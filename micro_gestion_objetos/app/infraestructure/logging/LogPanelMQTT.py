@@ -1,5 +1,5 @@
 from time import time
-from infraestructure.logging import ILogPanel
+from infraestructure.logging import ILogPanelMQTT
 import paho.mqtt.client as mqtt
 import json
 import asyncio
@@ -7,15 +7,19 @@ import asyncio
 
 broker = "" # Dirección del broker MQTT (Potencialmente será mosquitto)
 
-class LogPanel(ILogPanel):
-    def __init__(self):
-        self.client = mqtt.Client()
-        try:
-            self.client.connect(broker, 1883, 60)
-            self.client.loop_start()
-        except Exception as e:
-            print(f"Error al conectar con el broker MQTT: {e}")
-            self.client = None
+class LogPanelMQTT(ILogPanelMQTT):
+    _instance = None  # Variable de clase para almacenar la única instancia
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(LogPanelMQTT, cls).__new__(cls, *args, **kwargs)
+            cls._instance.client = mqtt.Client("P1")  # Crear una nueva instancia
+            try:
+                cls._instance.client.connect(broker, 1883, 60)
+                cls._instance.client.loop_start()
+            except Exception as e:
+                print(f"Error al conectar con el broker MQTT: {e}")
+                cls._instance.client = None
+        return cls._instance
 
     async def Publicar(self, topic: str, message):
         if not self.client:

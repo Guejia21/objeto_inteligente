@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 # Definición de la interfaz ILogPanel para publicar logs 
-class ILogPanel(ABC):
+class ILogPanelMQTT(ABC):
     @abstractmethod    
     async def Publicar(self, topic: str, message):
         pass
