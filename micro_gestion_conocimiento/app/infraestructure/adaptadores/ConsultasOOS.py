@@ -3,7 +3,7 @@ Adaptador de Consultas a la Base de Conocimiento OOS
 Se extiende de la interfaz IConsultasOOS permitiendo generar todo tipo de consultas a la ontología instanciada ubicada en /OWL/ontologiainstanciada.owl.
 """
 
-from importlib.resources import path
+
 import os
 
 from app.infraestructure.logging.Logging import logger
@@ -26,7 +26,42 @@ class ConsultasOOS(IConsultasOOS):
 
     ## ---->  El metodo ontologia.consultaDataProperty retorna una lista con los resultados [[],[]]
 
-
+# Propiedades válidas del State
+    STATE_PROPERTIES = {
+        'title', 'description', 'feed', 'private', 
+        'status', 'updated', 'created', 'creator', 'version', 
+        'website', 'service_state'
+    }
+    def consultar_state_property(self, property_name: str):
+        """
+        Consulta genérica de propiedades del State.
+        
+        Args:
+            property_name: Nombre de la propiedad (sin prefijo oos:)
+            
+        Returns:
+            El valor de la propiedad o None si no existe
+            
+        Raises:
+            ValueError: Si la propiedad no está en STATE_PROPERTIES
+        """
+        self.consultarOntoActiva()
+        if property_name not in self.STATE_PROPERTIES:
+            raise ValueError(
+                f"Propiedad '{property_name}' no válida. "                
+            )
+        
+        query = f"""
+        PREFIX oos: <{UrisOOS.ns_oos}>
+        SELECT ?{property_name}
+        WHERE {{
+            ?entity oos:{property_name} ?{property_name}.
+            ?entity rdf:type  oos:State .
+        }}
+        """
+        resultado = self.ontologia.consultaDataProperty(query)
+        return resultado[0][0] if resultado and resultado[0] else None
+    
 ############################################## CONSUTAS BaSICAS ###############################################################
     def consultarOntoActiva(self):
         if not self.ontoExists:
@@ -51,182 +86,48 @@ class ConsultasOOS(IConsultasOOS):
         return resultado
 
     ##Retornar la descripcion
-    def consultarDescription(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?description
-                    WHERE {
-                        ?entity oos:description ?description. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+    def consultarDescription(self):        
+        return self.consultar_state_property('description')
 
     ###Retorna si el Feed es private(true) o si es public(false)
-    def consultarPrivate(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?private
-                    WHERE {
-                        ?entity oos:private ?private. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+    def consultarPrivate(self):        
+        return self.consultar_state_property('private')
 
     ###Retorna el tittle (Un nombre descriptivo para el Feed
-    def consultarTitle(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?title
-                    WHERE {
-                        ?entity oos:title ?title. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        ##Esto se hace para que si solo hay 1 item en resultado lo retorne como string
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+    def consultarTitle(self):        
+        return self.consultar_state_property('title')
 
     ###Retorna la url del feed (.json)
-    def consultarFeed(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?feed
-                    WHERE {
-                        ?entity oos:feed ?feed. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+    def consultarFeed(self):        
+        return self.consultar_state_property('feed')
 
     ###Retorna live si el Feed ha sido actualizado
     ###en los ultimos 15min, de lo contrario frozen
-    def consultarStatus(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?status
-                    WHERE {
-                        ?entity oos:status ?status. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+    def consultarStatus(self):       
+        return self.consultar_state_property('status')
 
     ###Retorna la hora en la cual Feed tuvo su ultim actualizacion
     def consultarUpdated(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?updated
-                    WHERE {
-                        ?entity oos:updated ?updated.
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+        return self.consultar_state_property('updated')
 
     ###Retorna la fecha en que el Feed fue creado
     def consultarCreated(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?created
-                    WHERE {
-                        ?entity oos:created ?created. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+        return self.consultar_state_property('created')
 
     ###Retorna una URL referenciando al creador del Feed
     def consultarCreator(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?creator
-                    WHERE {
-                        ?entity oos:creator ?creator. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+        return self.consultar_state_property('creator')
 
     ###Retorna Version of the data format Feed returned.
     def consultarVersion(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?version
-                    WHERE {
-                        ?entity oos:version ?version. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
-
+        return self.consultar_state_property('version')
     ###Retorna la URL de un sitio web que es relevante para este feed
     def consultarWebsite(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?website
-                    WHERE {
-                        ?entity oos:website ?website. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+        return self.consultar_state_property('website')
 
     ###Retorna el estado del servicio basico del objeto
     def consultarServiceState(self):
-        self.consultarOntoActiva()
-        query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT ?service_state
-                    WHERE {
-                        ?entity oos:service_state ?service_state. 
-                        ?entity rdf:type  oos:State
-                    }"""
-        resultado = self.ontologia.consultaDataProperty(query)
-        if resultado == []:
-            resultado = ""
-        else:
-            resultado = resultado[0][0]
-        return resultado
+        return self.consultar_state_property('service_state')
 
     def consultarTagsDatastream(self, idDatastream):
         self.consultarOntoActiva()

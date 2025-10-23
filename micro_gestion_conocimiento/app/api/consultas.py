@@ -16,7 +16,7 @@ async def consultar_id(service: ConsultasService = Depends(get_consultas_service
 async def consultar_description(service: ConsultasService = Depends(get_consultas_service)) -> str:
     """Endpoint para consultar la descripción del estado."""
     try:
-        return service.consultar_description()
+        return service.consultarDescription()
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 async def consultar_private(service: ConsultasService = Depends(get_consultas_service)) -> bool:
