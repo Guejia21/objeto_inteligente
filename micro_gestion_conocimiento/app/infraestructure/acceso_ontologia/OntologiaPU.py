@@ -1,4 +1,4 @@
-
+#TODO Preguntar como se maneja la ontología del usuario
 import os
 import os.path
 
@@ -7,8 +7,8 @@ from rdflib import *
 from rdflib import Literal
 from rdflib.namespace import RDF
 import time
+import config
 from rdflib import URIRef
-from Auxiliares import Paths
 import logging
 
 class OntologiaPU:
@@ -24,7 +24,7 @@ class OntologiaPU:
     def __init__(self, path):
         logging.basicConfig()
         try:           
-            os.stat(Paths.pathOWL)
+            os.stat(config.pathOWL)
             self.path = path
             self.g = rdflib.Graph()
             if os.path.exists(path):
@@ -36,12 +36,12 @@ class OntologiaPU:
 
     def crearNuevaOntologia(self, path):
         try:           
-            os.stat(Paths.pathOWL)
+            os.stat(config.pathOWL)
         except:
-            os.mkdir(Paths.pathOWL, 0o777)
+            os.mkdir(config.pathOWL, 0o777)
         self.path = path
         if not os.path.exists(path):
-            self.g.parse(Paths.ontologiaPU)
+            self.g.parse(config.ontologiaPU)
             self.g.serialize(destination = path, format='xml')
         
         
