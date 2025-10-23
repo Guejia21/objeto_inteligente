@@ -5,7 +5,10 @@ from app.infraestructure.adaptadores.PobladorOOS import PobladorOOS
 
 def get_consultas_service() -> ConsultasService:
     # Aquí se debería instanciar y devolver el servicio con sus dependencias
-    consultas_base_conocimiento = ConsultasOOS()
+    try:
+        consultas_base_conocimiento = ConsultasOOS()
+    except Exception as e:
+        raise ValueError("Error al inicializar el servicio de consultas: " + str(e))     
     return ConsultasService(consultas_base_conocimiento)
 
 def get_poblacion_service() -> PoblacionService:

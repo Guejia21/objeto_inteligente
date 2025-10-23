@@ -49,6 +49,7 @@ class PobladorOOS(IPoblacion):
             self.poblarDataStreams(listaRecursos)
             # Las clases se utilizan anteriormente están asociadas a la ontología, por lo que al guardar la ontología se guardan los individuos creados
             self.onto.save(file=config.ontologiaInstanciada,format="rdfxml")
+            logger.info("Población de metadatos exitosa")
             return True
         except Exception as e:
             destroy_entity(self.individuoEstado)
@@ -88,10 +89,8 @@ class PobladorOOS(IPoblacion):
 
     def poblarDataStreams(self, listaRecursos):        
         ds = listaRecursos        
-        #Registrando los datastreams
+        logger.info("Poblando DataStreams...")
         for item in ds:            
-            print("**********************************************************")
-
             dataStreamsIRI = item["datastream_id"]
             unidadIRI = dataStreamsIRI + "_unidad"
             entityIRI = dataStreamsIRI + "_entity_of_interest"
@@ -119,6 +118,7 @@ class PobladorOOS(IPoblacion):
 
             datastreamObj.isMeasured.append(unidadObj)
             entityObj.isDefinedBy.append(featureObj)            
+        logger.info("DataStreams poblados correctamente.")
 
 # if __name__ == "__main__":
 #     pob = PobladorOOS()

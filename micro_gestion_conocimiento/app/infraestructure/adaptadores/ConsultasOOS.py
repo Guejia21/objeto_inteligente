@@ -3,6 +3,10 @@ Adaptador de Consultas a la Base de Conocimiento OOS
 Se extiende de la interfaz IConsultasOOS permitiendo generar todo tipo de consultas a la ontología instanciada ubicada en /OWL/ontologiainstanciada.owl.
 """
 
+from importlib.resources import path
+import os
+
+from app.infraestructure.logging.Logging import logger
 from app.infraestructure.acceso_ontologia.Ontologia import Ontologia
 from app.infraestructure.util.UrisOOS import UrisOOS
 from app import config
@@ -12,17 +16,24 @@ from app.infraestructure.interfaces.IConsultas import IConsultasOOS
 
 class ConsultasOOS(IConsultasOOS):    
 
-    def __init__(self):        
-        self.ontologia = Ontologia(config.ontologiaInstanciada)
+    def __init__(self):
+        if os.path.exists(config.ontologiaInstanciada):
+            self.ontologia = Ontologia(config.ontologiaInstanciada)
+            self.ontoExists = True
+        else:
+            logger.error(f"La ontologia instanciada no existe en la ruta especificada: {config.ontologiaInstanciada}")
+            self.ontoExists = False
 
     ## ---->  El metodo ontologia.consultaDataProperty retorna una lista con los resultados [[],[]]
 
 
 ############################################## CONSUTAS BaSICAS ###############################################################
-
-    ##Retornar el id
+    def consultarOntoActiva(self):
+        if not self.ontoExists:
+            raise Exception("La ontología instanciada no está disponible para consultas.")
+    
     def consultarId(self):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?id
                     WHERE {
@@ -41,7 +52,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ##Retornar la descripcion
     def consultarDescription(self):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?description
                     WHERE {
@@ -57,7 +68,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna si el Feed es private(true) o si es public(false)
     def consultarPrivate(self):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?private
                     WHERE {
@@ -73,7 +84,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna el tittle (Un nombre descriptivo para el Feed
     def consultarTitle(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?title
                     WHERE {
@@ -90,7 +101,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna la url del feed (.json)
     def consultarFeed(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?feed
                     WHERE {
@@ -107,7 +118,7 @@ class ConsultasOOS(IConsultasOOS):
     ###Retorna live si el Feed ha sido actualizado
     ###en los ultimos 15min, de lo contrario frozen
     def consultarStatus(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?status
                     WHERE {
@@ -123,7 +134,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna la hora en la cual Feed tuvo su ultim actualizacion
     def consultarUpdated(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?updated
                     WHERE {
@@ -139,7 +150,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna la fecha en que el Feed fue creado
     def consultarCreated(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?created
                     WHERE {
@@ -155,7 +166,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna una URL referenciando al creador del Feed
     def consultarCreator(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?creator
                     WHERE {
@@ -171,7 +182,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna Version of the data format Feed returned.
     def consultarVersion(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?version
                     WHERE {
@@ -187,7 +198,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna la URL de un sitio web que es relevante para este feed
     def consultarWebsite(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?website
                     WHERE {
@@ -203,7 +214,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna el estado del servicio basico del objeto
     def consultarServiceState(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?service_state
                     WHERE {
@@ -218,7 +229,7 @@ class ConsultasOOS(IConsultasOOS):
         return resultado
 
     def consultarTagsDatastream(self, idDatastream):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         queryTags = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?tags
                     WHERE {
@@ -231,7 +242,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ##Retorna un diccionario {label, symbol}
     def consultarUnitDatastream(self, idDatastream):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         queryUnit = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     PREFIX kos:<http://localhost/kos#>
                     SELECT ?label ?symbol 
@@ -254,7 +265,7 @@ class ConsultasOOS(IConsultasOOS):
     ###Retorna una coleccion de los Datastreams en ese Feed en un
     ###diccionario { 'min_value', 'max_value', 'datastream_id', "datastream_format",  "datastream_type" ,'tags','unit':{'label','symbol'} }
     def consultarDatastreams(self, idDatastream):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ['min_value', 'max_value', 'datastream_id', "datastream_format", "datastream_type", 'tags', 'unit']
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     PREFIX kos:<http://localhost/kos#>
@@ -284,7 +295,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ##Retorna [[],[],[]]
     def consultarTagsTodosDatastreams(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         queryTags = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastream_id ?tags
                     WHERE {
@@ -295,7 +306,7 @@ class ConsultasOOS(IConsultasOOS):
         return resultadoTags
 
     def consultarUnitTodosDatastreams(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["datastream_id", "label", "symbol"]
         queryUnit = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     PREFIX kos:<http://localhost/kos#>
@@ -313,7 +324,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDicc
 
     def consultarTodosDatastreams(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ['datastream_id', 'min_value', 'max_value', "datastream_format", "datastream_type", 'tags', 'unit']
         keysMetaDatos = ['datastream_id', 'min_value', 'max_value', "datastream_format", "datastream_type"]
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
@@ -354,7 +365,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna una lista con los id de los Datastreams
     def consultarListaIdDatastreams(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastreams
                     WHERE {
@@ -373,7 +384,7 @@ class ConsultasOOS(IConsultasOOS):
     ###Retornar la localizacion del objeto en una
     ###diccionario{lon,lat,name,domail,ele}
     def consultarLocation(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ['lon', 'lat', 'name', 'domain', 'ele']
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT ?lon ?lat ?name ?domain ?ele
@@ -391,7 +402,7 @@ class ConsultasOOS(IConsultasOOS):
     ################################################################################################################
 
     def consultarState(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ['id', 'title', 'description', 'created', 'creator', 'feed', 'private', 'status', 'updated'
             , 'version', 'website', 'service_state', "ip_object", "tags"]
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#> 
@@ -424,7 +435,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ##Retorna una lista con los tags
     def consultarTagsObjeto(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         queryTags = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?tags
                     WHERE {
@@ -439,7 +450,7 @@ class ConsultasOOS(IConsultasOOS):
         return resultadoTags
 
     def consultarDataStreamFormat(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["datastream_id", "datastream_format", 'datastream_type']
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastream_id ?datastream_format ?datastream_type
@@ -461,7 +472,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def consultarDataStreamFormatPorId(self, datastream_id):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastream_id ?datastream_format
                     WHERE {
@@ -474,8 +485,8 @@ class ConsultasOOS(IConsultasOOS):
         return resultado
 
     def consultarServiceIntelligent(self):
+        self.consultarOntoActiva()
         keys = ["id", "service_state", "datastream"]
-        ##        self.ontologia = Ontologia()
         query = """PREFIX oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT DISTINCT ?id ?service_state ?datastream
                     WHERE {
@@ -498,7 +509,7 @@ class ConsultasOOS(IConsultasOOS):
         return dicc
 
     def consultarMetodosSend(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT ?entity
                 WHERE {
@@ -509,7 +520,7 @@ class ConsultasOOS(IConsultasOOS):
         return resultadoConsulta
 
     def consultarMetodosReceive(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT ?entity
                 WHERE {
@@ -520,7 +531,7 @@ class ConsultasOOS(IConsultasOOS):
         return resultadoConsulta
 
     def consultarMetodosExternal(self):
-        ##        self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT ?entity
                 WHERE {
@@ -532,7 +543,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ########################################################################################################################
     def diccionarioMetaDatosObjeto(self):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         # keys = ['id','title','description','created','creator','feed','private','status','updated' ,'version','website','service_state',"ip_object", 'lon','lat','name','domain','ele',"tags"]
         keys = ['id', 'title', 'description', 'created', 'creator', 'feed', 'private', 'status', 'updated'
             , 'version', 'website', "ip_object", 'lon', 'lat', 'name', 'domain', 'ele', "tags"]
@@ -585,7 +596,7 @@ class ConsultasOOS(IConsultasOOS):
     ########## Consultas ecas###########################################################################################
 
     def tieneContrato(self, osidDestino):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["id", "id_action_resource", "comparator_action", "variable_action", "type_variable_action"]
         # [['708637323', 'calefactor', 'igual', '1']]
         query = """ PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
@@ -613,7 +624,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def verificarContrato(self, osid, osidDestino):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["osid", "osidDestino", "id_action_resource", "comparator_action", "variable_action",
                 "type_variable_action", "eca_state"]
         # [['708637323', 'calefactor', 'igual', '1']]
@@ -643,7 +654,7 @@ class ConsultasOOS(IConsultasOOS):
 
     ##    [[]]
     def listarDinamicEstado(self, eca_state):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["eca_state", "name_eca"]
         query = """PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT DISTINCT ?eca_state ?name_eca 
@@ -660,7 +671,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def estadoEca(self, eca_name):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["eca_state", "name_eca"]
         query = """PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT DISTINCT ?eca_state ?name_eca 
@@ -677,7 +688,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def usuarioEca(self, eca_name):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["user_eca", "name_eca"]
         query = """PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT DISTINCT ?user_eca ?name_eca 
@@ -694,7 +705,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def listarEcasEvento(self, osid, eca_state):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["eca_state", "id_event_resource", "comparator_condition", "variable_condition",
                 "type_variable_condition", "unit_condition", "meaning_condition", "ip_action_object",
                 "osid_object_action", "name_action_object", "comparator_action", "type_variable_action",
@@ -746,7 +757,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def listarEcasEventoSegunUsuario(self, osid, state_eca, usuario_eca):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         keys = ["eca_state", "id_event_resource", "comparator_condition", "variable_condition",
                 "type_variable_condition", "unit_condition", "meaning_condition", "ip_action_object",
                 "osid_object_action", "name_action_object", "comparator_action", "type_variable_action",
@@ -801,7 +812,7 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def listarEcas(self):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         # keys=['name_eca','eca_state','id_event_resource', 'ip_event_object','comparator_condition','variable_condition','type_variable_condition','unit_condition','meaning_condition','ip_action_object','osid_object_action','name_action_object' ,'comparator_action','type_variable_action','variable_action','meaning_action','id_action_resource','name_action_resource']
         keys = ['name_eca', 'eca_state', 'user_eca', 'osid_object_event', 'ip_event_object', 'name_event_object',
                 'id_event_resource', 'name_event_resource', 'comparator_condition', 'variable_condition',
@@ -858,7 +869,7 @@ class ConsultasOOS(IConsultasOOS):
             print( e)
 
     def listarEcasUsuario(self, user_eca):
-        # self.ontologia = Ontologia()
+        self.consultarOntoActiva()
         # keys=['name_eca','eca_state','id_event_resource', 'ip_event_object','comparator_condition','variable_condition','type_variable_condition','unit_condition','meaning_condition','ip_action_object','osid_object_action','name_action_object' ,'comparator_action','type_variable_action','variable_action','meaning_action','id_action_resource','name_action_resource']
         keys = ['name_eca', 'eca_state', 'user_eca', 'osid_object_event', 'ip_event_object', 'name_event_object',
                 'id_event_resource', 'name_event_resource', 'comparator_condition', 'variable_condition',
@@ -920,6 +931,7 @@ class ConsultasOOS(IConsultasOOS):
             print( e)
 
     def listarNombresEcasUsuario(self, user_eca):
+        self.consultarOntoActiva()
         query = """PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT DISTINCT ?name_eca ?eca_state 
                 where{
@@ -937,6 +949,7 @@ class ConsultasOOS(IConsultasOOS):
             print( e)
 
     def getEca(self, nombreEca):
+        self.consultarOntoActiva()
         self.ontologia = Ontologia()
         # keys=['name_eca','eca_state', 'user_eca','id_event_resource', 'ip_event_object','comparator_condition','variable_condition','type_variable_condition','unit_condition','meaning_condition','ip_action_object','osid_object_action','name_action_object' ,'comparator_action','type_variable_action','variable_action','meaning_action','id_action_resource','name_action_resource']
         keys = ['name_eca', 'eca_state', 'user_eca', 'osid_object_event', 'ip_event_object', 'name_event_object',
