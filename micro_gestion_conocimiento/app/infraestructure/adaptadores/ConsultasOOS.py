@@ -2,7 +2,7 @@
 Adaptador de Consultas a la Base de Conocimiento OOS
 Se extiende de la interfaz IConsultasOOS permitiendo generar todo tipo de consultas a la ontología instanciada ubicada en /OWL/ontologiainstanciada.owl.
 """
-
+#TODO configurar los metodos para que no se ejecuten cuando la onto no está activa
 
 import os
 
@@ -45,7 +45,9 @@ class ConsultasOOS(IConsultasOOS):
         Raises:
             ValueError: Si la propiedad no está en STATE_PROPERTIES
         """
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         if property_name not in self.STATE_PROPERTIES:
             raise ValueError(
                 f"Propiedad '{property_name}' no válida. "                
@@ -63,10 +65,9 @@ class ConsultasOOS(IConsultasOOS):
         return resultado[0][0] if resultado and resultado[0] else None
     
 ############################################## CONSUTAS BaSICAS ###############################################################
-    def consultarOntoActiva(self):
-        if not self.ontoExists:
-            raise Exception("La ontología instanciada no está disponible para consultas.")
-    
+    def consultarOntoActiva(self) -> bool:
+        return self.ontoExists
+
     def consultarId(self):
         self.consultarOntoActiva()
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
@@ -130,7 +131,9 @@ class ConsultasOOS(IConsultasOOS):
         return self.consultar_state_property('service_state')
 
     def consultarTagsDatastream(self, idDatastream):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            return None
         queryTags = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?tags
                     WHERE {

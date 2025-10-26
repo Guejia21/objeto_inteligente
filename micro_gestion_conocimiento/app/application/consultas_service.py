@@ -1,3 +1,4 @@
+from app.infraestructure.logging.Logging import logger
 from app.infraestructure.interfaces.IConsultas import IConsultasOOS
 
 class ConsultasService:
@@ -6,7 +7,10 @@ class ConsultasService:
         self.gestion_base_conocimiento = gestion_base_conocimiento
     def consultarOntoActiva(self):
         """Verifica que la ontología instanciada esté disponible; lanza excepción si no lo está."""
-        return self.gestion_base_conocimiento.consultarOntoActiva()
+        if not self.gestion_base_conocimiento.consultarOntoActiva():
+            logger.warning("La ontología no está activa o disponible.")
+            return False
+        return True
     def consultarId(self):
         """Devuelve el id del objeto (consulta SPARQL sobre oos:id_object)."""
         return self.gestion_base_conocimiento.consultarId()

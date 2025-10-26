@@ -1,9 +1,9 @@
 import logging
-
+"""Logger a nivel de consola para la aplicación."""
 # Configuración básica del logger
 logging.basicConfig(
     level=logging.DEBUG,  # Cambiar a logging.INFO o logging.ERROR en producción
-    format="%(asctime)s [%(levelname)s] %(message)s",
+    format="%(levelname)s %(asctime)s  %(message)s",
     handlers=[
         logging.StreamHandler(),  # Enviar logs a la consola        
     ]

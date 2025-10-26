@@ -9,6 +9,9 @@ class IConsultasOOS(ABC):
     Interfaz abstracta para las consultas y operaciones de negocio sobre la ontología.
     Implementaciones deben encapsular el backend (rdflib, triplestore, Neo4j, etc.).
     """
+    @abstractmethod
+    def consultarOntoActiva(self) -> bool:
+        """Verifica si la ontología instanciada está activa/disponible."""        
 
     @abstractmethod
     def consultarId(self) -> Optional[str]:

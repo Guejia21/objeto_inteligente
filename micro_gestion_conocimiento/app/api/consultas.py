@@ -5,6 +5,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.deps import get_consultas_service
 
 router = APIRouter(prefix="/consultas", tags=["Consultas de Base de conocimiento"])
+@router.get("/consultar_active", response_model=bool)
+async def consultar_active(service: ConsultasService = Depends(get_consultas_service)) -> bool:
+    """Endpoint para consultar si el objeto inteligente está activo."""
+    try:
+        return service.consultarOntoActiva()
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
 @router.get("/consultar_id", response_model=str)
 async def consultar_id(service: ConsultasService = Depends(get_consultas_service)) -> str:
     """Endpoint para consultar el ID del objeto inteligente."""
@@ -19,6 +26,7 @@ async def consultar_description(service: ConsultasService = Depends(get_consulta
         return service.consultarDescription()
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+@router.get("/consultar_private", response_model=bool)
 async def consultar_private(service: ConsultasService = Depends(get_consultas_service)) -> bool:
     """Endpoint para consultar si el feed/objeto es privado."""
     try:

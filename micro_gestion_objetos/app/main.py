@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
-from app.api.ObjetoController import router
+from app.api.objeto_controller import router
 
 app = FastAPI()
 app.include_router(router)

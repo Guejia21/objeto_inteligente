@@ -1,20 +1,24 @@
-from time import time
-from infraestructure.logging import ILogPanelMQTT
+
+from app.infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT 
 import paho.mqtt.client as mqtt
+from paho.mqtt.client import CallbackAPIVersion
 import json
 import asyncio
+from app import config
 #Implementación concreta de la interfaz ILogPanel que publica logs a través de MQTT
 
-broker = "" # Dirección del broker MQTT (Potencialmente será mosquitto)
 
 class LogPanelMQTT(ILogPanelMQTT):
     _instance = None  # Variable de clase para almacenar la única instancia
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(LogPanelMQTT, cls).__new__(cls, *args, **kwargs)
-            cls._instance.client = mqtt.Client("P1")  # Crear una nueva instancia
+            cls._instance.client = mqtt.Client(
+                client_id="P1", 
+                callback_api_version=CallbackAPIVersion.VERSION1
+            )
             try:
-                cls._instance.client.connect(broker, 1883, 60)
+                cls._instance.client.connect(config.broker, 1883, 60)
                 cls._instance.client.loop_start()
             except Exception as e:
                 print(f"Error al conectar con el broker MQTT: {e}")
