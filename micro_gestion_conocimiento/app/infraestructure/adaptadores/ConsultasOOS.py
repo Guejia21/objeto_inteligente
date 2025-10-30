@@ -23,6 +23,7 @@ class ConsultasOOS(IConsultasOOS):
         else:
             logger.error(f"La ontologia instanciada no existe en la ruta especificada: {config.ontologiaInstanciada}")
             self.ontoExists = False
+            self.ontologia = Ontologia(config.ontologia)
 
     ## ---->  El metodo ontologia.consultaDataProperty retorna una lista con los resultados [[],[]]
 
@@ -69,7 +70,9 @@ class ConsultasOOS(IConsultasOOS):
         return self.ontoExists
 
     def consultarId(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?id
                     WHERE {
