@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from app.domain.entities.eca import ECA
 
 class PersonalizacionRepository(ABC):
@@ -35,4 +35,14 @@ class PersonalizacionRepository(ABC):
     
     @abstractmethod
     async def verificar_usuario(self, email: str) -> bool:
+        pass
+        
+    @abstractmethod
+    async def desactivar_ecas_por_osid(self, osid: str) -> List[str]:
+        """Desactiva ECAs basado en OSID de usuario"""
+        pass
+
+    @abstractmethod
+    async def guardar_interaccion(self, interaccion_data: Dict[str, Any]) -> str:
+        """Guarda datos de interacción usuario-objeto"""
         pass
