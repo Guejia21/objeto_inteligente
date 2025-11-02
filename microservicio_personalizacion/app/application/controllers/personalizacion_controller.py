@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, File, Form, UploadFile
 from typing import Dict, Any
 import json
 import logging
@@ -108,6 +108,82 @@ async def set_eca_state(
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 # ... (los demás endpoints mantienen la misma estructura con mejor logging)
+
+@router.post("/RecibirOntologia")
+async def recibir_ontologia(
+    file: UploadFile = File(..., description="Archivo de ontología (.owl)"),
+    nombre: str = Form(..., description="Nombre de la ontología"),
+    ipCoordinador: str = Form(..., description="IP del coordinador")
+):
+    """
+    Recibe y procesa una ontología de usuario
+    """
+    try:
+        logger.info(f"Recibiendo ontología: {nombre} desde {ipCoordinador}")
+        
+        # Leer el contenido del archivo
+        file_content = await file.read()
+        
+        # Lógica para procesar la ontología
+        resultado = await personalizacion_service.procesar_ontologia(
+            file_content=file_content,
+            nombre=nombre,
+            ip_coordinador=ipCoordinador
+        )
+        
+        return {"mensaje": "Ontología recibida exitosamente", "status_code": 200, "data": resultado}
+    
+    except Exception as e:
+        logger.error(f"Error procesando ontología: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+@router.post("/NotificarSalidaDeUsuario")
+async def notificar_salida_usuario(
+    osid: str = Form(..., description="ID del objeto/usuario")
+):
+    """
+    Notifica la salida de un usuario del sistema
+    """
+    try:
+        logger.info(f"Notificando salida de usuario con osid: {osid}")
+        
+        resultado = await personalizacion_service.desactivar_ecas_por_osid(osid)
+        
+        return {"mensaje": "Salida de usuario notificada exitosamente", "status_code": 200, "data": resultado}
+    
+    except Exception as e:
+        logger.error(f"Error notificando salida de usuario: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+@router.post("/RegistroInteraccionUsuarioObjeto")
+async def registro_interaccion_usuario_objeto(
+    email: str = Form(..., description="Email del usuario"),
+    idDataStream: str = Form(..., description="ID del data stream"),
+    comando: str = Form(..., description="Comando de interacción"),
+    osid: str = Form(..., description="ID del objeto"),
+    mac: str = Form(..., description="Dirección MAC del dispositivo"),
+    dateInteraction: str = Form(..., description="Fecha de interacción (ISO format)")
+):
+    """
+    Registra interacciones entre usuarios y objetos
+    """
+    try:
+        logger.info(f"Registrando interacción: usuario {email} con objeto {osid}")
+        
+        resultado = await personalizacion_service.registrar_interaccion(
+            email=email,
+            id_data_stream=idDataStream,
+            comando=comando,
+            osid=osid,
+            mac=mac,
+            date_interaction=dateInteraction
+        )
+        
+        return {"mensaje": "Interacción registrada exitosamente", "status_code": 200, "data": resultado}
+    
+    except Exception as e:
+        logger.error(f"Error registrando interacción: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @router.get("/health")
 async def health_check():
