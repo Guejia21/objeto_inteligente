@@ -9,6 +9,8 @@ class PoblacionService:
 
     def poblar_metadatos_objeto(self, diccionarioObjeto:dict, listaRecursos:dict ) -> None:
         """Pobla los metadatos del objeto inteligente en la base de conocimiento."""
+        print(diccionarioObjeto)
+        print(listaRecursos)
         if self.gestion_poblacion.poblarMetadatosObjeto(diccionarioObjeto, listaRecursos):
             return {"status": "Población exitosa"}
         else:

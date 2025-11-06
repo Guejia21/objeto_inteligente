@@ -2,7 +2,7 @@
 from app.infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT
 from app.domain.ObjetoInteligente import ObjetoInteligente
 from app.infraestructure.logging.Logging import logger
-from app.application.dtos import ObjectData
+from app.application.dtos import ObjectData, DatastreamEstadoItem
 from app.infraestructure.IRepository import IRepository
 from app.application import ontology_service
 
@@ -48,22 +48,62 @@ class ObjetoService:
         else:
             logger.warning("El osid solicitado %s no coincide con el del objeto inteligente %s", osid, self.objetoInteligente.osid)
             return {"message": "El osid solicitado no coincide con el del objeto inteligente."}
+    
+
+
     async def startObject(self, data: ObjectData):
         """Método para iniciar el objeto inteligente con los datos proporcionados"""        
         if ontology_service.is_active():
             logger.warning("El objeto inteligente ya está activo.")
             return {"message": "El objeto inteligente ya está activo."}
-        json_data_object = self.objetoInteligente.estructurarJSON(data.model_dump())
+        json_data_object = self.objetoInteligente.estructurarJSON(data.feed.model_dump())
         logger.info("Iniciando la población de la ontología.")
+        print(json_data_object)
         if not ontology_service.poblate_ontology(json_data_object):
             logger.error("Error al poblar la ontología.")
             return {"message": "Error al iniciar el objeto inteligente."}
         logger.info("Ontología poblada con éxito.")
         #Actualizar los datos del objeto
-        self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)        
+        self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)
+        logger.debug("Datos estructurados para poblar la ontología: %s", json_data_object)
         self.persistence.save_object_metadata(json_data_object)
         #TODO: Iniciar la persistencia de los datastreams
         logger.info("Objeto inteligente iniciado con éxito.")
         return {"message": "Objeto inteligente iniciado con éxito"}
-            
+    
+    async def get_state(self, osid: int):
+        """Obtiene el estado actual de los datastreams del objeto inteligente dado su osid."""
+        if osid != self.objetoInteligente.osid:
+            raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
         
+        estado = ontology_service.get_datastream_states()
+        if estado is None:
+            raise ValueError("No se han recibido datos de datastreams para este objeto.")
+        
+        datastreams = [
+            {
+                "variableEstado": ds.get("datastream_id"),
+                "type": ds.get("type", "float"),
+                "valor": ds.get("valor"),
+                "dstype": ds.get("dstype", "sensor")
+            }
+            for ds in estado
+        ]
+        return {"osid": osid, "datastreams": datastreams}
+
+    async def send_data(self, osid: int, variableEstado: bool, tipove: str):
+        """Envía datos al objeto inteligente."""
+        if osid != self.objetoInteligente.osid:
+            raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
+        
+        resultado = ontology_service.send_data(osid, variableEstado, tipove)
+        if not resultado:
+            raise RuntimeError("Error al enviar los datos al objeto inteligente.")
+        return {"message": "Datos enviados correctamente al objeto inteligente."}
+                
+
+
+
+
+
+            

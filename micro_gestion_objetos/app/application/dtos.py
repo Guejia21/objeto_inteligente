@@ -1,6 +1,6 @@
 """"Data Transfer Objects (DTOs) para la aplicación de gestión de objetos inteligentes."""
 from typing import List, Optional, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Unit(BaseModel):
@@ -20,6 +20,12 @@ class Datastream(BaseModel):
     tags: List[str]
     unit: Unit
     datapoints: Optional[Any]
+
+class DatastreamEstadoItem(BaseModel):
+    variableEstado: str = Field(..., description="Identificador del datastream")
+    type: str = Field(..., description="Tipo de dato (float, bool, etc.)")
+    valor: Any = Field(..., description="Valor actual del datastream")
+    dstype: str = Field(..., description="Tipo de datastream (sensor/actuador)")
 
 
 class Location(BaseModel):

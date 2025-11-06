@@ -1,4 +1,4 @@
-from fastapi import requests
+import requests
 
 from app import config
 
@@ -9,12 +9,12 @@ class ObjetoInteligente:
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(ObjetoInteligente, cls).__new__(cls)
-            cls._instance.__initialized = False  # Bandera para inicialización
+            cls._instance._initialized = False  # Bandera para inicialización
         return cls._instance
 
     def __init__(self, osid: str = None, title: str = None):
-        if not self.__initialized:
-            self.__initialized = True
+        if not getattr(self, "_initialized", False):
+            self._initialized = True
             self.osid = osid
             self.title = title
             self.json = {}
@@ -24,73 +24,142 @@ class ObjetoInteligente:
         """Actualiza los atributos del objeto inteligente"""
         self.osid = osid
         self.title = title
+
     def estructurarJSON(self, jsonOriginal):
-        self.json = jsonOriginal
-        if self.json != {}:
-            ##En el json la location esta como diccionario, aqui la agrego a la lista.
-            for i in self.json:
-                if (self.json[i] == None or self.json[i] == "None" or self.json[i] is None):
-                    self.json[i] = ""
-            if 'location' in self.json:
-                location = self.json["location"]
-                del self.json["location"]
-                for item in location:  ##Name es la entidad superior
-                    aux = location[item]
-                    if (aux == None):
-                        aux = ""
-                    try:
-                        self.json[item] = aux.decode("utf8")  ##location[item]
-                    except:
-                        self.json[item] = aux
-            if "Private" in self.json:
-                private = self.json["Private"]
-                del self.json["Private"]
-                if (private == None):
-                    private = ""
-                try:
-                    self.json["private"] = private.decode("utf8")
-                except:
-                    self.json["private"] = private
-            if "datastreams" in self.json:
-                self.datastreams = self.json["datastreams"]
-                del self.json["datastreams"]
-                ##Comodin es solo para hacer algo con la hora de xively, por eso lo elimino
-                for item2 in self.datastreams:
-                    if item2['id'] == 'comodin':
-                        self.datastreams.remove(item2)
-                ##Se cambia la clave id por datastream_id
-                for recurso in self.datastreams:
-                    id = recurso['id']
-                    del recurso["id"]
-                    if (id == None):
-                        id = ""
-                    try:
-                        recurso["datastream_id"] = id.decode("utf8")
-                    except:
-                        recurso["datastream_id"] = id
-                    if "unit" in recurso:
-                        unidad = recurso["unit"]
-                        for u in unidad:
-                            unidadAux = unidad[u]
-                            if (unidadAux == None):
-                                unidadAux = ""
-                            try:
-                                recurso[u] = unidadAux.decode("utf8")  # unidad[u]
-                            except:
-                                recurso[u] = unidadAux
-                        del recurso["unit"]
-                    if "tags" in recurso:
-                        listaTags = recurso['tags']
-                        if 'Actuador' in listaTags or 'Actuator' in listaTags:
-                            recurso['datastream_type'] = "actuador"
-                        elif 'Sensor' in listaTags:
-                            recurso['datastream_type'] = "sensor"
-                        caracteristica = [s for s in listaTags if "Caracteristica" in s]
-                        if len(caracteristica) > 0:
-                            recurso['featureofinterest'] = caracteristica[0].split("Caracteristica ")[1]
-                        entidad = [s for s in listaTags if "Entidad" in s]
-                        if len(entidad) > 0:
-                            recurso['entityofinterest'] = entidad[0].split("Entidad ")[1]
+        """Prepara el JSON del objeto y lo adapta al formato {dicObj, dicRec} requerido.
+
+        Acepta dos formas de entrada:
+        - El dict completo que contiene keys como Conceptos, lugares, feed, etc.
+        - Directamente el dict del `feed`.
+
+        Devuelve:
+            {"dicObj": {...}, "dicRec": [...]} con tipos y campos normalizados.
+        """
+        from app.infraestructure.logging.Logging import logger
+
+        # Aceptar que nos pasen el objeto entero o solo el feed
+        payload = jsonOriginal or {}
+        if "feed" in payload and isinstance(payload.get("feed"), dict):
+            feed = payload.get("feed")
         else:
-            print("json vacio")
-        return self.json
+            # Si nos pasó directamente el feed
+            feed = payload
+
+        # Normalizar nulos
+        def norm(v, default=""):
+            if v is None or v == "None":
+                return default
+            return v
+
+        # Extraer datastreams (si vienen en feed)
+        datastreams = []
+        if isinstance(feed.get("datastreams"), list):
+            datastreams = feed.get("datastreams")
+
+        # Construir dicRec
+        dicRec = []
+        for recurso in datastreams:
+            if not isinstance(recurso, dict):
+                continue
+
+            # Desanidar unidad
+            unit = recurso.get("unit") or {}
+            symbol = norm(unit.get("symbol", ""))
+            label = norm(unit.get("label", ""))
+            try:
+                unitType = int(unit.get("unitType", 0) or 0)
+            except Exception:
+                unitType = 0
+
+            # Tags: limpiar etiquetas de control y extraer caracteristica/entidad
+            raw_tags = recurso.get("tags") or []
+            tags = []
+            featureofinterest = ""
+            entityofinterest = ""
+            for t in raw_tags:
+                if not isinstance(t, str):
+                    continue
+                if t.lower() in ("sensor", "actuador", "actuator"):
+                    # etiqueta de tipo, no la añadimos a tags
+                    continue
+                if "Caracteristica" in t:
+                    # extraer lo que viene después
+                    try:
+                        featureofinterest = t.split("Caracteristica ", 1)[1]
+                        tags.append(featureofinterest)
+                    except Exception:
+                        pass
+                elif "Entidad" in t:
+                    try:
+                        entityofinterest = t.split("Entidad ", 1)[1]
+                        tags.append(entityofinterest)
+                    except Exception:
+                        pass
+                else:
+                    tags.append(t)
+
+            # Clasificar datastream_type por tags originales
+            ds_type = ""
+            if any(x in ("Actuador", "Actuator") for x in raw_tags):
+                ds_type = "actuador"
+            elif any(x == "Sensor" for x in raw_tags):
+                ds_type = "sensor"
+
+            dicRec.append({
+                "datastream_id": str(recurso.get("id") or recurso.get("datastream_id", "")),
+                "datastream_format": str(recurso.get("datastream_format", "float")),
+                "feedid": str(recurso.get("feedid") or feed.get("id", "")),
+                "current_value": str(norm(recurso.get("current_value", ""))),
+                "at": str(norm(recurso.get("at", ""))),
+                "max_value": str(norm(recurso.get("max_value", ""))),
+                "min_value": str(norm(recurso.get("min_value", ""))),
+                "tags": list(tags),
+                "datapoints": str(norm(recurso.get("datapoints", ""))),
+                "symbol": str(symbol),
+                "label": str(label),
+                "unitType": int(unitType),
+                "datastream_type": str(ds_type),
+                "featureofinterest": str(featureofinterest),
+                "entityofinterest": str(entityofinterest)
+            })
+
+        # Construir dicObj a partir de feed + location
+        location = feed.get("location") or {}
+        try:
+            lat = float(location.get("lat") or feed.get("lat") or 0)
+        except Exception:
+            lat = 0.0
+        try:
+            lon = float(location.get("lon") or feed.get("lon") or 0)
+        except Exception:
+            lon = 0.0
+        try:
+            ele = float(location.get("ele") or feed.get("ele") or 0)
+        except Exception:
+            ele = 0.0
+
+        # id: prefer feed.id, sino primer feedid de datastreams, sino osid
+        id_val = norm(feed.get("id") or (datastreams[0].get("feedid") if datastreams and isinstance(datastreams[0], dict) else None) or self.osid or "")
+
+        dicObj = {
+            "id": id_val,
+            "ip_object": str(norm(payload.get("ip_object", ""))),
+            "version": str(norm(feed.get("version", ""))),
+            "creator": str(norm(feed.get("creator", ""))),
+            "status": int(feed.get("status") or 0),
+            "tags": list(feed.get("tags") or []),
+            "title": str(norm(feed.get("title", ""))),
+            "private": bool(feed.get("Private") or feed.get("private") or False),
+            "description": str(norm(feed.get("description", ""))),
+            "updated": str(norm(feed.get("updated", ""))),
+            "website": str(norm(feed.get("website", ""))),
+            "feed": str(norm(feed.get("feed", ""))),
+            "created": str(norm(feed.get("created", ""))),
+            "name": str(norm(location.get("name") or feed.get("name", ""))),
+            "domain": int(location.get("domain") or feed.get("domain") or 0),
+            "lat": lat,
+            "lon": lon,
+            "ele": ele
+        }
+
+        return {"dicObj": dicObj, "dicRec": dicRec}

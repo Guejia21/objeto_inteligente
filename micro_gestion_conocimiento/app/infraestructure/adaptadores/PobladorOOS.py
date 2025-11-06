@@ -18,17 +18,30 @@ class PobladorOOS(IPoblacion):
         self.individuoObjecto = None
         self.individuoEstado = None
         self.location = None
-        self.onto = get_ontology("file://" + config.ontologia).load(reload_if_newer=True)
-
-        logger.info("Inicio Poblar Objeto Semantico con OWLReady2")        
+        
+        logger.info("Inicio Poblar Objeto Semantico con OWLReady2")
+        
+        # Ensure OWL directory exists
         if not os.path.exists(config.pathOWL):
-            os.makedirs(config.pathOWL, mode=0o777)    
+            os.makedirs(config.pathOWL, mode=0o777)
+            
+        # Validate base ontology exists
+        if not os.path.exists(config.ontologia):
+            raise FileNotFoundError(f"Base ontology file not found: {config.ontologia}")
+            
         try:
-            # Copio la ontologia base a la ontologia instanciada
+            # Load the ontology first to validate it
+            self.onto = get_ontology("file://" + config.ontologia).load(reload_if_newer=True)
+            if not self.onto.loaded:
+                raise Exception("Failed to load base ontology")
+                
+            # Copy base ontology to instance ontology
             shutil.copyfile(config.ontologia, config.ontologiaInstanciada)
+            logger.info("Base ontology copied successfully to instance ontology")
         except Exception as e:
-            logger.error("Fallo al copiar ontologia base a ontologia instanciada")
+            logger.error("Failed during ontology initialization")
             logger.error(e)
+            raise
 
         logger.info("Ontologia Cargada: " + str(self.onto.loaded))
 
@@ -52,11 +65,15 @@ class PobladorOOS(IPoblacion):
             logger.info("Población de metadatos exitosa")
             return True
         except Exception as e:
-            destroy_entity(self.individuoEstado)
-            destroy_entity(self.individuoObjecto)
-            destroy_entity(self.location)
+            # Only destroy entities if they were successfully created
+            if hasattr(self.individuoEstado, 'namespace') and self.individuoEstado.namespace is not None:
+                destroy_entity(self.individuoEstado)
+            if hasattr(self.individuoObjecto, 'namespace') and self.individuoObjecto.namespace is not None:
+                destroy_entity(self.individuoObjecto)
+            if hasattr(self.location, 'namespace') and self.location.namespace is not None:
+                destroy_entity(self.location)
             self.onto = get_ontology("file://" + config.ontologia).load(reload_if_newer=True)
-            logger.info("Se destruyeron las entidades")
+            logger.info("Se limpiaron las entidades según fue necesario")
             logger.error(e)
             return False
 
