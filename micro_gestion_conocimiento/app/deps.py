@@ -1,5 +1,5 @@
 from app.application.consultas_service import ConsultasService 
-from app.application.poblacion_service import PoblacionService
+from app.application.poblacion_service import PoblacionOntologiaUsuarioService, PoblacionService
 from app.infraestructure.adaptadores.ConsultasOOS import ConsultasOOS
 from app.infraestructure.adaptadores.PobladorOOS import PobladorOOS
 
@@ -15,3 +15,4 @@ def get_poblacion_service() -> PoblacionService:
     # Aquí se debería instanciar y devolver el servicio con sus dependencias
     poblacion_base_conocimiento = PobladorOOS()
     return PoblacionService(poblacion_base_conocimiento)
+

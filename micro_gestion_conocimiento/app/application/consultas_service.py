@@ -1,3 +1,4 @@
+from app.infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
 from app.infraestructure.logging.Logging import logger
 from app.infraestructure.interfaces.IConsultas import IConsultasOOS
 
@@ -122,3 +123,8 @@ class ConsultasService:
     def consultarMetodosExternal(self):
         """Retorna instancias de métodos External en la ontología (consulta de instancias)."""
         return self.gestion_base_conocimiento.consultarMetodosExternal()
+    
+class ConsultasOntologiaUsuarioService:
+    """Servicio de Consultas para la Ontología del usuario."""
+    def __init__(self, gestion_base_conocimiento: IConsultasPerfilUsuario):
+        self.gestion_base_conocimiento = gestion_base_conocimiento
