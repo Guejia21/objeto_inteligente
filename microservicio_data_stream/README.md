@@ -1,10 +1,8 @@
-# Microservicio Recursos & Datastreams
+Para instalar micropython en linux debe seguirse la guia:
+https://docs.micropython.org/en/latest/develop/gettingstarted.html
+Se puede crear un enlace simbolico para usar micropython como un comando nativo, de esta forma:
 
-## Endpoints
-- **GET /SendData**: osid, variableEstado, tipove (sen|act)
-- **POST /SetDatastream**: { osid, idDataStream, comando, [email, mac, dateInteraction] }
-- **GET /ListDatastreams**: osid
+sudo ln -s <"rutamicropython">/micropython /usr/local/bin/micropython
 
-## Run local
-```bash
-uvicorn app.main:app --reload --port 8080
+# Nota importante
+Para la ejecución con la rasberry se recomienda hacerlo con python3, por lo tanto se deberán hacer cambios respecto a las librerias, por ejemplo, en vez de ujson (para micropython) usar json
