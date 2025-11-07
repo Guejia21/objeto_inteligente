@@ -1,6 +1,6 @@
 from microdot import Request, Response
 from services.datastream_service import DatastreamService
-import json as json
+import ujson as json
 # Instancia del servicio
 datastream_service = DatastreamService()
 

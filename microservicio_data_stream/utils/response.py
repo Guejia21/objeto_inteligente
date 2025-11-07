@@ -1,4 +1,4 @@
-import json as json
+import ujson as json
 # from typing import Any, Dict, List, Optional  # typing no está disponible en MicroPython
 
 class ResponseHelper:
