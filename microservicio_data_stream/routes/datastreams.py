@@ -6,11 +6,11 @@ datastream_service = DatastreamService()
 
 def register_routes(app):
     """Registra las rutas en la aplicación Microdot"""    
-    @app.route('/SendState', methods=['GET'])
-    @app.route('/SendState/', methods=['GET'])
+    @app.route('/Datastreams/SendState', methods=['GET'])
+    @app.route('/Datastreams/SendState/', methods=['GET'])
     async def send_state(request: Request):
         """
-        Endpoint: /SendState?osid=<id>
+        Endpoint: /Datastreams/SendState?osid=<id>
         Obtiene el estado de todos los datastreams
         """
         try:
@@ -40,12 +40,12 @@ def register_routes(app):
                 headers={'Content-Type': 'application/json'}
             )
     
-    @app.route('/SendData', methods=['GET'])
-    @app.route('/SendData/', methods=['GET'])
+    @app.route('/Datastreams/SendData', methods=['GET'])
+    @app.route('/Datastreams/SendData/', methods=['GET'])
     async def send_data(request: Request):
         """
-        Endpoint: /SendData?osid=<id>&variableEstado=<var>&tipove=<tipo>
-        Ejemplo: /SendData?osid=ESP32_Sala&variableEstado=temperatura&tipove=1
+        Endpoint: /Datastreams/SendData?osid=<id>&variableEstado=<var>&tipove=<tipo>
+        Ejemplo: /Datastreams/SendData?osid=ESP32_Sala&variableEstado=temperatura&tipove=1
         Obtiene el valor actual de un datastream específico
         """
         try:
@@ -77,11 +77,11 @@ def register_routes(app):
                 headers={'Content-Type': 'application/json'}
             )
     
-    @app.route('/SetDatastream', methods=['GET'])
-    @app.route('/SetDatastream/', methods=['GET'])
+    @app.route('/Datastreams/SetDatastream', methods=['GET'])
+    @app.route('/Datastreams/SetDatastream/', methods=['GET'])
     async def set_datastream(request: Request):
         """
-        Endpoint: /SetDatastream?osid=<id>&idDataStream=<ds>&comando=<cmd>
+        Endpoint: /Datastreams/SetDatastream?osid=<id>&idDataStream=<ds>&comando=<cmd>
         Establece el valor de un datastream (actuador)
         """
         try:
@@ -113,7 +113,7 @@ def register_routes(app):
                 headers={'Content-Type': 'application/json'}
             )
     
-    @app.route('/health', methods=['GET'])
+    @app.route('/Datastreams/health', methods=['GET'])
     async def health_check(request: Request):
         """Health check endpoint"""
         from config import Config
