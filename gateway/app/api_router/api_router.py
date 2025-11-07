@@ -13,7 +13,7 @@ class APIRouter:
                     "methods": ["GET", "POST"],
                     "backend": config.ONTOLOGY_SERVICE_URL
                 },
-                "/intelligent_object": {
+                "/objeto": {
                     "methods": ["GET", "POST"],
                     "backend": config.OBJECT_SERVICE_URL
                 }
@@ -25,7 +25,7 @@ class APIRouter:
         service = request.path_params["path_name"].split("/")[1]
         service = "/" + service  # Reconstruir el path con el formato esperado
         # TODO: Log the critical parameters: Client IP, Timestamp etc. for monitoring and analytics
-
+        print(f"Routing request for service: {service} with method: {request.method}")
         # If a random path is accessed, don't forward to backend
         if service not in self.config["endpoints"]:
             # TODO: Log for audit
@@ -60,7 +60,20 @@ class APIRouter:
                         return Response(content="Error forwarding request", status_code=500)
                 case "POST":
                     try:
-                        response = await session.post(url=base_url, data=request.body(), json=request.json(), headers=headers)
+                        # Leer el body del request
+                        body = await request.body()
+                        
+                        # Determinar si es JSON o form data
+                        content_type = request.headers.get("content-type", "")
+                        
+                        if "application/json" in content_type:
+                            # Si es JSON, parsear y enviar como json
+                            json_data = await request.json()
+                            response = await session.post(url=base_url, json=json_data, headers=headers)
+                        else:
+                            # Si no es JSON, enviar como data raw
+                            response = await session.post(url=base_url, data=body, headers=headers)
+                            
                     except Exception as e:
                         logger.error(f"Error occurred while forwarding POST request: {e}")
                         return Response(content="Error forwarding request", status_code=500)

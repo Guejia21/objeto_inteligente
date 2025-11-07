@@ -2,5 +2,5 @@
 from pathlib import Path
 
 broker = "test.mosquitto.org" # Dirección del broker MQTT (Potencialmente será mosquitto)
-urlOntologyService = "http://localhost:8000"
+urlOntologyService = "http://localhost:8001/ontology"
 pathMetadata = str(Path(__file__).resolve().parent / "infraestructure" / "metadata" / "metadata.json")
