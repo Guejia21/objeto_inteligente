@@ -1,4 +1,4 @@
-try:
+"""try:
     from hardware.gpio_adapter import gpio
     
     # Pin D3 en GrovePi = GPIO 2 en ESP32 (ajusta según tu conexión)
@@ -9,4 +9,6 @@ try:
     print("LED encendido")
     
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"Error: {e}")"""
+#Mientras se arregla la grove pi, se simulan los valores
+print("LED encendido")

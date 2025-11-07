@@ -1,4 +1,4 @@
-try:
+"""try:
     from hardware.gpio_adapter import gpio
     
     # Pin A0 en GrovePi = GPIO 36 en ESP32 (ajusta según la conexión)
@@ -10,4 +10,6 @@ try:
     print(value)
     
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"Error: {e}")"""
+#Mientras se arregla la grove pi, se simulan los valores
+value = 25.0  # Simular temperatura de 25.0 °C

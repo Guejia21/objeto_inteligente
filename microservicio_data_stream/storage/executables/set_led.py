@@ -1,11 +1,11 @@
 # Controla un LED
 
-def main(comparador, valor):
-    """
+"""def main(comparador, valor):
+    
     Args:
         comparador: "igual", "mayor", "menor"
         valor: valor a establecer
-    """
+    
     print(f"LED: {comparador} {valor}")
     
     # Aquí irías tu código para controlar el LED
@@ -16,4 +16,7 @@ def main(comparador, valor):
     # if valor == "1" or valor.lower() == "on":
     #     led.on()
     # else:
-    #     led.off()
+    #     led.off()"""
+#Mientras se arregla la grove pi, se simulan los valores
+def main(comparador, valor):
+    print(f"LED: {comparador} {valor}")

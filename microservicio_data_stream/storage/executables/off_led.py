@@ -1,4 +1,4 @@
-try:
+"""try:
     from hardware.gpio_adapter import gpio
     
     LED_PIN = 3  # D3 en Raspberry, GPIO 2 en ESP32
@@ -8,4 +8,6 @@ try:
     print("LED apagado")
     
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"Error: {e}")"""
+#Mientras se arregla la grove pi, se simulan los valores
+print("LED apagado")
