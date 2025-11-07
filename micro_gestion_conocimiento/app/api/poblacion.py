@@ -4,7 +4,7 @@ from app.application.dtos import PobladorPayloadDTO
 from app.deps import get_poblacion_service
 from app.application.poblacion_service import PoblacionService
 
-router = APIRouter(prefix="/poblacion", tags=["Poblacion de Base de conocimiento"])
+router = APIRouter(prefix="/ontology/poblacion", tags=["Poblacion de Base de conocimiento"])
 @router.post("/poblar_metadatos_objeto", response_model=None,status_code=201)
 async def poblar_metadatos_objeto(metadata: PobladorPayloadDTO, service: PoblacionService = Depends(get_poblacion_service)):
     """Endpoint para poblar los metadatos del objeto inteligente."""
