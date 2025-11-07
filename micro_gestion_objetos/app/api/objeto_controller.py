@@ -9,7 +9,7 @@ from app.application.dtos import ObjectData
 router = APIRouter(prefix="/objeto", tags=["Gestión de objeto inteligente"])
 
 @router.get("/Identificator")
-async def get_identificator(osid: int = Query(..., gt=0, description="ID del objeto inteligente"), objeto_service: ObjetoService = Depends(get_objeto_service)):
+async def get_identificator(osid: str = Query(..., description="ID del objeto inteligente"), objeto_service: ObjetoService = Depends(get_objeto_service)):
     """Obtiene los metadatos del objeto inteligente dado su osid."""
     try:
         return await objeto_service.getIdentificator(osid)

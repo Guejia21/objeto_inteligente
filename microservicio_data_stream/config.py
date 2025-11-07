@@ -2,7 +2,7 @@
 class Config:
     # Servidor
     HOST = '0.0.0.0'
-    PORT = 8081
+    PORT = 8003
 
     # BASE_DIR: obtener carpeta del fichero actual
     try:
