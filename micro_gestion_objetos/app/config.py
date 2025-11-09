@@ -1,6 +1,19 @@
 """Archivo de configuración para la aplicación."""
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from pathlib import Path
 
-broker = "test.mosquitto.org" # Dirección del broker MQTT (Potencialmente será mosquitto)
-urlOntologyService = "http://localhost:8001/ontology"
-pathMetadata = str(Path(__file__).resolve().parent / "infraestructure" / "metadata" / "metadata.json")
+class Settings(BaseSettings):
+    BASE_URL: str = 'http://localhost:8002'    
+    RABBIT_URL: str = "amqp://guest:guest@localhost:5672/"
+    REGISTER_DATASTREAMS_QUEUE_NAME: str = 'register_datastreams_queue'
+    ONTOLOGY_SERVICE_URL: str = "http://localhost:8001/ontology"    
+    METADATA_PATH:str = str(Path(__file__).resolve().parent / "infraestructure" / "metadata" / "metadata.json")
+    BROKER_HOST: str = "localhost"
+    model_config = ConfigDict(
+        env_file='.env',
+        extra='ignore'
+    )
+
+
+settings = Settings()

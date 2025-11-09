@@ -1,8 +1,4 @@
-import requests
-
-from app import config
-
-
+"""Módulo que define la clase ObjetoInteligente y sus métodos asociados."""
 class ObjetoInteligente:
     _instance = None  # Variable de clase para almacenar la única instancia
     # Implementación del patrón Singleton

@@ -4,13 +4,13 @@ from app.infraestructure.logging.Logging import logger
 import json
 import os
 from pathlib import Path
-from app import config
+from app.config import settings
 
 class Persistence(IRepository):
     def save_object_metadata(self, metadata: dict):                
         try:            
             # Asegurar que el directorio destino exista
-            metadata_path = Path(config.pathMetadata)
+            metadata_path = Path(settings.METADATA_PATH)
             metadata_path.parent.mkdir(parents=True, exist_ok=True)
             with open(metadata_path, "w", encoding="utf-8") as file:
                 json.dump(metadata, file, ensure_ascii=False, indent=2)
@@ -21,7 +21,7 @@ class Persistence(IRepository):
 
     def get_object_metadata(self) -> dict:        
         try:
-            with open(config.pathMetadata, "r", encoding="utf-8") as file:
+            with open(settings.METADATA_PATH, "r", encoding="utf-8") as file:
                 metadata = json.load(file)
             logger.info("Metadatos del objeto obtenidos correctamente.")
             return metadata
@@ -30,7 +30,7 @@ class Persistence(IRepository):
             raise
     def is_object_metadata_exists(self) -> bool:
         try:
-            return Path(config.pathMetadata).exists()
+            return Path(settings.METADATA_PATH).exists()
         except FileNotFoundError:
             logger.warning("El archivo de metadatos no existe.")
             return False
