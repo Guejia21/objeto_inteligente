@@ -1,20 +1,11 @@
+import uos
 
 class Config:
     # Servidor
     HOST = '0.0.0.0'
     PORT = 8003
 
-    # BASE_DIR: obtener carpeta del fichero actual
-    try:
-        _f = __file__
-    except NameError:
-        _f = ''
-    _sep_idx = _f.rfind('/')
-    if _sep_idx != -1:
-        BASE_DIR = _f[:_sep_idx]
-    else:
-        BASE_DIR = '.'
-
+    BASE_DIR = uos.getcwd()
     # Rutas (compatibles con MicroPython)
     PATH_EJECUTABLES = BASE_DIR + '/storage/executables/'
     PATH_METADATA = BASE_DIR + '/storage/metadata/'
@@ -22,6 +13,7 @@ class Config:
     # Objeto (se carga dinámicamente desde metadata)
     OSID = None
     TITLE = None
+    OBJECT_IP = None
 
     # Códigos de respuesta
     CODES = {
@@ -32,4 +24,9 @@ class Config:
         'errorDatastream': '1027',
         'noImplementado': '1099'
     }
-# ...existing code...
+    # Configuración de WiFi
+    WIFI_SSID = 'ejemplo'
+    WIFI_PASS = 'ejemplo'
+    # Configuración del broker MQTT    
+    MQTT_PORT = 1883
+    REGISTER_DATASTREAMS_QUEUE_NAME = 'register_datastreams_queue'
