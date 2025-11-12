@@ -1,5 +1,9 @@
+import os
+from infraestructure.interfaces import IPoblacionPerfilUsuario
+from infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
 from infraestructure.interfaces.IPoblacion import IPoblacion
-
+from infraestructure.logging.Logging import logger
+import config
 
 class PoblacionService:
     """Clase base para servicios de población."""
@@ -15,3 +19,30 @@ class PoblacionService:
             return {"status": "Población exitosa"}
         else:
             return {"status": "Fallo en la población"}
+        
+class PoblacionOntologiaUsuarioService:
+    """Servicio de Población para la Ontología del usuario."""
+    #def __init__(self, gestion_base_conocimiento: IPoblacionPerfilUsuario):
+    #    self.gestion_base_conocimiento = gestion_base_conocimiento
+    def cargarOntologia(self, file_content: bytes, nombre: str, ip_coordinador: str) -> None:
+        """Guarda la ontología del perfil de usuario recibida."""
+        logger.info(f"Cargando ontología para el usuario: {nombre} desde IP: {ip_coordinador}")
+        try:            
+            rutaArchivo = config.pathOWL + nombre
+            self.pathActual = rutaArchivo
+            if  os.path.exists(self.pathActual):
+                logger.info(f"El archivo de ontología ya existe. Se reemplazará: {self.pathActual}")
+                os.remove(self.pathActual)
+            archivo=open(rutaArchivo,'wb')
+            archivo.write(file_content)
+            archivo.close()
+
+            ##TODO guardar la ip del coordinador en un archivo para futuras consultas
+            #AppUtil.guardarIpCoordinadorEnArchivo(ipCoordinador)
+            #except Exception as e :
+
+            #self.activarEcasUsuario()
+
+        except Exception as e :
+            logger.error("Error al cargar la ontología del perfil de usuario: " + str(e))    
+        
