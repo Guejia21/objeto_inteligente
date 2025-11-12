@@ -23,14 +23,3 @@ class RegistroInteraccionRequest(BaseModel):
     mac: str
     dateInteraction: str
 
-class SetEcaStateRequest(BaseModel):
-    osid: str
-    nombreECA: str
-    comando: str  # "on" o "off"
-
-class ListarEcasRequest(BaseModel):
-    osid: str
-
-class EliminarEcaRequest(BaseModel):
-    osid: str
-    ecaName: str

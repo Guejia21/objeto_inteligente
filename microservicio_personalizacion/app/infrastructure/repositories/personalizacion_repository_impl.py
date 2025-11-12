@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 
 # Agregar paths del sistema legacy para mantener compatibilidad
 sys.path.append('./Escenario/OntologiaPck/')
@@ -34,7 +35,90 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
             self.consultas = None
             self.poblar_eca = None
             self.editar_eca = None
-    
+        
+        # Cache para preferencias de usuario (temporal)
+        self._preferencias_usuario = {}
+        self._interacciones_usuario = {}
+
+    # ========== MÉTODOS NUEVOS PARA PERSONALIZACIÓN ==========
+
+    async def guardar_preferencia_usuario(self, eca: ECA, email: str) -> bool:
+        """Guarda una preferencia de usuario (nuevo método)"""
+        try:
+            if email not in self._preferencias_usuario:
+                self._preferencias_usuario[email] = []
+            
+            preferencia_data = {
+                'email': email,
+                'osid': eca.eventoECA.objEvento,
+                'osidDestino': eca.accionECA.objAccion,
+                'contrato': {
+                    'evento': {
+                        'recurso': eca.eventoECA.id_event_resource,
+                        'operador': eca.eventoECA.comparadorCondicion,
+                        'valor': eca.eventoECA.variableCondicion
+                    },
+                    'accion': {
+                        'recurso': eca.accionECA.id_action_resource,
+                        'valor': eca.accionECA.variableAccion
+                    }
+                },
+                'eca_name': eca.name_eca,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            self._preferencias_usuario[email].append(preferencia_data)
+            logger.info(f"✅ Preferencia guardada para usuario {email}: {eca.name_eca}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error guardando preferencia: {e}")
+            return False
+
+    async def obtener_preferencias_usuario(self, email: str) -> List[Dict[str, Any]]:
+        """Obtiene todas las preferencias de un usuario"""
+        return self._preferencias_usuario.get(email, [])
+
+    async def limpiar_preferencias_temporales(self, email: str) -> bool:
+        """Limpia preferencias temporales de un usuario"""
+        try:
+            if email in self._preferencias_usuario:
+                # En una implementación real, aquí se limpiarían solo las temporales
+                # Por ahora simulamos que se limpian algunas
+                original_count = len(self._preferencias_usuario[email])
+                self._preferencias_usuario[email] = [
+                    pref for pref in self._preferencias_usuario[email] 
+                    if not pref.get('temporal', False)
+                ]
+                new_count = len(self._preferencias_usuario[email])
+                logger.info(f"Preferencias temporales limpiadas para {email}: {original_count} -> {new_count}")
+                return True
+            return True  # Si no hay preferencias, igual es éxito
+        except Exception as e:
+            logger.error(f"Error limpiando preferencias: {e}")
+            return False
+
+    async def guardar_interaccion(self, interaccion_data: Dict[str, Any]) -> str:
+        """Guarda interacción usuario-objeto"""
+        try:
+            email = interaccion_data.get('email')
+            if email not in self._interacciones_usuario:
+                self._interacciones_usuario[email] = []
+            
+            interaccion_id = f"inter_{int(datetime.now().timestamp())}_{len(self._interacciones_usuario[email])}"
+            
+            interaccion_data['interaccion_id'] = interaccion_id
+            self._interacciones_usuario[email].append(interaccion_data)
+            
+            logger.info(f"✅ Interacción guardada para {email}: {interaccion_id}")
+            return interaccion_id
+            
+        except Exception as e:
+            logger.error(f"Error guardando interacción: {e}")
+            return "error"
+
+    # ========== MÉTODOS LEGACY (MANTENER COMPATIBILIDAD) ==========
+
     async def guardar_eca(self, eca: ECA) -> bool:
         """Guarda un ECA en la ontología"""
         if not HAS_LEGACY_DEPS:
@@ -49,7 +133,7 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
         except Exception as e:
             logger.error(f"Error guardando ECA en ontología: {e}")
             return False
-    
+
     async def obtener_eca(self, nombre_eca: str) -> Optional[ECA]:
         """Obtiene un ECA por nombre"""
         if not HAS_LEGACY_DEPS:
@@ -96,7 +180,7 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
         except Exception as e:
             logger.error(f"Error obteniendo ECA {nombre_eca}: {e}")
             return None
-    
+
     async def listar_ecas_usuario(self, email: str) -> List[ECA]:
         """Lista ECAs de un usuario"""
         if not HAS_LEGACY_DEPS:
@@ -112,7 +196,7 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
         except Exception as e:
             logger.error(f"Error listando ECAs del usuario {email}: {e}")
             return []
-    
+
     async def listar_todos_ecas(self) -> List[ECA]:
         """Lista todos los ECAs"""
         if not HAS_LEGACY_DEPS:
@@ -128,7 +212,7 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
         except Exception as e:
             logger.error(f"Error listando todos los ECAs: {e}")
             return []
-    
+
     async def cambiar_estado_eca(self, nombre_eca: str, estado: str) -> bool:
         """Cambia estado de un ECA"""
         if not HAS_LEGACY_DEPS:
@@ -142,7 +226,7 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
         except Exception as e:
             logger.error(f"Error cambiando estado del ECA {nombre_eca}: {e}")
             return False
-    
+
     async def desactivar_ecas_usuario(self, email: str) -> List[str]:
         """Desactiva todos los ECAs de un usuario"""
         ecas_desactivados = []
@@ -158,7 +242,7 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
         except Exception as e:
             logger.error(f"Error desactivando ECAs del usuario {email}: {e}")
             return []
-    
+
     async def eliminar_eca(self, nombre_eca: str) -> bool:
         """Elimina un ECA"""
         if not HAS_LEGACY_DEPS:
@@ -172,64 +256,23 @@ class PersonalizacionRepositoryImpl(PersonalizacionRepository):
         except Exception as e:
             logger.error(f"Error eliminando ECA {nombre_eca}: {e}")
             return False
-    
+
     async def verificar_usuario(self, email: str) -> bool:
-        """Verifica si un usuario existe (mock por ahora)"""
-        # Por ahora siempre retorna True para pruebas
-        # En producción, conectar con sistema de autenticación legacy
-        return True
+        """Verifica si un usuario existe"""
+        return True  # Siempre True para pruebas
         
     async def desactivar_ecas_por_osid(self, osid: str) -> List[str]:
-        """
-        Implementación para desactivar ECAs por OSID
-        """
+        """Desactiva ECAs por OSID"""
         try:
-            # En un entorno real, aquí buscaríamos primero el email asociado al OSID
-            # Por ahora usamos el sistema legacy a través del consultas
-            if not HAS_LEGACY_DEPS:
-                logger.warning(f"Mock: ECAs desactivados para OSID {osid}")
-                return []
-
-            # Obtener ECAs asociados al OSID
-            ecas_desactivados = []
-            try:
-                ecas_data = self.consultas.listarEcasPorOsid(osid)  # Asumiendo que existe este método
-                for eca_data in ecas_data:
-                    nombre_eca = eca_data.get('name_eca')
-                    if await self.cambiar_estado_eca(nombre_eca, "off"):
-                        ecas_desactivados.append(nombre_eca)
-            except AttributeError:
-                logger.warning("Método listarEcasPorOsid no disponible en sistema legacy")
-                
-            return ecas_desactivados
+            # Buscar email asociado al OSID y desactivar sus ECAs
+            email = await self._obtener_email_por_osid(osid)
+            return await self.desactivar_ecas_usuario(email)
         except Exception as e:
             logger.error(f"Error en desactivar_ecas_por_osid: {e}")
             return []
 
-    async def guardar_interaccion(self, interaccion_data: Dict[str, Any]) -> str:
-        """
-        Implementación para guardar interacciones
-        """
-        try:
-            if not HAS_LEGACY_DEPS:
-                # En modo mock, generamos un ID único usando timestamp y datos
-                import time
-                mock_id = f"inter_{int(time.time())}_{hash(str(interaccion_data)) % 10000}"
-                logger.warning(f"Mock: Interacción guardada con ID: {mock_id}")
-                return mock_id
-
-            # En un entorno real, aquí guardaríamos en la base de datos o sistema legacy
-            # Por ahora generamos un ID único y simulamos el guardado
-            try:
-                # Intentar usar el sistema legacy si tiene un método apropiado
-                interaccion_id = self.consultas.registrarInteraccion(interaccion_data)
-            except AttributeError:
-                # Si no existe el método en el sistema legacy, usar comportamiento mock
-                import time
-                interaccion_id = f"inter_{int(time.time())}_{hash(str(interaccion_data)) % 10000}"
-                
-            logger.info(f"Interacción guardada con ID: {interaccion_id}")
-            return interaccion_id
-        except Exception as e:
-            logger.error(f"Error guardando interacción: {e}")
-            return "error"
+    async def _obtener_email_por_osid(self, osid: str) -> str:
+        """Obtiene email asociado a OSID"""
+        if osid.startswith("usuario_"):
+            return f"{osid}@ejemplo.com"
+        return f"usuario_{osid}@ejemplo.com"
