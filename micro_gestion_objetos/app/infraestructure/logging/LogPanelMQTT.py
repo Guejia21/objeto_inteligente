@@ -1,10 +1,10 @@
 
-from app.infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT 
+from infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT 
 import paho.mqtt.client as mqtt
 from paho.mqtt.client import CallbackAPIVersion
 import json
 import asyncio
-from app.config import settings
+from config import settings
 #Implementación concreta de la interfaz ILogPanel que publica logs a través de MQTT
 
 

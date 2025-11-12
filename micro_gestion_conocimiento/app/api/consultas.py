@@ -1,8 +1,8 @@
 
-from app.application.consultas_service import ConsultasService
+from application.consultas_service import ConsultasService
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.deps import get_consultas_service
+from deps import get_consultas_service
 
 router = APIRouter(prefix="/ontology/consultas", tags=["Consultas de Base de conocimiento"])
 @router.get("/consultar_active", response_model=bool)

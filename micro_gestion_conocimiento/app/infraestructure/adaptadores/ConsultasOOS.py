@@ -2,28 +2,27 @@
 Adaptador de Consultas a la Base de Conocimiento OOS
 Se extiende de la interfaz IConsultasOOS permitiendo generar todo tipo de consultas a la ontología instanciada ubicada en /OWL/ontologiainstanciada.owl.
 """
-#TODO configurar los metodos para que no se ejecuten cuando la onto no está activa
+
 
 import os
 
-from app.infraestructure.logging.Logging import logger
-from app.infraestructure.acceso_ontologia.Ontologia import Ontologia
-from app.infraestructure.util.UrisOOS import UrisOOS
-from app import config
-
-from app.infraestructure.interfaces.IConsultas import IConsultasOOS
+from infraestructure.logging.Logging import logger
+from infraestructure.acceso_ontologia.Ontologia import Ontologia
+from infraestructure.util.UrisOOS import UrisOOS
+from config import settings
+from infraestructure.interfaces.IConsultas import IConsultasOOS
 
 
 class ConsultasOOS(IConsultasOOS):    
 
     def __init__(self):
-        if os.path.exists(config.ontologiaInstanciada):
-            self.ontologia = Ontologia(config.ontologiaInstanciada)
+        if os.path.exists(settings.ONTOLOGIA_INSTANCIADA):
+            self.ontologia = Ontologia(settings.ONTOLOGIA_INSTANCIADA)
             self.ontoExists = True
         else:
-            logger.error(f"La ontologia instanciada no existe en la ruta especificada: {config.ontologiaInstanciada}")
+            logger.error(f"La ontologia instanciada no existe en la ruta especificada: {settings.ONTOLOGIA_INSTANCIADA}")
             self.ontoExists = False
-            self.ontologia = Ontologia(config.ontologia)
+            self.ontologia = Ontologia(settings.ONTOLOGIA_PU)
 
     ## ---->  El metodo ontologia.consultaDataProperty retorna una lista con los resultados [[],[]]
 

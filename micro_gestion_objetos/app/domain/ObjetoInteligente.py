@@ -31,7 +31,7 @@ class ObjetoInteligente:
         Devuelve:
             {"dicObj": {...}, "dicRec": [...]} con tipos y campos normalizados.
         """
-        from app.infraestructure.logging.Logging import logger
+        from infraestructure.logging.Logging import logger
 
         # Aceptar que nos pasen el objeto entero o solo el feed
         payload = jsonOriginal or {}

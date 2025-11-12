@@ -1,8 +1,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException
-from app.application.dtos import PobladorPayloadDTO
-from app.deps import get_poblacion_service
-from app.application.poblacion_service import PoblacionService
+from application.dtos import PobladorPayloadDTO
+from deps import get_poblacion_service
+from application.poblacion_service import PoblacionService
 
 router = APIRouter(prefix="/ontology/poblacion", tags=["Poblacion de Base de conocimiento"])
 @router.post("/poblar_metadatos_objeto", response_model=None,status_code=201)

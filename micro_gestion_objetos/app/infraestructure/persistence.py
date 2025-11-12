@@ -1,10 +1,10 @@
 
-from app.infraestructure.IRepository import IRepository
-from app.infraestructure.logging.Logging import logger
+from infraestructure.IRepository import IRepository
+from infraestructure.logging.Logging import logger
 import json
 import os
 from pathlib import Path
-from app.config import settings
+from config import settings
 
 class Persistence(IRepository):
     def save_object_metadata(self, metadata: dict):                

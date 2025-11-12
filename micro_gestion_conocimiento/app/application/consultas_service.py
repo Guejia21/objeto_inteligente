@@ -1,5 +1,5 @@
-from app.infraestructure.logging.Logging import logger
-from app.infraestructure.interfaces.IConsultas import IConsultasOOS
+from infraestructure.logging.Logging import logger
+from infraestructure.interfaces.IConsultas import IConsultasOOS
 
 class ConsultasService:
     """Servicio de Consultas para la Ontología OOS."""

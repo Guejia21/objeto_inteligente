@@ -1,6 +1,6 @@
 
-from app.config import settings
-from app.infraestructure.logging.Logging import  logger
+from config import settings
+from infraestructure.logging.Logging import  logger
 import requests
 
 """Servicio para interactuar con la ontología del objeto inteligente."""

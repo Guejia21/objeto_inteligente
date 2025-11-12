@@ -29,15 +29,16 @@ def conectar_wifi():
     print("WiFi conectada:", wlan.ifconfig())
 # Función para consumir mensajes del broker (Se usa la interfaz BrokerInterface para mayor abstracción)
 async def consumer_mqtt(broker: BrokerInterface):
-    def mensaje_recibido(topic, msg):
+    def recibir_datastreams(topic, msg):
         print("Registrando datastream desde mensaje MQTT...")
         datastreams = util.convert_metadata_format(json.loads(msg))
         util.save_metadata(datastreams)
+        util.generarEjecutables(datastreams["datastreams"], datastreams["object"]["id"])
         datastream_service._load_metadata()
         print("Datastreams registrados correctamente.")
         # Aquí se puede procesar el mensaje recibido
 
-    await broker.suscribirse(Config.REGISTER_DATASTREAMS_QUEUE_NAME, mensaje_recibido)
+    await broker.suscribirse(Config.REGISTER_DATASTREAMS_QUEUE_NAME, recibir_datastreams)
 
 # Ejecutar servidor
 async def main():

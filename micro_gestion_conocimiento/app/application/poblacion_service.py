@@ -1,4 +1,4 @@
-from ..infraestructure.interfaces.IPoblacion import IPoblacion
+from infraestructure.interfaces.IPoblacion import IPoblacion
 
 
 class PoblacionService:

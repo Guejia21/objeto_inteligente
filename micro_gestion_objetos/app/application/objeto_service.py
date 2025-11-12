@@ -1,12 +1,12 @@
 
 import json
-from app.infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT
-from app.domain.ObjetoInteligente import ObjetoInteligente
-from app.infraestructure.logging.Logging import logger
-from app.application.dtos import ObjectData
-from app.config import settings
-from app.infraestructure.IRepository import IRepository
-from app.application import ontology_service
+from infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT
+from domain.ObjetoInteligente import ObjetoInteligente
+from infraestructure.logging.Logging import logger
+from application.dtos import ObjectData
+from config import settings
+from infraestructure.IRepository import IRepository
+from application import ontology_service
 
 
 class ObjetoService:
@@ -67,7 +67,7 @@ class ObjetoService:
         logger.info("Ontología poblada con éxito.")
         #Actualizar los datos del objeto
         self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)
-        logger.debug("Datos estructurados para poblar la ontología: %s", json_data_object)
+        #logger.debug("Datos estructurados para poblar la ontología: %s", json_data_object)
         self.persistence.save_object_metadata(json_data_object)
         #Después de instanciar la ontología y metadatos, se deben enviar los datastreams para que sean registrados en el micro de recursos y datastreams
         await self.log_panel.Publicar(settings.REGISTER_DATASTREAMS_QUEUE_NAME, json.dumps(json_data_object))

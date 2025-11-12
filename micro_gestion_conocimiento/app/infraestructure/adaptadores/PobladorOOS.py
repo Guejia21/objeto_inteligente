@@ -1,15 +1,15 @@
 """Adaptador de Población de la Ontología OOS
 Se extiende de la interfaz IPoblacion permitiendo poblar los metadatos del objeto inteligente en la ontología instanciada ubicada en /OWL/ontologiainstanciada.owl."""
-import app.config as config
+from config import settings
 import os, shutil
-from app.infraestructure.interfaces.IPoblacion import IPoblacion
+from infraestructure.interfaces.IPoblacion import IPoblacion
 from owlready2 import *
-from app.infraestructure.util.ClasesOOS import *
-from app.infraestructure.logging.Logging import logger
+from infraestructure.util.ClasesOOS import *
+from infraestructure.logging.Logging import logger
 
 
-onto_path = [config.pathOWL] #("app/infraestucture/OWL/")
-logger.info("Ruta Ontologias: " + config.pathOWL)
+onto_path = [settings.PATH_OWL] #("app/infraestucture/OWL/")
+logger.info("Ruta Ontologias: " + settings.PATH_OWL)
 
 
 class PobladorOOS(IPoblacion):
@@ -22,28 +22,28 @@ class PobladorOOS(IPoblacion):
         logger.info("Inicio Poblar Objeto Semantico con OWLReady2")
         
         # Ensure OWL directory exists
-        if not os.path.exists(config.pathOWL):
-            os.makedirs(config.pathOWL, mode=0o777)
+        if not os.path.exists(settings.PATH_OWL):
+            os.makedirs(settings.PATH_OWL, mode=0o777)
             
         # Validate base ontology exists
-        if not os.path.exists(config.ontologia):
-            raise FileNotFoundError(f"Base ontology file not found: {config.ontologia}")
+        if not os.path.exists(settings.ONTOLOGIA):
+            raise FileNotFoundError(f"Base ontology file not found: {settings.ONTOLOGIA}")
             
         try:
             # Load the ontology first to validate it
-            self.onto = get_ontology("file://" + config.ontologia).load(reload_if_newer=True)
+            self.onto = get_ontology("file://" + settings.ONTOLOGIA).load(reload_if_newer=True)
             if not self.onto.loaded:
                 raise Exception("Failed to load base ontology")
                 
             # Copy base ontology to instance ontology
-            shutil.copyfile(config.ontologia, config.ontologiaInstanciada)
+            shutil.copyfile(settings.ONTOLOGIA, settings.ONTOLOGIA_INSTANCIADA)
             logger.info("Base ontology copied successfully to instance ontology")
         except Exception as e:
             logger.error("Failed during ontology initialization")
             logger.error(e)
             raise
 
-        logger.info("Ontologia Cargada: " + str(self.onto.loaded))
+        logger.info("Ontologia Cargada")
 
     def poblarMetadatosObjeto(self, diccionarioObjeto:dict, listaRecursos:dict):
         try:            
@@ -61,7 +61,7 @@ class PobladorOOS(IPoblacion):
 
             self.poblarDataStreams(listaRecursos)
             # Las clases se utilizan anteriormente están asociadas a la ontología, por lo que al guardar la ontología se guardan los individuos creados
-            self.onto.save(file=config.ontologiaInstanciada,format="rdfxml")
+            self.onto.save(file=settings.ONTOLOGIA_INSTANCIADA,format="rdfxml")
             logger.info("Población de metadatos exitosa")
             return True
         except Exception as e:
@@ -72,7 +72,7 @@ class PobladorOOS(IPoblacion):
                 destroy_entity(self.individuoObjecto)
             if hasattr(self.location, 'namespace') and self.location.namespace is not None:
                 destroy_entity(self.location)
-            self.onto = get_ontology("file://" + config.ontologia).load(reload_if_newer=True)
+            self.onto = get_ontology("file://" + settings.ONTOLOGIA).load(reload_if_newer=True)
             logger.info("Se limpiaron las entidades según fue necesario")
             logger.error(e)
             return False

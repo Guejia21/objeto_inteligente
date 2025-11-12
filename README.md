@@ -18,7 +18,8 @@ cd micro*
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port *puerto*
+cd app
+python3 main.py
 ```
 #### Broker de mensajería
 En este micro se usará una comunicación mqtt, debido a que el protocolo nativo manejado por RabbitMq no está soportado en Micropython. A pesar de eso, Rabbit ofrece un plugin mqtt, con el fin de publicar mensajes en este protocolo, para activar el plugin debe iniciarse Rabbit mq y hacer:

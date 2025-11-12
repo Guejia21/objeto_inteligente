@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ONTOLOGY_SERVICE_URL: str = "http://localhost:8001/ontology"    
     METADATA_PATH:str = str(Path(__file__).resolve().parent / "infraestructure" / "metadata" / "metadata.json")
     BROKER_HOST: str = "localhost"
+    PORT: int = 8002
     model_config = ConfigDict(
         env_file='.env',
         extra='ignore'
