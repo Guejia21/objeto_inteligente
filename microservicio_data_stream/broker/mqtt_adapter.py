@@ -17,11 +17,14 @@ class MQTTAdapter(BrokerInterface):
             print(f"Error conectando a MQTT: {e}")
             self.conectado = False
 
-    def publicar(self, topico, mensaje):
+    async def publicar(self, topico, mensaje):
         if not self.conectado:
             self.__conectar()
         if self.conectado:
-            self.client.publish(topico.encode(), mensaje.encode())
+            try:
+                self.client.publish(topico.encode(), mensaje.encode())                
+            except Exception as e:
+                print(f"Error publicando en MQTT: {e}")
 
     async def suscribirse(self, topico, callback):
         # Intentar conectar sin bloquear indefinidamente

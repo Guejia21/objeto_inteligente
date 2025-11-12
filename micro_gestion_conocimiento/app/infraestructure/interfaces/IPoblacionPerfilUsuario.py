@@ -1,9 +1,10 @@
 
 import os
 from pyparsing import ABC, abstractmethod
-from app import config
-from app.infraestructure.logging.Logging import logger
+import config
+from infraestructure.logging.Logging import logger
 """Interfaz de Población de la Ontología OOS."""
+#TODO!!!!
 class IPoblacion(ABC):        
 
     @abstractmethod

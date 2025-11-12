@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from deps import get_consultas_service
 
-ontologia_router = APIRouter(prefix="/consultas", tags=["Consultas de Base de conocimiento"])
+ontologia_router = APIRouter(prefix="/ontology/consultas", tags=["Consultas de Base de conocimiento"])
 """ Endpoints para consultas sobre la ontología del objeto inteligente."""
 @ontologia_router.get("/consultar_active", response_model=bool)
 async def consultar_active(service: ConsultasService = Depends(get_consultas_service)) -> bool:
@@ -98,5 +98,5 @@ async def consultar_service_state(service: ConsultasService = Depends(get_consul
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-ontologia_usuario_router = APIRouter(prefix="/consultas_usuario", tags=["Consultas de Usuario"])
+ontologia_usuario_router = APIRouter(prefix="/ontology/consultas_usuario", tags=["Consultas de Usuario"])
 """ Endpoints para consultas sobre la ontología del perfil de usuario."""

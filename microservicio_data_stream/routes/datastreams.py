@@ -22,9 +22,9 @@ def register_routes(app):
                     status_code=400,
                     headers={'Content-Type': 'application/json'}
                 )
-            
+            print("Enviando SendState")
             result = datastream_service.send_state(osid)
-            
+            print(f"SendState exitoso")
             return Response(
                 result,
                 headers={

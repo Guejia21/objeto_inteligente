@@ -2,12 +2,12 @@ from rdflib import Literal
 import os
 from os import listdir
 import time
-from app import config
-from app.infraestructure.acceso_ontologia.OntologiaPU import OntologiaPU
+from config import settings
+from infraestructure.acceso_ontologia.OntologiaPU import OntologiaPU
 from ConsultasPerfilUsuario import ConsultasPerfilUsuario
-from app.infraestructure.interfaces import IPoblacionPerfilUsuario
-from app.infraestructure.util import UrisPu
-from app.infraestructure.logging.Logging import logger
+from infraestructure.interfaces import IPoblacionPerfilUsuario
+from infraestructure.util import UrisPu
+from infraestructure.logging.Logging import logger
 
 pathUsuActual = './PerfilUsuario/OWL/UsuarioActual.owl'
     
@@ -15,12 +15,12 @@ class PoblarPerfilUsuario(IPoblacionPerfilUsuario):
     
     def __init__(self, mac, idUsuario, accion):
         try:           
-            os.stat(config.pathOWL)
+            os.stat(settings.PATH_OWL)
         except:
-            os.mkdir(config.pathOWL, 0o777)
+            os.mkdir(settings.PATH_OWL, 0o777)
         if accion == "CARGAR":
             try:    
-                self.path = config.pathOWL + mac + "&" + idUsuario + ".owl"
+                self.path = settings.PATH_OWL + mac + "&" + idUsuario + ".owl"
                 #self.path = AppUtil.pathOWL + mac +  ".owl"
                 self.ontologia = OntologiaPU(self.path)
                 logger.info(f"Ruta de ontología cargada: {self.path}")
@@ -28,7 +28,7 @@ class PoblarPerfilUsuario(IPoblacionPerfilUsuario):
                 logger.error("Desde PobladorPU. El path es incorrecto")
 
         elif accion == "CREAR":
-            self.path = config.pathOWL + mac + "&" + idUsuario + ".owl"
+            self.path = settings.PATH_OWL + mac + "&" + idUsuario + ".owl"
             self.ontologia = OntologiaPU(self.path)
             self.ontologia.crearNuevaOntologia(self.path)
         elif accion == "usuarioActual":

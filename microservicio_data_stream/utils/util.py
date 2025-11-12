@@ -53,7 +53,7 @@ def save_metadata(metadata):
         print("Metadata guardada correctamente.")
     except Exception as e:
         print(f"Error guardando metadata: {e}")
-def generarEjecutables(listaRecursos, idObjeto):
+def create_executables(listaRecursos, idObjeto):
     """Genera archivos ejecutables (plantillas) para cada datastream si no existen"""
     print("GENERANDO EJECUTABLES")
     if archivo_existe(Config.PATH_EJECUTABLES) == False:

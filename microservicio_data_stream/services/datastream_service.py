@@ -111,9 +111,7 @@ class DatastreamService:
                 Config.CODES['idIncorrecto']
             )
         
-        try:
-            print("Enviando SendState")
-            
+        try:                        
             datastreams_state = []
             
             # Obtener valor de cada datastream
@@ -134,9 +132,7 @@ class DatastreamService:
                     "datastream_type": ds_type,
                     "value": value
                 })
-            
-            print(f"SendState exitoso: {len(datastreams_state)} datastreams")
-            
+                        
             return self.response.send_state_response(osid, datastreams_state)
             
         except Exception as e:

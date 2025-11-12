@@ -28,5 +28,8 @@ class Config:
     WIFI_SSID = 'ejemplo'
     WIFI_PASS = 'ejemplo'
     # Configuración del broker MQTT    
+    BROKER_HOST = "127.0.0.1"
     MQTT_PORT = 1883
     REGISTER_DATASTREAMS_QUEUE_NAME = 'register_datastreams_queue'
+    # Configuración de telemetría
+    TELEMETRY_PUBLISH_INTERVAL = 5  # segundos
