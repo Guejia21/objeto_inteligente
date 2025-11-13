@@ -63,7 +63,11 @@ class ConsultasOOS(IConsultasOOS):
         }}
         """
         resultado = self.ontologia.consultaDataProperty(query)
-        return resultado[0][0] if resultado and resultado[0] else None
+        # Devolver cadena vacía cuando no haya resultado para evitar errores
+        # de validación en endpoints que esperan `str` (no Optional).
+        if resultado and resultado[0]:
+            return resultado[0][0]
+        return ""
     
 ############################################## CONSUTAS BaSICAS ###############################################################
     def consultarOntoActiva(self) -> bool:

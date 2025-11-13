@@ -31,7 +31,7 @@ async def start_object(data: ObjectData, objeto_service: ObjetoService = Depends
 
 
 @router.get("/SendState")
-async def get_state(osid: int = Query(..., gt=0, description="ID del objeto inteligente"), objeto_service: ObjetoService = Depends(get_objeto_service)):
+async def get_state(osid: str = Query(..., description="ID del objeto inteligente"), objeto_service: ObjetoService = Depends(get_objeto_service)):
     """Obtiene el estado actual de los datastreams del objeto inteligente dado su osid."""
     try:
         return await objeto_service.get_state(osid)
@@ -42,12 +42,12 @@ async def get_state(osid: int = Query(..., gt=0, description="ID del objeto inte
 
 @router.get("/SendData")
 async def send_data(
-    osid: int = Query(..., description="ID del objeto inteligente"),
-    variableEstado: bool = Query(..., description="Variable del estado"),
-    tipove: str = Query(..., description="Tipo de variable (act, sen, etc.)"),
+    osid: str = Query(..., description="ID del objeto inteligente"),
+    variableEstado: str = Query(..., description="Variable del estado"),
+    tipove: str = Query('1', description="Tipo de variable (act, sen, etc.)"),
     objeto_service: ObjetoService = Depends(get_objeto_service)
-):   
-    """Envía datos al objeto inteligente."""
+):
+    """Envía datos al objeto inteligente (pide al microservicio de datastreams)."""
     try:
         return await objeto_service.send_data(osid, variableEstado, tipove)
     except ValueError as e:
@@ -57,7 +57,7 @@ async def send_data(
 
 
 @router.get("/SendServiceState")
-async def send_service_state(osid: int = Query(..., gt=0, description="ID del objeto inteligente"),objeto_service: ObjetoService = Depends(get_objeto_service)):
+async def send_service_state(osid: str = Query(..., description="ID del objeto inteligente"), objeto_service: ObjetoService = Depends(get_objeto_service)):
     """Envía el estado de los servicios del objeto inteligente dado su osid."""
     try:
         return await objeto_service.send_service_state(osid)
@@ -67,7 +67,10 @@ async def send_service_state(osid: int = Query(..., gt=0, description="ID del ob
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/SendCommand")
-async def send_command(osid: int = Query(..., gt=0, description="ID del objeto origen"),osidDestino: int = Query(..., gt=0, description="ID del objeto destino"),comando: str = Query(..., description="Comando a ejecutar"),
+async def send_command(
+    osid: str = Query(..., description="ID del objeto origen"),
+    osidDestino: str = Query(..., description="ID del objeto destino"),
+    comando: str = Query(..., description="Comando a ejecutar"),
     objeto_service: ObjetoService = Depends(get_objeto_service)
 ):
     """Envía un comando desde un objeto inteligente a otro."""

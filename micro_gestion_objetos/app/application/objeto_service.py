@@ -2,9 +2,11 @@
 from app.infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT
 from app.domain.ObjetoInteligente import ObjetoInteligente
 from app.infraestructure.logging.Logging import logger
-from app.application.dtos import ObjectData, DatastreamEstadoItem
+from app.application.dtos import ObjectData
 from app.infraestructure.IRepository import IRepository
 from app.application import ontology_service
+from app.application import dataStream_service
+import asyncio
 
 
 class ObjetoService:
@@ -58,49 +60,104 @@ class ObjetoService:
             return {"message": "El objeto inteligente ya está activo."}
         json_data_object = self.objetoInteligente.estructurarJSON(data.feed.model_dump())
         logger.info("Iniciando la población de la ontología.")
-        print(json_data_object)
         if not ontology_service.poblate_ontology(json_data_object):
+            print(json_data_object)
             logger.error("Error al poblar la ontología.")
             return {"message": "Error al iniciar el objeto inteligente."}
         logger.info("Ontología poblada con éxito.")
         #Actualizar los datos del objeto
-        self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)
-        logger.debug("Datos estructurados para poblar la ontología: %s", json_data_object)
+        self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)        
         self.persistence.save_object_metadata(json_data_object)
         #TODO: Iniciar la persistencia de los datastreams
         logger.info("Objeto inteligente iniciado con éxito.")
         return {"message": "Objeto inteligente iniciado con éxito"}
-    
-    async def get_state(self, osid: int):
-        """Obtiene el estado actual de los datastreams del objeto inteligente dado su osid."""
-        if osid != self.objetoInteligente.osid:
-            raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
-        
-        estado = ontology_service.get_datastream_states()
-        if estado is None:
-            raise ValueError("No se han recibido datos de datastreams para este objeto.")
-        
-        datastreams = [
-            {
-                "variableEstado": ds.get("datastream_id"),
-                "type": ds.get("type", "float"),
-                "valor": ds.get("valor"),
-                "dstype": ds.get("dstype", "sensor")
-            }
-            for ds in estado
-        ]
-        return {"osid": osid, "datastreams": datastreams}
 
-    async def send_data(self, osid: int, variableEstado: bool, tipove: str):
-        """Envía datos al objeto inteligente."""
+    async def get_state(self, osid: str):
+        """Obtiene el estado actual de los datastreams del objeto inteligente.
+
+        Esta implementación delega la obtención de estado al microservicio de
+        datastreams mediante `dataStream_service.send_state` y normaliza la
+        respuesta para mantener la forma esperada por la API.
+        """
         if osid != self.objetoInteligente.osid:
+            logger.warning("El osid solicitado %s no coincide con el del objeto inteligente %s", osid, self.objetoInteligente.osid)
             raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
-        
-        resultado = ontology_service.send_data(osid, variableEstado, tipove)
-        if not resultado:
-            raise RuntimeError("Error al enviar los datos al objeto inteligente.")
-        return {"message": "Datos enviados correctamente al objeto inteligente."}
+
+        try:
+            await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "Inicio SendState")
+            logger.info("Solicitando estado de datastreams al microservicio para osid %s", osid)
+
+            # Ejecutar la llamada bloquente en un hilo para no bloquear el event loop
+            resultado = await asyncio.to_thread(dataStream_service.send_state, str(osid))
+
+            if not isinstance(resultado, dict):
+                logger.error("Respuesta inesperada de dataStreamService: %s", resultado)
+                raise ValueError("Respuesta inválida del servicio de datastreams")
+
+            datastreams = resultado.get("datastreams")
+            if datastreams is None:
+                logger.error("La respuesta de SendState no contiene 'datastreams': %s", resultado)
+                raise ValueError("Respuesta inválida del servicio de datastreams: sin datastreams")
+
+            normalized = []
+            for ds in datastreams:
+                normalized.append({
+                    "variableEstado": ds.get("datastream_id") or ds.get("datastream") or ds.get("id"),
+                    "type": ds.get("datastream_format") or ds.get("datatype") or ds.get("type") or "string",
+                    "valor": ds.get("value") or ds.get("valor") or ds.get("current_value"),
+                    "dstype": ds.get("datastream_type") or ds.get("dstype") or "sensor"
+                })
+
+            await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "SendState Fin")
+            logger.info("SendState exitoso para %d datastreams", len(normalized))
+
+            return {"osid": resultado.get("osid", osid), "datastreams": normalized, "timestamp": resultado.get("timestamp")}
+
+        except Exception as e:
+            logger.error("Error obteniendo estado de datastreams desde dataStreamService: %s", e)
+            raise ValueError(f"Error al obtener estado: {e}")
+    
+    async def send_service_state(self, osid: str = None):
+        """Consulta la disponibilidad del microservicio de datastream.
+
+        Nota: el endpoint de datastream (`send_service_state`) no requiere
+        `osid`, por lo que aquí ignoramos el parámetro si se pasa desde la
+        ruta y delegamos directamente en `dataStream_service`.
+        """
+        try:
+            await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "Inicio SendServiceState")
+            # Ejecutar la comprobación del servicio en hilo (función sincrónica)
+            available = await asyncio.to_thread(dataStream_service.send_service_state)
+            await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "SendServiceState Fin")
+            # Devolver disponibilidad; incluimos osid solo si fue provisto por la ruta
+            result = {"service_available": bool(available)}
+            if osid:
+                result["osid"] = osid
+            return result
+        except Exception as e:
+            logger.error("Error verificando estado del servicio de datastreams: %s", e)
+            raise ValueError(f"Error al verificar servicio de datastreams: {e}")
+
+    async def send_data(self, osid: str, variableEstado: str, tipove: str = '1'):
+        """Solicita al microservicio de datastream el valor de un datastream espSecífico."""
+        if osid != self.objetoInteligente.osid:
+            logger.warning("El osid solicitado %s no coincide con el del objeto inteligente %s", osid, self.objetoInteligente.osid)
+            raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
+
+        if not variableEstado:
+            raise ValueError("variableEstado es requerido")
+
+        try:
+            await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, f"Inicio SendData {variableEstado}")
+            # Ejecutar la petición SendData en un hilo para evitar bloqueo
+            resultado = await asyncio.to_thread(dataStream_service.send_data, str(osid), str(variableEstado), tipove)
+            await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, f"SendData Fin {variableEstado}")
+            return resultado
+        except Exception as e:
+            logger.error("Error en SendData para %s/%s: %s", osid, variableEstado, e)
+            raise ValueError(f"Error al solicitar SendData: {e}")
                 
+        
 
 
 
