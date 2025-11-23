@@ -1,1 +1,1 @@
-def main(comparador, variable):
+pass

@@ -1,5 +1,5 @@
 from config import Config
-import uos
+import os as uos
 
 def convert_metadata_format(input_metadata):
     """
@@ -46,7 +46,7 @@ def convert_metadata_format(input_metadata):
     return output
 def save_metadata(metadata):
     """Guarda la metadata en un archivo JSON"""
-    import ujson as json
+    import json as json
     try:
         with open(Config.PATH_METADATA + "metadata.json", 'w') as f:
             json.dump(metadata, f)

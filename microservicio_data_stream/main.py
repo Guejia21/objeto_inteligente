@@ -1,7 +1,8 @@
-import ujson as json
+import json as json
 from lib.microdot.microdot import Microdot
 from broker.broker_interface import BrokerInterface
-from broker.mqtt_adapter import MQTTAdapter
+#from broker.mqtt_adapter import MQTTAdapter
+from broker.mqtt_python_adapter import MQTTPythonAdapter
 from routes.datastreams import register_routes
 from routes.datastreams import datastream_service
 from config import Config
@@ -11,13 +12,20 @@ import asyncio
 
 # Crear aplicación
 app = Microdot()
-# Configurar broker MQTT
-broker = MQTTAdapter(
+# Configurar broker MQTT cuando se desea usar microPython
+"""broker = MQTTAdapter(
     client_id="datastream_service",
     #broker=Config.OBJECT_IP,
     broker=Config.BROKER_HOST, #Usar localhost para pruebas locales
     port=Config.MQTT_PORT
-) 
+)"""
+# Configurar broker MQTT cuando se desea usar Python
+broker = MQTTPythonAdapter(
+    client_id="datastream_service",
+    #broker=Config.OBJECT_IP,
+    broker=Config.BROKER_HOST, #Usar localhost para pruebas locales
+    port=Config.MQTT_PORT 
+)
 # Variable global para controlar la tarea de publicación
 publicacion_task = None
 # Registrar rutas
@@ -79,28 +87,39 @@ async def publicar_valores(broker: BrokerInterface, osid: str, interval: int = 5
 # Función para consumir mensajes del broker (Se usa la interfaz BrokerInterface para mayor abstracción)
 async def consumer_mqtt(broker: BrokerInterface):
     global publicacion_task
+    # Capturamos el loop principal aquí, antes de entrar al callback del hilo
+    loop = asyncio.get_running_loop()
     
     def recibir_datastreams(topic, msg):
-        global publicacion_task
+        # Esta función corre en un hilo separado (creado por paho-mqtt)
+        # Debemos delegar la ejecución al loop principal de asyncio
         
-        print("Registrando datastream desde mensaje MQTT...")
-        datastreams = util.convert_metadata_format(json.loads(msg))
-        util.save_metadata(datastreams)
-        util.create_executables(datastreams["datastreams"], datastreams["object"]["id"])
-        datastream_service._load_metadata()
-        print("Datastreams registrados correctamente.")
-        
-        # Cancelar tarea anterior si existe
-        if publicacion_task and not publicacion_task.done():
-            publicacion_task.cancel()
-            print("Tarea de publicación anterior cancelada.")
-        
-        # Crear nueva tarea de publicación
-        osid = datastreams["object"]["id"]
-        publicacion_task = asyncio.create_task(
-            publicar_valores(broker, osid, interval=Config.TELEMETRY_PUBLISH_INTERVAL)
-        )
-        print("Nueva tarea de publicación iniciada.")
+        async def procesar_logica():
+            global publicacion_task
+            print("Registrando datastream desde mensaje MQTT...")
+            try:
+                datastreams = util.convert_metadata_format(json.loads(msg))
+                util.save_metadata(datastreams)
+                util.create_executables(datastreams["datastreams"], datastreams["object"]["id"])
+                datastream_service._load_metadata()
+                print("Datastreams registrados correctamente.")
+                
+                # Cancelar tarea anterior si existe
+                if publicacion_task and not publicacion_task.done():
+                    publicacion_task.cancel()
+                    print("Tarea de publicación anterior cancelada.")
+                
+                # Crear nueva tarea de publicación
+                osid = datastreams["object"]["id"]
+                publicacion_task = asyncio.create_task(
+                    publicar_valores(broker, osid, interval=Config.TELEMETRY_PUBLISH_INTERVAL)
+                )
+                print("Nueva tarea de publicación iniciada.")
+            except Exception as e:
+                print(f"Error al procesar datastreams: {e}")
+
+        # Usamos run_coroutine_threadsafe para enviar la corrutina al loop principal
+        asyncio.run_coroutine_threadsafe(procesar_logica(), loop)
 
     await broker.suscribirse(Config.REGISTER_DATASTREAMS_QUEUE_NAME, recibir_datastreams)
 

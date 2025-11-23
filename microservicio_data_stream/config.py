@@ -1,4 +1,4 @@
-import uos
+import os as uos
 
 class Config:
     # Servidor

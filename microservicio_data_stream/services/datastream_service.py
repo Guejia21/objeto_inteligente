@@ -1,4 +1,4 @@
-import ujson as json
+import json as json
 from utils.module_executor import ModuleExecutor
 from utils.response import ResponseHelper
 from config import Config
