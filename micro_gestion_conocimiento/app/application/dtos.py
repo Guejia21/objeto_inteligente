@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Literal, Optional, Any
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -68,3 +68,85 @@ class PobladorPayloadDTO(BaseModel):
         if v is None:
             return []
         return list(v)
+    
+class EcaPayloadDTO(BaseModel):    
+    """
+    Schema para el diccionario ECA aplanado
+    Define los atributos necesarios para poblar una regla ECA en la ontología OOS.    
+    """
+    
+    # General ECA attributes
+    name_eca: str = Field(..., description="Nombre único del ECA")
+    state_eca: Literal["on", "off"] = Field(..., description="Estado del ECA (on/off)")
+    eca_state: Literal["active", "inactive"] = Field(..., description="Estado de activación")
+    interest_entity_eca: str = Field(..., description="Entidad de interés")
+    user_eca: Optional[str] = Field(None, description="Email del usuario creador")
+    
+    # Event attributes (objeto y recurso que dispara el ECA)
+    id_event_object: str = Field(..., description="ID del objeto evento")
+    ip_event_object: str = Field(..., description="IP del objeto evento")
+    name_event_object: str = Field(..., description="Nombre del objeto evento")
+    id_event_resource: str = Field(..., description="ID del datastream evento")
+    name_event_resource: str = Field(..., description="Nombre del recurso evento")
+    
+    # Condition attributes
+    comparator_condition: str = Field(
+        ..., 
+        description="Comparador: mayor, menor, igual, mayor_igual, menor_igual, diferente"
+    )
+    meaning_condition: str = Field(..., description="Significado de la condición")
+    unit_condition: str = Field(..., description="Unidad de medida")
+    variable_condition: str = Field(..., description="Valor a comparar (como string)")
+    type_variable_condition: str = Field(
+        ..., 
+        description="Tipo de dato: float, int, string, bool"
+    )
+    
+    # Action attributes (objeto y recurso que ejecuta la acción)
+    id_action_object: str = Field(..., description="ID del objeto acción")
+    ip_action_object: str = Field(..., description="IP del objeto acción")
+    name_action_object: str = Field(..., description="Nombre del objeto acción")
+    id_action_resource: str = Field(..., description="ID del datastream/actuador")
+    name_action_resource: str = Field(..., description="Nombre del recurso acción")
+    comparator_action: str = Field(
+        ..., 
+        description="Comparador de acción: igual, incrementar, decrementar"
+    )
+    unit_action: str = Field(..., description="Unidad de la acción")
+    meaning_action: str = Field(..., description="Significado de la acción")
+    variable_action: str = Field(..., description="Valor de la acción (como string)")
+    type_variable_action: str = Field(
+        ..., 
+        description="Tipo de dato de la acción: float, int, string, bool"
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name_eca": "ECA_Temperatura_Ventilador",
+                "state_eca": "on",
+                "eca_state": "active",
+                "interest_entity_eca": "Ambiente",
+                "user_eca": "usuario@example.com",
+                "id_event_object": "ESP32_Sala",
+                "ip_event_object": "192.168.1.10",
+                "name_event_object": "Sensor Temperatura Sala",
+                "id_event_resource": "temperatura",
+                "name_event_resource": "Temperatura",
+                "comparator_condition": "mayor",
+                "meaning_condition": "threshold",
+                "unit_condition": "C",
+                "variable_condition": "30.5",
+                "type_variable_condition": "float",
+                "id_action_object": "ESP32_Cocina",
+                "ip_action_object": "192.168.1.11",
+                "name_action_object": "Actuador Ventilador",
+                "id_action_resource": "ventilador",
+                "name_action_resource": "Ventilador",
+                "comparator_action": "igual",
+                "unit_action": "state",
+                "meaning_action": "turn_on",
+                "variable_action": "on",
+                "type_variable_action": "string"
+            }
+        }

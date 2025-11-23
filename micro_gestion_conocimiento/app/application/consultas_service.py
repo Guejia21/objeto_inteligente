@@ -124,6 +124,19 @@ class ConsultasService:
         """Retorna instancias de métodos External en la ontología (consulta de instancias)."""
         return self.gestion_base_conocimiento.consultarMetodosExternal()
     
+    def setEcaState(self, valorNuevo:str, nombreECA:str):
+        """Actualiza el estado de una ECA."""
+        #El nuevo valor solo puede ser 'on' o 'off'
+        if valorNuevo not in ['on', 'off']:
+            logger.error(f"Valor inválido para el estado de ECA: {valorNuevo}. Debe ser 'on' o 'off'.")
+            return {"error": "Valor inválido. Use 'on' o 'off'."}
+        logger.info(f"Actualizando estado de ECA '{nombreECA}' a '{valorNuevo}'")
+        self.gestion_base_conocimiento.setEcaState(valorNuevo, nombreECA)
+        logger.info(f"Estado de ECA '{nombreECA}' actualizado correctamente.")
+        return {"status": "ECA actualizada correctamente"}
+    def listarECAs(self):
+        """Retorna la lista de ECAs definidas en la ontología."""
+        return self.gestion_base_conocimiento.listarEcas()
 class ConsultasOntologiaUsuarioService:
     """Servicio de Consultas para la Ontología del usuario."""
     def __init__(self, gestion_base_conocimiento: IConsultasPerfilUsuario):

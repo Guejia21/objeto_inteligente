@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
-from app.application.dtos import PobladorPayloadDTO
+from app.application.dtos import EcaPayloadDTO, PobladorPayloadDTO
 from app.deps import get_poblacion_service
 from app.application.poblacion_service import PoblacionOntologiaUsuarioService, PoblacionService
 
@@ -12,6 +12,20 @@ async def poblar_metadatos_objeto(metadata: PobladorPayloadDTO, service: Poblaci
     try:
         listaRecursos = [r.model_dump() for r in metadata.dicRec]
         return service.poblar_metadatos_objeto(metadata.dicObj.model_dump(), listaRecursos)
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+@ontologia_router.post("/poblar_eca", response_model=None,status_code=201)
+async def poblar_eca(eca: EcaPayloadDTO, service: PoblacionService = Depends(get_poblacion_service)):
+    """Endpoint para poblar una regla ECA en la base de conocimiento."""
+    try:
+        return service.poblar_eca(eca.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+@ontologia_router.post("/edit_eca", response_model=None,status_code=200)
+async def edit_eca(eca: EcaPayloadDTO, service: PoblacionService = Depends(get_poblacion_service)):
+    """Endpoint para poblar una regla ECA en la base de conocimiento."""
+    try:
+        return service.edit_eca(eca.model_dump())
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
 

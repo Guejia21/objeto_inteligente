@@ -17,6 +17,12 @@ class PoblacionService:
             return {"status": "Población exitosa"}
         else:
             return {"status": "Fallo en la población"}
+    def poblar_eca(self, diccionarioECA:dict) -> None:
+        """Pobla las reglas ECA en la base de conocimiento."""
+        if self.gestion_poblacion.poblarECA(diccionarioECA):
+            return {"status": "Población ECA exitosa"}
+        else:
+            return {"status": "Fallo en la población ECA"}
         
 class PoblacionOntologiaUsuarioService:
     """Servicio de Población para la Ontología del usuario."""
