@@ -32,6 +32,6 @@ Si se ejecuta por medio de Docker se debe ingresar a la consola del contenedor y
 Para ejecutar rabbit por medio de Docker se hace:
 ```sh
 cd objeto_inteligente/
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 -p 1883:1883 -v ~/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf rabbitmq:4-management bash -c "rabbitmq-plugins enable --offline rabbitmq_management rabbitmq_mqtt && rabbitmq-server"
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 -p 1883:1883 -v rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf rabbitmq:4-management bash -c "rabbitmq-plugins enable --offline rabbitmq_management rabbitmq_mqtt && rabbitmq-server"
 ```
 
