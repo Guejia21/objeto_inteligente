@@ -30,7 +30,7 @@ class PobladorOOS(IPoblacion):
         self.individuoObjecto = None
         self.individuoEstado = None
         self.location = None
-        self.onto = get_ontology("file://" + settings.ontologia).load(reload_if_newer=True)
+        self.onto = get_ontology("file://" + settings.ONTOLOGIA).load(reload_if_newer=True)
         self.uris = UrisOOS()
         self.ontologia = Ontologia()
 

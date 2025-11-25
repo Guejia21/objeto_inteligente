@@ -77,10 +77,12 @@ class ObjetoService:
     async def get_state(self, osid: int):
         """Obtiene el estado actual de los datastreams del objeto inteligente dado su osid."""
         if osid != self.objetoInteligente.osid:
+            logger.warning("El osid solicitado %s no coincide con el del objeto inteligente", osid)
             raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
         
         estado = ontology_service.get_datastream_states()
         if estado is None:
+            logger.error("No se han recibido datos de datastreams para el objeto con osid %s", osid)
             raise ValueError("No se han recibido datos de datastreams para este objeto.")
         
         datastreams = [

@@ -14,7 +14,7 @@ async def poblar_metadatos_objeto(metadata: PobladorPayloadDTO, service: Poblaci
         return service.poblar_metadatos_objeto(metadata.dicObj.model_dump(), listaRecursos)
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
-    @ontologia_router.post("/poblar_eca", response_model=None,status_code=201)
+@ontologia_router.post("/poblar_eca", response_model=None,status_code=201)
 async def poblar_eca(eca: EcaPayloadDTO, service: PoblacionService = Depends(get_poblacion_service)):
     """Endpoint para poblar una regla ECA en la base de conocimiento."""
     try:

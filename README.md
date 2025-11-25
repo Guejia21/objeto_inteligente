@@ -21,6 +21,11 @@ pip install -r requirements.txt
 cd app
 python3 main.py
 ```
+
+Si se desea limpiar los archivos generados en la ejecución del proyecto, se hace:
+```sh
+python clean.py
+```
 #### Broker de mensajería
 En este micro se usará una comunicación mqtt, debido a que el protocolo nativo manejado por RabbitMq no está soportado en Micropython. A pesar de eso, Rabbit ofrece un plugin mqtt, con el fin de publicar mensajes en este protocolo, para activar el plugin debe iniciarse Rabbit mq y hacer:
 
