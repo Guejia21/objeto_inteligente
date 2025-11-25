@@ -48,7 +48,17 @@ class PobladorOOS(IPoblacion):
         logger.info("Ontologia Cargada: " + str(self.onto.loaded))
 
     def poblarMetadatosObjeto(self, diccionarioObjeto:dict, listaRecursos:dict):
-        try:            
+        try:
+            # First, try to clean up any existing resources with the same ID
+            try:
+                existing_objects = self.onto.search(id_object=str(diccionarioObjeto["id"]))
+                for obj in existing_objects:
+                    destroy_entity(obj)
+                logger.info(f"Cleaned up existing object with ID {diccionarioObjeto['id']}")
+            except Exception as cleanup_error:
+                logger.warning(f"Error during cleanup: {cleanup_error}")
+            
+            # Create new instances
             self.individuoEstado = State("Estado")
             self.individuoObjecto = Object()
             self.individuoObjecto.set_name("Objeto")
@@ -113,6 +123,16 @@ class PobladorOOS(IPoblacion):
             dataStreamsIRI = item["datastream_id"]
             unidadIRI = dataStreamsIRI + "_unidad"
             entityIRI = dataStreamsIRI + "_entity_of_interest"
+            
+            # Clean up any existing resources with these IRIs
+            try:
+                for iri in [dataStreamsIRI, unidadIRI, entityIRI]:
+                    existing = self.onto.search(iri=iri)
+                    for entity in existing:
+                        destroy_entity(entity)
+                        logger.info(f"Cleaned up existing resource with IRI: {iri}")
+            except Exception as cleanup_error:
+                logger.warning(f"Error during resource cleanup: {cleanup_error}")
             featureIRI = dataStreamsIRI + "_feature_of_interest"
             
             datastreamObj = datastreams(dataStreamsIRI)

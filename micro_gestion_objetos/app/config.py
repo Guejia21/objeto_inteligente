@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     RABBIT_URL: str = "amqp://guest:guest@localhost:5672/"
     REGISTER_DATASTREAMS_QUEUE_NAME: str = 'register_datastreams_queue'
     ONTOLOGY_SERVICE_URL: str = "http://localhost:8001/ontology"    
+    DATASTREAM_SERVICE_URL: str = "http://localhost:8003/Datastreams"
     METADATA_PATH:str = str(Path(__file__).resolve().parent / "infraestructure" / "metadata" / "metadata.json")
     BROKER_HOST: str = "localhost"
     PORT: int = 8002
