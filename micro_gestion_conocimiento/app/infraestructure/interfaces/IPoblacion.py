@@ -9,4 +9,7 @@ class IPoblacion(ABC):
     @abstractmethod
     def poblarECA(self, diccionarioECA:dict)->bool:
         """Pobla las reglas ECA en la base de conocimiento."""
+    @abstractmethod
+    def editarECA(self, diccionarioECA:dict)->bool:
+        """Edita un ECA en la base del conocimiento."""
     

@@ -588,7 +588,9 @@ class ConsultasOOS(IConsultasOOS):
 
     ##    [[]]
     def listarDinamicEstado(self, eca_state):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ["eca_state", "name_eca"]
         query = """PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT DISTINCT ?eca_state ?name_eca 

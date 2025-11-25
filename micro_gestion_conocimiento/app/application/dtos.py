@@ -77,8 +77,7 @@ class EcaPayloadDTO(BaseModel):
     
     # General ECA attributes
     name_eca: str = Field(..., description="Nombre único del ECA")
-    state_eca: Literal["on", "off"] = Field(..., description="Estado del ECA (on/off)")
-    eca_state: Literal["active", "inactive"] = Field(..., description="Estado de activación")
+    state_eca: Literal["on", "off"] = Field(..., description="Estado del ECA (on/off)")     
     interest_entity_eca: str = Field(..., description="Entidad de interés")
     user_eca: Optional[str] = Field(None, description="Email del usuario creador")
     
@@ -150,3 +149,16 @@ class EcaPayloadDTO(BaseModel):
                 "type_variable_action": "string"
             }
         }
+class ECAStateListDTO(BaseModel):
+    """DTO para una lista de estados de ECAs"""
+    ecas: List[List[str]] = Field(
+        ..., 
+        description="Lista de tuplas [nombre_eca, estado]",
+        json_schema_extra={
+            "example": [
+                ["ECA1", "off"],
+                ["ECA2", "on"],
+                ["ECA3", "off"]
+            ]
+        }
+    )

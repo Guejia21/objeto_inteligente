@@ -23,11 +23,19 @@ class PoblacionService:
             return {"status": "Población ECA exitosa"}
         else:
             return {"status": "Fallo en la población ECA"}
+    def editar_eca(self, diccionarioECA:dict) -> None:
+        """Edita un ECA en la base del conocimiento."""
+        try:
+            estado = self.gestion_poblacion.editarECA(diccionarioECA)
+        except Exception as e:
+            logger.error("Error al editar el ECA: " + str(e))            
+            return {"status": "Fallo en la edición ECA"}        
+        return {"status": "Edición ECA exitosa"}
         
 class PoblacionOntologiaUsuarioService:
     """Servicio de Población para la Ontología del usuario."""
     #def __init__(self, gestion_base_conocimiento: IPoblacionPerfilUsuario):
-    #    self.gestion_base_conocimiento = gestion_base_conocimiento
+    #    self.gestion_base_conocimiento = gestion_base_conocimiento    
     def cargarOntologia(self, file_content: bytes, nombre: str, ip_coordinador: str) -> None:
         """Guarda la ontología del perfil de usuario recibida."""
         logger.info(f"Cargando ontología para el usuario: {nombre} desde IP: {ip_coordinador}")

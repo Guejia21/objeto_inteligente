@@ -7,8 +7,7 @@ from app.application.poblacion_service import PoblacionOntologiaUsuarioService, 
 ontologia_router = APIRouter(prefix="/poblacion", tags=["Poblacion de Base de conocimiento"])
 @ontologia_router.post("/poblar_metadatos_objeto", response_model=None,status_code=201)
 async def poblar_metadatos_objeto(metadata: PobladorPayloadDTO, service: PoblacionService = Depends(get_poblacion_service)):
-    """Endpoint para poblar los metadatos del objeto inteligente."""
-    #TODO si la ontología ya tiene datos del objeto inteligente, no permitir poblarlos de nuevo
+    """Endpoint para poblar los metadatos del objeto inteligente."""    
     try:
         listaRecursos = [r.model_dump() for r in metadata.dicRec]
         return service.poblar_metadatos_objeto(metadata.dicObj.model_dump(), listaRecursos)
@@ -21,11 +20,11 @@ async def poblar_eca(eca: EcaPayloadDTO, service: PoblacionService = Depends(get
         return service.poblar_eca(eca.model_dump())
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
-@ontologia_router.post("/edit_eca", response_model=None,status_code=200)
-async def edit_eca(eca: EcaPayloadDTO, service: PoblacionService = Depends(get_poblacion_service)):
-    """Endpoint para poblar una regla ECA en la base de conocimiento."""
+@ontologia_router.patch("/editar_eca", response_model=None,status_code=200)
+async def editar_eca(eca: EcaPayloadDTO, service: PoblacionService = Depends(get_poblacion_service)):
+    """Endpoint para editar una regla ECA en la base de conocimiento."""
     try:
-        return service.edit_eca(eca.model_dump())
+        return service.editar_eca(eca.model_dump())
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -3,6 +3,7 @@ from app.application.consultas_service import ConsultasService
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.deps import get_consultas_service
+from app.application.dtos import ECAStateListDTO
 
 ontologia_router = APIRouter(prefix="/consultas", tags=["Consultas de Base de conocimiento"])
 """ Endpoints para consultas sobre la ontología del objeto inteligente."""
@@ -97,23 +98,43 @@ async def consultar_service_state(service: ConsultasService = Depends(get_consul
         return service.consultarServiceState()
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
-@ontologia_router.post("/set_eca_state/")
+@ontologia_router.post("/set_eca_state")
 async def set_eca_state(valorNuevo: str, nombreECA: str, service: ConsultasService = Depends(get_consultas_service)):
     """Endpoint para actualizar el estado de una ECA."""
-    #TODO En la ontología se actualiza el estado relacionado al objeto con el nombre literal del eca
-    #pero no se actualiza otro objeto que tiene el nombre del eca+nombre_usuario
-    #revisar de que manera se debe enviar el nombre correcto para actualizar ambos si es necesario
+    # Para actualizar correctamente el estado del eca debe enviarse el nombre del eca+nombre del usuario
     try:
         return service.setEcaState(valorNuevo, nombreECA)
     except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
-@ontologia_router.get("/listarECAs", response_model=list)
+        raise HTTPException(status_code=400, detail=str(e))
+@ontologia_router.get("/listar_ecas", response_model=list)
 async def listar_ecas(service: ConsultasService = Depends(get_consultas_service)) -> list:
     """Endpoint para listar las ECAs definidas en la ontología."""
     try:
         return service.listarECAs()
     except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@ontologia_router.delete("/eliminar_eca")
+async def eliminar_eca(nombreECA: str, service: ConsultasService = Depends(get_consultas_service)):
+    """Endpoint para eliminar una ECA de la ontología."""
+    try:
+        return service.eliminarECA(nombreECA)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+@ontologia_router.get("/listar_dinamic_estado", response_model=list)
+async def listar_dinamic_estado(eca_state: str, service: ConsultasService = Depends(get_consultas_service)) -> list:
+    """Endpoint para listar las ECAs con un estado específico."""
+    try:
+        return service.listarDinamicEstado(eca_state)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+@ontologia_router.patch("/set_eca_list_state")
+async def set_eca_list_state(listaEcas: ECAStateListDTO, service: ConsultasService = Depends(get_consultas_service)):
+    """Endpoint para actualizar el estado de una lista de ECAs."""
+    try:
+        return service.setEcaListState(listaEcas.ecas)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 ontologia_usuario_router = APIRouter(prefix="/consultas_usuario", tags=["Consultas de Usuario"])
 """ Endpoints para consultas sobre la ontología del perfil de usuario."""

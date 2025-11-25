@@ -1,6 +1,6 @@
 """"Data Transfer Objects (DTOs) para la aplicación de gestión de objetos inteligentes."""
 from typing import List, Optional, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Unit(BaseModel):
