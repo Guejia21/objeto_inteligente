@@ -135,7 +135,7 @@ class ConsultasOOS(IConsultasOOS):
     def consultarTagsDatastream(self, idDatastream):
         if not self.consultarOntoActiva():
             logger.error("La ontología no está activa.")
-            return None
+            raise Exception("La ontología no está activa.")
         queryTags = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?tags
                     WHERE {
@@ -148,7 +148,9 @@ class ConsultasOOS(IConsultasOOS):
 
     ##Retorna un diccionario {label, symbol}
     def consultarUnitDatastream(self, idDatastream):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         queryUnit = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     PREFIX kos:<http://localhost/kos#>
                     SELECT ?label ?symbol 
@@ -171,7 +173,9 @@ class ConsultasOOS(IConsultasOOS):
     ###Retorna una coleccion de los Datastreams en ese Feed en un
     ###diccionario { 'min_value', 'max_value', 'datastream_id', "datastream_format",  "datastream_type" ,'tags','unit':{'label','symbol'} }
     def consultarDatastreams(self, idDatastream):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ['min_value', 'max_value', 'datastream_id', "datastream_format", "datastream_type", 'tags', 'unit']
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     PREFIX kos:<http://localhost/kos#>
@@ -201,7 +205,9 @@ class ConsultasOOS(IConsultasOOS):
 
     ##Retorna [[],[],[]]
     def consultarTagsTodosDatastreams(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         queryTags = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastream_id ?tags
                     WHERE {
@@ -212,7 +218,9 @@ class ConsultasOOS(IConsultasOOS):
         return resultadoTags
 
     def consultarUnitTodosDatastreams(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ["datastream_id", "label", "symbol"]
         queryUnit = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     PREFIX kos:<http://localhost/kos#>
@@ -230,7 +238,9 @@ class ConsultasOOS(IConsultasOOS):
         return listaDicc
 
     def consultarTodosDatastreams(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ['datastream_id', 'min_value', 'max_value', "datastream_format", "datastream_type", 'tags', 'unit']
         keysMetaDatos = ['datastream_id', 'min_value', 'max_value', "datastream_format", "datastream_type"]
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
@@ -271,7 +281,9 @@ class ConsultasOOS(IConsultasOOS):
 
     ###Retorna una lista con los id de los Datastreams
     def consultarListaIdDatastreams(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastreams
                     WHERE {
@@ -290,7 +302,9 @@ class ConsultasOOS(IConsultasOOS):
     ###Retornar la localizacion del objeto en una
     ###diccionario{lon,lat,name,domail,ele}
     def consultarLocation(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ['lon', 'lat', 'name', 'domain', 'ele']
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT ?lon ?lat ?name ?domain ?ele
@@ -308,7 +322,9 @@ class ConsultasOOS(IConsultasOOS):
     ################################################################################################################
 
     def consultarState(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ['id', 'title', 'description', 'created', 'creator', 'feed', 'private', 'status', 'updated'
             , 'version', 'website', 'service_state', "ip_object", "tags"]
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#> 
@@ -341,7 +357,9 @@ class ConsultasOOS(IConsultasOOS):
 
     ##Retorna una lista con los tags
     def consultarTagsObjeto(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         queryTags = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?tags
                     WHERE {
@@ -356,7 +374,9 @@ class ConsultasOOS(IConsultasOOS):
         return resultadoTags
 
     def consultarDataStreamFormat(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ["datastream_id", "datastream_format", 'datastream_type']
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastream_id ?datastream_format ?datastream_type
@@ -378,7 +398,9 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def consultarDataStreamFormatPorId(self, datastream_id):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT ?datastream_id ?datastream_format
                     WHERE {
@@ -391,7 +413,9 @@ class ConsultasOOS(IConsultasOOS):
         return resultado
 
     def consultarServiceIntelligent(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ["id", "service_state", "datastream"]
         query = """PREFIX oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                     SELECT DISTINCT ?id ?service_state ?datastream
@@ -415,7 +439,9 @@ class ConsultasOOS(IConsultasOOS):
         return dicc
 
     def consultarMetodosSend(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT ?entity
                 WHERE {
@@ -426,7 +452,9 @@ class ConsultasOOS(IConsultasOOS):
         return resultadoConsulta
 
     def consultarMetodosReceive(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         query = """PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT ?entity
                 WHERE {
@@ -449,7 +477,9 @@ class ConsultasOOS(IConsultasOOS):
 
     ########################################################################################################################
     def diccionarioMetaDatosObjeto(self):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         # keys = ['id','title','description','created','creator','feed','private','status','updated' ,'version','website','service_state',"ip_object", 'lon','lat','name','domain','ele',"tags"]
         keys = ['id', 'title', 'description', 'created', 'creator', 'feed', 'private', 'status', 'updated'
             , 'version', 'website', "ip_object", 'lon', 'lat', 'name', 'domain', 'ele', "tags"]
@@ -560,7 +590,9 @@ class ConsultasOOS(IConsultasOOS):
 
     ##    [[]]
     def listarDinamicEstado(self, eca_state):
-        self.consultarOntoActiva()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         keys = ["eca_state", "name_eca"]
         query = """PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
                 SELECT DISTINCT ?eca_state ?name_eca 
@@ -926,8 +958,11 @@ class ConsultasOOS(IConsultasOOS):
         uriDataProperty = uri.dp_service_state
         self.ontologia.actualizarDataProperty(uriIndividuo, uriDataProperty, valorNuevo)
 
-    def setEcaState(self, valorNuevo, nombreECA):
+    def setEcaState(self, valorNuevo:str, nombreECA:str):
         # self.ontologia = Ontologia()
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
         uri = UrisOOS()
         uriIndividuo = uri.prefijo + nombreECA
         uriDataProperty = uri.dp_state_eca
