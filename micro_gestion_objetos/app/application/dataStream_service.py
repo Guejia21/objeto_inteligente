@@ -9,8 +9,8 @@ Provee funciones para consumir los endpoints del microservicio de datastream:
 Basado en el patrón de ontology_service.py.
 """
 
-from app import config
-from app.infraestructure.logging.Logging import logger
+from config import settings
+from infraestructure.logging.Logging import logger
 import requests
 
 headers = {"Content-Type": "application/json"}
@@ -25,7 +25,7 @@ def send_service_state() -> bool:
         True si el servicio responde correctamente, False en caso contrario.
     """
     try:
-        url = config.urlDataStreamService + "/health"
+        url = settings.DATASTREAM_SERVICE_URL + "/health"
         request = requests.get(url, headers=headers, timeout=5)
         if request.status_code == 200:
             logger.info("Microservicio de datastream disponible.")
@@ -54,7 +54,7 @@ def send_state(osid: str) -> dict:
         raise ValueError("osid es requerido")
     
     try:
-        url = config.urlDataStreamService + "/SendState"
+        url = settings.DATASTREAM_SERVICE_URL + "/SendState"
         params = {"osid": osid}
         request = requests.get(url, params=params, headers=headers, timeout=5)
         
@@ -92,7 +92,7 @@ def send_data(osid: str, variable_estado: str, tipove: str =1 ) -> dict:
         raise ValueError("osid y variable_estado son requeridos")
     
     try:
-        url = config.urlDataStreamService + "/SendData"
+        url = settings.DATASTREAM_SERVICE_URL + "/SendData"
         params = {
             "osid": osid,
             "variableEstado": variable_estado,

@@ -5,7 +5,7 @@ import asyncio
 from utils import util
 import json
 from config import Config
-
+from main import publicacion_task
 class BrokerInterface:
     async def publicar(self, topico, mensaje):
         raise NotImplementedError("Debe implementar 'publicar'")
