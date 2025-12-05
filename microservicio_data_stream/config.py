@@ -29,11 +29,11 @@ class Config:
     WIFI_PASS = 'ejemplo'
     # Configuración del broker MQTT    
     BROKER_HOST = "127.0.0.1"
-    MQTT_PORT = 1884
+    MQTT_PORT = 1883
     REGISTER_DATASTREAMS_QUEUE_NAME = 'register_datastreams_queue'    
     # Configuración ThingsBoard
     THINGSBOARD_HOST: str = "localhost"
-    THINGSBOARD_PORT: int = 1883
+    THINGSBOARD_PORT: int = 1884
     THINGSBOARD_ACCESS_TOKEN: str = "YOUR_THINGSBOARD_ACCESS_TOKEN"
     THINGSBOARD_TELEMETRY_TOPIC: str = "v1/devices/me/telemetry"
     TELEMETRY_PUBLISH_INTERVAL: int = 5  # Segundos

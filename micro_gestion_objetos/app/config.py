@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DATASTREAM_SERVICE_URL: str = "http://localhost:8003/Datastreams"
     METADATA_PATH:str = str(Path(__file__).resolve().parent / "infraestructure" / "metadata" / "metadata.json")
     BROKER_HOST: str = "localhost"
-    BROKER_PORT: int = 1884
+    BROKER_PORT: int = 1883
     THINGSBOARD_HOST: str = "localhost"
     THINGSBOARD_USER: str = "tenant@thingsboard.org"
     THINGSBOARD_PASSWORD: str = "tenant"
