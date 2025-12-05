@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-
-from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 
@@ -184,7 +182,7 @@ class IConsultasOOS(ABC):
         """Actualiza la propiedad service_state del objeto."""
 
     @abstractmethod
-    def setEcaState(self, valorNuevo: Any, nombreECA: str) -> None:
+    def setEcaState(self, valorNuevo: str, nombreECA: str) -> None:
         """Actualiza el estado de una ECA."""
 
     @abstractmethod

@@ -1,13 +1,13 @@
 
-from app import config
-from app.infraestructure.logging.Logging import  logger
+from config import settings
+from infraestructure.logging.Logging import  logger
 import requests
 
 """Servicio para interactuar con la ontología del objeto inteligente."""
 headers = {"Content-Type": "application/json"}
 def is_active() -> bool:
     """Verifica si la ontología ha sido creada."""
-    url = config.urlOntologyService + "/consultas/consultar_active"
+    url = settings.ONTOLOGY_SERVICE_URL + "/consultas/consultar_active"
     request = requests.get(url, headers=headers)
     if request.status_code == 200 and request.content == b'true':
         return True
@@ -16,7 +16,7 @@ def is_active() -> bool:
         return False
 def get_id() -> str:
     """Obtiene el ID del objeto inteligente desde la ontología."""
-    url = config.urlOntologyService + "/consultas/consultar_id"
+    url = settings.ONTOLOGY_SERVICE_URL + "/consultas/consultar_id"
     request = requests.get(url, headers=headers)
     if request.status_code == 200:
         try:
@@ -37,7 +37,7 @@ def get_id() -> str:
         raise ValueError("Error al consultar el ID del objeto inteligente.")
 def get_title() -> str:
     """Obtiene el título del objeto inteligente desde la ontología."""
-    url = config.urlOntologyService + "/consultas/consultar_title"
+    url = settings.ONTOLOGY_SERVICE_URL + "/consultas/consultar_title"
     request = requests.get(url, headers=headers)
     if request.status_code == 200:
         try:
@@ -61,7 +61,7 @@ def get_title() -> str:
         raise ValueError("Error al consultar el título del objeto inteligente.")
 def poblate_ontology(data: dict) -> bool:
     """Puebla la ontología con los datos proporcionados."""
-    url = config.urlOntologyService + "/poblacion/poblar_metadatos_objeto"
+    url = settings.ONTOLOGY_SERVICE_URL + "/poblacion/poblar_metadatos_objeto"
     # Sanitizar payload para evitar enviar valores que Pydantic no pueda parsear
     try:
         from copy import deepcopy

@@ -1,15 +1,12 @@
-#TODO Preguntar como se maneja la ontología del usuario
 import os
-import os.path
-
 import rdflib
 from rdflib import *
 from rdflib import Literal
 from rdflib.namespace import RDF
 import time
-import config
+from config import settings
 from rdflib import URIRef
-import logging
+
 
 class OntologiaPU:
     """Gestor de operaciones sobre la ontología de PerfilUsuario.
@@ -21,27 +18,25 @@ class OntologiaPU:
     Args:
         path (str): Ruta al archivo OWL/RDF de la ontología.
     """    
-    def __init__(self, path):
-        logging.basicConfig()
-        try:           
-            os.stat(config.pathOWL)
+    def __init__(self, path):        
+        if os.path.exists(path):
             self.path = path
             self.g = rdflib.Graph()
-            if os.path.exists(path):
-                self.g.parse(path)
-        except:
-            print( "Desde Ontologia. El path es incorrecto")
+            self.g.parse(path)
+        else:
+            raise FileNotFoundError(f"La ontología de usuario no existe en la ruta especificada: {path}")
         
 ###################### Grafo #####################################################   
 
     def crearNuevaOntologia(self, path):
         try:           
-            os.stat(config.pathOWL)
+            os.stat(settings.PATH_OWL)
         except:
-            os.mkdir(config.pathOWL, 0o777)
+            os.mkdir(settings.PATH_OWL, 0o777)
         self.path = path
         if not os.path.exists(path):
-            self.g.parse(config.ontologiaPU)
+            #TODO en el código original no existe el path de ontologiaPU
+            self.g.parse(settings.ONTOLOGIA_PU)
             self.g.serialize(destination = path, format='xml')
         
         

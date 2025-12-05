@@ -1,5 +1,3 @@
-import os
-import sys
 
 class ModuleExecutor:
     """Ejecuta módulos Python para leer/escribir datastreams"""

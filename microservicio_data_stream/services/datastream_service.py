@@ -1,5 +1,5 @@
-import ujson as json
-from services.module_executor import ModuleExecutor
+import json as json
+from utils.module_executor import ModuleExecutor
 from utils.response import ResponseHelper
 from config import Config
 
@@ -18,6 +18,8 @@ class DatastreamService:
                 metadata = json.load(f)
                 Config.OSID = metadata['object']['id']
                 Config.TITLE = metadata['object'].get('title', 'Unknown')
+                Config.OBJECT_IP = metadata['object'].get('ip_object', 'Unknown')
+                Config.THINGSBOARD_TOKEN = metadata['object'].get('thingsboard_token', '')
                 self.datastreams = metadata.get('datastreams', [])
                 print(f"Metadata cargada: OSID={Config.OSID}, Datastreams={len(self.datastreams)}")
         except Exception as e:
@@ -110,9 +112,7 @@ class DatastreamService:
                 Config.CODES['idIncorrecto']
             )
         
-        try:
-            print("Enviando SendState")
-            
+        try:                        
             datastreams_state = []
             
             # Obtener valor de cada datastream
@@ -133,9 +133,7 @@ class DatastreamService:
                     "datastream_type": ds_type,
                     "value": value
                 })
-            
-            print(f"SendState exitoso: {len(datastreams_state)} datastreams")
-            
+                        
             return self.response.send_state_response(osid, datastreams_state)
             
         except Exception as e:
@@ -211,4 +209,3 @@ class DatastreamService:
                 Config.CODES['errorDatastream'],
                 str(e)
             )        
-        

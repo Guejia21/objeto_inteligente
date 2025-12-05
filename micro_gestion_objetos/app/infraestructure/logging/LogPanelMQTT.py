@@ -1,10 +1,10 @@
 
-from app.infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT 
+from infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT 
 import paho.mqtt.client as mqtt
 from paho.mqtt.client import CallbackAPIVersion
 import json
 import asyncio
-from app import config
+from config import settings
 #Implementación concreta de la interfaz ILogPanel que publica logs a través de MQTT
 
 
@@ -18,7 +18,7 @@ class LogPanelMQTT(ILogPanelMQTT):
                 callback_api_version=CallbackAPIVersion.VERSION1
             )
             try:
-                cls._instance.client.connect(config.broker, 1883, 60)
+                cls._instance.client.connect(settings.BROKER_HOST, settings.BROKER_PORT, 60)
                 cls._instance.client.loop_start()
             except Exception as e:
                 print(f"Error al conectar con el broker MQTT: {e}")

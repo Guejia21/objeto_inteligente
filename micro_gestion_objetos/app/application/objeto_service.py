@@ -1,11 +1,14 @@
 
-from app.infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT
-from app.domain.ObjetoInteligente import ObjetoInteligente
-from app.infraestructure.logging.Logging import logger
-from app.application.dtos import ObjectData
-from app.infraestructure.IRepository import IRepository
-from app.application import ontology_service
-from app.application import dataStream_service
+import json
+from infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT
+from domain.ObjetoInteligente import ObjetoInteligente
+from infraestructure.logging.Logging import logger
+from application.dtos import ObjectData
+from config import settings
+from infraestructure.IRepository import IRepository
+from application import ontology_service
+from application import dataStream_service
+from infraestructure.things_board import tb_client
 import asyncio
 
 
@@ -68,7 +71,16 @@ class ObjetoService:
         #Actualizar los datos del objeto
         self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)        
         self.persistence.save_object_metadata(json_data_object)
-        #TODO: Iniciar la persistencia de los datastreams
+        #Después de instanciar la ontología y metadatos, se deben enviar los datastreams para que sean registrados en el micro de recursos y datastreams
+        #Se crea el dispositivo en thingsboard y se obtiene su token
+        tb_client_token = tb_client.create_device_with_token(data.feed.id, data.feed.title)
+        if tb_client_token:
+            logger.info("Dispositivo creado en ThingsBoard con éxito.")
+            #Agregar el token de thingsboard al JSON del objeto
+            json_data_object['thingsboard_token'] = tb_client_token
+        else:
+            logger.error("Error al crear el dispositivo en ThingsBoard.")                    
+        await self.log_panel.Publicar(settings.REGISTER_DATASTREAMS_QUEUE_NAME, json.dumps(json_data_object))    
         logger.info("Objeto inteligente iniciado con éxito.")
         return {"message": "Objeto inteligente iniciado con éxito"}
 
@@ -80,7 +92,7 @@ class ObjetoService:
         respuesta para mantener la forma esperada por la API.
         """
         if osid != self.objetoInteligente.osid:
-            logger.warning("El osid solicitado %s no coincide con el del objeto inteligente %s", osid, self.objetoInteligente.osid)
+            logger.warning("El osid solicitado %s no coincide con el del objeto inteligente", osid)
             raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
 
         try:

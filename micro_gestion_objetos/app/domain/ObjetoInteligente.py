@@ -1,8 +1,4 @@
-import requests
-
-from app import config
-
-
+"""Módulo que define la clase ObjetoInteligente y sus métodos asociados."""
 class ObjetoInteligente:
     _instance = None  # Variable de clase para almacenar la única instancia
     # Implementación del patrón Singleton
@@ -35,7 +31,7 @@ class ObjetoInteligente:
         Devuelve:
             {"dicObj": {...}, "dicRec": [...]} con tipos y campos normalizados.
         """
-        from app.infraestructure.logging.Logging import logger
+        from infraestructure.logging.Logging import logger
 
         # Aceptar que nos pasen el objeto entero o solo el feed
         payload = jsonOriginal or {}

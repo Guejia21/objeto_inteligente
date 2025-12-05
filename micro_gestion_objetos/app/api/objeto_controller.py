@@ -1,9 +1,9 @@
 
 from fastapi import APIRouter, Depends, Query,HTTPException
 
-from app.application.objeto_service import ObjetoService
-from app.deps import get_objeto_service
-from app.application.dtos import ObjectData
+from application.objeto_service import ObjetoService
+from deps import get_objeto_service
+from application.dtos import ObjectData
 
 
 router = APIRouter(prefix="/objeto", tags=["Gestión de objeto inteligente"])

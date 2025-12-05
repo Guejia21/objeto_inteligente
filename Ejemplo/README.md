@@ -1,0 +1,1 @@
+En esta carpeta se encontrará el json que debe ser enviado al micro de objetos a StartObject, después, la carpeta de executables debe ser pegada en el micro de recursos y datastreams en "storage"

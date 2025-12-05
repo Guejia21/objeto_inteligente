@@ -1,11 +1,11 @@
 """Este modulo define las clases de la ontología OOS representandolas como instancias de objetos en Python."""
-from app.infraestructure.util.UrisOOS import *
+from infraestructure.util.UrisOOS import *
 from owlready2 import *
-from app import config
+from config import settings
 
-onto_path.append(config.pathOWL) # Añade la ruta de la ontología al path de OWLReady2
+onto_path.append(settings.PATH_OWL) # Añade la ruta de la ontología al path de OWLReady2
 #Se carga la ontología para que las clases sepan cual es el esquema OWL que deben seguir
-onto = get_ontology("file://" + config.ontologia).load()
+onto = get_ontology("file://" + settings.ONTOLOGIA).load()
 
 
 class Unit(Thing):

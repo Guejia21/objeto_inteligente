@@ -1,6 +1,6 @@
 
 import rdflib
-import app.config as config
+from config import settings
 import os, threading
 from rdflib import *
 from rdflib.namespace import RDF
@@ -15,11 +15,11 @@ class Ontologia:
     def __init__(self, ontologiaIns = None, ontologiaOriginal = None):
         self.lock = threading.Lock()
         if ontologiaOriginal == None:
-            self.ontologia = config.ontologia  ##Path de la ontologia sin instanciar
+            self.ontologia = settings.ONTOLOGIA  ##Path de la ontologia sin instanciar
         else:
             self.ontologia = ontologiaOriginal  ##Path de la ontologia sin instanciar
         if ontologiaIns == None:
-            self.ontologiaInst = config.ontologiaInstanciada  ##Path de la ontologia instanciada
+            self.ontologiaInst = settings.ONTOLOGIA_INSTANCIADA  ##Path de la ontologia instanciada
         else:
             self.ontologiaInst = ontologiaIns  ##Path de la ontologia instanciada
 

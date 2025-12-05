@@ -1,5 +1,7 @@
-from app.infraestructure.logging.Logging import logger
-from app.infraestructure.interfaces.IConsultas import IConsultasOOS
+from typing import Any, List
+from infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
+from infraestructure.logging.Logging import logger
+from infraestructure.interfaces.IConsultas import IConsultasOOS
 
 class ConsultasService:
     """Servicio de Consultas para la Ontología OOS."""
@@ -122,3 +124,52 @@ class ConsultasService:
     def consultarMetodosExternal(self):
         """Retorna instancias de métodos External en la ontología (consulta de instancias)."""
         return self.gestion_base_conocimiento.consultarMetodosExternal()
+    
+    def setEcaState(self, valorNuevo:str, nombreECA:str):
+        """Actualiza el estado de una ECA."""
+        #El nuevo valor solo puede ser 'on' o 'off'
+        if valorNuevo not in ['on', 'off']:
+            logger.error(f"Valor inválido para el estado de ECA: {valorNuevo}. Debe ser 'on' o 'off'.")
+            return {"error": "Valor inválido. Use 'on' o 'off'."}
+        logger.info(f"Actualizando estado de ECA '{nombreECA}' a '{valorNuevo}'")
+        self.gestion_base_conocimiento.setEcaState(valorNuevo, nombreECA)
+        logger.info(f"Estado de ECA '{nombreECA}' actualizado correctamente.")
+        return {"status": "ECA actualizada correctamente"}
+    def listarECAs(self):
+        """Retorna la lista de ECAs definidas en la ontología."""
+        return self.gestion_base_conocimiento.listarEcas()
+    def eliminarECA(self, nombreECA:str):        
+        """
+        Elimina una ECA de la ontología.
+        
+        :param self: Instancia del servicio de consultas.
+        :param nombreECA: Nombre de la ECA a eliminar junto con el nombre del usuario (Ejemplo: ecausuario).
+        :type nombreECA: str
+        """
+        self.gestion_base_conocimiento.eliminarEca(nombreECA)
+        logger.info(f"ECA '{nombreECA}' eliminada correctamente.")
+        return {"status": "ECA eliminada correctamente"}
+    def listarDinamicEstado(self, eca_state:str):
+        """
+        Lista las ECAs con un estado específico.
+        
+        :param self: Instancia del servicio de consultas.
+        :param eca_state: Estado específico de las ECAs a listar(on/off).
+        :type eca_state: str
+        """
+        return self.gestion_base_conocimiento.listarDinamicEstado(eca_state)
+    def setEcaListState(self, listaEcas: List[List[Any]]):
+        """
+        Actualiza el estado de una lista de ECAs.
+        
+        :param self: Instancia del servicio de consultas.
+        :param listaEcas: Lista de nombres de ECAs a actualizar, su formato es una lista tipo ["name_eca","new_state"].
+        :type listaEcas: List[List[Any]]
+        """
+        self.gestion_base_conocimiento.setEcaListState(listaEcas)
+        logger.info(f"{len(listaEcas)} ECAs actualizadas correctamente.")
+        return {"status": "ECAs actualizadas correctamente"}
+class ConsultasOntologiaUsuarioService:
+    """Servicio de Consultas para la Ontología del usuario."""
+    def __init__(self, gestion_base_conocimiento: IConsultasPerfilUsuario):
+        self.gestion_base_conocimiento = gestion_base_conocimiento

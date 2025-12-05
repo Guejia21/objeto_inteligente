@@ -1,6 +1,6 @@
-from microdot import Request, Response
+from lib.microdot.microdot import Request, Response
 from services.datastream_service import DatastreamService
-import ujson as json
+import json as json
 # Instancia del servicio
 datastream_service = DatastreamService()
 
@@ -22,9 +22,9 @@ def register_routes(app):
                     status_code=400,
                     headers={'Content-Type': 'application/json'}
                 )
-            
+            print("Enviando SendState")
             result = datastream_service.send_state(osid)
-            
+            print(f"SendState exitoso")
             return Response(
                 result,
                 headers={

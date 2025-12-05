@@ -1,48 +1,50 @@
 """Adaptador de Población de la Ontología OOS
 Se extiende de la interfaz IPoblacion permitiendo poblar los metadatos del objeto inteligente en la ontología instanciada ubicada en /OWL/ontologiainstanciada.owl."""
-import app.config as config
+from config import settings
 import os, shutil
-from app.infraestructure.interfaces.IPoblacion import IPoblacion
+from infraestructure.interfaces.IPoblacion import IPoblacion
+from infraestructure.acceso_ontologia.Ontologia import Ontologia
 from owlready2 import *
-from app.infraestructure.util.ClasesOOS import *
-from app.infraestructure.logging.Logging import logger
+from infraestructure.util.ClasesOOS import *
+from infraestructure.logging.Logging import logger
+from rdflib import Literal
 
-
-onto_path = [config.pathOWL] #("app/infraestucture/OWL/")
-logger.info("Ruta Ontologias: " + config.pathOWL)
+onto_path = [settings.PATH_OWL] #("app/infraestucture/OWL/")
+logger.info("Ruta Ontologias: " + settings.PATH_OWL)
 
 
 class PobladorOOS(IPoblacion):
+    _instance = None
+    _initialized = False
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(PobladorOOS, cls).__new__(cls)
+        return cls._instance
 
     def __init__(self):
+        # Solo inicializar una vez
+        if PobladorOOS._initialized:
+            return        
+        PobladorOOS._initialized = True
         self.individuoObjecto = None
         self.individuoEstado = None
         self.location = None
-        
-        logger.info("Inicio Poblar Objeto Semantico con OWLReady2")
-        
-        # Ensure OWL directory exists
-        if not os.path.exists(config.pathOWL):
-            os.makedirs(config.pathOWL, mode=0o777)
-            
-        # Validate base ontology exists
-        if not os.path.exists(config.ontologia):
-            raise FileNotFoundError(f"Base ontology file not found: {config.ontologia}")
-            
-        try:
-            # Load the ontology first to validate it
-            self.onto = get_ontology("file://" + config.ontologia).load(reload_if_newer=True)
-            if not self.onto.loaded:
-                raise Exception("Failed to load base ontology")
-                
-            # Copy base ontology to instance ontology
-            shutil.copyfile(config.ontologia, config.ontologiaInstanciada)
-            logger.info("Base ontology copied successfully to instance ontology")
-        except Exception as e:
-            logger.error("Failed during ontology initialization")
-            logger.error(e)
-            raise
+        self.onto = get_ontology("file://" + settings.ONTOLOGIA).load(reload_if_newer=True)
+        self.uris = UrisOOS()
+        self.ontologia = Ontologia()
 
+        logger.info("Inicio Poblar Objeto Semantico con OWLReady2")        
+        if not os.path.exists(settings.PATH_OWL):
+            os.makedirs(settings.PATH_OWL, mode=0o777)    
+        if not os.path.exists(settings.ONTOLOGIA_INSTANCIADA):
+            try:
+                # Copio la ontologia base a la ontologia instanciada
+                shutil.copyfile(settings.ONTOLOGIA, settings.ONTOLOGIA_INSTANCIADA)
+            except Exception as e:
+                logger.error("Fallo al copiar ontologia base a ontologia instanciada")
+                logger.error(e)
+        self.ontoInstanciada = get_ontology("file://" + settings.ONTOLOGIA_INSTANCIADA).load(reload_if_newer=True)
         logger.info("Ontologia Cargada: " + str(self.onto.loaded))
 
     def poblarMetadatosObjeto(self, diccionarioObjeto:dict, listaRecursos:dict):
@@ -63,12 +65,15 @@ class PobladorOOS(IPoblacion):
             self.location = location()
             self.location.set_name("Localizacion")                    
 
-            self.poblarObjecto(diccionarioObjeto)
-            self.poblarEstado(diccionarioObjeto)
-            self.poblarLocation(diccionarioObjeto)
-            self.poblarDataStreams(listaRecursos)
+            self.__poblarObjecto(diccionarioObjeto)
+
+            self.__poblarEstado(diccionarioObjeto)
+
+            self.__poblarLocation(diccionarioObjeto)
+
+            self.__poblarDataStreams(listaRecursos)
             # Las clases se utilizan anteriormente están asociadas a la ontología, por lo que al guardar la ontología se guardan los individuos creados
-            self.onto.save(file=config.ontologiaInstanciada,format="rdfxml")
+            self.onto.save(file=settings.ONTOLOGIA_INSTANCIADA,format="rdfxml")
             logger.info("Población de metadatos exitosa")
             return True
         except Exception as e:
@@ -79,17 +84,17 @@ class PobladorOOS(IPoblacion):
                 destroy_entity(self.individuoObjecto)
             if hasattr(self.location, 'namespace') and self.location.namespace is not None:
                 destroy_entity(self.location)
-            self.onto = get_ontology("file://" + config.ontologia).load(reload_if_newer=True)
+            self.onto = get_ontology("file://" + settings.ONTOLOGIA).load(reload_if_newer=True)
             logger.info("Se limpiaron las entidades según fue necesario")
             logger.error(e)
             return False
 
-    def poblarObjecto(self, diccionarioObjeto):
+    def __poblarObjecto(self, diccionarioObjeto):
         self.individuoObjecto.id_object = [diccionarioObjeto["id"]]
         if ("ip_object" in diccionarioObjeto):
             self.individuoObjecto.ip_object = [diccionarioObjeto["ip_object"]]        
 
-    def poblarEstado(self, diccionarioObjeto):
+    def __poblarEstado(self, diccionarioObjeto):
         self.individuoEstado.version = [diccionarioObjeto["version"]]
         self.individuoEstado.creator = [diccionarioObjeto["creator"]]
         self.individuoEstado.status = [diccionarioObjeto["status"]]
@@ -104,14 +109,14 @@ class PobladorOOS(IPoblacion):
         self.individuoEstado.feed = [diccionarioObjeto["feed"]]
         self.individuoEstado.created = [diccionarioObjeto["created"]]        
 
-    def poblarLocation(self, ds):
+    def __poblarLocation(self, ds):
         self.location.lon = [ds["lon"]]
         self.location.lat = [ds["lat"]]
         self.location.name_location = [ds["name"]]
         self.location.domain = [ds["domain"]]
         self.location.ele = [ds["ele"]]
 
-    def poblarDataStreams(self, listaRecursos):        
+    def __poblarDataStreams(self, listaRecursos):                
         ds = listaRecursos        
         logger.info("Poblando DataStreams...")
         for item in ds:            
@@ -153,6 +158,253 @@ class PobladorOOS(IPoblacion):
             datastreamObj.isMeasured.append(unidadObj)
             entityObj.isDefinedBy.append(featureObj)            
         logger.info("DataStreams poblados correctamente.")
+
+    def poblarECA(self, diccionarioECA:dict):  
+        """
+        Pobla una regla ECA en la ontología instanciada.
+        
+        :param self: Instancia de la clase PobladorOOS.
+        :param diccionarioECA: Diccionario con los datos de la regla ECA a poblar.
+        :type diccionarioECA: dict
+        """      
+        logger.info("Poblando regla ECA...")
+        user_eca = "default"        
+        ##Si está usando el perfil de usuario
+        if "user_eca" in diccionarioECA:
+            user_eca = diccionarioECA["user_eca"]
+
+        ##Reemplaza los espacios para no tener problemas en la ontología
+        nombreEca = diccionarioECA['name_eca'].replace(" ", "_") + user_eca
+
+        ##Creacion de los individuos
+        individuoECA = self.uris.prefijo + nombreEca
+        individuoEvento = self.uris.prefijo + nombreEca + "evento"
+        individuoAccion = self.uris.prefijo + nombreEca + "accion"
+        individuoCondicion = self.uris.prefijo + nombreEca + "condicion"
+        listaIndividuos = []
+        listaIndividuos.append([individuoECA, self.uris.clase_dinamic])
+        listaIndividuos.append([individuoEvento, self.uris.clase_event])
+        listaIndividuos.append([individuoAccion, self.uris.clase_Action])
+        listaIndividuos.append([individuoCondicion, self.uris.clase_condition])
+        self.ontologia.insertarListaIndividuos(listaIndividuos)
+
+        dinamic = self.__poblarDinamic(diccionarioECA, individuoECA)
+        event = self.__poblarEvent(diccionarioECA, individuoEvento)
+        accion = self.__poblarAction(diccionarioECA, individuoAccion)
+        condicion = self.__poblarCondition(diccionarioECA, individuoCondicion)
+        self.ontologia.insertarListaDataProperty(dinamic + event + accion + condicion)
+
+        listaObjectProperty = []
+        listaObjectProperty.append([individuoECA, self.uris.op_starts_with, individuoEvento])
+        listaObjectProperty.append([individuoEvento, self.uris.op_check, individuoCondicion])
+        listaObjectProperty.append([individuoCondicion, self.uris.op_is_related_with, individuoAccion])
+        self.ontologia.insertarListaObjectProperty(listaObjectProperty)
+        logger.info("Regla ECA poblada correctamente.")
+        return True
+
+    def __poblarDinamic(self, diccionarioECA, individuoECA):
+        dinamic = []
+        # dinamic.append([individuoECA, self.uris.dp_, Literal(diccionarioECA[""])])
+        nombreEca = diccionarioECA['name_eca'].replace(" ", "_")
+        if "interest_entity_eca" in diccionarioECA:
+            dinamic.append(
+                [individuoECA, self.uris.dp_interest_entity_eca, Literal(diccionarioECA["interest_entity_eca"])])
+        dinamic.append([individuoECA, self.uris.dp_name_eca, Literal(nombreEca)])
+        dinamic.append([individuoECA, self.uris.dp_state_eca, Literal(diccionarioECA["state_eca"])])
+        user_eca = "default"
+        if "user_eca" in diccionarioECA:
+            user_eca = diccionarioECA["user_eca"]
+        dinamic.append([individuoECA, self.uris.dp_user_eca, Literal(user_eca)])
+        return dinamic
+
+    ##        self.ontologia.insertarListaDataProperty(dinamic)
+
+    def __poblarEvent(self, diccionarioECA, individuoEvento):
+        event = []
+        # dinamic.append([individuoEvento, self.uris.dp_, Literal(diccionarioECA[""])])
+        event.append([individuoEvento, self.uris.dp_id_event_object, Literal(diccionarioECA["id_event_object"])])
+        event.append([individuoEvento, self.uris.dp_ip_event_object, Literal(diccionarioECA["ip_event_object"])])
+        event.append([individuoEvento, self.uris.dp_id_event_resource, Literal(diccionarioECA["id_event_resource"])])
+        event.append(
+            [individuoEvento, self.uris.dp_name_event_resource, Literal(diccionarioECA["name_event_resource"])])
+        event.append([individuoEvento, self.uris.dp_name_event_object, Literal(diccionarioECA["name_event_object"])])
+        return event
+
+    def __poblarAction(self, diccionarioECA, individuoAccion):
+        action = []
+        action.append([individuoAccion, self.uris.dp_comparator_action, Literal(diccionarioECA["comparator_action"])])
+        action.append([individuoAccion, self.uris.dp_id_action_resource, Literal(diccionarioECA["id_action_resource"])])
+        action.append([individuoAccion, self.uris.dp_id_action_object, Literal(diccionarioECA["id_action_object"])])
+        action.append([individuoAccion, self.uris.dp_ip_action_object, Literal(diccionarioECA["ip_action_object"])])
+        action.append([individuoAccion, self.uris.dp_meaning_action, Literal(diccionarioECA["meaning_action"])])
+        action.append([individuoAccion, self.uris.dp_name_action_object, Literal(diccionarioECA["name_action_object"])])
+        action.append(
+            [individuoAccion, self.uris.dp_name_action_resource, Literal(diccionarioECA["name_action_resource"])])
+        action.append(
+            [individuoAccion, self.uris.dp_type_variable_action, Literal(diccionarioECA["type_variable_action"])])
+        action.append([individuoAccion, self.uris.dp_unit_action, Literal(diccionarioECA["unit_action"])])
+        action.append([individuoAccion, self.uris.dp_variable_action, Literal(diccionarioECA["variable_action"])])
+        return action
+
+    def __poblarCondition(self, diccionarioECA, individuoCondicion):
+        condition = []
+        condition.append(
+            [individuoCondicion, self.uris.dp_comparator_condition, Literal(diccionarioECA["comparator_condition"])])
+        condition.append(
+            [individuoCondicion, self.uris.dp_meaning_condition, Literal(diccionarioECA["meaning_condition"])])
+        condition.append([individuoCondicion, self.uris.dp_type_variable_condition,
+                          Literal(diccionarioECA["type_variable_condition"])])
+        condition.append([individuoCondicion, self.uris.dp_unit_condition, Literal(diccionarioECA["unit_condition"])])
+        condition.append(
+            [individuoCondicion, self.uris.dp_variable_condition, Literal(diccionarioECA["variable_condition"])])
+        return condition
+    
+    # ...existing code...
+    def editarECA(self, diccionarioECA)->bool:
+        """
+        Edita una regla ECA existente en la ontología instanciada.
+        
+        :param self: Instancia de la clase PobladorOOS.
+        :param diccionarioECA: Diccionario con los datos de la regla ECA a editar.
+        """
+        try:
+            user_eca = "default"
+            if "user_eca" in diccionarioECA:
+                user_eca = diccionarioECA["user_eca"]
+
+            nombreEca = diccionarioECA['name_eca'].replace(" ", "_") + user_eca
+            logger.info(f"Nombre ECA a editar: {nombreEca}")
+            
+            # Buscar individuos
+            iri_eca = self.uris.prefijo + nombreEca
+            iri_evento = self.uris.prefijo + nombreEca + "evento"
+            iri_accion = self.uris.prefijo + nombreEca + "accion"
+            iri_condicion = self.uris.prefijo + nombreEca + "condicion"
+                        
+            
+            individuoECA_list = self.ontoInstanciada.search(iri=iri_eca)
+            individuoEvento_list = self.ontoInstanciada.search(iri=iri_evento)
+            individuoAccion_list = self.ontoInstanciada.search(iri=iri_accion)
+            individuoCondicion_list = self.ontoInstanciada.search(iri=iri_condicion)
+            
+            # Verificar que existan los individuos
+            if not individuoECA_list:
+                logger.error(f"No se encontró la regla ECA con IRI: {iri_eca}")
+                logger.info("Reglas ECA disponibles en la ontología:")
+                # Listar todas las instancias de dinamic para debugging
+                dinamics = self.ontoInstanciada.search(type=self.ontoInstanciada.search_one(iri=self.uris.clase_dinamic))
+                for d in dinamics:
+                    logger.info(f"  - {d.iri} (name: {d.name_eca if hasattr(d, 'name_eca') else 'N/A'})")
+                return False
+            
+            if not individuoEvento_list:
+                logger.error(f"No se encontró el evento con IRI: {iri_evento}")
+                return False
+                
+            if not individuoAccion_list:
+                logger.error(f"No se encontró la acción con IRI: {iri_accion}")
+                return False
+                
+            if not individuoCondicion_list:
+                logger.error(f"No se encontró la condición con IRI: {iri_condicion}")
+                return False
+            
+            # Obtener los individuos
+            individuoECA = individuoECA_list[0]
+            individuoEvento = individuoEvento_list[0]
+            individuoAccion = individuoAccion_list[0]
+            individuoCondicion = individuoCondicion_list[0]
+            
+            logger.info("Todos los individuos encontrados. Procediendo a editar...")
+            
+            # Editar cada componente
+            self.__editarDinamic(diccionarioECA, individuoECA)
+            self.__editarEvent(diccionarioECA, individuoEvento)
+            self.__editarAction(diccionarioECA, individuoAccion)
+            self.__editarCondition(diccionarioECA, individuoCondicion)
+            
+            # Guardar cambios
+            self.ontoInstanciada.save(file=config.ontologiaInstanciada, format="rdfxml")
+            logger.info(f"Regla ECA '{diccionarioECA['name_eca']}' editada correctamente.")
+            return True
+            
+        except IndexError as e:
+            logger.error(f"Error: No se encontró uno o más individuos de la regla ECA '{nombreEca}'")
+            logger.error(f"Detalles: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Error inesperado al editar el ECA: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return False
+
+    def __editarDinamic(self, diccionarioECA, individuoECA):
+        dinamic = []
+        # dinamic.append([individuoECA, self.uris.dp_, Literal(diccionarioECA[""])])        
+        if "interest_entity_eca" in diccionarioECA:
+            individuoECA.interest_entity_eca = [diccionarioECA["interest_entity_eca"]]
+        if "name_eca" in diccionarioECA:
+            individuoECA.name_eca = [diccionarioECA["name_eca"]]
+        if "state_eca" in diccionarioECA:
+            individuoECA.state_eca = [diccionarioECA["state_eca"]]
+        user_eca = "default"
+        if "user_eca" in diccionarioECA:
+            user_eca = diccionarioECA["user_eca"]
+        individuoECA.user_eca = [user_eca]
+
+    ##        self.ontologia.insertarListaDataProperty(dinamic)
+
+    def __editarEvent(self, diccionarioECA, individuoEvento):
+        event = []
+        if "id_event_object" in diccionarioECA:
+            individuoEvento.id_event_object = [diccionarioECA["id_event_object"]]
+        if "ip_event_object" in diccionarioECA:
+            individuoEvento.ip_event_object = [diccionarioECA["ip_event_object"]]
+        if "id_event_resource" in diccionarioECA:
+            individuoEvento.id_event_resource = [diccionarioECA["id_event_resource"]]
+        if "name_event_resource" in diccionarioECA:
+            individuoEvento.name_event_resource = [diccionarioECA["name_event_resource"]]
+        if "name_event_object" in diccionarioECA:
+            individuoEvento.name_event_object = [diccionarioECA["name_event_object"]]
+
+    def __editarAction(self, diccionarioECA, individuoAccion):
+        if "comparator_action" in diccionarioECA:
+            individuoAccion.comparator_action = [diccionarioECA["comparator_action"]]
+        if "id_action_resource" in diccionarioECA:
+            individuoAccion.id_action_resource = [diccionarioECA["id_action_resource"]]
+        if "id_action_object" in diccionarioECA:
+            individuoAccion.id_action_object = [diccionarioECA["id_action_object"]]
+        if "ip_action_object" in diccionarioECA:
+            individuoAccion.ip_action_object = [diccionarioECA["ip_action_object"]]
+        if "meaning_action" in diccionarioECA:
+            individuoAccion.meaning_action = [diccionarioECA["meaning_action"]]
+        if "name_action_object" in diccionarioECA:
+            individuoAccion.name_action_object = [diccionarioECA["name_action_object"]]
+        if "name_action_resource" in diccionarioECA:
+            individuoAccion.name_action_resource = [diccionarioECA["name_action_resource"]]
+        if "type_variable_action" in diccionarioECA:
+            individuoAccion.type_variable_action = [diccionarioECA["type_variable_action"]]
+        if "unit_action" in diccionarioECA:
+            individuoAccion.unit_action = [diccionarioECA["unit_action"]]
+        if "variable_action" in diccionarioECA:
+            individuoAccion.variable_action = [diccionarioECA["variable_action"]]
+
+    def __editarCondition(self, diccionarioECA, individuoCondicion):
+        if "comparator_condition" in diccionarioECA:
+            individuoCondicion.comparator_condition = [diccionarioECA["comparator_condition"]]
+        if "meaning_condition" in diccionarioECA:
+            individuoCondicion.meaning_condition = [diccionarioECA["meaning_condition"]]
+        if "type_variable_condition" in diccionarioECA:
+            individuoCondicion.type_variable_condition = [diccionarioECA["type_variable_condition"]]
+        if "unit_condition" in diccionarioECA:
+            individuoCondicion.unit_condition = [diccionarioECA["unit_condition"]]
+        if "variable_condition" in diccionarioECA:
+            individuoCondicion.variable_condition = [diccionarioECA["variable_condition"]]
+
+
+    
+
+    
 
 # if __name__ == "__main__":
 #     pob = PobladorOOS()
