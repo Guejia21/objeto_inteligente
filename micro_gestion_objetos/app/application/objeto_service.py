@@ -8,6 +8,7 @@ from config import settings
 from infraestructure.IRepository import IRepository
 from application import ontology_service
 from application import dataStream_service
+from infraestructure.things_board import tb_client
 import asyncio
 
 
@@ -71,7 +72,15 @@ class ObjetoService:
         self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)        
         self.persistence.save_object_metadata(json_data_object)
         #Después de instanciar la ontología y metadatos, se deben enviar los datastreams para que sean registrados en el micro de recursos y datastreams
-        await self.log_panel.Publicar(settings.REGISTER_DATASTREAMS_QUEUE_NAME, json.dumps(json_data_object))
+        #Se crea el dispositivo en thingsboard y se obtiene su token
+        tb_client_token = tb_client.create_device_with_token(data.feed.id, data.feed.title)
+        if tb_client_token:
+            logger.info("Dispositivo creado en ThingsBoard con éxito.")
+            #Agregar el token de thingsboard al JSON del objeto
+            json_data_object['thingsboard_token'] = tb_client_token
+        else:
+            logger.error("Error al crear el dispositivo en ThingsBoard.")                    
+        await self.log_panel.Publicar(settings.REGISTER_DATASTREAMS_QUEUE_NAME, json.dumps(json_data_object))    
         logger.info("Objeto inteligente iniciado con éxito.")
         return {"message": "Objeto inteligente iniciado con éxito"}
 

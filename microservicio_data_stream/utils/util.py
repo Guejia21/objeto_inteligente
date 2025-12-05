@@ -12,7 +12,8 @@ def convert_metadata_format(input_metadata):
         Dict con formato corto (object, datastreams)
     """
     dic_obj = input_metadata.get("dicObj", {})
-    dic_rec = input_metadata.get("dicRec", [])
+    dic_rec = input_metadata.get("dicRec", [])    
+    tb_token = input_metadata.get("thingsboard_token", "")
     
     # Construir objeto simplificado
     output = {
@@ -20,7 +21,8 @@ def convert_metadata_format(input_metadata):
             "id": dic_obj.get("id", ""),
             "title": dic_obj.get("title", ""),
             "description": dic_obj.get("description", ""),
-            "ip_object": dic_obj.get("ip_object", "")
+            "ip_object": dic_obj.get("ip_object", ""),
+            "thingsboard_token": tb_token
         },
         "datastreams": []
     }

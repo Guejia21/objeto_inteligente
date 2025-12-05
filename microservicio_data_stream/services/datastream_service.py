@@ -19,6 +19,7 @@ class DatastreamService:
                 Config.OSID = metadata['object']['id']
                 Config.TITLE = metadata['object'].get('title', 'Unknown')
                 Config.OBJECT_IP = metadata['object'].get('ip_object', 'Unknown')
+                Config.THINGSBOARD_TOKEN = metadata['object'].get('thingsboard_token', '')
                 self.datastreams = metadata.get('datastreams', [])
                 print(f"Metadata cargada: OSID={Config.OSID}, Datastreams={len(self.datastreams)}")
         except Exception as e:

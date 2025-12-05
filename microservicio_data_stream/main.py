@@ -1,8 +1,8 @@
 import json as json
 from lib.microdot.microdot import Microdot
-from broker.broker_interface import consumer_mqtt, publicar_valores
+from broker.broker_interface import consumer_mqtt, publicar_valores, publicacion_task
 #from broker.mqtt_adapter import MQTTAdapter
-from broker.mqtt_python_adapter import MQTTPythonAdapter
+from broker.mqtt_python_adapter import mosquitto_broker,tb_broker
 from routes.datastreams import register_routes
 from config import Config
 #import network #Activar si se usa ESP32 con WiFi
@@ -17,15 +17,7 @@ app = Microdot()
     broker=Config.BROKER_HOST, #Usar localhost para pruebas locales
     port=Config.MQTT_PORT
 )"""
-# Configurar broker MQTT cuando se desea usar Python
-broker = MQTTPythonAdapter(
-    client_id="datastream_service",
-    #broker=Config.OBJECT_IP,
-    broker=Config.BROKER_HOST, #Usar localhost para pruebas locales
-    port=Config.MQTT_PORT 
-)
-# Variable global para controlar la tarea de publicación
-publicacion_task = None
+
 # Registrar rutas
 register_routes(app)
 
@@ -46,15 +38,17 @@ async def main():
     print(f"   Title: {Config.TITLE}")
     #conectar_wifi()
     # Iniciar servidor
-    asyncio.create_task(app.start_server(host=Config.HOST, port=Config.PORT))
-    # Iniciar suscripción a broker MQTT
-    asyncio.create_task(consumer_mqtt(broker))
-    """if Config.OSID:
+    asyncio.create_task(app.start_server(host=Config.HOST, port=Config.PORT))    
+    if Config.OSID:
         # Iniciar publicación periódica si ya hay OSID
         global publicacion_task
         publicacion_task = asyncio.create_task(
-            publicar_valores(broker, Config.OSID, interval=Config.TELEMETRY_PUBLISH_INTERVAL)
-        )"""
+            publicar_valores(tb_broker, Config.OSID, interval=Config.TELEMETRY_PUBLISH_INTERVAL)
+        )
+    else:
+        #Si el objeto no está incializado, esperar a que se inicialice
+        print("Esperando inicialización del objeto...")
+        asyncio.create_task(consumer_mqtt(mosquitto_broker))
     while True:
         await asyncio.sleep(1)
 asyncio.run(main())

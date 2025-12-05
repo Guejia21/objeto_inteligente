@@ -18,7 +18,7 @@ class LogPanelMQTT(ILogPanelMQTT):
                 callback_api_version=CallbackAPIVersion.VERSION1
             )
             try:
-                cls._instance.client.connect(settings.BROKER_HOST, 1883, 60)
+                cls._instance.client.connect(settings.BROKER_HOST, settings.BROKER_PORT, 60)
                 cls._instance.client.loop_start()
             except Exception as e:
                 print(f"Error al conectar con el broker MQTT: {e}")
