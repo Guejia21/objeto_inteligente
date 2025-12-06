@@ -1,25 +1,21 @@
-from fastapi import APIRouter, HTTPException
-from typing import List
-from app.models import (
-    EcaCreate, StateChange,
-    EcaResponse, ListEcaResponse,
-    SuccessResponse, ErrorResponse
-)
-from app.serrvices.eca_service import EcaService
+from fastapi import APIRouter, Depends, HTTPException
+
+from application.dtos import ECAResponse, MakeContractRequest
+from deps import get_eca_service
+from application.eca_service import EcaService
 
 router = APIRouter(prefix="/eca", tags=["ECAs"])
-service = EcaService()
 
 # Crear nueva ECA
-@router.post("/", response_model=SuccessResponse, responses={400: {"model": ErrorResponse}})
-def crear_eca(eca: EcaCreate):
+@router.post("/makeContract", response_model=ECAResponse, responses={400: {"model": ECAResponse}})
+async def crear_eca(eca: MakeContractRequest, service: EcaService = Depends(get_eca_service)):  
     try:
-        result = service.crear_eca(eca.dict())
-        return SuccessResponse(**result)
+        result = await service.crear_eca(eca)
+        return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# Editar ECA existente
+"""# Editar ECA existente
 @router.put("/", response_model=SuccessResponse)
 def editar_eca(eca: EcaCreate):
     try:
@@ -63,3 +59,4 @@ def eliminar_eca(name: str):
         return SuccessResponse(**result)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+"""

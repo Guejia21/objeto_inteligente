@@ -1,9 +1,22 @@
-import os
+"""Archivo de configuración para la aplicación."""
+from pathlib import Path
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
-MICRO_GESTION_KNOWLEDGE_URL = os.getenv(
-    "MICRO_GESTION_KNOWLEDGE_URL",
-    "http://localhost:8000"  # ajusta host/puerto según tu docker-compose
-)
+class Settings(BaseSettings):
+    BASE_URL: str = 'http://localhost:8004'        
+    ONTOLOGY_SERVICE_URL: str = "http://localhost:8001/ontology"    
+    DATASTREAM_SERVICE_URL: str = "http://localhost:8003/Datastreams"
+    BROKER_HOST: str = "localhost"
+    BROKER_PORT: int = 1883
+    HTTP_TIMEOUT: float = 10.0    
+    PATH_ECA: str = str(Path(__file__).resolve().parent / "infra" / "ECA") #Carpeta donde se guardan las ECAs
+    PORT: int = 8004
+    MQTT_TELEMETRY_TOPIC: str = "datastream/telemetry"
+    model_config = ConfigDict(
+        env_file='.env',
+        extra='ignore'
+    )
 
-# Timeout por defecto para llamadas HTTP
-HTTP_TIMEOUT = float(os.getenv("HTTP_TIMEOUT", "10.0"))
+
+settings = Settings()

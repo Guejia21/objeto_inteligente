@@ -77,8 +77,8 @@ def register_routes(app):
                 headers={'Content-Type': 'application/json'}
             )
     
-    @app.route('/Datastreams/SetDatastream', methods=['GET'])
-    @app.route('/Datastreams/SetDatastream/', methods=['GET'])
+    @app.route('/Datastreams/SetDatastream', methods=['POST'])
+    @app.route('/Datastreams/SetDatastream/', methods=['POST'])
     async def set_datastream(request: Request):
         """
         Endpoint: /Datastreams/SetDatastream?osid=<id>&idDataStream=<ds>&comando=<cmd>

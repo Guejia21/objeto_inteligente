@@ -137,7 +137,7 @@ def main():
         'executables': 0,
         'metadata': 0,
         'ontologies': 0,
-        'databases': 0,
+        'ecas': 0,
         'cache': 0
     }
     
@@ -164,8 +164,14 @@ def main():
     ontologia_file = project_root / "micro_gestion_conocimiento" / "app" / "infraestructure" / "OWL" / "ontologiaInstanciada.owl"
     if safe_delete_file(ontologia_file, "Ontología instanciada"):
         stats['ontologies'] += 1
+    
+    # 5. Limpiar contratos ECA del microservicio de automatización
+    print_header("📋 Limpiando contratos ECA de micro_automatizacion_ecas...")
+    ecas_dir = project_root / "micro_automatizacion_ecas" / "app" / "infra" / "ECA"
+    if safe_delete_directory_contents(ecas_dir, "Contratos ECA"):
+        stats['ecas'] += 1
         
-    # 5. Limpiar archivos temporales y cache
+    # 6. Limpiar archivos temporales y cache
     print_header("🗑️  Limpiando archivos temporales y cache...")
     
     # Cache de Python
@@ -179,7 +185,7 @@ def main():
     
     stats['cache'] = cache_count
     
-    # 6. Resumen final
+    # 7. Resumen final
     print(f"\n{Colors.BLUE}{'='*60}{Colors.NC}")
     print(f"{Colors.GREEN}✅ Limpieza completada exitosamente{Colors.NC}")
     print(f"{Colors.BLUE}{'='*60}{Colors.NC}\n")
@@ -187,7 +193,8 @@ def main():
     print("📋 Resumen de limpieza:")
     print(f"  • Directorios de ejecutables limpiados: {stats['executables']}")
     print(f"  • Archivos de metadata reseteados: {stats['metadata']}")
-    print(f"  • Ontologías eliminadas: {stats['ontologies']}")    
+    print(f"  • Ontologías eliminadas: {stats['ontologies']}")
+    print(f"  • Contratos ECA eliminados: {stats['ecas']}")
     print(f"  • Archivos de cache/temporales eliminados: {stats['cache']}")
     
     print(f"\n💡 El proyecto está listo para una nueva ejecución limpia\n")

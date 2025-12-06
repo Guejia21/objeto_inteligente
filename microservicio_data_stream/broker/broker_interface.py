@@ -15,13 +15,14 @@ class BrokerInterface:
         raise NotImplementedError("Debe implementar 'suscribirse'")
 
 # ...existing code...
-async def publicar_valores(broker: BrokerInterface, osid: str, interval: int = 5):
+async def publicar_valores(broker: BrokerInterface, osid: str, topic: str, interval: int = 5):
     """
     Publica periódicamente los valores de los datastreams a una cola vía MQTT
     
     Args:
         broker: Instancia del broker MQTT
         osid: ID del objeto inteligente
+        topic: Tópico MQTT donde se publicarán los mensajes
         interval: Intervalo en segundos entre publicaciones (default: 5s)
     """
     print(f"Iniciando publicación periódica de valores cada {interval}s...")
@@ -54,12 +55,8 @@ async def publicar_valores(broker: BrokerInterface, osid: str, interval: int = 5
                                 telemetry[ds_id] = ds_value
                     
                     if telemetry:
-                        # Se publica en el topico de thingsboard
-                        topic = Config.THINGSBOARD_TELEMETRY_TOPIC
-                        
-                        #TODO revisar porque no está llegando el mensaje a la interfaz web
-                        payload = json.dumps(telemetry)
-                                                
+                        # Se publica en el topico enviado                                                                        
+                        payload = json.dumps(telemetry)                                                
                         await broker.publicar(topic, payload)                        
                         #print(f"Publicado telemetría: {telemetry} en tópico: {topic}")
                     else:
@@ -76,12 +73,12 @@ async def publicar_valores(broker: BrokerInterface, osid: str, interval: int = 5
         
         await asyncio.sleep(interval)
 
-# Variable global para controlar la tarea de publicación
-publicacion_task = None
-
+# Variables globales para controlar la tarea de publicación de telemetría
+tb_publicacion_task = None
+mosq_publicacion_task = None
 
 async def consumer_mqtt(broker: BrokerInterface):
-    global publicacion_task
+    #global tb_publicacion_task
     # Capturamos el loop principal aquí, antes de entrar al callback del hilo
     loop = asyncio.get_running_loop()
     

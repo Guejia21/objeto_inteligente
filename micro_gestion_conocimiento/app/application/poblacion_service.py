@@ -22,9 +22,15 @@ class PoblacionService:
     def poblar_eca(self, diccionarioECA:dict) -> None:
         """Pobla las reglas ECA en la base de conocimiento."""
         if self.gestion_poblacion.poblarECA(diccionarioECA):
-            return {"status": "Población ECA exitosa"}
+            return {
+                "code": 201,
+                "status": "Población ECA exitosa"
+                }
         else:
-            return {"status": "Fallo en la población ECA"}
+            return {
+                "code": 400,
+                "status": "Fallo en la población ECA"
+            }
     def editar_eca(self, diccionarioECA:dict) -> None:
         """Edita un ECA en la base del conocimiento."""
         try:
