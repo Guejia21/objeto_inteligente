@@ -34,11 +34,13 @@ class PobladorOOS(IPoblacion):
         self.uris = UrisOOS()
         self.ontologia = Ontologia()
 
+    def _inicializar_ontologia_instanciada(self):
         logger.info("Inicio Poblar Objeto Semantico con OWLReady2")        
         if not os.path.exists(settings.PATH_OWL):
             os.makedirs(settings.PATH_OWL, mode=0o777)    
         if not os.path.exists(settings.ONTOLOGIA_INSTANCIADA):
             try:
+                logger.debug("La ontologia instanciada no existe, se crea una nueva a partir de la base")
                 # Copio la ontologia base a la ontologia instanciada
                 shutil.copyfile(settings.ONTOLOGIA, settings.ONTOLOGIA_INSTANCIADA)
             except Exception as e:
@@ -48,6 +50,16 @@ class PobladorOOS(IPoblacion):
         logger.info("Ontologia Cargada: " + str(self.onto.loaded))
 
     def poblarMetadatosObjeto(self, diccionarioObjeto:dict, listaRecursos:dict):
+        """
+        Pobla los metadatos del objeto inteligente en la ontología instanciada.
+        
+        :param self: Instancia de la clase PobladorOOS.
+        :param diccionarioObjeto: Diccionario con los metadatos del objeto inteligente.
+        :type diccionarioObjeto: dict
+        :param listaRecursos: Diccionario con la lista de recursos asociados al objeto inteligente.
+        :type listaRecursos: dict
+        """
+        self._inicializar_ontologia_instanciada()
         try:
             # First, try to clean up any existing resources with the same ID
             try:
@@ -167,6 +179,10 @@ class PobladorOOS(IPoblacion):
         :param diccionarioECA: Diccionario con los datos de la regla ECA a poblar.
         :type diccionarioECA: dict
         """      
+        if not os.path.exists(settings.ONTOLOGIA_INSTANCIADA):
+            logger.error("La ontología instanciada no existe en la ruta especificada.")
+            return False
+        self.ontologia = Ontologia() #Reinicia la ontologia para evitar conflictos
         logger.info("Poblando regla ECA...")
         user_eca = "default"        
         ##Si está usando el perfil de usuario

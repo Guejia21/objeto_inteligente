@@ -4,6 +4,7 @@ from infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilU
 from infraestructure.interfaces.IPoblacion import IPoblacion
 from infraestructure.logging.Logging import logger
 import config
+from fastapi.responses import JSONResponse
 
 class PoblacionService:
     """Clase base para servicios de población."""
@@ -16,29 +17,41 @@ class PoblacionService:
         print(diccionarioObjeto)
         print(listaRecursos)
         if self.gestion_poblacion.poblarMetadatosObjeto(diccionarioObjeto, listaRecursos):
-            return {"status": "Población exitosa"}
+            return JSONResponse(
+                status_code=201,
+                content={"status": "Población exitosa"}
+            )
         else:
-            return {"status": "Fallo en la población"}
-    def poblar_eca(self, diccionarioECA:dict) -> None:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "Fallo en la población"}
+            )
+    def poblar_eca(self, diccionarioECA:dict) -> JSONResponse:
         """Pobla las reglas ECA en la base de conocimiento."""
         if self.gestion_poblacion.poblarECA(diccionarioECA):
-            return {
-                "code": 201,
-                "status": "Población ECA exitosa"
-                }
+            return JSONResponse(
+                status_code=201,
+                content={"status": "Población ECA exitosa"}
+                )
         else:
-            return {
-                "code": 400,
-                "status": "Fallo en la población ECA"
-            }
-    def editar_eca(self, diccionarioECA:dict) -> None:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "Fallo en la población ECA"}
+            )
+    def editar_eca(self, diccionarioECA:dict) -> JSONResponse:
         """Edita un ECA en la base del conocimiento."""
         try:
             estado = self.gestion_poblacion.editarECA(diccionarioECA)
         except Exception as e:
             logger.error("Error al editar el ECA: " + str(e))            
-            return {"status": "Fallo en la edición ECA"}        
-        return {"status": "Edición ECA exitosa"}
+            return JSONResponse(
+                status_code=400,
+                content={"status": "Fallo en la edición ECA"}
+            )
+        return JSONResponse(
+            status_code=200,
+            content={"status": "Edición ECA exitosa"}
+        )
         
 class PoblacionOntologiaUsuarioService:
     """Servicio de Población para la Ontología del usuario."""

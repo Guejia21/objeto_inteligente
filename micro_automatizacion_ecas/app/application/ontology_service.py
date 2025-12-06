@@ -71,47 +71,8 @@ def poblate_eca(data: dict) -> bool:
     """Puebla una regla ECA en la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/poblacion/poblar_eca"    
     request = requests.post(url, json=data, headers=headers)
-    if request.json().get("code") == 201:
+    if request.status_code == 201:
         logger.info("ECA poblada con éxito.")
         return True
     logger.error("Error al poblar el ECA: %s", request.text)
-    return False
-def poblate_ontology(data: dict) -> bool:
-    """Puebla la ontología con los datos proporcionados."""
-    url = settings.ONTOLOGY_SERVICE_URL + "/poblacion/poblar_metadatos_objeto"
-    # Sanitizar payload para evitar enviar valores que Pydantic no pueda parsear
-    try:
-        from copy import deepcopy
-        payload = deepcopy(data)
-        if isinstance(payload, dict) and "dicRec" in payload and isinstance(payload.get("dicRec"), list):
-            for rec in payload["dicRec"]:
-                # unitType: garantizar entero (0 por defecto)
-                ut = rec.get("unitType", 0)
-                if ut in [None, "", "None"]:
-                    rec["unitType"] = 0
-                else:
-                    try:
-                        rec["unitType"] = int(ut)
-                    except Exception:
-                        rec["unitType"] = 0
-
-                # Asegurar que tags sea lista
-                if "tags" in rec and rec.get("tags") is None:
-                    rec["tags"] = []
-
-                # Normalizar valores que no deben ser None
-                for k in ["symbol", "label", "datapoints", "at", "current_value", "max_value", "min_value"]:
-                    if k in rec and rec.get(k) is None:
-                        rec[k] = ""
-
-    except Exception as e:
-        logger.warning("Error al sanitizar payload antes de poblar ontología: %s", e)
-        payload = data
-
-    logger.debug("Payload enviado a poblar_metadatos_objeto: %s", payload)
-    request = requests.post(url, json=payload, headers=headers)
-    if request.status_code == 201:
-        logger.info("Ontología poblada con éxito.")
-        return True
-    logger.error("Error al poblar la ontología: %s", request.text)
     return False
