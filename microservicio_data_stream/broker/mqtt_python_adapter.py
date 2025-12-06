@@ -86,7 +86,7 @@ mosquitto_broker = MQTTPythonAdapter(
 tb_broker = MQTTPythonAdapter(
     client_id="datastream_service_tb",
     broker=Config.THINGSBOARD_HOST,
-    user=Config.THINGSBOARD_TOKEN,
+    user=Config.THINGSBOARD_ACCESS_TOKEN,
     password="",
     port=Config.THINGSBOARD_PORT
 )

@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     METADATA_PATH:str = str(Path(__file__).resolve().parent / "infraestructure" / "metadata" / "metadata.json")
     BROKER_HOST: str = "localhost"
     BROKER_PORT: int = 1883
-    THINGSBOARD_HOST: str = "localhost"
+    THINGSBOARD_HOST: str = "192.168.8.209"
     THINGSBOARD_USER: str = "tenant@thingsboard.org"
     THINGSBOARD_PASSWORD: str = "tenant"
     THINGSBOARD_ACCESS_TOKEN: str = "YOUR_THINGSBOARD_ACCESS_TOKEN"

@@ -33,9 +33,8 @@ class Config:
     MOSQUITTO_TELEMETRY_TOPIC: str = "datastream/telemetry"
     REGISTER_DATASTREAMS_QUEUE_NAME = 'register_datastreams_queue'    
     # Configuración ThingsBoard
-    THINGSBOARD_HOST: str = "localhost"
+    THINGSBOARD_HOST: str = "192.168.8.209"
     THINGSBOARD_PORT: int = 1884
     THINGSBOARD_ACCESS_TOKEN: str = ""
     THINGSBOARD_TELEMETRY_TOPIC: str = "v1/devices/me/telemetry"
-    TELEMETRY_PUBLISH_INTERVAL: int = 5  # Segundos
-    THINGSBOARD_TOKEN = None
+    TELEMETRY_PUBLISH_INTERVAL: int = 5  # Segundos    
