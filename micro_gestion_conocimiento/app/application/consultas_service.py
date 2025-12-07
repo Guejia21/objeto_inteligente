@@ -124,7 +124,17 @@ class ConsultasService:
     def consultarMetodosExternal(self):
         """Retorna instancias de métodos External en la ontología (consulta de instancias)."""
         return self.gestion_base_conocimiento.consultarMetodosExternal()
-    
+    def verficarContrato(self, osid:str,osidDestino : str):
+        """Verifica si existe un contrato ECA entre dos objetos en la ontología.
+
+        Args:
+            osid (str): ID del objeto que envía la consulta.
+            osidDestino (str): ID del objeto destino del contrato.
+
+        Returns:
+            _type_: Lista de diccionarios con la información del contrato si existe, o una lista vacía si no existe.
+        """        
+        return self.gestion_base_conocimiento.verificarContrato(osid,osidDestino)
     def setEcaState(self, valorNuevo:str, nombreECA:str):
         """Actualiza el estado de una ECA."""
         #El nuevo valor solo puede ser 'on' o 'off'

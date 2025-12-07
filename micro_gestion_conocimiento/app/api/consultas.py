@@ -98,7 +98,7 @@ async def consultar_service_state(service: ConsultasService = Depends(get_consul
         return service.consultarServiceState()
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
-@ontologia_router.post("/set_eca_state")
+@ontologia_router.patch("/set_eca_state")
 async def set_eca_state(valorNuevo: str, nombreECA: str, service: ConsultasService = Depends(get_consultas_service)):
     """Endpoint para actualizar el estado de una ECA."""
     # Para actualizar correctamente el estado del eca debe enviarse el nombre del eca+nombre del usuario
@@ -135,6 +135,12 @@ async def set_eca_list_state(listaEcas: ECAStateListDTO, service: ConsultasServi
         return service.setEcaListState(listaEcas.ecas)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
+@ontologia_router.get("/verificar_contrato/{osid}/{osidDestino}", response_model=list)
+async def verificar_contrato(osid: str, osidDestino: str, service: ConsultasService = Depends(get_consultas_service)) -> list:
+    """Endpoint para verificar si existe un contrato ECA entre dos objetos en la ontología."""
+    try:
+        return service.verficarContrato(osid, osidDestino)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 ontologia_usuario_router = APIRouter(prefix="/ontology/consultas_usuario", tags=["Consultas de Usuario"])
 """ Endpoints para consultas sobre la ontología del perfil de usuario."""

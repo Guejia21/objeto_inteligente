@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     BROKER_PORT: int = 1883
     HTTP_TIMEOUT: float = 10.0    
     PATH_ECA: str = str(Path(__file__).resolve().parent / "infra" / "ECA") #Carpeta donde se guardan las ECAs
+    PATH_COMANDOS: str = str(Path(__file__).resolve().parent / "infra" / "Comandos") #Carpeta donde se guardan los comandos
     PORT: int = 8004
     MQTT_TELEMETRY_TOPIC: str = "datastream/telemetry"
     model_config = ConfigDict(

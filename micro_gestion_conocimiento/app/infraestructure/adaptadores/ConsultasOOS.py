@@ -564,27 +564,55 @@ class ConsultasOOS(IConsultasOOS):
         return listaDic
 
     def verificarContrato(self, osid, osidDestino):
-        self.consultarOntoActiva()
-        keys = ["osid", "osidDestino", "id_action_resource", "comparator_action", "variable_action",
-                "type_variable_action", "eca_state"]
-        # [['708637323', 'calefactor', 'igual', '1']]
-        query = """ PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
-                    SELECT DISTINCT ?osid ?osidDestino ?id_action_resource ?comparator_action ?variable_action ?type_variable_action ?eca_state
-                    where{                            
-                                ?evento :id_event_object ?osid.
-                                FILTER regex(?osid, """ + "'" + osid + """').
-                                ?evento rdf:type :Event.
-                                ?accion :id_action_object ?osidDestino.
-                                ?action :id_action_resource ?id_action_resource.
-                                ?action :comparator_action ?comparator_action.
-                                ?action :variable_action ?variable_action.
-                                ?action :type_variable_action ?type_variable_action.
-                                FILTER regex(?osidDestino, """ + "'" + osidDestino + """').
-                                ?action rdf:type :Action.
-                                ?eca :state_eca ?eca_state.
-                                ?eca rdf:type :Dinamic.
-                                ?eca :StartsWith ?evento.
-                              }"""
+        """
+        Verifica si existe un contrato ECA entre dos objetos.
+        
+        Args:
+            osid: ID del objeto evento (origen)
+            osidDestino: ID del objeto acción (destino)
+            
+        Returns:
+            Lista de diccionarios con los contratos encontrados
+        """
+        if not self.consultarOntoActiva():
+            logger.error("La ontología no está activa.")
+            raise Exception("La ontología no está activa.")
+            
+        keys = ["osid", "osidDestino", "id_action_resource", "comparator_action", 
+                "variable_action", "type_variable_action", "eca_state", "name_eca"]
+        
+        # Consulta corregida: relaciona evento, condición y acción a través del ECA
+        query = """PREFIX : <http://semanticsearchiot.net/sswot/Ontologies#>
+                    SELECT DISTINCT ?osid ?osidDestino ?id_action_resource ?comparator_action 
+                           ?variable_action ?type_variable_action ?eca_state ?name_eca
+                    WHERE {
+                        # El ECA inicia con un evento
+                        ?eca :StartsWith ?evento.
+                        ?eca :state_eca ?eca_state.
+                        ?eca :name_eca ?name_eca.
+                        ?eca rdf:type :Dinamic.
+                        
+                        # El evento tiene el objeto origen
+                        ?evento :id_event_object ?osid.
+                        FILTER (?osid = '""" + osid + """').
+                        ?evento rdf:type :Event.
+                        
+                        # El evento verifica una condición
+                        ?evento :Check ?condicion.
+                        ?condicion rdf:type :Condition.
+                        
+                        # La condición está relacionada con una acción
+                        ?condicion :isRelatedWith ?accion.
+                        ?accion rdf:type :Action.
+                        
+                        # La acción tiene el objeto destino
+                        ?accion :id_action_object ?osidDestino.
+                        FILTER (?osidDestino = '""" + osidDestino + """').
+                        ?accion :id_action_resource ?id_action_resource.
+                        ?accion :comparator_action ?comparator_action.
+                        ?accion :variable_action ?variable_action.
+                        ?accion :type_variable_action ?type_variable_action.
+                    }"""
 
         resultadoConsulta = self.ontologia.consultaDataProperty(query)
         listaDic = []

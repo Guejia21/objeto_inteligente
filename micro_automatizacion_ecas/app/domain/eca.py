@@ -74,6 +74,7 @@ class ECA:
         except Exception as e:
             print(f"Error leyendo contrato ECA: {e}")
             return {}
+    
 """
     def poblarListaEca(self, listaDiccEca):
         for item in listaDiccEca:

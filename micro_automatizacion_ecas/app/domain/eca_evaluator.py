@@ -26,6 +26,7 @@ class ECAEvaluator:
         self.config = eca_config
         self.name = eca_config.get("name_eca", "ECA_Sin_Nombre")
         self.state = eca_config.get("state_eca", "off")
+        self.user_eca = eca_config.get("user_eca", "default")
         
         # Evento
         self.event_object_id = eca_config.get("id_event_object", "")

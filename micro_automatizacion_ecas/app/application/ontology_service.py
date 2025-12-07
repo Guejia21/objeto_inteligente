@@ -68,7 +68,7 @@ def get_title() -> str:
         logger.error("Error al consultar el título del objeto inteligente: %s", request.text)
         return None
 def poblate_eca(data: dict) -> bool:
-    """Puebla una regla ECA en la ontología."""
+    """Puebla una nueva regla ECA en la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/poblacion/poblar_eca"    
     request = requests.post(url, json=data, headers=headers)
     if request.status_code == 201:
@@ -76,3 +76,89 @@ def poblate_eca(data: dict) -> bool:
         return True
     logger.error("Error al poblar el ECA: %s", request.text)
     return False
+def edit_eca(data: dict) -> bool:
+    """Edita una regla ECA en la ontología."""
+    url = settings.ONTOLOGY_SERVICE_URL + "/poblacion/editar_eca"    
+    request = requests.post(url, json=data, headers=headers)
+    if request.status_code == 200:
+        logger.info("ECA editada con éxito.")
+        return True
+    logger.error("Error al editar el ECA: %s", request.text)
+    return False
+def get_ecas()-> list:
+    """Obtiene todas las reglas ECA desde la ontología."""
+    url = settings.ONTOLOGY_SERVICE_URL + "/consultas/listar_ecas"
+    request = requests.get(url, headers=headers)
+    if request.status_code == 200:
+        try:
+            data = request.json()
+            return data
+        except ValueError:
+            logger.error("Respuesta no es JSON: %s", request.text)
+            return None
+    else:
+        logger.error("Error al consultar las ECAs: %s", request.text)
+        return None
+def listarDinamicEstado(estado: str) -> list:
+    """Lista las ECAs por estado (on/off)"""
+    url = settings.ONTOLOGY_SERVICE_URL + f"/consultas/listar_dinamic_estado?eca_state={estado}"
+    request = requests.get(url, headers=headers)
+    if request.status_code == 200:
+        try:
+            data = request.json()
+            return data
+        except ValueError:
+            logger.error("Respuesta no es JSON: %s", request.text)
+            return None
+    else:
+        logger.error("Error al consultar las ECAs por estado: %s", request.text)
+        return None
+def setEcaListState(lista_ecas: list) -> bool:
+    """Actualiza el estado de una lista de ECAs."""
+    url = settings.ONTOLOGY_SERVICE_URL + "/consultas/set_eca_list_state"
+    payload = {"ecas": lista_ecas}
+    request = requests.patch(url, json=payload, headers=headers)
+    if request.status_code == 200:
+        logger.info("Estados de ECAs actualizados con éxito.")
+        return True
+    logger.error("Error al actualizar los estados de las ECAs: %s", request.text)
+    return False
+def delete_eca(eca_name: str) -> bool:
+    """Elimina una regla ECA de la ontología."""
+    url = settings.ONTOLOGY_SERVICE_URL + f"/consultas/eliminar_eca?nombreECA={eca_name}"
+    request = requests.delete(url, headers=headers)
+    if request.status_code == 200:
+        logger.info("ECA eliminada con éxito.")
+        return True
+    logger.error("Error al eliminar el ECA: %s", request.text)
+    return False
+def set_eca_state(eca_name: str, new_state: str) -> bool:
+    """Actualiza el estado de una regla ECA en la ontología."""
+    url = settings.ONTOLOGY_SERVICE_URL + "/consultas/set_eca_state?valorNuevo=" + new_state + "&nombreECA=" + eca_name
+    request = requests.patch(url, headers=headers)
+    if request.status_code == 200:
+        logger.info("Estado de ECA actualizado con éxito.")
+        return True
+    logger.error("Error al actualizar el estado de la ECA: %s", request.text)
+    return False
+def verificar_contrato(osid:str,osidDestino:str)-> list:
+    """Verifica si existe un contrato ECA entre dos objetos inteligentes.
+
+    Args:
+        osid (str): Id del objeto inteligente que envía la acción.
+        osidDestino (str): Id del objeto inteligente que recibe la acción.
+    Returns:
+        list: Lista de contratos ECA entre los dos objetos inteligentes.
+    """
+    url = settings.ONTOLOGY_SERVICE_URL + f"/consultas/verificar_contrato/{osid}/{osidDestino}"
+    request = requests.get(url, headers=headers)
+    if request.status_code == 200:
+        try:
+            data = request.json()
+            return data
+        except ValueError:
+            logger.error("Respuesta no es JSON: %s", request.text)
+            return None
+    else:
+        logger.error("Error al verificar el contrato ECA: %s", request.text)
+        return None
