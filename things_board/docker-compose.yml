@@ -1,0 +1,29 @@
+services:
+  tb:
+    image: thingsboard/tb-postgres
+    container_name: thingsboard
+    ports:
+      - "9090:9090"
+      - "1884:1883"   # MQTT
+      - "5683-5688:5683-5688/udp" # CoAP
+    environment:
+      TB_QUEUE_TYPE: in-memory
+    volumes:
+      - tb-data:/data
+      - tb-logs:/var/log/thingsboard
+
+  postgres:
+    image: postgres:12
+    container_name: tb-postgres
+    environment:
+      POSTGRES_DB: thingsboard
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  tb-data:
+  tb-logs:
+  pgdata:
+
