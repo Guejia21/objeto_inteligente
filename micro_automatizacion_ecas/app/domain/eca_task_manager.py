@@ -103,7 +103,7 @@ class ECATaskManager:
             telemetry = json.loads(message)
             
             if not self.active_ecas:
-                logger.debug("No hay ECAs activos para procesar")
+                #logger.debug("No hay ECAs activos para procesar")
                 return
             
             for eca_key, evaluator in self.active_ecas.items():
