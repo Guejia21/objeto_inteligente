@@ -269,6 +269,7 @@ class PobladorOOS(IPoblacion):
         :param diccionarioECA: Diccionario con los datos de la regla ECA a editar.
         """               
         try:
+            self._inicializar_ontologia_instanciada()
             user_eca = "default"
             if "user_eca" in diccionarioECA:
                 user_eca = diccionarioECA["user_eca"]
