@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from api.ecas import router as ecas_router
 from config import settings
 from deps import load_ecas_on_startup, get_broker
-from domain.eca_task_manager import ECATaskManager
+from domain.eca_task_manager import eca_task_manager
 
 
 @asynccontextmanager
