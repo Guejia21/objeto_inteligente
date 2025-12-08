@@ -4,15 +4,13 @@ from os import listdir
 import time
 from config import settings
 from infraestructure.acceso_ontologia.OntologiaPU import OntologiaPU
-from ConsultasPerfilUsuario import ConsultasPerfilUsuario
-from infraestructure.interfaces import IPoblacionPerfilUsuario
+from infraestructure.interfaces.IPoblacionPerfilUsuario import IPoblarPerfilUsuario
 from infraestructure.util import UrisPu
 from infraestructure.logging.Logging import logger
 
-pathUsuActual = './PerfilUsuario/OWL/UsuarioActual.owl'
+pathUsuActual = settings.ONTOLOGIA_PU
     
-class PoblarPerfilUsuario(IPoblacionPerfilUsuario):
-    
+class PoblarPerfilUsuario(IPoblarPerfilUsuario):
     def __init__(self, mac, idUsuario, accion):
         try:           
             os.stat(settings.PATH_OWL)
@@ -20,7 +18,7 @@ class PoblarPerfilUsuario(IPoblacionPerfilUsuario):
             os.mkdir(settings.PATH_OWL, 0o777)
         if accion == "CARGAR":
             try:    
-                self.path = settings.PATH_OWL + mac + "&" + idUsuario + ".owl"
+                self.path = settings.PATH_PU_OWL + mac + "&" + idUsuario + ".owl"
                 #self.path = AppUtil.pathOWL + mac +  ".owl"
                 self.ontologia = OntologiaPU(self.path)
                 logger.info(f"Ruta de ontología cargada: {self.path}")
@@ -61,8 +59,8 @@ class PoblarPerfilUsuario(IPoblacionPerfilUsuario):
             self.ontologia.insertarObjectProperty(uriIndividuoObject, UrisPu.op_date_interaction, uriShedule)      
             return True
         except Exception as e:
-            print( "Error ------------------->")
-            print( e)
+            logger.error("Error:")
+            logger.error(e)
             return False
 
     def editarSmartUsuario(self, diccObjetivo):

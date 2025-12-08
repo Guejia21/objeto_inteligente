@@ -164,14 +164,26 @@ def main():
     ontologia_file = project_root / "micro_gestion_conocimiento" / "app" / "infraestructure" / "OWL" / "ontologiaInstanciada.owl"
     if safe_delete_file(ontologia_file, "Ontología instanciada"):
         stats['ontologies'] += 1
+
+    # 4. Limpiar ontología instanciada
+    print_header("🧠 Limpiando metadata de micro de personalizacion")
+    ontologia_file = project_root / "microservicio_personalizacion" / "app" / "infrastructure" / "ipCoordinador.txt"
+    if safe_delete_file(ontologia_file, "Txt del IP coordinador"):
+        stats['metadata'] += 1
     
-    # 5. Limpiar contratos ECA del microservicio de automatización
+    # 5. Limpiar ontología de perfil de usuario (PU)
+    print_header("🧠 Limpiando ontología de perfil de usuario (PU)...")
+    pu_ontology_dir = project_root / "micro_gestion_conocimiento" / "app" / "infraestructure" / "OWL" / "PU"
+    if safe_delete_directory_contents(pu_ontology_dir, "Ontología de perfil de usuario"):
+        stats['ontologies'] += 1
+    
+    # 6. Limpiar contratos ECA del microservicio de automatización
     print_header("📋 Limpiando contratos ECA de micro_automatizacion_ecas...")
     ecas_dir = project_root / "micro_automatizacion_ecas" / "app" / "infra" / "ECA"
     if safe_delete_directory_contents(ecas_dir, "Contratos ECA"):
         stats['ecas'] += 1
         
-    # 6. Limpiar archivos temporales y cache
+    # 7. Limpiar archivos temporales y cache
     print_header("🗑️  Limpiando archivos temporales y cache...")
     
     # Cache de Python
@@ -185,7 +197,7 @@ def main():
     
     stats['cache'] = cache_count
     
-    # 7. Resumen final
+    # 8. Resumen final
     print(f"\n{Colors.BLUE}{'='*60}{Colors.NC}")
     print(f"{Colors.GREEN}✅ Limpieza completada exitosamente{Colors.NC}")
     print(f"{Colors.BLUE}{'='*60}{Colors.NC}\n")

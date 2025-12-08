@@ -14,28 +14,16 @@ logger.info("Ruta Ontologias: " + settings.PATH_OWL)
 
 
 class PobladorOOS(IPoblacion):
-    _instance = None
-    _initialized = False
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(PobladorOOS, cls).__new__(cls)
-        return cls._instance
-
     def __init__(self):
-        # Solo inicializar una vez
-        if PobladorOOS._initialized:
-            return        
-        PobladorOOS._initialized = True
         self.individuoObjecto = None
         self.individuoEstado = None
         self.location = None
         self.onto = get_ontology("file://" + settings.ONTOLOGIA).load(reload_if_newer=True)
         self.uris = UrisOOS()
         self.ontologia = Ontologia()
+        self._inicializar_ontologia_instanciada()
 
-    def _inicializar_ontologia_instanciada(self):
-        logger.info("Inicio Poblar Objeto Semantico con OWLReady2")        
+    def _inicializar_ontologia_instanciada(self):        
         if not os.path.exists(settings.PATH_OWL):
             os.makedirs(settings.PATH_OWL, mode=0o777)    
         if not os.path.exists(settings.ONTOLOGIA_INSTANCIADA):
@@ -58,10 +46,8 @@ class PobladorOOS(IPoblacion):
         :type diccionarioObjeto: dict
         :param listaRecursos: Diccionario con la lista de recursos asociados al objeto inteligente.
         :type listaRecursos: dict
-        """
-        self._inicializar_ontologia_instanciada()
-        try:
-            # First, try to clean up any existing resources with the same ID
+        """        
+        try:            
             try:
                 existing_objects = self.onto.search(id_object=str(diccionarioObjeto["id"]))
                 for obj in existing_objects:
@@ -181,8 +167,7 @@ class PobladorOOS(IPoblacion):
         """      
         if not os.path.exists(settings.ONTOLOGIA_INSTANCIADA):
             logger.error("La ontología instanciada no existe en la ruta especificada.")
-            return False
-        self.ontologia = Ontologia() #Reinicia la ontologia para evitar conflictos
+            return False        
         logger.info("Poblando regla ECA...")
         user_eca = "default"        
         ##Si está usando el perfil de usuario
@@ -282,7 +267,7 @@ class PobladorOOS(IPoblacion):
         
         :param self: Instancia de la clase PobladorOOS.
         :param diccionarioECA: Diccionario con los datos de la regla ECA a editar.
-        """
+        """               
         try:
             user_eca = "default"
             if "user_eca" in diccionarioECA:
@@ -340,7 +325,7 @@ class PobladorOOS(IPoblacion):
             self.__editarCondition(diccionarioECA, individuoCondicion)
             
             # Guardar cambios
-            self.ontoInstanciada.save(file=config.ontologiaInstanciada, format="rdfxml")
+            self.ontoInstanciada.save(file=settings.ONTOLOGIA_INSTANCIADA, format="rdfxml")
             logger.info(f"Regla ECA '{diccionarioECA['name_eca']}' editada correctamente.")
             return True
             

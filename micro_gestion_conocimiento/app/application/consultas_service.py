@@ -1,4 +1,6 @@
 from typing import Any, List
+
+from fastapi.responses import JSONResponse
 from infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
 from infraestructure.logging.Logging import logger
 from infraestructure.interfaces.IConsultas import IConsultasOOS
@@ -124,7 +126,17 @@ class ConsultasService:
     def consultarMetodosExternal(self):
         """Retorna instancias de métodos External en la ontología (consulta de instancias)."""
         return self.gestion_base_conocimiento.consultarMetodosExternal()
-    
+    def verficarContrato(self, osid:str,osidDestino : str):
+        """Verifica si existe un contrato ECA entre dos objetos en la ontología.
+
+        Args:
+            osid (str): ID del objeto que envía la consulta.
+            osidDestino (str): ID del objeto destino del contrato.
+
+        Returns:
+            _type_: Lista de diccionarios con la información del contrato si existe, o una lista vacía si no existe.
+        """        
+        return self.gestion_base_conocimiento.verificarContrato(osid,osidDestino)
     def setEcaState(self, valorNuevo:str, nombreECA:str):
         """Actualiza el estado de una ECA."""
         #El nuevo valor solo puede ser 'on' o 'off'
@@ -173,3 +185,24 @@ class ConsultasOntologiaUsuarioService:
     """Servicio de Consultas para la Ontología del usuario."""
     def __init__(self, gestion_base_conocimiento: IConsultasPerfilUsuario):
         self.gestion_base_conocimiento = gestion_base_conocimiento
+    def consultarActive(self)->JSONResponse:
+        """Consulta si el perfil del usuario está activo en su ontología."""
+        active = self.gestion_base_conocimiento.consultarActive() 
+        if active is None:
+            logger.warning("No se encontró el estado de actividad del usuario en la ontología.")
+            return JSONResponse(content={"active": None}, status_code=404)
+        return JSONResponse(content={"active": active}, status_code=200)
+    def consultarEmailUsuario(self)->JSONResponse:
+        """Consulta el email del usuario desde su ontología."""
+        email = self.gestion_base_conocimiento.consultarEmailUsuario() 
+        if not email:
+            logger.warning("No se encontró el email del usuario en la ontología.")
+            return JSONResponse(content={"email": ""}, status_code=404)
+        return JSONResponse(content={"email": email}, status_code=200)
+    def consultarListaPreferenciasporOSID(self, osid: str) -> JSONResponse:
+        """Consulta la lista de preferencias del usuario por OSID."""
+        preferencias = self.gestion_base_conocimiento.consultarListaPreferenciasporOSID(osid)
+        if not preferencias:
+            logger.warning(f"No se encontraron preferencias para el OSID: {osid}")
+            return JSONResponse(content={"preferencias": []}, status_code=404)
+        return JSONResponse(content={"preferencias": preferencias}, status_code=200)

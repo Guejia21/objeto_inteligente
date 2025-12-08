@@ -1,5 +1,7 @@
 
 import json
+
+from fastapi.responses import JSONResponse
 from infraestructure.logging.ILogPanelMQTT import ILogPanelMQTT
 from domain.ObjetoInteligente import ObjetoInteligente
 from infraestructure.logging.Logging import logger
@@ -29,7 +31,7 @@ class ObjetoService:
             logger.warning("La ontología no está activa. Objeto inteligente no inicializado.")
             return ObjetoInteligente(None)
 
-    async def getIdentificator(self, osid: int):
+    async def getIdentificator(self, osid: int)->JSONResponse:
         await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "Enviando Metadata.json")
         await self.log_panel.PubLog("metadata_query", self.objetoInteligente.osid, self.objetoInteligente.title, self.objetoInteligente.osid, self.objetoInteligente.title,
                                      "metadata_query", "Solicitud Recibida")
@@ -45,28 +47,62 @@ class ObjetoService:
                 logger.info("Identificador enviado correctamente")
                 await self.log_panel.PubLog("metadata_query", self.objetoInteligente.osid, self.objetoInteligente.title, self.objetoInteligente.osid, self.objetoInteligente.title,
                                 "metadata_query", "Publicando Respuesta")                
-                return resultado
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "status": "success",
+                        "message": "Metadatos del objeto inteligente obtenidos correctamente.",
+                        "data": resultado
+                    }
+                )
             except Exception as e:
-                logger.error("Error al leer el archivo de metadata: %s", e)                
-                #TODO: Retornar un JSON estructurado (como ellos hacian con XML) con el error relacionado
-                return None
+                logger.error("Error al leer el archivo de metadata: %s", e)                                
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "message": "Error al leer el archivo de metadata.",
+                        "data": {}
+                    }
+                )
         else:
             logger.warning("El osid solicitado %s no coincide con el del objeto inteligente %s", osid, self.objetoInteligente.osid)
-            return {"message": "El osid solicitado no coincide con el del objeto inteligente."}
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "El osid solicitado no coincide con el del objeto inteligente.",
+                    "data": {}
+                }
+            )
     
 
 
-    async def startObject(self, data: ObjectData):
+    async def startObject(self, data: ObjectData)->JSONResponse:
         """Método para iniciar el objeto inteligente con los datos proporcionados"""        
         if ontology_service.is_active():
             logger.warning("El objeto inteligente ya está activo.")
-            return {"message": "El objeto inteligente ya está activo."}
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "El objeto inteligente ya está activo.",
+                    "data": {}
+                }
+            )
         json_data_object = self.objetoInteligente.estructurarJSON(data.feed.model_dump())
         logger.info("Iniciando la población de la ontología.")
         if not ontology_service.poblate_ontology(json_data_object):
             print(json_data_object)
             logger.error("Error al poblar la ontología.")
-            return {"message": "Error al iniciar el objeto inteligente."}
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "message": "Error al poblar la ontología.",
+                    "data": {}
+                }
+            )
         logger.info("Ontología poblada con éxito.")
         #Actualizar los datos del objeto
         self.objetoInteligente.update_attributes(data.feed.id, data.feed.title)        
@@ -82,9 +118,16 @@ class ObjetoService:
             logger.error("Error al crear el dispositivo en ThingsBoard.")                    
         await self.log_panel.Publicar(settings.REGISTER_DATASTREAMS_QUEUE_NAME, json.dumps(json_data_object))    
         logger.info("Objeto inteligente iniciado con éxito.")
-        return {"message": "Objeto inteligente iniciado con éxito"}
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success",
+                "message": "Objeto inteligente iniciado con éxito.",
+                "data": {}
+            }
+        )
 
-    async def get_state(self, osid: str):
+    async def get_state(self, osid: str)->JSONResponse:
         """Obtiene el estado actual de los datastreams del objeto inteligente.
 
         Esta implementación delega la obtención de estado al microservicio de
@@ -93,7 +136,14 @@ class ObjetoService:
         """
         if osid != self.objetoInteligente.osid:
             logger.warning("El osid solicitado %s no coincide con el del objeto inteligente", osid)
-            raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "El osid solicitado no coincide con el del objeto inteligente.",
+                    "data": {}
+                }
+            )
 
         try:
             await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "Inicio SendState")
@@ -104,12 +154,26 @@ class ObjetoService:
 
             if not isinstance(resultado, dict):
                 logger.error("Respuesta inesperada de dataStreamService: %s", resultado)
-                raise ValueError("Respuesta inválida del servicio de datastreams")
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "message": "Respuesta inválida del servicio de datastreams.",
+                        "data": {}
+                    }
+                )
 
             datastreams = resultado.get("datastreams")
             if datastreams is None:
                 logger.error("La respuesta de SendState no contiene 'datastreams': %s", resultado)
-                raise ValueError("Respuesta inválida del servicio de datastreams: sin datastreams")
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "message": "Respuesta inválida del servicio de datastreams: sin datastreams.",
+                        "data": {}
+                    }
+                )
 
             normalized = []
             for ds in datastreams:
@@ -123,13 +187,28 @@ class ObjetoService:
             await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "SendState Fin")
             logger.info("SendState exitoso para %d datastreams", len(normalized))
 
-            return {"osid": resultado.get("osid", osid), "datastreams": normalized, "timestamp": resultado.get("timestamp")}
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "success",
+                    "osid": resultado.get("osid", osid),
+                    "datastreams": normalized,
+                    "timestamp": resultado.get("timestamp")
+                }
+            )
 
         except Exception as e:
             logger.error("Error obteniendo estado de datastreams desde dataStreamService: %s", e)
-            raise ValueError(f"Error al obtener estado: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "message": f"Error al obtener estado: {e}",
+                    "data": {}
+                }
+            )
     
-    async def send_service_state(self, osid: str = None):
+    async def send_service_state(self, osid: str = None)->JSONResponse:
         """Consulta la disponibilidad del microservicio de datastream.
 
         Nota: el endpoint de datastream (`send_service_state`) no requiere
@@ -145,29 +224,63 @@ class ObjetoService:
             result = {"service_available": bool(available)}
             if osid:
                 result["osid"] = osid
-            return result
+            return JSONResponse(
+                status_code=200,
+                content=result
+            )
         except Exception as e:
             logger.error("Error verificando estado del servicio de datastreams: %s", e)
-            raise ValueError(f"Error al verificar servicio de datastreams: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "message": f"Error al verificar servicio de datastreams: {e}",
+                    "data": {}
+                }
+            )
 
-    async def send_data(self, osid: str, variableEstado: str, tipove: str = '1'):
+    async def send_data(self, osid: str, variableEstado: str, tipove: str = '1')->JSONResponse:
         """Solicita al microservicio de datastream el valor de un datastream espSecífico."""
         if osid != self.objetoInteligente.osid:
             logger.warning("El osid solicitado %s no coincide con el del objeto inteligente %s", osid, self.objetoInteligente.osid)
-            raise ValueError("El osid solicitado no coincide con el del objeto inteligente.")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "El osid solicitado no coincide con el del objeto inteligente.",
+                    "data": {}
+                }
+            )
 
         if not variableEstado:
-            raise ValueError("variableEstado es requerido")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "variableEstado es requerido",
+                    "data": {}
+                }
+            )
 
         try:
             await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, f"Inicio SendData {variableEstado}")
             # Ejecutar la petición SendData en un hilo para evitar bloqueo
             resultado = await asyncio.to_thread(dataStream_service.send_data, str(osid), str(variableEstado), tipove)
             await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, f"SendData Fin {variableEstado}")
-            return resultado
+            return JSONResponse(
+                status_code=200,
+                content=resultado
+            )
         except Exception as e:
             logger.error("Error en SendData para %s/%s: %s", osid, variableEstado, e)
-            raise ValueError(f"Error al solicitar SendData: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "message": f"Error al solicitar SendData: {e}",
+                    "data": {}
+                }
+            )
                 
         
 

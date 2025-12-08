@@ -1,10 +1,12 @@
 import os
 from infraestructure.interfaces import IPoblacionPerfilUsuario
-from infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
 from infraestructure.interfaces.IPoblacion import IPoblacion
 from infraestructure.logging.Logging import logger
-import config
 from fastapi.responses import JSONResponse
+
+from config import settings
+from application.dtos import RegistroInteraccionDTO
+from infraestructure.adaptadores.PoblarPerfilUsuario import PoblarPerfilUsuario
 
 class PoblacionService:
     """Clase base para servicios de población."""
@@ -55,13 +57,13 @@ class PoblacionService:
         
 class PoblacionOntologiaUsuarioService:
     """Servicio de Población para la Ontología del usuario."""
-    #def __init__(self, gestion_base_conocimiento: IPoblacionPerfilUsuario):
-    #    self.gestion_base_conocimiento = gestion_base_conocimiento    
-    def cargarOntologia(self, file_content: bytes, nombre: str, ip_coordinador: str) -> None:
+    def __init__(self, gestion_base_conocimiento: IPoblacionPerfilUsuario = None):
+        self.gestion_base_conocimiento = gestion_base_conocimiento    
+    def cargarOntologia(self, file_content: bytes, nombre: str, ip_coordinador: str) -> JSONResponse:
         """Guarda la ontología del perfil de usuario recibida."""
         logger.info(f"Cargando ontología para el usuario: {nombre} desde IP: {ip_coordinador}")
         try:            
-            rutaArchivo = config.pathOWL + nombre
+            rutaArchivo = settings.PATH_PU_OWL + nombre
             self.pathActual = rutaArchivo
             if  os.path.exists(self.pathActual):
                 logger.info(f"El archivo de ontología ya existe. Se reemplazará: {self.pathActual}")
@@ -69,13 +71,45 @@ class PoblacionOntologiaUsuarioService:
             archivo=open(rutaArchivo,'wb')
             archivo.write(file_content)
             archivo.close()
-
-            ##TODO guardar la ip del coordinador en un archivo para futuras consultas
-            #AppUtil.guardarIpCoordinadorEnArchivo(ipCoordinador)
-            #except Exception as e :
-
-            #self.activarEcasUsuario()
+            logger.info(f"Ontología guardada correctamente en: {rutaArchivo}")
+            return JSONResponse(
+                status_code=201,
+                content={"status": "Ontología cargada exitosamente"}
+            )           
 
         except Exception as e :
             logger.error("Error al cargar la ontología del perfil de usuario: " + str(e))    
-        
+            return JSONResponse(
+                status_code=500,
+                content={"status": "Error al cargar la ontología"}
+            )
+    def registroInteraccionUsuarioObjeto(self, data:RegistroInteraccionDTO) -> JSONResponse:
+        """Registra una interacción del usuario con un objeto."""
+        #Se inicializa de la misma manera que en el sistema legado
+        self.gestion_base_conocimiento = PoblarPerfilUsuario(data.mac,data.email,"CARGAR")
+        if self.gestion_base_conocimiento.registroInteraccionUsuarioObjeto(data.email, data.idDataStream, data.comando, data.osid, data.dateInteraction):
+            return JSONResponse(
+                status_code=201,
+                content={"status": "Interacción registrada exitosamente"}
+            )
+        else:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "Fallo al registrar la interacción"}
+            )
+    def eliminarOntologia(self)->JSONResponse:
+        """Elimina la ontología del perfil de usuario."""
+        try:
+            if os.path.exists(settings.ONTOLOGIA_PU):
+                os.remove(settings.ONTOLOGIA_PU)
+                logger.info(f"Ontología eliminada correctamente: {settings.ONTOLOGIA_PU}")
+            return JSONResponse(
+                status_code=200,
+                content={"status": "Ontología eliminada exitosamente"}
+            )
+        except Exception as e:
+            logger.error("Error al eliminar la ontología del perfil de usuario: " + str(e))    
+            return JSONResponse(
+                status_code=500,
+                content={"status": "Error al eliminar la ontología"}
+            )

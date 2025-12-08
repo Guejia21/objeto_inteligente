@@ -56,23 +56,22 @@ class ECATaskManager:
         
         if eca_key in self.active_ecas:
             del self.active_ecas[eca_key]
-            logger.info(f"ECA eliminado: {eca_key}")
+            logger.info(f"ECA eliminado del monitoreo: {eca_key}")
             return True
         return False
     
-    async def update_eca_state(self, eca_name: str, new_state: str, user_eca: str = "default") -> bool:
-        """Actualiza el estado de un ECA (on/off)"""
+    async def update_eca_state(self, eca_name: str, new_state: str, user_eca: str = "default"):
+        """Actualiza el estado (on/off) de un ECA existente"""        
         eca_key = f"{eca_name}_{user_eca}"
         
-        if eca_key in self.active_ecas:
+        if eca_key in self.active_ecas.keys():
             self.active_ecas[eca_key].state = new_state
-            logger.info(f"ECA {eca_key} cambió a estado: {new_state}")
+            logger.info(f"ECA {eca_key} cambió a estado: {new_state} en gestor de tareas")
             
             if new_state == "on" and not self.is_listening:
                 await self._start_telemetry_listener()
-            
-            return True
-        return False
+            return         
+        logger.warning(f"ECA {eca_key} no encontrado para actualizar estado")
     
     async def _start_telemetry_listener(self):
         """Inicia la suscripción al tópico de telemetría"""
@@ -134,15 +133,16 @@ class ECATaskManager:
         """Retorna información de todos los ECAs activos"""
         return {
             key: {
-                "name": e.name,
-                "state": e.state,
+                "eca_name": e.name,
+                "eca_state": e.state,
+                "user_eca": e.user_eca,
                 "event_resource": e.event_resource_id,
                 "action_resource": e.action_resource_id,
                 "threshold": e.threshold_value,
                 "comparator": e.comparator
             }
             for key, e in self.active_ecas.items()
-        }
+        }    
 
 
 # Instancia global

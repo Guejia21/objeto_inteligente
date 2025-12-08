@@ -118,3 +118,72 @@ class SendDataResponse(BaseModel):
     datastream_format: str
     value: str
     timestamp: Optional[str] = None
+class CommandActionData(BaseModel):
+    """
+    Datos del comando/acción a ejecutar.
+    
+    Este schema representa el contenido del XML "comando"
+    pero en formato JSON para la migración.
+    """
+    id_action_resource: str = Field(..., description="ID del datastream/actuador a controlar")
+    comparator_action: str = Field(..., description="Comparador: igual, mayor, menor, incrementar, decrementar")
+    variable_action: str = Field(..., description="Valor a establecer")
+    type_variable_action: str = Field(..., description="Tipo del valor: string, float, int, bool")
+    
+    # Campos opcionales
+    name_action_object: Optional[str] = Field(None, description="Nombre del objeto acción")
+    name_action_resource: Optional[str] = Field(None, description="Nombre del recurso")
+    unit_action: Optional[str] = Field(None, description="Unidad de la acción")
+    meaning_action: Optional[str] = Field(None, description="Significado: turn_on, turn_off, set_value")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id_action_resource": "ventilador",
+                "comparator_action": "igual",
+                "variable_action": "on",
+                "type_variable_action": "string",
+                "name_action_object": "Actuador Ventilador",
+                "name_action_resource": "Ventilador",
+                "unit_action": "state",
+                "meaning_action": "turn_on"
+            }
+        }
+class SendCommandRequest(BaseModel):
+    """
+    Schema completo para SendCommand en formato JSON
+    (para migración del sistema XML a JSON)
+    """
+    osid: str = Field(..., description="ID del objeto origen (quien envía el comando)")
+    osidDestino: str = Field(..., description="ID del objeto destino (quien ejecuta)")
+    comando: CommandActionData = Field(..., description="Datos del comando a ejecutar")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "osid": "ESP32_Sala",
+                "osidDestino": "ESP32_Cocina",
+                "comando": {
+                    "id_action_resource": "ventilador",
+                    "comparator_action": "igual",
+                    "variable_action": "on",
+                    "type_variable_action": "string"
+                }
+            }
+        }
+class ECAStateRequest(BaseModel):
+    """Petición para cambiar el estado de un ECA"""
+    osid: str = Field(..., description="ID del objeto que recibe la petición")
+    nombreECA: str = Field(..., description="Nombre del ECA a modificar")
+    userECA: str = Field(..., description="Email del usuario creador del ECA")
+    comando: Literal["on", "off"] = Field(..., description="Nuevo estado del ECA")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "osid": "708637323",
+                "nombreECA": "Temperatura_Led",
+                "userECA": "usuario@example.com",
+                "comando": "on"
+            }
+        }

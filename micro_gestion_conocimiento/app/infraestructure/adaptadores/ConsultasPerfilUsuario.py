@@ -1,28 +1,34 @@
 """Adaptador para consultas en la ontología del perfil de usuario."""
 
-from app.infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
-from app.infraestructure.acceso_ontologia.OntologiaPU import OntologiaPU
+from infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
+from infraestructure.acceso_ontologia.OntologiaPU import OntologiaPU
 from itertools import groupby
 from operator import itemgetter
-from app import config
+from config import settings 
 import os
-
+from infraestructure.logging.Logging import logger
 class ConsultasPerfilUsuario(IConsultasPerfilUsuario):
 
-    def __init__(self, nombreOntologia):
+    def __init__(self, nombreOntologia:str = "UsuarioActual.owl"):
             self.usuarioActual= nombreOntologia
             try:           
-                os.stat(config.pathOWL)
+                os.stat(settings.PATH_PU_OWL)
             except:
-                os.mkdir(config.pathOWL, 0o777)
+                os.mkdir(settings.PATH_PU_OWL, 0o777)
             try:              
-                self.path = config.pathOWL +self.usuarioActual #se espera que el pathOWL haya solo un archivo, la ontologia del usuario actual
+                self.path = settings.PATH_PU_OWL + self.usuarioActual #se espera que el pathOWL haya solo un archivo, la ontologia del usuario actual
                 self.ontologia = OntologiaPU(self.path)
+                self.ontoExists = True
             except:
-                print("DESDE INIT CONSULTAS PERFIL USUARIO ERROR AL CARGAR LA ONTOLOGIA")
-            
+                logger.error("DESDE INIT CONSULTAS PERFIL USUARIO ERROR AL CARGAR LA ONTOLOGIA")
+                self.ontoExists = False
+    def consultarActive(self)->bool:
+        return self.ontoExists
     def consultarEmailUsuario(self):
         #print("consultarEmailUsuario")
+        if not self.ontoExists:
+            logger.error("ONTLOGIA PERFIL USUARIO NO EXISTE EN CONSULTAR EMAIL USUARIO")
+            return ""
         listaIps = []
         query = """ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -352,8 +358,8 @@ class ConsultasPerfilUsuario(IConsultasPerfilUsuario):
         keys = ['name_eca','state_eca','id_event_object','ip_event_object','name_event_object','id_event_resource','name_event_resource', 'comparator_condition','variable_condition','type_variable_condition','unit_condition','meaning_condition','id_action_object','ip_action_object','name_action_object','id_action_resource','name_action_resource','comparator_action','variable_action','type_variable_action','unit_action','meaning_action', 'name_activity', 'start_date_activity','end_date_activity' ]
         query = """ PREFIX  oos: <http://semanticsearchiot.net/sswot/Ontologies#> 
                     PREFIX : <http://localhost/default#>
-                    SELECT DISTINCT ?name_eca ?eca_state 
                     PREFIX upo:<http://localhost/UPO#>
+                    SELECT DISTINCT ?name_eca ?eca_state 
                     ?osid_object_event ?ip_event_object ?name_event_object ?id_event_resource ?name_event_resource 
                     ?comparator_condition ?variable_condition ?type_variable_condition ?unit_condition ?meaning_condition 
                     ?osid_object_action ?ip_action_object  ?name_action_object ?id_action_resource ?name_action_resource ?comparator_action ?variable_action ?type_variable_action  ?unit_action ?meaning_action 
@@ -379,8 +385,8 @@ class ConsultasPerfilUsuario(IConsultasPerfilUsuario):
                         ?accion oos:id_action_object ?osid_object_action. 
                         FILTER regex(?osid_object_action, '""" + idObjeto + """').
                         ?accion oos:name_action_object ?name_action_object.
-                        ?accion oos:ip_action_object 
-                        ?ip_action_object. ?accion oos:comparator_action ?comparator_action. 
+                        ?accion oos:ip_action_object ?ip_action_object. 
+                        ?accion oos:comparator_action ?comparator_action. 
                         ?accion oos:variable_action ?variable_action.  
                         ?accion oos:meaning_action ?meaning_action. 
                         ?accion oos:type_variable_action ?type_variable_action. 
@@ -412,8 +418,12 @@ class ConsultasPerfilUsuario(IConsultasPerfilUsuario):
         except Exception as e:
             print( "Error en listarontologios ontologias pck")
             print( e)
+            return []
             
     def consultarListaPreferenciasporOSID(self, idObjeto):
+        if not self.ontoExists:
+            logger.error("ONTLOGIA PERFIL USUARIO NO EXISTE EN CONSULTAR LISTA PREFERENCIAS POR OSID")
+            return []
         return self.consultarListaPreferenciasObjetoAccionporOSID(idObjeto)+self.consultarListaPreferenciasObjetoEventoporOSID(idObjeto)
 ########################################################################################################################
     def pasarListaDiccionario(self, lista, keys):

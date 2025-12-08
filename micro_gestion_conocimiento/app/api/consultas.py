@@ -1,8 +1,9 @@
 
-from application.consultas_service import ConsultasService
+from fastapi.responses import JSONResponse
+from application.consultas_service import ConsultasOntologiaUsuarioService, ConsultasService
 from fastapi import APIRouter, Depends, HTTPException
 
-from deps import get_consultas_service
+from deps import get_consultas_pu_service, get_consultas_pu_service, get_consultas_service
 from application.dtos import ECAStateListDTO
 
 ontologia_router = APIRouter(prefix="/ontology/consultas", tags=["Consultas de Base de conocimiento"])
@@ -98,7 +99,7 @@ async def consultar_service_state(service: ConsultasService = Depends(get_consul
         return service.consultarServiceState()
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
-@ontologia_router.post("/set_eca_state")
+@ontologia_router.patch("/set_eca_state")
 async def set_eca_state(valorNuevo: str, nombreECA: str, service: ConsultasService = Depends(get_consultas_service)):
     """Endpoint para actualizar el estado de una ECA."""
     # Para actualizar correctamente el estado del eca debe enviarse el nombre del eca+nombre del usuario
@@ -135,6 +136,34 @@ async def set_eca_list_state(listaEcas: ECAStateListDTO, service: ConsultasServi
         return service.setEcaListState(listaEcas.ecas)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
+@ontologia_router.get("/verificar_contrato/{osid}/{osidDestino}", response_model=list)
+async def verificar_contrato(osid: str, osidDestino: str, service: ConsultasService = Depends(get_consultas_service)) -> list:
+    """Endpoint para verificar si existe un contrato ECA entre dos objetos en la ontología."""
+    try:
+        return service.verficarContrato(osid, osidDestino)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
 ontologia_usuario_router = APIRouter(prefix="/ontology/consultas_usuario", tags=["Consultas de Usuario"])
 """ Endpoints para consultas sobre la ontología del perfil de usuario."""
+@ontologia_usuario_router.get("/consultar_email_usuario")
+def consultar_email_usuario(service: ConsultasOntologiaUsuarioService = Depends(get_consultas_pu_service)) -> str:
+    """Endpoint para consultar el email del usuario desde su ontología."""
+    try:
+        return service.consultarEmailUsuario()
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+@ontologia_usuario_router.get("/consultar_lista_preferencias/{osid}")
+def consultar_lista_preferencias(osid: str, service: ConsultasOntologiaUsuarioService = Depends(get_consultas_pu_service)) -> JSONResponse:
+    """Endpoint para consultar la lista de preferencias del usuario por OSID."""
+    try:
+        return service.consultarListaPreferenciasporOSID(osid)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+@ontologia_usuario_router.get("/consultar_active")
+def consultar_active(service: ConsultasOntologiaUsuarioService = Depends(get_consultas_pu_service)) -> JSONResponse:
+    """Endpoint para consultar si el perfil del usuario está activo en su ontología."""
+    try:
+        return service.consultarActive()
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))

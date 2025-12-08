@@ -8,6 +8,5 @@ logging.basicConfig(
         logging.StreamHandler(),  # Enviar logs a la consola        
     ]
 )
-
 # Crear un logger específico para este módulo
 logger = logging.getLogger(__name__)

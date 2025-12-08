@@ -162,3 +162,25 @@ class ECAStateListDTO(BaseModel):
             ]
         }
     )
+class RegistroInteraccionDTO(BaseModel):
+    mac:str = Field(..., description="MAC del usuario")
+    idUsuario:str = Field(..., description="ID del usuario")
+    accion:Literal["CARGAR","ELIMINAR"] = Field(..., description="Acción realizada")
+    email: str = Field(..., description="Correo electrónico del usuario")
+    idDataStream: str = Field(..., description="ID del datastream")
+    comando: str = Field(..., description="Comando ejecutado")
+    osid: str = Field(..., description="ID del objeto inteligente")
+    dateInteraction: str = Field(..., description="Fecha y hora de la interacción")
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "mac": "00:1A:7D:DA:71:13",
+                "idUsuario": "user_123",
+                "accion": "CARGAR",
+                "email": "usuario@example.com",
+                "idDataStream": "relay",
+                "comando": "on",
+                "osid": "ESP32_Sala",
+                "dateInteraction": "15/09/23 14:30:00"
+                }
+        }

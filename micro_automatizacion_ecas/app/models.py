@@ -26,12 +26,7 @@ class EcaResponse(EcaBase):
     estado: str
     name_eca: str
 
-class SendCommandRequest(BaseModel):
-    """Modelo para enviar comandos entre objetos"""
-    osid: str
-    osidDestino: str
-    comando: str
-    idDataStream: str
+
 
 class StateChange(BaseModel):
     """Modelo para cambiar estado de ECAs"""

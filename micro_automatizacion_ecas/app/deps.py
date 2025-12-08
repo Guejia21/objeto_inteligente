@@ -16,7 +16,11 @@ async def load_ecas_on_startup():
         return
     eca = ECA()
     logger.info(f"Cargando ECAs desde {eca_path}...")
-    for filename in os.listdir(eca_path):
+    ecas = os.listdir(eca_path)
+    if len(ecas) == 0:
+        logger.info("No se encontraron archivos de ECAs para cargar.")
+        return
+    for filename in ecas:
         if filename.endswith(".json"):
             diccionario_eca = eca.getDiccionarioECA(filename)
             if diccionario_eca:

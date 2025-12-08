@@ -1,8 +1,8 @@
 from fastapi import Request, Response
-from app.api_router.exceptions import RouteNotFoundException, MethodNotAllowedException
+from api_router.exceptions import RouteNotFoundException, MethodNotAllowedException
 from aiohttp import ClientSession, ClientTimeout
-from app.config import config
-from app.logging import logger
+from config import config
+from Logging import logger
 import json as json_module
 
 class APIRouter:
@@ -10,21 +10,33 @@ class APIRouter:
     def __init__(self):
                 
         self.config = {
-            "endpoints": {                
+            "endpoints": {
+                # Microservicio de Gestión de Objetos
                 "/objeto": {
                     "methods": ["GET", "POST"],
                     "backend": config.OBJECT_SERVICE_URL
                 },
+                # Microservicio de Data Streams
                 "/Datastreams": {
                     "methods": ["GET", "POST"],
                     "backend": config.DATASTREAMS_SERVICE_URL
-                }
+                },                
+                # Microservicio de Automatización ECAs
+                "/eca": {
+                    "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+                    "backend": config.ECA_SERVICE_URL
+                },
+                # Microservicio de Personalización
+                "/personalizacion": {
+                    "methods": ["GET", "POST"],
+                    "backend": config.PERSONALIZACION_SERVICE_URL
+                },
             },
         }
 
     async def route(self, request: Request):        
-        service = request.path_params["path_name"].split("/")[1]
-        service = "/" + service
+        path_parts = request.path_params["path_name"].split("/")
+        service = "/" + path_parts[1] if len(path_parts) > 1 else ""
         logger.info(f"Routing request for service: {service} with method: {request.method}")
         
         if service not in self.config["endpoints"]:
@@ -37,7 +49,7 @@ class APIRouter:
         headers = request.headers.mutablecopy()
         headers["gateway-jwt-token"] = "Some Security Header"
         
-        method = request.path_params["path_name"].split("/")[2:]
+        method = path_parts[2:] if len(path_parts) > 2 else []
         base_url = self.config["endpoints"][service]["backend"] + service + "/" + "/".join(method)
         
         # Agregar query parameters si existen
@@ -59,14 +71,9 @@ class APIRouter:
                         modified_headers = dict(response.headers)
                         
                 elif request.method == "POST":
-                    # Leer el body una sola vez
                     body_bytes = await request.body()
                     logger.info(f"Sending POST with {len(body_bytes)} bytes")
                     
-                    # Determinar Content-Type
-                    content_type = request.headers.get("content-type", "")
-                    
-                    # Enviar la petición
                     async with session.post(
                         url=base_url, 
                         data=body_bytes,
@@ -74,6 +81,39 @@ class APIRouter:
                     ) as response:
                         data = await response.read()
                         logger.info(f"POST response: {response.status}")
+                        modified_headers = dict(response.headers)
+                        
+                elif request.method == "PUT":
+                    body_bytes = await request.body()
+                    logger.info(f"Sending PUT with {len(body_bytes)} bytes")
+                    
+                    async with session.put(
+                        url=base_url, 
+                        data=body_bytes,
+                        headers=headers
+                    ) as response:
+                        data = await response.read()
+                        logger.info(f"PUT response: {response.status}")
+                        modified_headers = dict(response.headers)
+                        
+                elif request.method == "PATCH":
+                    body_bytes = await request.body()
+                    logger.info(f"Sending PATCH with {len(body_bytes)} bytes")
+                    
+                    async with session.patch(
+                        url=base_url, 
+                        data=body_bytes,
+                        headers=headers
+                    ) as response:
+                        data = await response.read()
+                        logger.info(f"PATCH response: {response.status}")
+                        modified_headers = dict(response.headers)
+                        
+                elif request.method == "DELETE":
+                    logger.info(f"Sending DELETE request")
+                    async with session.delete(url=base_url, headers=headers) as response:
+                        data = await response.read()
+                        logger.info(f"DELETE response: {response.status}")
                         modified_headers = dict(response.headers)
                 else:
                     return Response(content="Method not supported", status_code=405)
