@@ -146,4 +146,3 @@ class ECATaskManager:
 
 
 # Instancia global
-eca_task_manager = ECATaskManager()
