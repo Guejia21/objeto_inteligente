@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 class ILogPanelMQTT(ABC):
     @abstractmethod    
     async def Publicar(self, topic: str, message):
+        pass
+    async def suscribir(self, topic: str, callback):
         pass    
     @abstractmethod
     async def PubLog(self, key: str, id_emisor: int, nombre_emisor: str, id_receptor: int, nombre_receptor: str, elemento: str, estado: str):
