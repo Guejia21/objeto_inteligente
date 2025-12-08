@@ -184,7 +184,18 @@ class EcaService:
         """
         await self.Log.PubRawLog(self.osid, self.osid, "Apagar todos ecas")
         if self.osid == osid:
-            try:                
+            try:               
+                if os.listdir(self.pathEca) == []:
+                    logger.info("No hay ECAS para apagar")
+                    await self.Log.PubRawLog(self.osid, self.osid, "Fin Apagar todos ecas - No hay ECAS")
+                    return JSONResponse(
+                        status_code=200,
+                        content={
+                            "status": "success",                            
+                            "message": "No hay ECAs para apagar.",
+                            "data": {}
+                        }
+                    ) 
                 logger.info("Apagando Todos los ECAS")
                 ti = time.time()
                 await self.__apagar_ecas()
@@ -240,6 +251,18 @@ class EcaService:
         """
         if self.osid == osid:
             try:
+                filename = f"ECA_{eca_name}_{user_eca}.json"
+                filepath = os.path.join(settings.PATH_ECA, filename)
+                if not os.path.exists(filepath):
+                    logger.error(f"Archivo del ECA no encontrado: {filepath}")
+                    return JSONResponse(
+                        status_code=404,
+                        content={
+                            "status": "error",                            
+                            "message": f"No se encontró el archivo del ECA {eca_name}.",
+                            "data": {}
+                        }
+                    )
                 await self.Log.PubLog("eca_delete", self.osid, self.title, self.osid, self.title, eca_name, "Solicitud Recibida")
                 # Eliminar del gestor de tareas
                 eca_task_manager.unregister_eca(eca_name, user_eca)
@@ -307,6 +330,18 @@ class EcaService:
         """
         if self.osid == parametros.osid:
             try:
+                filename = f"ECA_{parametros.nombreECA}_{parametros.userECA}.json"
+                filepath = os.path.join(settings.PATH_ECA, filename)
+                if not os.path.exists(filepath):
+                    logger.error(f"Archivo del ECA no encontrado: {filepath}")
+                    return JSONResponse(
+                        status_code=404,
+                        content={
+                            "status": "error",                            
+                            "message": f"No se encontró el archivo del ECA {parametros.nombreECA}.",
+                            "data": {}
+                        }
+                    )
                 logger.info("Cambiando Estado a " + parametros.comando + " del ECA: " + parametros.nombreECA)
                 await self.__change_eca_state(parametros.nombreECA, parametros.userECA, parametros.comando)
                 logger.info("Estado " + parametros.comando + " del ECA: " + parametros.nombreECA)
