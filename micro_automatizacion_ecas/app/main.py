@@ -7,10 +7,9 @@ from config import settings
 from deps import load_ecas_on_startup, get_broker
 from domain.eca_task_manager import ECATaskManager
 
-
+eca_task_manager = ECATaskManager()
 @asynccontextmanager
-async def lifespan(app: FastAPI):    
-    eca_task_manager = ECATaskManager()
+async def lifespan(app: FastAPI):        
     eca_task_manager.set_broker(get_broker())
     await load_ecas_on_startup()
     yield
