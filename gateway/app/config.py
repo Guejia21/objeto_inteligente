@@ -1,13 +1,15 @@
 """Archivo de configuracion global de la aplicacion."""
-import os
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 
 class Settings(BaseSettings):
     """Clase de configuracion global de la aplicacion."""
-    ONTOLOGY_SERVICE_URL: str = os.getenv("ONTOLOGY_SERVICE_URL", "http://localhost:8001")
-    OBJECT_SERVICE_URL: str = os.getenv("OBJECT_SERVICE_URL", "http://localhost:8002")
-    DATASTREAMS_SERVICE_URL: str = os.getenv("DATASTREAMS_SERVICE_URL", "http://localhost:8003")
+    OBJECT_SERVICE_URL :str = "http://localhost:8002"
+    DATASTREAMS_SERVICE_URL : str = "http://localhost:8003"
+    ONTOLOGY_SERVICE_URL : str = "http://localhost:8001"
+    ECA_SERVICE_URL : str = "http://localhost:8004"
+    PERSONALIZACION_SERVICE_URL : str = "http://localhost:8005"
+    PORT: int = 8000
     model_config = ConfigDict(        
         env_file = ".env",
         env_file_encoding = "utf-8",

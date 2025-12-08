@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 
 from application.dtos import ECAResponse, ECAStateRequest, MakeContractRequest
 from deps import get_eca_service
@@ -10,7 +11,7 @@ from application.dtos import SendCommandRequest
 router = APIRouter(prefix="/eca", tags=["ECAs"])
 
 # Crear nueva ECA
-@router.post("/", response_model=ECAResponse, responses={400: {"model": ECAResponse}})
+@router.post("/")
 async def crear_eca(eca: MakeContractRequest, service: EcaService = Depends(get_eca_service)):  
     """Crear una nueva regla ECA."""
     try:
@@ -18,21 +19,21 @@ async def crear_eca(eca: MakeContractRequest, service: EcaService = Depends(get_
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-@router.get("/", response_model=ECAResponse)
+@router.get("/")
 async def listar_ecas(osid: str = Query(..., description="ID del objeto inteligente"),service: EcaService = Depends(get_eca_service)):
     """Listar todas las ECAs del objeto inteligente."""
     try:
         return await service.listar_ecas(osid)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-@router.patch("/", response_model=ECAResponse)
+@router.patch("/")
 async def apagar_ecas(osid: str = Query(..., description="ID del objeto inteligente"),service: EcaService = Depends(get_eca_service)):
     """Apagar todas las ECAs del objeto inteligente."""
     try:
         return await service.apagar_ecas(osid)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-@router.delete("/", response_model=ECAResponse)
+@router.delete("/")
 async def eliminar_eca(
     osid:str=Query(..., description="ID del objeto inteligente"),
     eca_name: str = Query(..., description="Nombre del ECA a eliminar"),
@@ -42,19 +43,19 @@ async def eliminar_eca(
         return await service.eliminar_eca(osid,eca_name, user_eca)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-@router.put("/state", response_model=ECAResponse)
+@router.put("/state")
 async def cambiar_estado(request: ECAStateRequest, service: EcaService = Depends(get_eca_service)):
     try:
         return await service.cambiar_estado_eca(request)        
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-@router.put("/edit", response_model=ECAResponse)
+@router.put("/edit")
 async def editar_eca(eca: MakeContractRequest, service: EcaService = Depends(get_eca_service)):
     try:
         return await service.editar_eca(eca)        
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-@router.post("/send_command", response_model=ECAResponse)
+@router.post("/send_command")
 async def send_command(request: SendCommandRequest, service: EcaService = Depends(get_eca_service)):
     """Envía un comando a un datastream actuador si existe un contrato."""
     try:

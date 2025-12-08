@@ -7,7 +7,7 @@ from deps import get_personalizacion_service
 
 
 
-router = APIRouter()
+router = APIRouter(prefix="/personalizacion", tags=["Gestión de Personalización de Usuario"])
 
 @router.post("/CrearPreferencia")
 async def crear_preferencia(

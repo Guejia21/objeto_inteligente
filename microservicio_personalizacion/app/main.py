@@ -12,7 +12,7 @@ def create_application() -> FastAPI:
     
     app = FastAPI(
         title="Microservicio de Personalización",
-        description="Gestiona preferencias e interacciones de usuario - Compatible con sistema legacy",
+        description="Gestiona preferencias e interacciones de usuario - Compatible con sistema legacy",        
         version="2.0.0",
         docs_url="/docs",
         redoc_url="/redoc"
@@ -28,7 +28,7 @@ def create_application() -> FastAPI:
     )
     
     # Incluir routers
-    app.include_router(personalizacion_router, prefix="", tags=["Personalización"])
+    app.include_router(personalizacion_router)
     
     return app
 

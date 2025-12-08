@@ -2,6 +2,8 @@ from ast import Dict
 import os
 from random import random
 import time
+
+from fastapi.responses import JSONResponse
 from application.dtos import ECAResponse, ECAStateRequest, MakeContractRequest, SendCommandRequest
 from infra.logging.Logging import logger
 from config import settings
@@ -20,7 +22,7 @@ class EcaService:
         self.Log = log_panel
         self.eca = ECA()        
         
-    async def crear_eca(self, eca_data: MakeContractRequest) -> ECAResponse:
+    async def crear_eca(self, eca_data: MakeContractRequest) -> JSONResponse:
         """
         Crea un nuevo contrato ECA para el objeto inteligente.
         
@@ -46,11 +48,13 @@ class EcaService:
                     
             except Exception as e:
                 logger.error(f"Error al guardar el archivo del contrato ECA: {e}")
-                return ECAResponse(
-                    status="error",
-                    code="FILE_SAVE_ERROR",
-                    message="Error al guardar el archivo del contrato ECA.",
-                    data={}
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",                        
+                        "message": "Error al guardar el archivo del contrato ECA.",
+                        "data": {}
+                    }
                 )
             
             try:
@@ -62,11 +66,13 @@ class EcaService:
                 # Poblar ontología
                 if not ontology_service.poblate_eca(diccEca):
                     logger.error("Error al poblar el ECA en la ontología.")
-                    return ECAResponse(
-                        status="error",
-                        code="ONTOLOGY_ERROR",
-                        message="Error al poblar el ECA en la ontología.",
-                        data={}
+                    return JSONResponse(
+                        status_code=500,
+                        content={
+                            "status": "error",                            
+                            "message": "Error al poblar el ECA en la ontología.",
+                            "data": {}
+                        }
                     )
                 
                 logger.info(f"ECA {diccEca['name_eca']} guardado en ontología")
@@ -74,43 +80,60 @@ class EcaService:
                 # Registrar ECA en el gestor de tareas para monitoreo
                 if await eca_task_manager.register_eca(diccEca):
                     logger.info(f"ECA {diccEca['name_eca']} registrado para monitoreo")
-                    return ECAResponse(
-                        status="success",
-                        code="ECA_CREATED",
-                        message="El contrato ECA ha sido creado exitosamente.",
-                        data={
-                            "eca_name": diccEca["name_eca"],
-                            "state": diccEca["state_eca"],
-                            "filename": filename
+                    return JSONResponse(
+                        status_code=200,
+                        content={
+                            "status": "success",                            
+                            "message": "El contrato ECA ha sido creado exitosamente.",
+                            "data": {
+                                "eca_name": diccEca["name_eca"],
+                                "state": diccEca["state_eca"],
+                                "filename": filename
+                            }
                         }
                     )
                 else:
                     logger.error("Error al registrar el ECA en el gestor de tareas.")
-                    return ECAResponse(
-                        status="error",
-                        code="TASK_MANAGER_ERROR",
-                        message="Error al registrar el ECA en el gestor de tareas.",
-                        data={}
+                    return JSONResponse(
+                        status_code=500,
+                        content={
+                            "status": "error",                            
+                            "message": "Error al registrar el ECA en el gestor de tareas.",
+                            "data": {}
+                        }
                     )            
             except Exception as e:
                 logger.error(f"Error creando ECA: {e}")
                 import traceback
                 traceback.print_exc()
-                return ECAResponse(
-                    status="error",
-                    code="ECA_CREATION_ERROR",
-                    message=f"Error al crear el ECA: {str(e)}",
-                    data={}
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",                            
+                        "message": f"Error al crear el ECA: {str(e)}",
+                        "data": {}
+                    }
                 )
         else:
-            return ECAResponse(
-                status="error",
-                code="INVALID_OSID",
-                message="El identificador del objeto no corresponde.",
-                data={}
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "code": "INVALID_OSID",
+                    "message": "El identificador del objeto no corresponde.",
+                    "data": {}
+                }
             )
     
-    async def listar_ecas(self,osid:str) -> ECAResponse:
+    async def listar_ecas(self,osid:str) -> JSONResponse:
+        """Lista todas las ECAs del objeto inteligente.
+
+        Args:
+            osid (str): ID del objeto inteligente.
+
+        Returns:
+            JSONResponse: Respuesta con la lista de ECAs.
+        """
         await self.Log.PubRawLog(self.osid, self.osid, "Listar todos ecas")
         if self.osid == osid:
             try:
@@ -118,33 +141,46 @@ class EcaService:
                 listaEcas = ontology_service.get_ecas()
                 logger.info(f"{len(listaEcas)} ECAs obtenidos de la ontología")                
                 await self.Log.PubRawLog(self.osid, self.osid, "Fin Listar todos ecas")
-                return ECAResponse(
-                    status="success",
-                    code="ECAS_LISTED",
-                    message="Listado de ECAs obtenido exitosamente.",
-                    data={"ecas": listaEcas}
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "status": "success",                        
+                        "message": "Listado de ECAs obtenido exitosamente.",
+                        "data": {"ecas": listaEcas}
+                    }
                 )
             except Exception as e:
                 await self.Log.PubRawLog(self.osid, self.osid, "Error Listar todos ecas")
                 logger.error("Error Listando ECAS: %s", e)                
-                return ECAResponse(
-                    status="error",
-                    code="ECAS_LISTING_ERROR",
-                    message=f"Error al listar los ECAs: {str(e)}",
-                    data={}
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "code": "ECAS_LISTING_ERROR",
+                        "message": f"Error al listar los ECAs: {str(e)}",
+                        "data": {}
+                    }
                 )
         else:
             await self.Log.PubRawLog(self.osid, self.osid, "Listar todos ecas Id incorrecto")
-            return ECAResponse(
-                status="error",
-                code="INVALID_OSID",
-                message="El identificador del objeto no corresponde.",
-                data={}
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "code": "INVALID_OSID",
+                    "message": "El identificador del objeto no corresponde.",
+                    "data": {}
+                }
             )
     
-    async def apagar_ecas(self, osid: str) -> ECAResponse:
-        """
-        Apaga todas las ECAs del objeto inteligente.
+    async def apagar_ecas(self, osid: str) -> JSONResponse:
+        """Apaga todas las ECAs del objeto inteligente, pone su estado en off en la ontologia y desactiva su monitorizacion.
+
+        Args:
+            osid (str): ID del objeto inteligente.
+
+        Returns:
+            JSONResponse: Respuesta de la operación de apagado.
         """
         await self.Log.PubRawLog(self.osid, self.osid, "Apagar todos ecas")
         if self.osid == osid:
@@ -157,32 +193,38 @@ class EcaService:
                 tf = time.time()
                 tt = tf - ti
                 logger.info("Termina de apagar Ecas en " + str(tt) + " Segundos")
-                return ECAResponse(
-                    status="success",
-                    code="ECAS_TURNED_OFF",
-                    message="Todas las ECAs han sido apagadas exitosamente.",
-                    data={}
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "status": "success",                        
+                        "message": "Todas las ECAs han sido apagadas exitosamente.",
+                        "data": {}
+                    }
                 )                               
             except Exception as e:
                 await self.Log.PubRawLog(self.osid, self.osid, "Error Apagar todos ecas")
                 logger.error("Error apagando todos los ECA: %s", e)                
-                return ECAResponse(
-                    status="error",
-                    code="ECAS_TURN_OFF_ERROR",
-                    message=f"Error al apagar las ECAs: {str(e)}",
-                    data={}
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",                        
+                        "message": f"Error al apagar las ECAs: {str(e)}",
+                        "data": {}
+                    }
                 )
         else:
             await self.Log.PubRawLog(self.osid, self.osid, "Apagar todos ecas id incorrecto")
             logger.error("Identificador Incorrecto")            
-            return ECAResponse(
-                status="error",
-                code="INVALID_OSID",
-                message="El identificador del objeto no corresponde.",
-                data={}
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",                    
+                    "message": "El identificador del objeto no corresponde.",
+                    "data": {}
+                }
             )  
     
-    async def eliminar_eca(self, osid:str,eca_name: str, user_eca: str = "default") -> ECAResponse:
+    async def eliminar_eca(self, osid:str,eca_name: str, user_eca: str = "default") -> JSONResponse:
         """
         Elimina un ECA específico del objeto inteligente.
         
@@ -214,30 +256,55 @@ class EcaService:
                 if ontology_service.delete_eca(nombre_completo):
                     logger.info(f"ECA {eca_name} eliminado correctamente")
                     await self.Log.PubLog("eca_delete", self.osid, self.title, self.osid, self.title, eca_name, "Eca eliminado en objeto")
-                    return ECAResponse(
-                        status="success",
-                        code="ECA_DELETED",
-                        message=f"ECA {eca_name} eliminado correctamente",
-                        data={"eca_name": eca_name}
+                    return JSONResponse(
+                        status_code=200,
+                        content={
+                            "status": "success",                            
+                            "message": f"El ECA {eca_name} ha sido eliminado exitosamente.",
+                            "data": {}
+                        }
                     )
                 else:
-                    return ECAResponse(
-                        status="error",
-                        code="ECA_NOT_FOUND",
-                        message=f"No se encontró el ECA {eca_name}",
-                        data={}
+                    return JSONResponse(
+                        status_code=404,
+                        content={
+                            "status": "error",
+                            "message": f"No se encontró el ECA {eca_name}",
+                            "data": {}
+                        }
                     )
             except Exception as e:
                 await self.Log.PubRawLog(self.osid, self.osid, "Error Eliminar ecas")
                 logger.error(f"Error eliminando ECA: {e}")
-                return ECAResponse(
-                    status="error",
-                    code="ECA_DELETE_ERROR",
-                    message=str(e),
-                    data={}
-                )
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "message": f"Error al eliminar el ECA: {str(e)}",
+                        "data": {}
+                    }
+                )   
+        else:
+            await self.Log.PubRawLog(self.osid, self.osid, "Error eliminarEca, Id incorrecto")
+            logger.error("Error - Identificador Incorrecto")            
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "El identificador del objeto no corresponde.",
+                    "data": {}
+                }
+            )
     
-    async def cambiar_estado_eca(self, parametros: ECAStateRequest) -> ECAResponse:
+    async def cambiar_estado_eca(self, parametros: ECAStateRequest) -> JSONResponse:
+        """Cambia el estado de un ECA específico. Actualiza su monitorizacion y estado en la ontologia
+
+        Args:
+            parametros (ECAStateRequest): Datos relacionados al cambio de estado
+
+        Returns:
+            JSONResponse: Resultado de la operación
+        """
         if self.osid == parametros.osid:
             try:
                 logger.info("Cambiando Estado a " + parametros.comando + " del ECA: " + parametros.nombreECA)
@@ -245,32 +312,38 @@ class EcaService:
                 logger.info("Estado " + parametros.comando + " del ECA: " + parametros.nombreECA)
                 await self.Log.PubRawLog(self.osid, self.osid,"Estado de " + parametros.nombreECA + " cambiado a : " + parametros.comando)
                 await self.Log.PubLog("set_eca_state", self.osid, self.title, self.osid, self.title,parametros.nombreECA, "ECA modificado en Objeto")
-                return ECAResponse(
-                    status="success",
-                    code="ECA_STATE_CHANGED",
-                    message=f"Estado del ECA {parametros.nombreECA} cambiado a {parametros.comando}",
-                    data={"eca_name": parametros.nombreECA, "new_state": parametros.comando}
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "status": "success",                        
+                        "message": f"El estado del ECA {parametros.nombreECA} ha sido cambiado a {parametros.comando} exitosamente.",
+                        "data": {}
+                    }
                 )                
             except Exception as e:
                 logger.error("Error cambiando estado ECA")
                 logger.error( e)
                 print( "")
-                return ECAResponse(
-                    status="error",
-                    code="ECA_STATE_CHANGE_ERROR",
-                    message=f"Error al cambiar el estado del ECA: {str(e)}",
-                    data={}
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "message": f"Error al cambiar el estado del ECA: {str(e)}",
+                        "data": {}
+                    }
                 )                        
         else:
             await self.Log.PubRawLog(self.osid, self.osid, "Error setEcaState Id incorrecto")
             logger.error("Error - Identificador Incorrecto")            
-            return ECAResponse(
-                status="error",
-                code="INVALID_OSID",
-                message="El identificador del objeto no corresponde.",
-                data={}
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",                    
+                    "message": "El identificador del objeto no corresponde.",
+                    "data": {}
+                }
             )
-    async def editar_eca(self, data : MakeContractRequest):                        
+    async def editar_eca(self, data : MakeContractRequest) -> JSONResponse:                        
         if self.osid == data.osid:
             try:
                 if not os.path.exists(self.pathEca):
@@ -278,11 +351,13 @@ class EcaService:
                 filename = f"ECA_{data.contrato.name_eca}_{data.contrato.user_eca}.json"
                 if not os.path.exists(self.pathEca + '/' + filename):
                     logger.info("Error  El ECA no existe")
-                    return ECAResponse(
-                        status="error",
-                        code="ECA_NOT_FOUND",
-                        message="El ECA no existe",
-                        data={}
+                    return JSONResponse(
+                        status_code=404,
+                        content={
+                            "status": "error",                            
+                            "message": "El ECA no existe",
+                            "data": {}
+                        }
                     )                                
                 fout = open(self.pathEca + '/' + filename, 'w')
                 fout.write(data.contrato.model_dump_json())
@@ -291,11 +366,13 @@ class EcaService:
                 self.Log.PubRawLog(self.osid, self.osid, "makeContract Error guardando archivo")
                 logger.error("Error  Guardando el contrato")
                 logger.error(e)
-                return ECAResponse(
-                    status="error",
-                    code="FILE_SAVE_ERROR",
-                    message="Error guardando el contrato",
-                    data={}
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",                        
+                        "message": "Error guardando el contrato",
+                        "data": {}
+                    }
                 )
             try:
                 # Actualizar el gestor de tareas
@@ -309,35 +386,51 @@ class EcaService:
                     await self.Log.PubRawLog(self.osid, self.osid, "ECA Creado")
                     logger.info( "       ECA guardado")
                     logger.info( "Tiempo en el que termina----------------> " + time.ctime())
-                    return ECAResponse(
-                        status="success",
-                        code="ECA_EDITED",
-                        message="El ECA ha sido editado exitosamente.",
-                        data={
-                            "eca_name": diccEca["name_eca"],
-                            "state": diccEca["state_eca"],
-                            "filename": filename
+                    return JSONResponse(
+                        status_code=200,
+                        content={
+                            "status": "success",
+                            "code": "ECA_EDITED",
+                            "message": "El ECA ha sido editado exitosamente.",
+                            "data": {
+                                "eca_name": diccEca["name_eca"],
+                                "state": diccEca["state_eca"],
+                                "filename": filename
+                            }
                         }                
                     )
                 else:                    
                     logger.error("Error  Guardando ECA en ontologia")
-                    return ECAResponse(
-                        status="error",
-                        code="ONTOLOGY_ERROR",
-                        message="Error guardando el ECA en la ontología",
-                        data={}
+                    return JSONResponse(
+                        status_code=500,
+                        content={
+                            "status": "error",                            
+                            "message": "Error guardando el ECA en la ontología",
+                            "data": {}}
                     )
             except Exception as e:
                 # self.Log.PubRawLog("eca_gen", self.osid, self.tittle, self.osid, self.tittle, diccEca["name_eca"], "Error ECA creado en Objeto")
                 logger.error("Error  Guardando ECA")
                 logger.error(e)
-                return ECAResponse(
-                    status="error",
-                    code="ONTOLOGY_ERROR",
-                    message="Error guardando el ECA en la ontología",
-                    data={}
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "message": "Error guardando el ECA en la ontología",
+                        "data": {}
+                    }
                 )
-    async def send_command(self, data: SendCommandRequest)->ECAResponse:
+        else:
+            logger.error("Error - Identificador Incorrecto")            
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",                    
+                    "message": "El identificador del objeto no corresponde.",
+                    "data": {}
+                }
+            )
+    async def send_command(self, data: SendCommandRequest)->JSONResponse:
         """Envía un comando a un datastream actuador si existe un contrato.
 
         Args:
@@ -358,30 +451,36 @@ class EcaService:
                         logger.info("Va a ejecutar " + respuesta[1]["id_action_resource"] + " " + str(respuesta[1]["comparator_action"]) + " " + str(respuesta[1]["variable_action"]))
                         if datastream_service.send_command(self.osid, respuesta[1]["id_action_resource"], data.comando):
                             await self.Log.PubRawLog(self.osid, self.osid, "Fin SendCommand")
-                            return ECAResponse(
-                                status="success",
-                                code="COMMAND_EXECUTED",
-                                message="Comando ejecutado exitosamente.",
-                                data={}
+                            return JSONResponse(
+                                status_code=200,
+                                content={
+                                    "status": "success",                                    
+                                    "message": "El comando ha sido enviado exitosamente al datastream actuador.",
+                                    "data": {}
+                                }
                             )
                         else:
                             await self.Log.PubRawLog(self.osid, self.osid, "Error SendCommand")
                             logger.error("Error enviando SendCommand")                            
-                            return ECAResponse(
-                                status="error",
-                                code="COMMAND_EXECUTION_ERROR",
-                                message="Error al ejecutar el comando en el datastream.",
-                                data={}
+                            return JSONResponse(
+                                status_code=500,
+                                content={
+                                    "status": "error",                                    
+                                    "message": "Error al ejecutar el comando en el datastream.",
+                                    "data": {}
+                                }
                             )
                     except Exception as e:
                         await self.Log.PubRawLog(self.osid, self.osid, "Error SendCommand")
                         logger.error("Error enviando SendCommand")
                         logger.error( e)                        
-                        return ECAResponse(
-                            status="error",
-                            code="COMMAND_EXECUTION_ERROR",
-                            message="Error al ejecutar el comando en el datastream.",
-                            data={}
+                        return JSONResponse(
+                            status_code=500,
+                            content={
+                                "status": "error",                                    
+                                "message": "Error al ejecutar el comando en el datastream.",
+                                "data": {}
+                            }
                         )
             ##Si el contrato no existe retorna la respuesta de error
             else:
@@ -392,11 +491,14 @@ class EcaService:
         else:
             await self.Log.PubRawLog(self.osid, self.osid, "Error SendCommand")
             logger.error("Error enviando SendCommand - Identificador Incorrecto")
-            return ECAResponse(
-                status="error",
-                code="INVALID_OSID",
-                message="El identificador del objeto no corresponde.",
-                data={}
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "code": "INVALID_OSID",
+                    "message": "El identificador del objeto no corresponde.",
+                    "data": {}
+                }
             )
     def __estaCommand(self, parametros:SendCommandRequest):
         """Verifica si el comando recibido coincide con algún contrato ECA.
@@ -446,20 +548,24 @@ class EcaService:
                 return respuesta
             else:
                 respuesta.append(0)
-                respuesta.append(ECAResponse(
-                    status="error",
-                    code="COMMAND_NOT_FOUND",
-                    message="Error de conexión al procesar el comando.",
-                    data={}
+                respuesta.append(JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",                        
+                        "message": "Error de conexión al procesar el comando.",
+                        "data": {}
+                    }
                 ))
                 return respuesta
         else:
             respuesta.append(0)
-            respuesta.append(ECAResponse(
-                status="error",
-                code="COMMAND_NOT_FOUND",
-                message="Error de conexión al procesar el comando.",
-                data={}
+            respuesta.append(JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "message": "Error de conexión al procesar el comando.",
+                    "data": {}
+                }
             ))
             return respuesta
         

@@ -1,5 +1,6 @@
 
 from fastapi import APIRouter, Depends, Query,HTTPException
+from fastapi.responses import JSONResponse
 
 from application.objeto_service import ObjetoService
 from deps import get_objeto_service
@@ -61,22 +62,6 @@ async def send_service_state(osid: str = Query(..., description="ID del objeto i
     """Envía el estado de los servicios del objeto inteligente dado su osid."""
     try:
         return await objeto_service.send_service_state(osid)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/SendCommand")
-async def send_command(
-    osid: str = Query(..., description="ID del objeto origen"),
-    osidDestino: str = Query(..., description="ID del objeto destino"),
-    comando: str = Query(..., description="Comando a ejecutar"),
-    objeto_service: ObjetoService = Depends(get_objeto_service)
-):
-    """Envía un comando desde un objeto inteligente a otro."""
-    params = {"osid": osid, "osidDestino": osidDestino, "comando": comando}
-    try:
-         return await objeto_service.send_command(params)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except RuntimeError as e:
