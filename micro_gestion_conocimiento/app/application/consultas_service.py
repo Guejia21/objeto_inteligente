@@ -1,4 +1,6 @@
 from typing import Any, List
+
+from fastapi.responses import JSONResponse
 from infraestructure.interfaces.IConsultasPerfilUsuario import IConsultasPerfilUsuario
 from infraestructure.logging.Logging import logger
 from infraestructure.interfaces.IConsultas import IConsultasOOS
@@ -183,3 +185,24 @@ class ConsultasOntologiaUsuarioService:
     """Servicio de Consultas para la Ontología del usuario."""
     def __init__(self, gestion_base_conocimiento: IConsultasPerfilUsuario):
         self.gestion_base_conocimiento = gestion_base_conocimiento
+    def consultarActive(self)->JSONResponse:
+        """Consulta si el perfil del usuario está activo en su ontología."""
+        active = self.gestion_base_conocimiento.consultarActive() 
+        if active is None:
+            logger.warning("No se encontró el estado de actividad del usuario en la ontología.")
+            return JSONResponse(content={"active": None}, status_code=404)
+        return JSONResponse(content={"active": active}, status_code=200)
+    def consultarEmailUsuario(self)->JSONResponse:
+        """Consulta el email del usuario desde su ontología."""
+        email = self.gestion_base_conocimiento.consultarEmailUsuario() 
+        if not email:
+            logger.warning("No se encontró el email del usuario en la ontología.")
+            return JSONResponse(content={"email": ""}, status_code=404)
+        return JSONResponse(content={"email": email}, status_code=200)
+    def consultarListaPreferenciasporOSID(self, osid: str) -> JSONResponse:
+        """Consulta la lista de preferencias del usuario por OSID."""
+        preferencias = self.gestion_base_conocimiento.consultarListaPreferenciasporOSID(osid)
+        if not preferencias:
+            logger.warning(f"No se encontraron preferencias para el OSID: {osid}")
+            return JSONResponse(content={"preferencias": []}, status_code=404)
+        return JSONResponse(content={"preferencias": preferencias}, status_code=200)

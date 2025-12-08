@@ -8,5 +8,10 @@ logging.basicConfig(
         logging.StreamHandler(),  # Enviar logs a la consola        
     ]
 )
+logging.getLogger("multipart").setLevel(logging.WARNING)
+logging.getLogger("multipart.multipart").setLevel(logging.WARNING)
+logging.getLogger("python_multipart").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 # Crear un logger específico para este módulo
 logger = logging.getLogger(__name__)

@@ -1,31 +1,23 @@
-import os
-from dotenv import load_dotenv
+from pathlib import Path
+from pydantic import ConfigDict
+from pydantic_settings import BaseSettings
 
-load_dotenv()
-
-class Settings:
-    # Configuración FastAPI
-    API_HOST = os.getenv("API_HOST", "0.0.0.0")
-    API_PORT = int(os.getenv("API_PORT", "8001"))
-    
+class Settings(BaseSettings):
+        
     # URLs de microservicios dependientes
-    ONTOLOGIAS_MS_URL = os.getenv("ONTOLOGIAS_MS_URL", "http://localhost:8002")
-    AUTOMATIZACION_MS_URL = os.getenv("AUTOMATIZACION_MS_URL", "http://localhost:8003")
-
-    # Configuración RabbitMQ
-    RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
-    RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", "5672"))
-    RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
-    RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "guest")
-    
+    ONTOLOGIAS_MS_URL :str = "http://localhost:8001/ontology/"
+    AUTOMATIZACION_MS_URL :str = "http://localhost:8004/eca/"
+    PATH_IP_COORDINADOR :str = str(Path(__file__).resolve().parent.parent / "infrastructure" / "ipCoordinador.txt")
+    PATH_ECAS : str = str(Path(__file__).resolve().parent.parent / "infrastructure/")
+    IP_SERVIDOR_PERFIL_USUARIO : str = "localhost"
     # Timeouts para llamadas a microservicios
-    MS_TIMEOUT = int(os.getenv("MS_TIMEOUT", "30"))
-
-    # Configuración paths legacy (mantener compatibilidad)
-    ONTOLOGY_PATH = os.getenv("ONTOLOGY_PATH", "./ontologies")
-    SERVICIOWEB_URL = os.getenv("SERVICIOWEB_URL", "http://localhost:8080")
-    
-    # Logging
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-
+    MS_TIMEOUT :int = 30
+    PORT: int = 8005
+    BROKER_HOST: str = "localhost"
+    BROKER_PORT: int = 1883
+    model_config = ConfigDict(
+        env_file='.env',
+        extra='ignore'
+    )
+        
 settings = Settings()

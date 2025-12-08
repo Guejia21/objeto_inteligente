@@ -10,8 +10,9 @@ class Settings(BaseSettings):
     RABBIT_URL: str = "amqp://guest:guest@localhost:5672/"        
     PORT: int = 8001
     PATH_OWL: str = BASE_PATH + '/infraestructure/OWL/'
+    PATH_PU_OWL: str = PATH_OWL + 'PU/'
     ONTOLOGIA: str = PATH_OWL+'ontologiav18.owl'
-    ONTOLOGIA_PU: str = PATH_OWL+'ontologiaPU.owl'
+    ONTOLOGIA_PU: str = PATH_PU_OWL+'UsuarioActual.owl'
     ONTOLOGIA_INSTANCIADA: str = PATH_OWL+'ontologiaInstanciada.owl'
     model_config = ConfigDict(
         env_file='.env',
