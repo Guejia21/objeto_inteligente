@@ -410,8 +410,12 @@ class EcaService:
                     }
                 )
             try:
+                diccEca = self.eca.getDiccionarioECA(filename)
+                diccEca['user_eca'] = data.email
                 # Actualizar el gestor de tareas
-                await eca_task_manager.update_eca_state(data.contrato.name_eca, data.contrato.state_eca, data.contrato.user_eca)
+                # Se elimina del monitoreo y se vuelve a agregar en caso de que hayan cambiado umbrales
+                await eca_task_manager.unregister_eca(data.contrato.name_eca, data.contrato.user_eca)
+                await eca_task_manager.register_eca(diccEca)                
                 logger.info( "       Editando ECA en la Ontologia")
                 logger.info( "Tiempor en el que inicia  ----------------------> " + time.ctime())
                 diccEca = self.eca.getDiccionarioECA(filename)
