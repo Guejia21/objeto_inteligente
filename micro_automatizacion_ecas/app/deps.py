@@ -4,7 +4,7 @@ import os
 from config import settings
 from infra.logging.Logging import logger
 from domain.eca import ECA
-from main import eca_task_manager
+from domain.eca_task_manager import eca_task_manager
 
 def get_eca_service() -> EcaService: 
     log = LogPanelMQTT()

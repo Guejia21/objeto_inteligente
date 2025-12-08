@@ -10,7 +10,7 @@ from config import settings
 from application import ontology_service
 from infra.logging.ILogPanelMQTT import ILogPanelMQTT
 from domain.eca import ECA
-from main import eca_task_manager
+from domain.eca_task_manager import eca_task_manager
 from infra import util
 from application import datastream_service
 
