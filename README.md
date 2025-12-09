@@ -43,4 +43,20 @@ Si se desea limpiar los archivos generados en la ejecución del proyecto, se hac
 python3 clean.py
 ```
 
+Para iniciar cada micro (estando en la carpeta raiz):
+```sh
+#Gateway
+cd gateway/app/ && source ../.venv/bin/activate && python3 main.py
+#Ecas
+cd micro_automatizacion_ecas/app/ && source ../.venv/bin/activate && python3 main.py
+#Base del conocimiento
+cd micro_gestion_conocimiento/app/ && source ../.venv/bin/activate && python3 main.py
+#Objetos
+cd micro_gestion_objetos/app/ && source ../.venv/bin/activate && python3 main.py
+#Datastreams
+cd microservicio_data_stream/ && source .venv/bin/activate && python3 main.py
+#Personalizacion
+cd microservicio_personalizacion/app && source ../.venv/bin/activate && python3 main.py
+```
+
 
