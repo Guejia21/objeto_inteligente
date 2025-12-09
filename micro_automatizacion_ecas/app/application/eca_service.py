@@ -483,6 +483,7 @@ class EcaService:
         osidDestino = data.osidDestino
         if self.osid == osidDestino:
             respuesta = self.__estaCommand(data)  # {osid osidDestino id_action_resource comparator_action variable_action type_variable_action eca_state}
+            logger.debug(respuesta)
             if (respuesta[0] == 1):
                 state_eca = respuesta[1]["eca_state"]
                 if state_eca == 'on':
@@ -553,7 +554,7 @@ class EcaService:
         listaECAS = ontology_service.verificar_contrato(osid, osidDestino)
         # devuelve [{osid osidDestino id_action_resource comparator_action variable_action type_variable_action eca_state}]
         # leer el comando y compararlo con la lista si coincide entonces ejecutar el comando y si no mandar xml de error
-        logger.info("Se recibieron" + str(len(listaECAS)) + " ecas")
+        logger.info("Se recibieron " + str(len(listaECAS)) + " ecas")
         if len(listaECAS) > 0:
             try:
                 os.stat(settings.PATH_COMANDOS)
@@ -579,11 +580,13 @@ class EcaService:
                         respuesta.append(sublistas)
                         return respuesta
                 respuesta.append(0)
-                respuesta.append(ECAResponse(
-                    status="error",
-                    code="COMMAND_NOT_FOUND",
-                    message="El comando no coincide con ningún contrato ECA.",
-                    data={}
+                respuesta.append(JSONResponse(
+                    status_code=500,
+                    content={                        
+                        "code": "COMMAND_NOT_FOUND",
+                        "message": "El comando no coincide con ningún contrato ECA.",
+                        "data": {}
+                    }
                 ))
                 return respuesta
             else:
