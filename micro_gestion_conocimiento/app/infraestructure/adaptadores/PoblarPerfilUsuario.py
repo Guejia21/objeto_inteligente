@@ -23,7 +23,8 @@ class PoblarPerfilUsuario(IPoblarPerfilUsuario):
                 self.ontologia = OntologiaPU(self.path)
                 logger.info(f"Ruta de ontología cargada: {self.path}")
             except:
-                logger.error("Desde PobladorPU. El path es incorrecto")
+                logger.error("Desde PobladorPU. El path es incorrecto, cargando ontologia de prueba")
+                self.ontologia = OntologiaPU(settings.ONTOLOGIA_PU)
 
         elif accion == "CREAR":
             self.path = settings.PATH_OWL + mac + "&" + idUsuario + ".owl"
