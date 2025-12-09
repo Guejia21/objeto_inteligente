@@ -69,7 +69,7 @@ class PersonalizacionService:
             )
         try:
             response = requests.post(
-                f"{settings.AUTOMATIZACION_MS_URL}/",
+                f"{settings.AUTOMATIZACION_MS_URL}",
                 json={
                     "email": data.email,
                     "osid": data.osid,
