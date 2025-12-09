@@ -162,7 +162,7 @@ def registrar_interaccion(data:RegistroInteraccionDTO)->bool:
     except requests.RequestException as e:
         logger.error(f"Error conectando al microservicio de ontologías: {e}")
         return False
-    if response.status_code == 200:
+    if response.status_code == 201:
         return True
     else:
         logger.error(f"Error registrando interacción del usuario: {response.text}")
