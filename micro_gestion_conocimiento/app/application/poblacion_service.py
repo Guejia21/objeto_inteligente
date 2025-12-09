@@ -44,16 +44,22 @@ class PoblacionService:
         """Edita un ECA en la base del conocimiento."""
         try:
             estado = self.gestion_poblacion.editarECA(diccionarioECA)
+            if estado:
+                return JSONResponse(
+                    status_code=200,
+                    content={"status": "Edición ECA exitosa"}
+                )
+            else:
+                return JSONResponse(
+                    status_code=400,
+                    content={"status": "Fallo en la edición ECA"}
+                )
         except Exception as e:
             logger.error("Error al editar el ECA: " + str(e))            
             return JSONResponse(
                 status_code=400,
                 content={"status": "Fallo en la edición ECA"}
-            )
-        return JSONResponse(
-            status_code=200,
-            content={"status": "Edición ECA exitosa"}
-        )
+            )        
         
 class PoblacionOntologiaUsuarioService:
     """Servicio de Población para la Ontología del usuario."""

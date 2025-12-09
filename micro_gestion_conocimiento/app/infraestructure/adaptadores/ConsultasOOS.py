@@ -1017,7 +1017,7 @@ class ConsultasOOS(IConsultasOOS):
         uriIndividuoEca = uri.prefijo + nombreECA.replace(" ", "_")
         uriIndividuoEventoEca = uri.prefijo + nombreECA + "evento"
         uriIndividuoCondicionEca = uri.prefijo + nombreECA + "condicion"
-        uriIndividuoAccionEca = uri.prefijo + nombreECA + "accion"
+        uriIndividuoAccionEca = uri.prefijo + nombreECA + "accion"        
         listaIndividuos = []
         listaIndividuos.append(uriIndividuoEca)
         listaIndividuos.append(uriIndividuoEventoEca)
