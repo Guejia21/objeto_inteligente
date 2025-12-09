@@ -1,60 +1,84 @@
-import json as json
-# from typing import Any, Dict, List, Optional  # typing no está disponible en MicroPython
+"""
+Formateador de respuestas JSON para el microservicio
+Compatible con MicroPython
+"""
 
-class ResponseHelper:
-    """Helper para crear respuestas JSON estandarizadas"""
+try:
+    import ujson as json
+except ImportError:
+    import json
+
+
+class ResponseFormatter:
+    """Genera respuestas JSON estandarizadas"""
     
-    @staticmethod
-    def success(data=None, message="Success", code="1000"):
-        """Respuesta exitosa en JSON"""
+    def success(self, data=None, message="OK", code=200):
+        """
+        Genera respuesta exitosa
+        Args:
+            data: Datos a retornar
+            message: Mensaje descriptivo
+            code: Código de respuesta
+        """
         response = {
             "status": "success",
             "code": code,
-            "message": message,
-            "data": data if data is not None else {}
+            "message": message
         }
+        
+        if data is not None:
+            response["data"] = data
+        
         return json.dumps(response)
     
-    @staticmethod
-    def error(message="Error", code="1099", details=None):
-        """Respuesta de error en JSON"""
+    def error(self, message, code=500, details=None):
+        """
+        Genera respuesta de error
+        Args:
+            message: Mensaje de error
+            code: Código de error
+            details: Detalles adicionales
+        """
         response = {
             "status": "error",
             "code": code,
             "message": message
         }
-        if details:
+        
+        if details is not None:
             response["details"] = details
         
         return json.dumps(response)
     
-    @staticmethod
-    def simple_value(osid, variable, datatype, value):
-        """Respuesta con valor simple de datastream"""
+    def simple_value(self, osid, datastream_id, datastream_format, value):
+        """
+        Genera respuesta simple con un valor de datastream
+        Args:
+            osid: ID del objeto
+            datastream_id: ID del datastream
+            datastream_format: Formato del datastream
+            value: Valor actual
+        """
         response = {
             "osid": osid,
-            "datastream": variable,
-            "datatype": datatype,
-            "value": value,
-            "timestamp": ResponseHelper._get_timestamp()
+            "datastream_id": datastream_id,
+            "datastream_format": datastream_format,
+            "value": value
         }
-        return json.dumps(response,)
+        
+        return json.dumps(response)
     
-    @staticmethod
-    def send_state_response(osid, datastreams):
-        """Respuesta con estado de todos los datastreams"""
+    def send_state_response(self, osid, datastreams):
+        """
+        Genera respuesta para SendState
+        Args:
+            osid: ID del objeto
+            datastreams: Lista de datastreams con sus valores
+        """
         response = {
             "osid": osid,
             "datastreams": datastreams,
-            "timestamp": ResponseHelper._get_timestamp()
+            "count": len(datastreams)
         }
+        
         return json.dumps(response)
-    
-    @staticmethod
-    def _get_timestamp():
-        """Genera timestamp ISO 8601"""
-        try:
-            from time import time
-            return str(int(time()))
-        except:
-            return "0"

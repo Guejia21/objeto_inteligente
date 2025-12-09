@@ -1,3 +1,4 @@
+import gc
 from lib.microdot.microdot import Request, Response
 from services.datastream_service import DatastreamService
 import json as json
@@ -111,8 +112,7 @@ def register_routes(app):
                 f'{{"status":"error","message":"{str(e)}"}}',
                 status_code=500,
                 headers={'Content-Type': 'application/json'}
-            )
-    
+            )    
     @app.route('/Datastreams/health', methods=['GET'])
     async def health_check(request: Request):
         """Health check endpoint"""
@@ -125,4 +125,8 @@ def register_routes(app):
                 "title": Config.TITLE
             }),
             headers={'Content-Type': 'application/json'}
-        )
+        )        
+
+    
+    
+       
