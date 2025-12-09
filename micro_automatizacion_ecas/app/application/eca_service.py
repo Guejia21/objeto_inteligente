@@ -522,6 +522,18 @@ class EcaService:
                                 "data": {}
                             }
                         )
+                else:
+                    await self.Log.PubRawLog(self.osid, self.osid, "Error SendCommand")
+                    logger.error("Error enviando SendCommand")
+                    logger.error("ECA apagado")                    
+                    return JSONResponse(
+                        status_code=500,
+                        content={
+                            "status": "error",                            
+                            "message": "El ECA asociado al comando está apagado.",
+                            "data": {}
+                        }
+                    )
             ##Si el contrato no existe retorna la respuesta de error
             else:
                 await self.Log.PubRawLog(self.osid, self.osid, "Error SendCommand")
