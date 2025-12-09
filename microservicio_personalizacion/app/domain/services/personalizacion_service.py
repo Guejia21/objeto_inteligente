@@ -69,7 +69,7 @@ class PersonalizacionService:
             )
         try:
             response = requests.post(
-                f"{settings.AUTOMATIZACION_MS_URL}/eca/",
+                f"{settings.AUTOMATIZACION_MS_URL}/",
                 json={
                     "email": data.email,
                     "osid": data.osid,
@@ -82,6 +82,12 @@ class PersonalizacionService:
                 return JSONResponse(
                     status_code=200,
                     content={"mensaje": "Preferencia creada exitosamente"}
+                )
+            else:
+                logger.error(f"Error al crear preferencia: {response.text}")
+                return JSONResponse(
+                    status_code=response.status_code,
+                    content={"error": "Error al crear preferencia en el microservicio de automatización"}
                 )
         except requests.RequestException as e:
             logger.error(f"Error al crear preferencia: {e}")
