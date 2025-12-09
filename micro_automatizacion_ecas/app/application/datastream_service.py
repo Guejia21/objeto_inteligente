@@ -5,7 +5,7 @@ from infra.logging.Logging import logger
 headers = {"Content-Type": "application/json"}
 def send_command(osid:str, id_datastream: str, comando: str) -> bool:
     """Envía un comando a un datastream actuador."""
-    url = settings.DATASTREAM_SERVICE_URL + f"/Datastreams/SetDatastream?osid={osid}&idDataStream={id_datastream}&comando={comando}"
+    url = settings.DATASTREAM_SERVICE_URL + f"/SetDatastream?osid={osid}&idDataStream={id_datastream}&comando={comando}"
     try:
         request = requests.post(url, headers=headers)
     except Exception as e:
