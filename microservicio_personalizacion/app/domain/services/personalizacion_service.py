@@ -70,12 +70,7 @@ class PersonalizacionService:
         try:
             response = requests.post(
                 f"{settings.AUTOMATIZACION_MS_URL}",
-                json={
-                    "email": data.email,
-                    "osid": data.osid,
-                    "osidDestino": data.osidDestino,
-                    "contrato": data.contrato
-                },
+                json=data.model_dump(),
                 timeout=30.0
                 )
             if response.status_code == 200:
