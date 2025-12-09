@@ -74,7 +74,7 @@ class PersonalizacionService:
                     "email": data.email,
                     "osid": data.osid,
                     "osidDestino": data.osidDestino,
-                    "contrato": data.contrato.model_dump_json()
+                    "contrato": data.contrato
                 },
                 timeout=30.0
                 )
