@@ -553,6 +553,7 @@ class EcaService:
         listaECAS = ontology_service.verificar_contrato(osid, osidDestino)
         # devuelve [{osid osidDestino id_action_resource comparator_action variable_action type_variable_action eca_state}]
         # leer el comando y compararlo con la lista si coincide entonces ejecutar el comando y si no mandar xml de error
+        logger.info("Se recibieron" + str(len(listaECAS)) + " ecas")
         if len(listaECAS) > 0:
             try:
                 os.stat(settings.PATH_COMANDOS)
