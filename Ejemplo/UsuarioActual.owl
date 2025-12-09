@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://localhost/default#"
+     xmlns:pu="http://localhost/default#"
+     xmlns:upo="http://localhost/UPO#"
+     xmlns:oos="http://semanticsearchiot.net/sswot/Ontologies#"
+     xmlns:onto="http://localhost/OntoProfile#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  
+  <owl:Ontology rdf:about="http://localhost/OntoProfile#">
+    <rdfs:comment>Ontología de usuario mínima para consultas de email y preferencias por OSID.</rdfs:comment>
+  </owl:Ontology>
+
+  <!-- Clases usadas por las consultas -->
+  <owl:Class rdf:about="http://localhost/OntoProfile#Person"/>
+  <owl:Class rdf:about="http://localhost/UPO#Preference"/>
+  <owl:Class rdf:about="http://semanticsearchiot.net/sswot/Ontologies#Event"/>
+  <owl:Class rdf:about="http://semanticsearchiot.net/sswot/Ontologies#Condition"/>
+  <owl:Class rdf:about="http://semanticsearchiot.net/sswot/Ontologies#Action"/>
+  <owl:Class rdf:about="http://localhost/default#Activity"/>
+  <owl:Class rdf:about="http://localhost/default#Shedule_Activity"/>
+
+  <!-- Usuario (consultarEmailUsuario) -->
+  <owl:NamedIndividual rdf:about="http://localhost/default#UsuarioPrincipal">
+    <rdf:type rdf:resource="http://localhost/OntoProfile#Person"/>
+    <pu:email>usuario@example.com</pu:email>
+  </owl:NamedIndividual>
+
+  <!-- Preferencia 1: Evento OSID=ESP32_Sala -> Acción OSID=ESP32_Ventilador -->
+  <owl:NamedIndividual rdf:about="http://localhost/default#Preferencia_Temp_Ventilador">
+    <rdf:type rdf:resource="http://localhost/UPO#Preference"/>
+    <name_preference>ECA_Temperatura_Ventilador</name_preference>
+    <state_preference>on</state_preference>
+    <oos:StartsWith rdf:resource="http://localhost/default#Evento_Temp_Alta"/>
+    <!-- Actividad opcional (para variables name_activity, start_date_activity, end_date_activity) -->
+    <oos:StartsWith rdf:resource="http://localhost/default#Actividad_Ahorro"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="http://localhost/default#Evento_Temp_Alta">
+    <rdf:type rdf:resource="http://semanticsearchiot.net/sswot/Ontologies#Event"/>
+    <oos:id_event_object>ESP32_Sala</oos:id_event_object>
+    <oos:ip_event_object>192.168.1.10</oos:ip_event_object>
+    <oos:name_event_object>Sensor Temperatura Sala</oos:name_event_object>
+    <oos:id_event_resource>temperatura</oos:id_event_resource>
+    <oos:name_event_resource>Temperatura Ambiente</oos:name_event_resource>
+    <oos:Check rdf:resource="http://localhost/default#Condicion_Temp_Mayor_28"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="http://localhost/default#Condicion_Temp_Mayor_28">
+    <rdf:type rdf:resource="http://semanticsearchiot.net/sswot/Ontologies#Condition"/>
+    <oos:comparator_condition>mayor</oos:comparator_condition>
+    <oos:variable_condition>28.0</oos:variable_condition>
+    <oos:type_variable_condition>float</oos:type_variable_condition>
+    <oos:unit_condition>C</oos:unit_condition>
+    <oos:meaning_condition>threshold</oos:meaning_condition>
+    <oos:isRelatedWith rdf:resource="http://localhost/default#Accion_Encender_Ventilador"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="http://localhost/default#Accion_Encender_Ventilador">
+    <rdf:type rdf:resource="http://semanticsearchiot.net/sswot/Ontologies#Action"/>
+    <oos:id_action_object>ESP32_Ventilador</oos:id_action_object>
+    <oos:ip_action_object>192.168.1.11</oos:ip_action_object>
+    <oos:name_action_object>Actuador Ventilador</oos:name_action_object>
+    <oos:id_action_resource>relay</oos:id_action_resource>
+    <oos:name_action_resource>Ventilador</oos:name_action_resource>
+    <oos:comparator_action>igual</oos:comparator_action>
+    <oos:variable_action>on</oos:variable_action>
+    <oos:type_variable_action>string</oos:type_variable_action>
+    <oos:unit_action>state</oos:unit_action>
+    <oos:meaning_action>turn_on</oos:meaning_action>
+  </owl:NamedIndividual>
+
+  <!-- Preferencia 2: Evento y Acción con OSID=ESP32_Humo -->
+  <owl:NamedIndividual rdf:about="http://localhost/default#Preferencia_Humo_Alarma">
+    <rdf:type rdf:resource="http://localhost/UPO#Preference"/>
+    <name_preference>ECA_Detector_Humo</name_preference>
+    <state_preference>on</state_preference>
+    <oos:StartsWith rdf:resource="http://localhost/default#Evento_Humo_Detectado"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="http://localhost/default#Evento_Humo_Detectado">
+    <rdf:type rdf:resource="http://semanticsearchiot.net/sswot/Ontologies#Event"/>
+    <oos:id_event_object>ESP32_Humo</oos:id_event_object>
+    <oos:ip_event_object>192.168.1.12</oos:ip_event_object>
+    <oos:name_event_object>Sensor de Humo</oos:name_event_object>
+    <oos:id_event_resource>humo</oos:id_event_resource>
+    <oos:name_event_resource>Detector de Humo</oos:name_event_resource>
+    <oos:Check rdf:resource="http://localhost/default#Condicion_Humo_Presente"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="http://localhost/default#Condicion_Humo_Presente">
+    <rdf:type rdf:resource="http://semanticsearchiot.net/sswot/Ontologies#Condition"/>
+    <oos:comparator_condition>igual</oos:comparator_condition>
+    <oos:variable_condition>true</oos:variable_condition>
+    <oos:type_variable_condition>bool</oos:type_variable_condition>
+    <oos:unit_condition>state</oos:unit_condition>
+    <oos:meaning_condition>detection</oos:meaning_condition>
+    <oos:isRelatedWith rdf:resource="http://localhost/default#Accion_Activar_Alarma"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="http://localhost/default#Accion_Activar_Alarma">
+    <rdf:type rdf:resource="http://semanticsearchiot.net/sswot/Ontologies#Action"/>
+    <oos:id_action_object>ESP32_Humo</oos:id_action_object>
+    <oos:ip_action_object>192.168.1.12</oos:ip_action_object>
+    <oos:name_action_object>Sensor de Humo</oos:name_action_object>
+    <oos:id_action_resource>buzzer</oos:id_action_resource>
+    <oos:name_action_resource>Alarma Sonora</oos:name_action_resource>
+    <oos:comparator_action>igual</oos:comparator_action>
+    <oos:variable_action>on</oos:variable_action>
+    <oos:type_variable_action>string</oos:type_variable_action>
+    <oos:unit_action>state</oos:unit_action>
+    <oos:meaning_action>alarm</oos:meaning_action>
+  </owl:NamedIndividual>
+
+  <!-- Actividad opcional enlazada a Preferencia 1 -->
+  <owl:NamedIndividual rdf:about="http://localhost/default#Actividad_Ahorro">
+    <rdf:type rdf:resource="http://localhost/default#Activity"/>
+    <name_activity>Monitoreo_Ambiente</name_activity>
+    <realize rdf:resource="http://localhost/default#Horario_Ahorro"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="http://localhost/default#Horario_Ahorro">
+    <rdf:type rdf:resource="http://localhost/default#Shedule_Activity"/>
+    <start_date_activity>2025-01-01T00:00:00</start_date_activity>
+    <end_date_activity>2025-12-31T23:59:59</end_date_activity>
+  </owl:NamedIndividual>
+
+</rdf:RDF>

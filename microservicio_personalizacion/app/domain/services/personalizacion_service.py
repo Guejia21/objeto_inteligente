@@ -1,420 +1,317 @@
-import logging
 import json
-from typing import Dict, Any, List, Optional
-from datetime import datetime
-import tempfile
+import logging
 import os
 
-from app.domain.entities.usuario import Usuario
-from app.domain.entities.preferencia import Preferencia
-from app.domain.entities.eca import ECA, EventoECA, AccionECA
-from app.domain.repositories.personalizacion_repository import PersonalizacionRepository  
+import requests
+from infrastructure import util
+from datetime import time
 
-logger = logging.getLogger(__name__)
+from fastapi import UploadFile
+from fastapi.responses import JSONResponse
+
+from config.settings import settings
+from domain.services import ontology_service
+import threading
+
+from domain.services import eca_service
+from application.dtos.request_dtos import MakeContractRequest, RegistroInteraccionDTO
+from domain.services.ConexionPu import ConexionPu 
+from infrastructure.logging.ILogPanelMQTT import ILogPanelMQTT
+from infrastructure.logging.Logging import logger
 
 class PersonalizacionService:
-    def __init__(self, repository: PersonalizacionRepository):
-        self.repository = repository
-        self.ontologia_cargada = False
-        self.ontologia_actual = None
+    def __init__(self, log = ILogPanelMQTT):
+        self.osid = ontology_service.get_osid()
+        self.ipServidorPU = "http://localhost"  # Dirección del servidor de perfil de usuario        
+        self.path =settings.PATH_ECAS
+        self.conexion_pu = ConexionPu()
+        self.Log = log
+    async def recibir_ontologia(self,file:UploadFile, nombre: str, ipCoordinador: str) -> JSONResponse:
+        """Recibe una ontología desde el coordinador y la envía al microservicio de ontologías.
 
-    async def cargar_ontologia(self, file_content: bytes, nombre: str, ip_coordinador: str) -> Dict[str, Any]:
+        Args:
+            file (UploadFile): Archivo de ontología recibido.
+            nombre (str): Nombre de la ontología.
+            ipCoordinador (str): IP del coordinador que envía la ontología.
+
+        Returns:
+            JSONResponse: Respuesta indicando el resultado de la operación.
         """
-        Carga y arranca una ontología - Similar a CargarOntologia del legacy
-        """
+        logger.info(f"Recibiendo ontología: {nombre} desde {ipCoordinador}")
+        
+        # Validar tipo de archivo
+        if not file.filename.endswith('.owl'):
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Tipo de archivo inválido. Se espera un archivo .owl"}
+            )
+        # Enviar la ontología al microservicio de ontologías
+        if ontology_service.cargar_ontologia(file, nombre, ipCoordinador):
+            logger.info(f"Ontología {nombre} enviada exitosamente al microservicio de ontologías")
+            util.guardarIpCoordinadorEnArchivo(ipCoordinador)
+            self.activarEcasUsuario()
+            return JSONResponse(
+                status_code=200,
+                content={"mensaje": "Ontología recibida y enviada al microservicio de ontologías exitosamente"}
+            )
+        else:
+            logger.error(f"Error enviando ontología {nombre} al microservicio de ontologías")
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Error enviando ontología al microservicio de ontologías"}
+            )    
+    async def crear_preferencia(self, data:MakeContractRequest) -> JSONResponse:
+        if not self.verificarUsuario(data.email):
+            logger.error("El email proporcionado no coincide con el usuario actual")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "El email proporcionado no coincide con el usuario actual"}
+            )
         try:
-            logger.info(f"Iniciando carga de ontología: {nombre} desde {ip_coordinador}")
-            
-            # 1. Guardar archivo temporal (similar al legacy)
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.owl') as temp_file:
-                temp_file.write(file_content)
-                temp_path = temp_file.name
-            
-            # 2. Cargar ontología con owlready2 (como en legacy)
-            try:
-                from owlready2 import get_ontology
-                ontologia = get_ontology(temp_path).load()
-                logger.info(f"✅ Ontología {nombre} cargada exitosamente")
-                
-                # 3. Preparar entorno y hilos (como en Starter/Main del legacy)
-                await self._preparar_entorno_ontologia(ontologia, ip_coordinador)
-                
-                self.ontologia_actual = ontologia
-                self.ontologia_cargada = True
-                
-                # 4. Cargar metadata XML auxiliar si existe
-                await self._cargar_metadata_auxiliar(ip_coordinador)
-                
-                return {
-                    "estado": "cargada_exitosamente",
-                    "nombre": nombre,
-                    "ip_coordinador": ip_coordinador,
-                    "clases_cargadas": len(list(ontologia.classes())),
-                    "individuos_cargados": len(list(ontologia.individuals()))
-                }
-                
-            except ImportError:
-                logger.warning("owlready2 no disponible, usando modo simulación")
-                return await self._simular_carga_ontologia(nombre, ip_coordinador)
-                
-            finally:
-                # Limpiar archivo temporal
-                os.unlink(temp_path)
-                
-        except Exception as e:
-            logger.error(f"❌ Error cargando ontología {nombre}: {e}")
-            return {"error": f"Error cargando ontología: {str(e)}", "status_code": 500}
-
-    async def procesar_ontologia(self, file_content: bytes, nombre: str, ip_coordinador: str) -> Dict[str, Any]:
-        """
-        Procesa una ontología recibida - Para endpoint /RecibirOntologia
-        """
-        return await self.cargar_ontologia(file_content, nombre, ip_coordinador)
-
-    async def crear_preferencia(self, preferencia: Preferencia) -> Dict[str, Any]:
-        """Crea una preferencia/ECA (similar a makeContract del legacy)"""
+            response = requests.post(
+                f"{settings.AUTOMATIZACION_MS_URL}",
+                json=data.model_dump(),
+                timeout=30.0
+                )
+            if response.status_code == 200:
+                return JSONResponse(
+                    status_code=200,
+                    content={"mensaje": "Preferencia creada exitosamente"}
+                )
+            else:
+                logger.error(f"Error al crear preferencia: {response.text}")
+                return JSONResponse(
+                    status_code=response.status_code,
+                    content={"error": "Error al crear preferencia en el microservicio de automatización"}
+                )
+        except requests.RequestException as e:
+            logger.error(f"Error al crear preferencia: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Error al comunicarse con el microservicio de automatización"}
+            )
+    # Métodos adaptados desde ModuloDePersonalizacion, debido a que no se tiene comunicacion con el servidor de PU
+    # ni a la ontologia PU, no se pueden probar    
+    def activarEcasUsuario(self):        
+        ##Cada Usuario va a tener un archivo email.txt donde se almacena el nombre del ECA y su estado.        
+        self.user_eca = ontology_service.consultar_email_usuario()
+        if self.user_eca == "":
+            logger.info("No se pudo consultar el email del usuario desde el microservicio de ontologías")
+            return        
+        logger.info( "BIENVENIDO " + self.user_eca)
+        ##Consulta los Ecas que tiene la ontologia del Usuario
+        ##OjO Cambias esto >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         try:
-            # 1. Verificar usuario (similar a ModuloDePersonalizacion.verificarUsuario)
-            usuario = Usuario(email=preferencia.email, osid=preferencia.osid)
-            if not await self._verificar_usuario(usuario):
-                return {"error": "usuario no esta", "status_code": 401}
+            logger.info( time.ctime())
+            logger.info(self.ipServidorPU + ':8080/ConsultarEcasPorObjeto?email='+self.user_eca+'&osid='+self.osid)
+            r = requests.get(self.ipServidorPU + ':8080/ConsultarEcasPorObjeto?email=' + self.user_eca + '&osid=' + self.osid)
+            resp = r.content
+            self.ecasUsuario  = json.loads(resp)
+            logger.info("**************************Ecas Usuario*********************************************** ")
+            for iten in self.ecasUsuario:
+                logger.info(iten['name_eca']+" "+iten['state_eca'])
             
-            # 2. Validar contrato (similar a validaciones del legacy)
-            if not preferencia.validar_contrato():
-                return {"error": "Parámetro faltante/contrato inválido", "status_code": 400}
+            logger.info( time.ctime())
+        except:
+            logger.error("Error en el modulo de personalizacion no se puede comunicar con el servidor de personalizacion de usuario ")
+            self.ecasUsuario  = ontology_service.consultar_lista_preferencias_por_osid(self.osid) ## Si no se puede comunicar con el servidor que las consulte localmente
+            if len(self.ecasUsuario) == 0:
+                logger.info("Desde Modulo personalizacion NO existen ECAS para el usuario "+self.user_eca)
+                return
+      ##OjO Cambias esto >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        self.pathEcasUsuario = self.path + self.user_eca +".txt"
+        if not os.path.exists(self.pathEcasUsuario):
+            logger.info("Desde Modulo personalizacion NO existe el archivo "+self.pathEcasUsuario)
+            archivo=open(self.pathEcasUsuario,'wb')    
+            archivo.close()
+        ecasArchivo = [] ## Contiene diccionarios {"eca_name", "eca_state"}
+        ecasArchivo = self.ecasArchivoADiccionario()
+##listaEcasCrear [{'name_event_resource': 'temperatura', 'unit_action': 'None', 'type_variable_action': 'bool', 'comparator_action': 'igual', 'id_action_object': '708637323', 'ip_action_object': '192.168.123.104', 'name_eca': 'subirTemperatura', 'end_date_activity': '', 'variable_condition': '20', 'comparator_condition': 'igual', 'meaning_condition': 'hace calor', 'state_eca': 'on', 'name_action_object': 'Regulador Temperatura', 'id_action_resource': 'ventilador', 'start_date_activity': '', 'name_activity': '', 'meaning_action': 'encender ventilador', 'name_event_object': 'Regulador Temperatura', 'id_event_resource': 'temperatura', 'variable_action': '1', 'ip_event_object': '192.168.123.104', 'unit_condition': '%', 'id_event_object': '708637323', 'name_action_resource': 'ventilador', 'type_variable_condition': 'float'}]
+        listaEcasEliminar = []
+        listaEcasIgualEstado = []
+        listaEcasModificarEstado = []
+        listaEcasCrear = []
+        posicionesEcasEncontrados = []
+        for item in self.ecasUsuario:
+            posicion = self.posicionValor(ecasArchivo, "name_eca", item["name_eca"])
+            if  posicion != -1: ##Si el eca del archivo esta en los del usuario, hay que activarlo osea ecaArchivo en listaEcasUsuario
+                itemEcaArchivo = ecasArchivo[posicion]                
+                logger.info(item)                
+                logger.info(itemEcaArchivo)
+                if itemEcaArchivo["state_eca"] == item['state_eca']:
+                    listaEcasIgualEstado.append(item)
+                else:
+                    listaEcasModificarEstado.append(item)
+                posicionesEcasEncontrados.append(posicion)
+            else: ##Esta en los ecas del usuario, pero no el el archivo
+                listaEcasCrear.append(item)
+        i = 0
+        for item in ecasArchivo:
+            if not i in posicionesEcasEncontrados:
+                listaEcasEliminar.append(ecasArchivo[i])
+            i = i + 1
             
-            # 3. Verificar duplicados (similar a verificaciones del legacy)
-            if await self._existe_eca_duplicado(preferencia):
-                return {"error": "preferencia ya existe", "status_code": 409}
-            
-            # 4. Convertir preferencia a ECA
-            eca = await self._convertir_preferencia_a_eca(preferencia)
-            
-            # 5. Poblar ECA en ontología (similar a poblarEca del legacy)
-            if self.ontologia_cargada:
-                eca_ontologia = await self._poblar_eca_ontologia(eca, preferencia.contrato)
-                if not eca_ontologia:
-                    return {"error": "Error poblando ECA en ontología", "status_code": 500}
-            
-            # 6. Guardar en repositorio
-            if not await self.repository.guardar_eca(eca):
-                return {"error": "Error interno del servidor", "status_code": 500}
-            
-            # 7. Iniciar ejecución ECA (similar a Modelo/ECA.py del legacy)
-            await self._iniciar_ejecucion_eca(eca)
-            
-            # 8. Publicar evento (si está configurado)
-            await self._publicar_evento_preferencia_creada(preferencia, eca)
-            
-            return {"mensaje": "Contrato creado correctamente", "status_code": 200}
-            
-        except Exception as e:
-            logger.error(f"Error creando preferencia: {e}")
-            return {"error": "Error interno del servidor", "status_code": 500}
+        logger.info("Desde modulo de personalizacion ECAS A CREAR")
+        for iten in listaEcasCrear:
+            logger.info(iten['name_eca'])        
+        logger.info("Desde modulo de personalizacion lista ECAS A MODIFICAR ")
+        for iten in listaEcasModificarEstado:
+            logger.info(iten['name_eca'])        
+        logger.info("Desde modulo de personalizacion lista ECAS A ELIMINAR ")
+        for iten in listaEcasEliminar:
+            logger.info(iten['name_eca'])        
+        logger.info("Desde modulo de personalizacion lista ECAS A LANZAR")
+        for iten in listaEcasIgualEstado:
+            logger.info(iten['name_eca'])                    
+        hiloCrearEcas = threading.Thread(target = self.crearEcas, name="HiloCrearEcas", args =(listaEcasCrear,))
+        hiloinicializarEcasUsuario = threading.Thread(target = self.inicializarEcasUsuario, name="HiloInicializarEcasUsuario", args =(listaEcasIgualEstado,))
+        hiloEliminarEcasUsurio = threading.Thread(target = self.eliminarEcas, name="HiloEliminarEcasUsurio", args =(listaEcasEliminar,))
+##
+        hiloCrearEcas.start()
+        hiloinicializarEcasUsuario.start()
+        hiloEliminarEcasUsurio.start()
+        ##Sobreescribo el archivo para que solo tenga los ecas de la ontologia del usuario
+        archivo=open(self.pathEcasUsuario,'w+')
+        listaEcasArchivo = listaEcasCrear + listaEcasModificarEstado + listaEcasIgualEstado
+        for item in listaEcasArchivo :
+            linea = item["name_eca"] + "," + item["state_eca"] + "\n"
+            archivo.write(linea)
+        archivo.close()
+        
+    def desactivarEcasUsuarioActual(self)->JSONResponse:
+        ##Cada Usuario va a tener un archivo email.txt donde se almacena el nombre del ECA y su estado.                
+        self.user_eca = ontology_service.consultar_email_usuario()
+        if self.user_eca == "":
+            logger.error("El usuario no existe en la ontologia PU")
+            return JSONResponse(content={"error": "No se pudo consultar el email del usuario"}, status_code=500)
+        self.pathEcasUsuario = self.path + self.user_eca +".txt"
+        if  os.path.exists(self.pathEcasUsuario):
+            #ecasArchivo = self.ecasArchivoADiccionario()
+            #Apaga las ecas haciendo un llamado al micro de ecas
+            #Suponemos que las ecas contenidas en el archivo .txt equivalen a todas las ecas del usuario
+            if eca_service.apagar_ecas(self.osid):
+                logger.info("ECAS del usuario "+ self.user_eca +" apagadas correctamente")
+            else:
+                logger.error("Error apagando las ECAS del usuario "+ self.user_eca)
+                return JSONResponse(content={"error": "Error apagando ECAs del usuario"}, status_code=500)
+        #Elimina la ontologia del usuario en el micro de ontologias
+        if ontology_service.eliminar_ontologia_usuario():
+            logger.info("Ontologia del usuario "+ self.user_eca +" eliminada correctamente")
+        else:
+            logger.error("Error eliminando la ontologia del usuario "+ self.user_eca)
+            return JSONResponse(content={"error": "Error eliminando ontología del usuario"}, status_code=500)        
+        #modulo.setClean()
+        return JSONResponse(content={"message": "Salida de usuario procesada exitosamente"}, status_code=200)
+    def crearEcas(self, listaEcasCrear):
+        #Retorna todos los datos del eca
+        #?name_activity ?start_date_activity ?end_date_activity
+        ##Se deben consultar los ecas del objeto para encender los que son del usuario y apagar lo0s demas
+        ##Si un eca no existe, debe crearlo
+        print( "   Creando ECAs Desde el Modulo de Personalizacion.")
+        print( "Creando un total de " + str(len(listaEcasCrear)) + " ECAs")
+        ##Lanza todos los ecas que esten en ON
+        for item in listaEcasCrear:
+                print( "Creando Eca " + item["name_activity"])
+                print( "")
+                item['user_eca'] = self.user_eca
+                if item["name_activity"] != "":
+                    if item["variable_condition"] == "1":
+                        item["variable_condition"] = item["start_date_activity"]
+                    elif item["variable_condition"] == "0":
+                        item["variable_condition"] = item["end_date_activity"]
+                    else:
+                        print ("Desde Personalizar, el eca tiene actividad, pero la variable condicion no es 0 ni 1: "+ item['name_eca'])
+        self.Log.PubUserLog( self.user_eca ,self.osid , "ModuloDePersonalizacion", "inicia poblar ecas cantidad "+str(len(listaEcasCrear)))
+        self.eca.poblarListaEca(listaEcasCrear)
+        self.Log.PubUserLog( self.user_eca ,self.osid , "ModuloDePersonalizacion", "fin poblar ecas cantidad "+str(len(listaEcasCrear)))
+        print( "ECAS Creados Desde el Modulo de Personalizacion")
 
-    async def _poblar_eca_ontologia(self, eca: ECA, contrato: Dict[str, Any]) -> bool:
-        """
-        Pobla un ECA en la ontología - Similar a PoblarECA.py del legacy
-        """
-        try:
-            if not self.ontologia_actual:
-                logger.warning("Ontología no cargada, no se puede poblar ECA")
-                return False
-            
-            # Obtener clases de la ontología (como en legacy)
-            ClaseECA = self.ontologia_actual.search_one(iri="*ECA")
-            ClaseEvento = self.ontologia_actual.search_one(iri="*Evento")
-            ClaseCondicion = self.ontologia_actual.search_one(iri="*Condicion")
-            ClaseAccion = self.ontologia_actual.search_one(iri="*Accion")
-            
-            if not all([ClaseECA, ClaseEvento, ClaseCondicion, ClaseAccion]):
-                logger.error("Clases ECA no encontradas en ontología")
-                return False
-            
-            # Crear individuos (como en PoblarECA.py)
-            # 1. Crear Evento
-            individuo_evento = ClaseEvento(f"evento_{eca.name_eca}")
-            individuo_evento.id_event_resource = [contrato['evento']['recurso']]
-            individuo_evento.name_event_resource = [contrato['evento'].get('nombre_recurso', '')]
-            individuo_evento.name_event_object = [contrato['evento'].get('nombre_objeto', '')]
-            individuo_evento.signCondicion = [contrato['evento'].get('descripcion', '')]
-            individuo_evento.unidadCondicion = [contrato['evento'].get('unidad', '')]
-            individuo_evento.variableCondicion = [str(contrato['evento']['valor'])]
-            individuo_evento.comparadorCondicion = [contrato['evento']['operador']]
-            
-            # 2. Crear Condición
-            individuo_condicion = ClaseCondicion(f"condicion_{eca.name_eca}")
-            individuo_condicion.is_related_with = [individuo_evento]
-            
-            # 3. Crear Acción
-            individuo_accion = ClaseAccion(f"accion_{eca.name_eca}")
-            individuo_accion.id_action_resource = [contrato['accion']['recurso']]
-            individuo_accion.name_action_resource = [contrato['accion'].get('nombre_recurso', '')]
-            individuo_accion.name_action_object = [contrato['accion'].get('nombre_objeto', '')]
-            individuo_accion.signAccion = [contrato['accion'].get('descripcion', '')]
-            individuo_accion.unidadAccion = [contrato['accion'].get('unidad', '')]
-            individuo_accion.variableAccion = [str(contrato['accion']['valor'])]
-            individuo_accion.comparadorAccion = [contrato['accion'].get('operador', 'igual')]
-            
-            # 4. Crear ECA
-            individuo_eca = ClaseECA(eca.name_eca)
-            individuo_eca.eca_state = ["on"]  # Por defecto activado
-            individuo_eca.starts_with = [individuo_evento]
-            individuo_eca.user_eca = [eca.user_eca]
-            
-            # Establecer relaciones object properties
-            individuo_evento.check = [individuo_condicion]
-            individuo_condicion.is_related_with = [individuo_accion]
-            
-            logger.info(f"✅ ECA {eca.name_eca} poblado en ontología")
+    def inicializarEcasUsuario(self, listaEcasActivar):
+        print( "Inicializando un total de " + str(len(listaEcasActivar)) + " ECAs")
+        self.Log.PubUserLog( self.user_eca ,self.osid , "ModuloDePersonalizacion", "inicia inicializando ecas cantidad "+str(len(listaEcasActivar)))
+
+        self.eca.lanzarHiloListaEca(listaEcasActivar)
+        print( "ECAS iniciados Desde el Modulo de Personalizacion")
+
+    """def modificarEstadoEcasUsuario(self, listaEcasModificar):
+        print( "Modificando estado de  un total de " + str(len(listaEcasModificar)) + " ECAs")
+        self.Log.PubUserLog( self.user_eca ,self.osid , "ModuloDePersonalizacion", "inicia modificar estado ecas cantidad "+str(len(listaEcasModificar)))
+        self.eca.cambiarEstadoListaEcas(listaEcasModificar)
+        print( "ECAS con estado modificado Desde el Modulo de Personalizacion")"""
+    #Modificar para que elimine ecas en el micro de ecas
+    def eliminarEcas(self, listaEcasEliminar):
+        print( "Eliminando estado de  un total de " + str(len(listaEcasEliminar)) + " ECAs")
+        self.eca.eliminarListaEcas(listaEcasEliminar)
+        print( "ECAS ELIMINADOS Desde el Modulo de Personalizacion")
+    
+    def verificarUsuario(self, email):
+        #Convertir a consulta de ontologia de perfil de usuario        
+        if  ontology_service.consultar_email_usuario() == email:
             return True
-            
-        except Exception as e:
-            logger.error(f"❌ Error poblando ECA en ontología: {e}")
+        else:
             return False
 
-    async def cambiar_estado_eca(self, osid: str, nombre_eca: str, estado: str) -> Dict[str, Any]:
-        """Cambia estado de un ECA (similar a SetEcaState del legacy)"""
-        try:
-            if estado not in ["on", "off"]:
-                return {"error": "estado inválido", "status_code": 400}
-            
-            # 1. Cambiar en ontología si está cargada
-            if self.ontologia_cargada:
-                await self._cambiar_estado_eca_ontologia(nombre_eca, estado)
-            
-            # 2. Cambiar en repositorio
-            if await self.repository.cambiar_estado_eca(nombre_eca, estado):
-                # 3. Orquestar ciclo de vida (similar a Modelo/ECA.py)
-                await self._orquestar_ciclo_vida_eca(nombre_eca, estado)
-                return {"mensaje": f"ECA {nombre_eca} {estado}", "status_code": 200}
-            else:
-                return {"error": "Error cambiando estado del ECA", "status_code": 500}
-                
-        except Exception as e:
-            logger.error(f"Error cambiando estado del ECA {nombre_eca}: {e}")
-            return {"error": "Error interno del servidor", "status_code": 500}
+    """def eliminarEcaUsuario(self, listaEcasUsuario, clave, valor):
+        for item in listaEcasUsuario:
+            if item[clave] == valor:
+                listaEcasUsuario.remove(item)
+                return listaEcasUsuario
+        return listaEcasUsuario"""
 
-    async def _cambiar_estado_eca_ontologia(self, nombre_eca: str, estado: str):
-        """
-        Cambia estado de ECA en ontología - Similar a ConsultasOOS.setEcaState
-        """
-        try:
-            if not self.ontologia_actual:
-                return
-            
-            # Buscar individuo ECA
-            individuo_eca = self.ontologia_actual.search_one(iri=f"*{nombre_eca}")
-            if individuo_eca:
-                individuo_eca.eca_state = [estado]
-                logger.info(f"Estado de ECA {nombre_eca} cambiado a {estado} en ontología")
-        except Exception as e:
-            logger.error(f"Error cambiando estado en ontología para {nombre_eca}: {e}")
-
-    async def listar_ecas_usuario(self, email: str, osid: str) -> Dict[str, Any]:
-        """Lista ECAs de un usuario (similar a ConsultasOOS.listarEcasUsuario)"""
-        try:
-            # 1. Obtener del repositorio
-            ecas = await self.repository.listar_ecas_usuario(email)
-            
-            # 2. Si ontología cargada, enriquecer con datos de ontología
-            if self.ontologia_cargada:
-                ecas = await self._enriquecer_ecas_con_ontologia(ecas)
-            
-            # Convertir a formato legacy compatible
-            ecas_legacy = []
-            for eca in ecas:
-                ecas_legacy.append(eca.to_legacy_dict())
-            
-            return {
-                "ecas": ecas_legacy,
-                "status_code": 200
-            }
-        except Exception as e:
-            logger.error(f"Error listando ECAs del usuario {email}: {e}")
-            return {"error": "Error al listar ECAs", "status_code": 500}
-
-    async def desactivar_ecas_por_osid(self, osid: str) -> Dict[str, Any]:
-        """
-        Desactiva ECAs basado en OSID - Para endpoint /NotificarSalidaDeUsuario
-        Similar a ApagarTodosEcas del legacy
-        """
-        try:
-            logger.info(f"Desactivando ECAs para usuario con osid: {osid}")
-            
-            # 1. Obtener email asociado al osid (simulado)
-            email = await self._obtener_email_por_osid(osid)
-            
-            if not email:
-                return {"error": "Usuario no encontrado", "status_code": 404}
-            
-            # 2. Desactivar en repositorio
-            ecas_desactivados = await self.repository.desactivar_ecas_usuario(email)
-            
-            # 3. Desactivar en ontología si está cargada
-            if self.ontologia_cargada:
-                for eca_nombre in ecas_desactivados:
-                    await self._cambiar_estado_eca_ontologia(eca_nombre, "off")
-            
-            # 4. Detener ejecución de ECAs (similar a Modelo/ECA.py)
-            await self._detener_ejecucion_ecas_usuario(email)
-            
-            return {
-                "mensaje": f"ECAs desactivados para usuario con osid: {osid}",
-                "osid": osid,
-                "email": email,
-                "ecas_desactivados": ecas_desactivados,
-                "status_code": 200
-            }
-            
-        except Exception as e:
-            logger.error(f"❌ Error desactivando ECAs para osid {osid}: {e}")
-            return {"error": f"Error al desactivar ECAs: {str(e)}", "status_code": 500}
-
-    async def registrar_interaccion(self, email: str, id_data_stream: str, comando: str, 
-                                  osid: str, mac: str, date_interaction: str) -> Dict[str, Any]:
-        """
-        Registra interacción usuario-objeto - Para endpoint /RegistroInteraccionUsuarioObjeto
-        """
-        try:
-            logger.info(f"Registrando interacción: {email} -> {osid} - {comando}")
-            
-            # Lógica para registrar la interacción
-            interaccion_data = {
-                "email": email,
-                "id_data_stream": id_data_stream,
-                "comando": comando,
-                "objeto_id": osid,
-                "dispositivo_mac": mac,
-                "fecha_interaccion": date_interaction,
-                "timestamp_procesamiento": datetime.now().isoformat()
-            }
-            
-            # Guardar en repositorio
-            interaccion_id = await self.repository.guardar_interaccion(interaccion_data)
-            
-            # Evaluar si esta interacción dispara algún ECA
-            await self._evaluar_interaccion_para_ecas(interaccion_data)
-            
-            return {
-                "interaccion_registrada": True,
-                "interaccion_id": interaccion_id,
-                "data": interaccion_data,
-                "status_code": 200
-            }
-            
-        except Exception as e:
-            logger.error(f"❌ Error registrando interacción usuario {email} - objeto {osid}: {e}")
-            return {"error": f"Error registrando interacción: {str(e)}", "status_code": 500}
-
-    # Métodos auxiliares específicos del legacy
-    async def _preparar_entorno_ontologia(self, ontologia, ip_coordinador: str):
-        """Prepara entorno y hilos para ontología - Similar a Starter/Main del legacy"""
-        logger.info("Preparando entorno de ontología...")
-        # Aquí iría la lógica de inicialización de hilos y entorno
-        # como en el sistema legacy
-
-    async def _cargar_metadata_auxiliar(self, ip_coordinador: str):
-        """Carga metadata XML auxiliar - Similar a legacy"""
-        logger.info(f"Cargando metadata auxiliar desde {ip_coordinador}")
-
-    async def _simular_carga_ontologia(self, nombre: str, ip_coordinador: str) -> Dict[str, Any]:
-        """Simula carga de ontología cuando owlready2 no está disponible"""
-        logger.info(f"Simulando carga de ontología: {nombre}")
-        return {
-            "estado": "cargada_simulada",
-            "nombre": nombre,
-            "ip_coordinador": ip_coordinador,
-            "clases_cargadas": 15,
-            "individuos_cargados": 8
-        }
-
-    async def _iniciar_ejecucion_eca(self, eca: ECA):
-        """Inicia ejecución de ECA - Similar a Modelo/EjecutarEca.py del legacy"""
-        logger.info(f"Iniciando ejecución de ECA: {eca.name_eca}")
-        # Aquí iría la lógica de arranque de hilos y monitoreo
-
-    async def _orquestar_ciclo_vida_eca(self, nombre_eca: str, estado: str):
-        """Orquesta ciclo de vida ECA - Similar a Modelo/ECA.py del legacy"""
-        logger.info(f"Orquestando ciclo de vida para ECA {nombre_eca}: {estado}")
-
-    async def _detener_ejecucion_ecas_usuario(self, email: str):
-        """Detiene ejecución de ECAs de usuario - Similar a legacy"""
-        logger.info(f"Deteniendo ejecución de ECAs para usuario: {email}")
-
-    async def _evaluar_interaccion_para_ecas(self, interaccion_data: Dict[str, Any]):
-        """Evalúa si interacción dispara algún ECA - Similar a EjecutarEcaIndependiente.py"""
-        logger.info("Evaluando interacción para posibles ECAs disparados")
-
-    async def _obtener_email_por_osid(self, osid: str) -> Optional[str]:
-        """Obtiene email asociado a OSID (simulado)"""
-        # En implementación real, consultaría base de datos o servicio
-        return f"usuario_{osid}@ejemplo.com"
-
-    async def _enriquecer_ecas_con_ontologia(self, ecas: List[ECA]) -> List[ECA]:
-        """Enriquece ECAs con datos de ontología"""
-        # Implementación para combinar datos de repositorio y ontología
-        return ecas
-
-    # Métodos privados existentes (mantener compatibilidad)
-    async def _verificar_usuario(self, usuario: Usuario) -> bool:
-        return usuario.verificar_autenticacion()
-
-    async def _existe_eca_duplicado(self, preferencia: Preferencia) -> bool:
-        ecas_usuario = await self.repository.listar_ecas_usuario(preferencia.email)
-        for eca in ecas_usuario:
-            if (eca.eventoECA.objEvento == preferencia.osid and 
-                eca.accionECA.objAccion == preferencia.osidDestino):
+    """def estaValor(self, listaDic, clave, valor):
+        for item in listaDic:
+            if item[clave] == valor:
                 return True
-        return False
+        return False"""
 
-    async def _convertir_preferencia_a_eca(self, preferencia: Preferencia) -> ECA:
-        contrato = preferencia.contrato
-        
-        evento = EventoECA(
-            objEvento=preferencia.osid,
-            id_event_resource=contrato['evento']['recurso'],
-            name_event_resource=contrato['evento'].get('nombre_recurso', ''),
-            name_event_object=contrato['evento'].get('nombre_objeto', ''),
-            signCondicion=contrato['evento'].get('descripcion', ''),
-            unidadCondicion=contrato['evento'].get('unidad', ''),
-            variableCondicion=str(contrato['evento']['valor']),
-            comparadorCondicion=contrato['evento']['operador']
-        )
-        
-        accion = AccionECA(
-            objAccion=preferencia.osidDestino,
-            id_action_resource=contrato['accion']['recurso'],
-            name_action_resource=contrato['accion'].get('nombre_recurso', ''),
-            name_action_object=contrato['accion'].get('nombre_objeto', ''),
-            signAccion=contrato['accion'].get('descripcion', ''),
-            unidadAccion=contrato['accion'].get('unidad', ''),
-            variableAccion=str(contrato['accion']['valor']),
-            comparadorAccion=contrato['accion'].get('operador', 'igual')
-        )
-        
-        nombre_eca = f"eca_{preferencia.email}_{preferencia.osid}_{len(await self.repository.listar_ecas_usuario(preferencia.email)) + 1}"
-        
-        return ECA(
-            name_eca=nombre_eca,
-            eca_state="on",
-            eventoECA=evento,
-            accionECA=accion,
-            user_eca=preferencia.email
-        )
+    def posicionValor(self, listaDic, clave, valor):
+        i = 0
+        for item in listaDic:
+            if item[clave] == valor:
+                return i
+            i = i + 1
+        return -1
 
-    async def _publicar_evento_preferencia_creada(self, preferencia: Preferencia, eca: ECA):
-        """Publica evento de preferencia creada"""
-        pass
+    """
+    def guardarEcasArchivo(self, rutaArchivo, listaEcas):
+        archivo = open(rutaArchivo,  'r+')
+        for item in listaEcas:
+            linea = item["name_eca"] + "," + item["state_eca"]
+    """
 
-    # Métodos del repositorio que deben existir
-    async def eliminar_eca(self, osid: str, nombre_eca: str) -> Dict[str, Any]:
-        """Elimina un ECA (similar a eliminarEca del legacy)"""
-        try:
-            if await self.repository.eliminar_eca(nombre_eca):
-                return {"mensaje": f"ECA {nombre_eca} eliminado", "status_code": 200}
+    def ecasArchivoADiccionario(self):
+        rutaArchivo = self.pathEcasUsuario
+        archivo = open(rutaArchivo,  'r+')
+        lineas = archivo.readlines()
+        archivo.close()
+        ecasArchivo = []
+        #TODO Cambiar el archivo
+        for linea in lineas:
+            linea = linea.rstrip('\n')
+            split = linea.split(",")
+            nombreEca = split[0]
+            estadoEca = split[1]
+            dicEca = {"name_eca": nombreEca, "state_eca" : estadoEca}
+            ecasArchivo.append(dicEca)
+        return ecasArchivo
+    
+    def registroInteraccionUsuarioObjeto(self,data:RegistroInteraccionDTO)->JSONResponse:
+        """if os.path.exists(AppUtil.pathOWL + mac +  ".owl"):
+            poblador = PoblarPerfilUsuario(mac, email, "CARGAR")
+            poblador.registroInteraccionUsuarioObjeto( email, idDataStream, comando, osid, dateInteraction)"""
+        #Si la ontologia existe, se registra la interaccion en el micro de ontologias
+        if ontology_service.verificar_perfil_activo():
+            if ontology_service.registrar_interaccion(data):
+                return JSONResponse(content={"message": "Interacción registrada exitosamente en el microservicio de ontologías"}, status_code=200)
             else:
-                return {"error": "Error eliminando ECA", "status_code": 500}
-        except Exception as e:
-            logger.error(f"Error eliminando ECA {nombre_eca}: {e}")
-            return {"error": "Error interno del servidor", "status_code": 500}
+                return JSONResponse(content={"error": "Error registrando la interacción en el microservicio de ontologías"}, status_code=500)
+        else:
+            logger.info("El usuario no esta en la casa, notificando al servidor de perfil usuario")
+            #EL usuario no esta en la casa actualmente, por eso se envia la peticion al servidor perfil de usuario            
+            self.conexion_pu.enviarRegistroInteraccionUsuarioObjetoAlServidorPerfilUsuario(data.email,data.idDataStream, data.comando,data.osid, data.mac,  data.dateInteraction)
+        return JSONResponse(content={"message": "La interacción fue registrada en el servidor de perfil de usuario"}, status_code=200)    
+        """
+        def enviarRegistroInteraccionUsuarioObjetoAlCoordinador(self, email,idDataStream,comando, osid, mac, dateInteraction):
+        conexion = ConexionPu()
+        conexion.enviarRegistroInteraccionUsuarioObjetoAlCoordinador(email, idDataStream,comando, osid, mac, dateInteraction)
+        """
