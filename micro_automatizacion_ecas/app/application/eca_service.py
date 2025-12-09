@@ -489,7 +489,7 @@ class EcaService:
                 if state_eca == 'on':
                     try:
                         logger.info("Va a ejecutar " + respuesta[1]["id_action_resource"] + " " + str(respuesta[1]["comparator_action"]) + " " + str(respuesta[1]["variable_action"]))
-                        if datastream_service.send_command(self.osid, respuesta[1]["id_action_resource"], data.comando):
+                        if datastream_service.send_command(self.osid, respuesta[1]["id_action_resource"], data.comando.variable_action):
                             await self.Log.PubRawLog(self.osid, self.osid, "Fin SendCommand")
                             return JSONResponse(
                                 status_code=200,
