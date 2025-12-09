@@ -1,0 +1,121 @@
+import json as json
+import signal
+from lib.microdot.microdot import Microdot
+from broker.broker_interface import consumer_mqtt, publicar_valores, tb_publicacion_task, mosq_publicacion_task
+from broker.mqtt_adapter import mosquitto_broker, tb_broker
+#from broker.mqtt_python_adapter import mosquitto_broker, tb_broker
+from routes.datastreams import register_routes
+from config import Config
+#import network #Activar si se usa ESP32 con WiFi
+import asyncio
+
+# Crear aplicación
+app = Microdot()
+
+
+# Registrar rutas
+register_routes(app)
+
+# Flag para controlar el cierre
+shutdown_event = asyncio.Event()
+running_tasks = []
+
+#Configuración de WiFi (si aplica)
+def conectar_wifi():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    wlan.connect(Config.WIFI_SSID, Config.WIFI_PASS)
+    while not wlan.isconnected():
+        pass
+    print("WiFi conectada:", wlan.ifconfig())
+
+
+async def shutdown():
+    """Maneja el cierre seguro del servidor"""
+    print("\nCerrando servidor...")
+    shutdown_event.set()
+    
+    # Cancelar todas las tareas
+    for task in running_tasks:
+        if task and not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+    
+    # Cerrar conexiones MQTT
+    try:
+        if hasattr(mosquitto_broker, 'client') and mosquitto_broker.client:
+            mosquitto_broker.client.loop_stop()
+            mosquitto_broker.client.disconnect()
+    except Exception:
+        pass
+    
+    try:
+        if hasattr(tb_broker, 'client') and tb_broker.client:
+            tb_broker.client.loop_stop()
+            tb_broker.client.disconnect()
+    except Exception:
+        pass
+    
+    # Detener servidor Microdot
+    try:
+        app.shutdown()
+    except Exception:
+        pass
+    
+    print("Servidor cerrado correctamente")
+
+
+# Ejecutar servidor
+async def main():
+    print(f"   Datastream Service iniciando en {Config.HOST}:{Config.PORT}")
+    print(f"   OSID: {Config.OSID}")
+    print(f"   Title: {Config.TITLE}")
+    
+    # Configurar manejadores de señales para cierre seguro
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, lambda: asyncio.create_task(shutdown()))
+    
+    #conectar_wifi()
+    
+    # Iniciar servidor
+    server_task = asyncio.create_task(app.start_server(host=Config.HOST, port=Config.PORT))
+    running_tasks.append(server_task)
+    
+    if Config.OSID:
+        # Iniciar publicación periódica a ThingBoard si ya hay OSID y token        
+        if Config.THINGSBOARD_ACCESS_TOKEN != "":
+            global tb_publicacion_task
+            print("Iniciando publicación a ThingsBoard...")
+            tb_publicacion_task = asyncio.create_task(
+                publicar_valores(tb_broker, Config.OSID, topic=Config.THINGSBOARD_TELEMETRY_TOPIC, interval=Config.TELEMETRY_PUBLISH_INTERVAL)
+            )
+            running_tasks.append(tb_publicacion_task)
+        
+        # Iniciar publicación periodica a Mosquitto si ya hay OSID
+        global mosq_publicacion_task
+        mosq_publicacion_task = asyncio.create_task(
+            publicar_valores(mosquitto_broker, Config.OSID, topic=Config.MOSQUITTO_TELEMETRY_TOPIC, interval=Config.TELEMETRY_PUBLISH_INTERVAL)
+        )
+        running_tasks.append(mosq_publicacion_task)
+    else:
+        # Si el objeto no está inicializado, esperar a que se inicialice
+        print("Esperando inicialización del objeto...")
+        consumer_task = asyncio.create_task(consumer_mqtt(mosquitto_broker))
+        running_tasks.append(consumer_task)
+    
+    # Esperar hasta que se solicite el cierre
+    try:
+        await shutdown_event.wait()
+    except asyncio.CancelledError:
+        pass
+
+
+if __name__ == '__main__':
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nServidor interrumpido por el usuario")
