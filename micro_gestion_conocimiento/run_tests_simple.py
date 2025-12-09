@@ -109,7 +109,7 @@ def main():
         grand_passed += passed
     
     # Mostrar resumen
-    print_header("📊 RESUMEN FINAL")
+    print_header(" RESUMEN FINAL")
     
     print(f"\n TOTAL PRUEBAS EJECUTADAS: {grand_total}")
     print(f" PRUEBAS EXITOSAS: {grand_passed}")
@@ -127,7 +127,7 @@ def main():
     print("=" * 70)
     
     print(f" Pruebas ejecutadas: {grand_total}")
-    print(f" Total pruebas implementadas: 14 (10 unitarias + 2 integración + 2 componentes)")
+    print(f" Total pruebas implementadas: 23 (19 unitarias + 2 integración + 2 componentes)")
     
     if grand_passed == grand_total and grand_total >= 12:
         print("\n ¡TODOS LOS REQUISITOS CUMPLIDOS EXITOSAMENTE!")
