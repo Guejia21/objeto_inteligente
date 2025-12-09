@@ -621,7 +621,7 @@ class EcaService:
                 #Cancela el monitoreo de la ECA
                 await eca_task_manager.update_eca_state(eca["eca_name"], "off", eca["user_eca"])
                 #Actualizar su json
-                self.__update_eca_state_json(eca["eca_name"], eca["user_eca"], "off")
+                util.update_eca_state_json(eca["eca_name"], eca["user_eca"], "off")
                 nombre_completo_eca = eca["eca_name"] + eca["user_eca"] #Se envia de esta manera para que funcione correctamente en la base del conocimiento
                 lista.append([nombre_completo_eca, "off"])
             if ontology_service.setEcaListState(lista):        
