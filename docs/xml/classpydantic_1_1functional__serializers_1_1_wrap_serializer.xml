@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="classpydantic_1_1functional__serializers_1_1_wrap_serializer" kind="class" language="Python" prot="public">
+    <compoundname>pydantic::functional_serializers::WrapSerializer</compoundname>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="classpydantic_1_1functional__serializers_1_1_wrap_serializer_1a18e9683b55a04edf14f19b96f67d2290" prot="public" static="yes" mutable="no">
+        <type><ref refid="namespacepydantic__core_1_1core__schema" kindref="compound">core_schema</ref></type>
+        <definition>core_schema pydantic.functional_serializers.WrapSerializer::func</definition>
+        <argsstring></argsstring>
+        <name>func</name>
+        <qualifiedname>pydantic.functional_serializers.WrapSerializer.func</qualifiedname>
+        <initializer>.WrapSerializerFunction</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" line="152" column="1" bodyfile="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" bodystart="152" bodyend="-1"/>
+        <referencedby refid="classpip_1_1__vendor_1_1pyparsing_1_1diagram_1_1_editable_partial_1a3c8365249bd6514fce002d62622de581" compoundref="microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2pyparsing_2diagram_2____init_____8py" startline="118" endline="120">pip._vendor.pyparsing.diagram.EditablePartial.name</referencedby>
+        <referencedby refid="classpkg__resources_1_1__vendor_1_1pyparsing_1_1diagram_1_1_editable_partial_1a5d76afb03014e0a40acecc3203c5e359" compoundref="microservicio__data__stream_2venv_2_lib_2site-packages_2pkg__resources_2__vendor_2pyparsing_2diagram_2____init_____8py" startline="111" endline="113">pkg_resources._vendor.pyparsing.diagram.EditablePartial.name</referencedby>
+        <referencedby refid="classsetuptools_1_1__vendor_1_1pyparsing_1_1diagram_1_1_editable_partial_1a53f2f69d9bb2d266d0cf162a993dccb3" compoundref="microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__vendor_2pyparsing_2diagram_2____init_____8py" startline="111" endline="113">setuptools._vendor.pyparsing.diagram.EditablePartial.name</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="classpydantic_1_1functional__serializers_1_1_wrap_serializer_1a355d6e454d1883ede81f07455ec972d8" prot="public" static="yes" mutable="no">
+        <type>Any</type>
+        <definition>Any pydantic.functional_serializers.WrapSerializer::return_type</definition>
+        <argsstring></argsstring>
+        <name>return_type</name>
+        <qualifiedname>pydantic.functional_serializers.WrapSerializer.return_type</qualifiedname>
+        <initializer>=  PydanticUndefined</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" line="153" column="1" bodyfile="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" bodystart="153" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classpydantic_1_1functional__serializers_1_1_wrap_serializer_1af9c117c7ccc93146454fb86e5ab5713a" prot="public" static="yes" mutable="no">
+        <type>WhenUsed</type>
+        <definition>WhenUsed pydantic.functional_serializers.WrapSerializer::when_used</definition>
+        <argsstring></argsstring>
+        <name>when_used</name>
+        <qualifiedname>pydantic.functional_serializers.WrapSerializer.when_used</qualifiedname>
+        <initializer>=  &apos;always&apos;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" line="154" column="1" bodyfile="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" bodystart="154" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><verbatim>Wrap serializers receive the raw inputs along with a handler function that applies the standard serialization
+logic, and can modify the resulting value before returning it as the final output of serialization.
+
+For example, here&apos;s a scenario in which a wrap serializer transforms timezones to UTC **and** utilizes the existing `datetime` serialization logic.
+
+```python
+from datetime import datetime, timezone
+from typing import Annotated, Any
+
+from pydantic import BaseModel, WrapSerializer
+
+class EventDatetime(BaseModel):
+    start: datetime
+    end: datetime
+
+def convert_to_utc(value: Any, handler, info) -&gt; dict[str, datetime]:
+    # Note that `handler` can actually help serialize the `value` for
+    # further custom serialization in case it&apos;s a subclass.
+    partial_result = handler(value, info)
+    if info.mode == &apos;json&apos;:
+        return {
+            k: datetime.fromisoformat(v).astimezone(timezone.utc)
+            for k, v in partial_result.items()
+        }
+    return {k: v.astimezone(timezone.utc) for k, v in partial_result.items()}
+
+UTCEventDatetime = Annotated[EventDatetime, WrapSerializer(convert_to_utc)]
+
+class EventModel(BaseModel):
+    event_datetime: UTCEventDatetime
+
+dt = EventDatetime(
+    start=&apos;2024-01-01T07:00:00-08:00&apos;, end=&apos;2024-01-03T20:00:00+06:00&apos;
+)
+event = EventModel(event_datetime=dt)
+print(event.model_dump())
+&apos;&apos;&apos;
+{
+    &apos;event_datetime&apos;: {
+        &apos;start&apos;: datetime.datetime(
+            2024, 1, 1, 15, 0, tzinfo=datetime.timezone.utc
+        ),
+        &apos;end&apos;: datetime.datetime(
+            2024, 1, 3, 14, 0, tzinfo=datetime.timezone.utc
+        ),
+    }
+}
+&apos;&apos;&apos;
+
+print(event.model_dump_json())
+&apos;&apos;&apos;
+{&quot;event_datetime&quot;:{&quot;start&quot;:&quot;2024-01-01T15:00:00Z&quot;,&quot;end&quot;:&quot;2024-01-03T14:00:00Z&quot;}}
+&apos;&apos;&apos;
+```
+
+Attributes:
+    func: The serializer function to be wrapped.
+    return_type: The return type for the function. If omitted it will be inferred from the type annotation.
+    when_used: Determines when this serializer should be used. Accepts a string with values `&apos;always&apos;`,
+        `&apos;unless-none&apos;`, `&apos;json&apos;`, and `&apos;json-unless-none&apos;`. Defaults to &apos;always&apos;.
+</verbatim> </para>
+    </detaileddescription>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" line="89" column="1" bodyfile="micro_gestion_objetos/venv/Lib/site-packages/pydantic/functional_serializers.py" bodystart="89" bodyend="190"/>
+    <listofallmembers>
+      <member refid="classpydantic_1_1functional__serializers_1_1_wrap_serializer_1a18e9683b55a04edf14f19b96f67d2290" prot="public" virt="non-virtual"><scope>pydantic::functional_serializers::WrapSerializer</scope><name>func</name></member>
+      <member refid="classpydantic_1_1functional__serializers_1_1_wrap_serializer_1a355d6e454d1883ede81f07455ec972d8" prot="public" virt="non-virtual"><scope>pydantic::functional_serializers::WrapSerializer</scope><name>return_type</name></member>
+      <member refid="classpydantic_1_1functional__serializers_1_1_wrap_serializer_1af9c117c7ccc93146454fb86e5ab5713a" prot="public" virt="non-virtual"><scope>pydantic::functional_serializers::WrapSerializer</scope><name>when_used</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

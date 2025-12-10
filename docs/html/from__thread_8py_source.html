@@ -1,0 +1,762 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/anyio/from_thread.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('from__thread_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">from_thread.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="from__thread_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html">    1</a></span><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> sys</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacecollections_1_1abc.html">collections.abc</a> <span class="keyword">import</span> Awaitable, Callable, Generator</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">from</span> concurrent.futures <span class="keyword">import</span> Future</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">from</span> contextlib <span class="keyword">import</span> (</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>    AbstractAsyncContextManager,</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    AbstractContextManager,</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    contextmanager,</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>)</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass, field</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">from</span> inspect <span class="keyword">import</span> isawaitable</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">from</span> threading <span class="keyword">import</span> Lock, Thread, current_thread, get_ident</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">from</span> types <span class="keyword">import</span> TracebackType</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">from</span> typing <span class="keyword">import</span> (</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    Any,</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    Generic,</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    TypeVar,</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    cast,</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    overload,</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>)</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">from</span> ._core._eventloop <span class="keyword">import</span> (</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    get_async_backend,</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    get_cancelled_exc_class,</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    threadlocals,</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>)</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">from</span> ._core._eventloop <span class="keyword">import</span> run <span class="keyword">as</span> run_eventloop</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">from</span> ._core._exceptions <span class="keyword">import</span> NoEventLoopError</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">from</span> ._core._synchronization <span class="keyword">import</span> Event</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">from</span> ._core._tasks <span class="keyword">import</span> CancelScope, create_task_group</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">from</span> .abc._tasks <span class="keyword">import</span> TaskStatus</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">from</span> .lowlevel <span class="keyword">import</span> EventLoopToken</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keywordflow">if</span> sys.version_info &gt;= (3, 11):</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">from</span> typing <span class="keyword">import</span> TypeVarTuple, Unpack</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">from</span> typing_extensions <span class="keyword">import</span> TypeVarTuple, Unpack</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#a43d2d243ce562b4cb8b1cb6de3210720">   40</a></span>T_Retval = TypeVar(<span class="stringliteral">&quot;T_Retval&quot;</span>)</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#a8eb78d7a866e6acdd9111b5569deaf66">   41</a></span>T_co = TypeVar(<span class="stringliteral">&quot;T_co&quot;</span>, covariant=<span class="keyword">True</span>)</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#aee5f472f2dec0abcf691e1c7485bf66e">   42</a></span>PosArgsT = <a class="code hl_class" href="classtyping__extensions_1_1_type_var_tuple.html">TypeVarTuple</a>(<span class="stringliteral">&quot;PosArgsT&quot;</span>)</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="foldopen" id="foldopen00045" data-start="" data-end="">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#a9c890666b4bd359216efd114a1671b74">   45</a></span><span class="keyword">def </span><a class="code hl_function" href="namespaceanyio_1_1from__thread.html#a9c890666b4bd359216efd114a1671b74">_token_or_error</a>(token: EventLoopToken | <span class="keywordtype">None</span>) -&gt; EventLoopToken:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">if</span> token <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keywordflow">return</span> token</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keywordflow">return</span> threadlocals.current_token</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">except</span> AttributeError:</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classanyio_1_1__core_1_1__exceptions_1_1_no_event_loop_error.html">NoEventLoopError</a>(</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>            <span class="stringliteral">&quot;Not running inside an AnyIO worker thread, and no event loop token was &quot;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            <span class="stringliteral">&quot;provided&quot;</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        ) <span class="keyword">from</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+</div>
+<div class="foldopen" id="foldopen00058" data-start="" data-end="">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#ac2911b6b1ebcefcb26196cc228110d6f">   58</a></span><span class="keyword">def </span><a class="code hl_function" href="namespaceanyio_1_1from__thread.html#ac2911b6b1ebcefcb26196cc228110d6f">run</a>(</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]],</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    *args: Unpack[PosArgsT],</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    token: EventLoopToken | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>) -&gt; T_Retval:</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="stringliteral">    Call a coroutine function from a worker thread.</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="stringliteral">    :param func: a coroutine function</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="stringliteral">    :param args: positional arguments for the callable</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="stringliteral">    :param token: an event loop token to use to get back to the event loop thread</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="stringliteral">        (required if calling this function from outside an AnyIO worker thread)</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="stringliteral">    :return: the return value of the coroutine function</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="stringliteral">    :raises MissingTokenError: if no token was provided and called from outside an</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="stringliteral">        AnyIO worker thread</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="stringliteral">    :raises RunFinishedError: if the event loop tied to ``token`` is no longer running</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="stringliteral">    .. versionchanged:: 4.11.0</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="stringliteral">        Added the ``token`` parameter.</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    explicit_token = token <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    token = <a class="code hl_function" href="namespaceanyio_1_1from__thread.html#a9c890666b4bd359216efd114a1671b74">_token_or_error</a>(token)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">return</span> token.backend_class.run_async_from_thread(</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        func, args, token=token.native_token <span class="keywordflow">if</span> explicit_token <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    )</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+</div>
+<div class="foldopen" id="foldopen00086" data-start="" data-end="">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#aed9eb910caec4d85842b37736d2faebc">   86</a></span><span class="keyword">def </span><a class="code hl_function" href="namespaceanyio_1_1from__thread.html#aed9eb910caec4d85842b37736d2faebc">run_sync</a>(</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    func: Callable[[Unpack[PosArgsT]], T_Retval],</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    *args: Unpack[PosArgsT],</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    token: EventLoopToken | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>) -&gt; T_Retval:</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="stringliteral">    Call a function in the event loop thread from a worker thread.</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="stringliteral">    :param func: a callable</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="stringliteral">    :param args: positional arguments for the callable</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="stringliteral">    :param token: an event loop token to use to get back to the event loop thread</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="stringliteral">        (required if calling this function from outside an AnyIO worker thread)</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="stringliteral">    :return: the return value of the callable</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="stringliteral">    :raises MissingTokenError: if no token was provided and called from outside an</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="stringliteral">        AnyIO worker thread</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="stringliteral">    :raises RunFinishedError: if the event loop tied to ``token`` is no longer running</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="stringliteral">    .. versionchanged:: 4.11.0</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="stringliteral">        Added the ``token`` parameter.</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    explicit_token = token <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    token = <a class="code hl_function" href="namespaceanyio_1_1from__thread.html#a9c890666b4bd359216efd114a1671b74">_token_or_error</a>(token)</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">return</span> token.backend_class.run_sync_from_thread(</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        func, args, token=token.native_token <span class="keywordflow">if</span> explicit_token <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    )</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+</div>
+<div class="foldopen" id="foldopen00114" data-start="" data-end="">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html">  114</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html">_BlockingAsyncContextManager</a>(Generic[T_co], AbstractContextManager):</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#aeecc3b7bc1e9007bbcab887f45f7649a">  115</a></span>    _enter_future: Future[T_co]</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#af2f5b74861bc4d34e06369fbddc827c4">  116</a></span>    _exit_future: Future[bool | <span class="keywordtype">None</span>]</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    _exit_event: Event</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a9b1f4cb5e796087aa486f09c8ad4eb37">  118</a></span>    _exit_exc_info: tuple[</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        type[BaseException] | <span class="keywordtype">None</span>, BaseException | <span class="keywordtype">None</span>, TracebackType | <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    ] = (<span class="keywordtype">None</span>, <span class="keywordtype">None</span>, <span class="keywordtype">None</span>)</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keyword">def </span>__init__(</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        self, async_cm: AbstractAsyncContextManager[T_co], portal: BlockingPortal</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    ):</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a6d00a394faf779edfd2af94b97a58bc6">  125</a></span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a6d00a394faf779edfd2af94b97a58bc6">_async_cm</a> = async_cm</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#ad05ebdd6a032e986b845748ca576c3a9">  126</a></span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#ad05ebdd6a032e986b845748ca576c3a9">_portal</a> = portal</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="foldopen" id="foldopen00128" data-start="" data-end="">
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a5de86d1792f3444fef39d464c3ea3afe">  128</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a5de86d1792f3444fef39d464c3ea3afe">run_async_cm</a>(self) -&gt; bool | None:</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a194da01cf47b820f13580c1464a409e8">  130</a></span>            self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a194da01cf47b820f13580c1464a409e8">_exit_event</a> = <a class="code hl_class" href="classanyio_1_1__core_1_1__synchronization_1_1_event.html">Event</a>()</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>            value = await self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a6d00a394faf779edfd2af94b97a58bc6">_async_cm</a>.__aenter__()</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <span class="keywordflow">except</span> BaseException <span class="keyword">as</span> exc:</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>            self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#aeecc3b7bc1e9007bbcab887f45f7649a">_enter_future</a>.set_exception(exc)</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>            <span class="keywordflow">raise</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>            self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#aeecc3b7bc1e9007bbcab887f45f7649a">_enter_future</a>.set_result(value)</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>            <span class="comment"># Wait for the sync context manager to exit.</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>            <span class="comment"># This next statement can raise `get_cancelled_exc_class()` if</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>            <span class="comment"># something went wrong in a task group in this async context</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>            <span class="comment"># manager.</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>            await self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a194da01cf47b820f13580c1464a409e8">_exit_event</a>.wait()</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        <span class="keywordflow">finally</span>:</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>            <span class="comment"># In case of cancellation, it could be that we end up here before</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>            <span class="comment"># `_BlockingAsyncContextManager.__exit__` is called, and an</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>            <span class="comment"># `_exit_exc_info` has been set.</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>            result = await self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a6d00a394faf779edfd2af94b97a58bc6">_async_cm</a>.__aexit__(*self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a9b1f4cb5e796087aa486f09c8ad4eb37">_exit_exc_info</a>)</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <span class="keywordflow">return</span> result</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="keyword">def </span>__enter__(self) -&gt; T_co:</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#aeecc3b7bc1e9007bbcab887f45f7649a">_enter_future</a> = Future()</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#af2f5b74861bc4d34e06369fbddc827c4">_exit_future</a> = self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#ad05ebdd6a032e986b845748ca576c3a9">_portal</a>.start_task_soon(self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a5de86d1792f3444fef39d464c3ea3afe">run_async_cm</a>)</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="keywordflow">return</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#aeecc3b7bc1e9007bbcab887f45f7649a">_enter_future</a>.result()</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="keyword">def </span>__exit__(</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        self,</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        __exc_type: type[BaseException] | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        __exc_value: BaseException | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        __traceback: TracebackType | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    ) -&gt; bool | <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a9b1f4cb5e796087aa486f09c8ad4eb37">_exit_exc_info</a> = __exc_type, __exc_value, __traceback</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#ad05ebdd6a032e986b845748ca576c3a9">_portal</a>.call(self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a194da01cf47b820f13580c1464a409e8">_exit_event</a>.set)</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <span class="keywordflow">return</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#af2f5b74861bc4d34e06369fbddc827c4">_exit_future</a>.result()</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+</div>
+<div class="foldopen" id="foldopen00168" data-start="" data-end="">
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html">  168</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html">_BlockingPortalTaskStatus</a>(<a class="code hl_class" href="classanyio_1_1abc_1_1__tasks_1_1_task_status.html">TaskStatus</a>):</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keyword">def </span>__init__(self, future: Future):</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html#a80bad0242c008312cbf69d28efe7f6ab">  170</a></span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html#a80bad0242c008312cbf69d28efe7f6ab">_future</a> = future</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="foldopen" id="foldopen00172" data-start="" data-end="">
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html#aa32bd71d08ef5f1f091b0d6ecc620f81">  172</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html#aa32bd71d08ef5f1f091b0d6ecc620f81">started</a>(self, value: object = <span class="keywordtype">None</span>) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html#a80bad0242c008312cbf69d28efe7f6ab">_future</a>.set_result(value)</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00176" data-start="" data-end="">
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html">  176</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1from__thread_1_1_blocking_portal.html">BlockingPortal</a>:</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <span class="stringliteral">&quot;&quot;&quot;An object that lets external threads run code in an asynchronous event loop.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keyword">def </span>__new__(cls) -&gt; BlockingPortal:</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        <span class="keywordflow">return</span> get_async_backend().create_blocking_portal()</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1920613b4be1d8fc3f954c75032b53d3">  183</a></span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1920613b4be1d8fc3f954c75032b53d3">_event_loop_thread_id</a>: int | <span class="keywordtype">None</span> = get_ident()</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8a4b5805bd0bc26b053274fd21634cc7">  184</a></span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8a4b5805bd0bc26b053274fd21634cc7">_stop_event</a> = <a class="code hl_class" href="classanyio_1_1__core_1_1__synchronization_1_1_event.html">Event</a>()</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8758409756ad99bd7fa7f0d3169e610c">  185</a></span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8758409756ad99bd7fa7f0d3169e610c">_task_group</a> = create_task_group()</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a414a31ecbc6a48c6e010f7b7ccd1265c">  186</a></span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a414a31ecbc6a48c6e010f7b7ccd1265c">_cancelled_exc_class</a> = get_cancelled_exc_class()</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="keyword">async def </span>__aenter__(self) -&gt; BlockingPortal:</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        await self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8758409756ad99bd7fa7f0d3169e610c">_task_group</a>.__aenter__()</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        <span class="keywordflow">return</span> self</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="keyword">async def </span>__aexit__(</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        self,</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        exc_type: type[BaseException] | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        exc_val: BaseException | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        exc_tb: TracebackType | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    ) -&gt; bool:</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        await self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#ab2f07e3ab376dae2041b4cd241400264">stop</a>()</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        <span class="keywordflow">return</span> await self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8758409756ad99bd7fa7f0d3169e610c">_task_group</a>.__aexit__(exc_type, exc_val, exc_tb)</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="foldopen" id="foldopen00201" data-start="" data-end="">
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1c7e2c8b207f3fa28b8b7dfd3b1fd520">  201</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1c7e2c8b207f3fa28b8b7dfd3b1fd520">_check_running</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1920613b4be1d8fc3f954c75032b53d3">_event_loop_thread_id</a> <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&quot;This portal is not running&quot;</span>)</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1920613b4be1d8fc3f954c75032b53d3">_event_loop_thread_id</a> == get_ident():</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>            <span class="keywordflow">raise</span> RuntimeError(</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>                <span class="stringliteral">&quot;This method cannot be called from the event loop thread&quot;</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>            )</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+</div>
+<div class="foldopen" id="foldopen00209" data-start="" data-end="">
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a6ec764d02fa3a54e7004cb978ed5f5d6">  209</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a6ec764d02fa3a54e7004cb978ed5f5d6">sleep_until_stopped</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        <span class="stringliteral">&quot;&quot;&quot;Sleep until :meth:`stop` is called.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        await self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8a4b5805bd0bc26b053274fd21634cc7">_stop_event</a>.wait()</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+</div>
+<div class="foldopen" id="foldopen00213" data-start="" data-end="">
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#ab2f07e3ab376dae2041b4cd241400264">  213</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#ab2f07e3ab376dae2041b4cd241400264">stop</a>(self, cancel_remaining: bool = <span class="keyword">False</span>) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="stringliteral">        Signal the portal to shut down.</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="stringliteral">        This marks the portal as no longer accepting new calls and exits from</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><span class="stringliteral">        :meth:`sleep_until_stopped`.</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="stringliteral">        :param cancel_remaining: ``True`` to cancel all the remaining tasks, ``False``</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="stringliteral">            to let them finish before returning</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1920613b4be1d8fc3f954c75032b53d3">_event_loop_thread_id</a> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8a4b5805bd0bc26b053274fd21634cc7">_stop_event</a>.set()</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keywordflow">if</span> cancel_remaining:</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8758409756ad99bd7fa7f0d3169e610c">_task_group</a>.cancel_scope.cancel(<span class="stringliteral">&quot;the blocking portal is shutting down&quot;</span>)</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
+</div>
+<div class="foldopen" id="foldopen00229" data-start="" data-end="">
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a48536f0d82727c3ae792cac8b89d8830">  229</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a48536f0d82727c3ae792cac8b89d8830">_call_func</a>(</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        self,</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval] | T_Retval],</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        args: tuple[Unpack[PosArgsT]],</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        kwargs: dict[str, Any],</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        future: Future[T_Retval],</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keyword">def </span>callback(f: Future[T_Retval]) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>            <span class="keywordflow">if</span> f.cancelled() <span class="keywordflow">and</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1920613b4be1d8fc3f954c75032b53d3">_event_loop_thread_id</a> <span class="keywordflow">not</span> <span class="keywordflow">in</span> (</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>                <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>                get_ident(),</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            ):</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>                self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a31fb27be539cd591acfd98489688b57d">call</a>(scope.cancel, <span class="stringliteral">&quot;the future was cancelled&quot;</span>)</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            retval_or_awaitable = func(*args, **kwargs)</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            <span class="keywordflow">if</span> isawaitable(retval_or_awaitable):</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>                <span class="keyword">with</span> <a class="code hl_class" href="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope.html">CancelScope</a>() <span class="keyword">as</span> scope:</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>                    <span class="keywordflow">if</span> future.cancelled():</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>                        scope.cancel(<span class="stringliteral">&quot;the future was cancelled&quot;</span>)</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>                    <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                        future.add_done_callback(callback)</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>                    retval = await retval_or_awaitable</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>            <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>                retval = retval_or_awaitable</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordflow">except</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a414a31ecbc6a48c6e010f7b7ccd1265c">_cancelled_exc_class</a>:</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>            future.cancel()</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>            future.set_running_or_notify_cancel()</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        <span class="keywordflow">except</span> BaseException <span class="keyword">as</span> exc:</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>            <span class="keywordflow">if</span> <span class="keywordflow">not</span> future.cancelled():</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                future.set_exception(exc)</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>            <span class="comment"># Let base exceptions fall through</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>            <span class="keywordflow">if</span> <span class="keywordflow">not</span> isinstance(exc, Exception):</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>                <span class="keywordflow">raise</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>            <span class="keywordflow">if</span> <span class="keywordflow">not</span> future.cancelled():</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>                future.set_result(retval)</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        <span class="keywordflow">finally</span>:</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>            scope = <span class="keywordtype">None</span>  <span class="comment"># type: ignore[assignment]</span></div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+</div>
+<div class="foldopen" id="foldopen00271" data-start="" data-end="">
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a7450c66adeb71f733f69e14af497d7da">  271</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a7450c66adeb71f733f69e14af497d7da">_spawn_task_from_thread</a>(</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        self,</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval] | T_Retval],</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        args: tuple[Unpack[PosArgsT]],</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        kwargs: dict[str, Any],</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        name: object,</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        future: Future[T_Retval],</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="stringliteral">        Spawn a new task using the given callable.</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="stringliteral">        Implementers must ensure that the future is resolved when the task finishes.</span></div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span><span class="stringliteral">        :param func: a callable</span></div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span><span class="stringliteral">        :param args: positional arguments to be passed to the callable</span></div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="stringliteral">        :param kwargs: keyword arguments to be passed to the callable</span></div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span><span class="stringliteral">        :param name: name of the task (will be coerced to a string if not ``None``)</span></div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><span class="stringliteral">        :param future: a future that will resolve to the return value of the callable,</span></div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="stringliteral">            or the exception raised during its execution</span></div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        <span class="keywordflow">raise</span> NotImplementedError</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span> </div>
+</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    <span class="preprocessor">@overload</span></div>
+<div class="foldopen" id="foldopen00295" data-start="" data-end="">
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a31fb27be539cd591acfd98489688b57d">  295</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a31fb27be539cd591acfd98489688b57d">call</a>(</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        self,</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]],</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>        *args: Unpack[PosArgsT],</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    ) -&gt; T_Retval: ...</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
+</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    <span class="preprocessor">@overload</span></div>
+<div class="foldopen" id="foldopen00302" data-start="" data-end="">
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#aed887c15fa529e4652f71f08963d7d66">  302</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a31fb27be539cd591acfd98489688b57d">call</a>(</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>        self, func: Callable[[Unpack[PosArgsT]], T_Retval], *args: Unpack[PosArgsT]</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    ) -&gt; T_Retval: ...</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span> </div>
+</div>
+<div class="foldopen" id="foldopen00306" data-start="" data-end="">
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#acb3d9d2f58f13d8788ddd0cc0d533062">  306</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a31fb27be539cd591acfd98489688b57d">call</a>(</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>        self,</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>        func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval] | T_Retval],</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>        *args: Unpack[PosArgsT],</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    ) -&gt; T_Retval:</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="stringliteral">        Call the given function in the event loop thread.</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span><span class="stringliteral">        If the callable returns a coroutine object, it is awaited on.</span></div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span><span class="stringliteral">        :param func: any callable</span></div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span><span class="stringliteral">        :raises RuntimeError: if the portal is not running or if this method is called</span></div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span><span class="stringliteral">            from within the event loop thread</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>        <span class="keywordflow">return</span> cast(T_Retval, self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1aef949f7fed3687f4c4af6b9b522a72">start_task_soon</a>(func, *args).result())</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
+</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>    <span class="preprocessor">@overload</span></div>
+<div class="foldopen" id="foldopen00324" data-start="" data-end="">
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1aef949f7fed3687f4c4af6b9b522a72">  324</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1aef949f7fed3687f4c4af6b9b522a72">start_task_soon</a>(</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>        self,</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>        func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]],</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>        *args: Unpack[PosArgsT],</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>        name: object = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>    ) -&gt; Future[T_Retval]: ...</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span> </div>
+</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>    <span class="preprocessor">@overload</span></div>
+<div class="foldopen" id="foldopen00332" data-start="" data-end="">
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a56f702dcfc95fae2e2d6393150c1bf50">  332</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1aef949f7fed3687f4c4af6b9b522a72">start_task_soon</a>(</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>        self,</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>        func: Callable[[Unpack[PosArgsT]], T_Retval],</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>        *args: Unpack[PosArgsT],</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>        name: object = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>    ) -&gt; Future[T_Retval]: ...</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
+</div>
+<div class="foldopen" id="foldopen00339" data-start="" data-end="">
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#af527df7764c15be1ca75389b2ca0f08d">  339</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1aef949f7fed3687f4c4af6b9b522a72">start_task_soon</a>(</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>        self,</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>        func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval] | T_Retval],</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>        *args: Unpack[PosArgsT],</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        name: object = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>    ) -&gt; Future[T_Retval]:</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span><span class="stringliteral">        Start a task in the portal&#39;s task group.</span></div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span><span class="stringliteral">        The task will be run inside a cancel scope which can be cancelled by cancelling</span></div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span><span class="stringliteral">        the returned future.</span></div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span><span class="stringliteral">        :param func: the target function</span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span><span class="stringliteral">        :param args: positional arguments passed to ``func``</span></div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span><span class="stringliteral">        :param name: name of the task (will be coerced to a string if not ``None``)</span></div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span><span class="stringliteral">        :return: a future that resolves with the return value of the callable if the</span></div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span><span class="stringliteral">            task completes successfully, or with the exception raised in the task</span></div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span><span class="stringliteral">        :raises RuntimeError: if the portal is not running or if this method is called</span></div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span><span class="stringliteral">            from within the event loop thread</span></div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span><span class="stringliteral">        :rtype: concurrent.futures.Future[T_Retval]</span></div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span><span class="stringliteral">        .. versionadded:: 3.0</span></div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>        self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1c7e2c8b207f3fa28b8b7dfd3b1fd520">_check_running</a>()</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>        f: Future[T_Retval] = Future()</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a7450c66adeb71f733f69e14af497d7da">_spawn_task_from_thread</a>(func, args, {}, name, f)</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        <span class="keywordflow">return</span> f</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span> </div>
+</div>
+<div class="foldopen" id="foldopen00368" data-start="" data-end="">
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#ae3450b9f72e00fece219699950d3b62d">  368</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#ae3450b9f72e00fece219699950d3b62d">start_task</a>(</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>        self,</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>        func: Callable[..., Awaitable[T_Retval]],</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>        *args: object,</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>        name: object = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    ) -&gt; tuple[Future[T_Retval], Any]:</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span><span class="stringliteral">        Start a task in the portal&#39;s task group and wait until it signals for readiness.</span></div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span><span class="stringliteral">        This method works the same way as :meth:`.abc.TaskGroup.start`.</span></div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span><span class="stringliteral">        :param func: the target function</span></div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span><span class="stringliteral">        :param args: positional arguments passed to ``func``</span></div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span><span class="stringliteral">        :param name: name of the task (will be coerced to a string if not ``None``)</span></div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span><span class="stringliteral">        :return: a tuple of (future, task_status_value) where the ``task_status_value``</span></div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span><span class="stringliteral">            is the value passed to ``task_status.started()`` from within the target</span></div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span><span class="stringliteral">            function</span></div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span><span class="stringliteral">        :rtype: tuple[concurrent.futures.Future[T_Retval], Any]</span></div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span><span class="stringliteral">        .. versionadded:: 3.0</span></div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span> </div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        <span class="keyword">def </span>task_done(future: Future[T_Retval]) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>            <span class="keywordflow">if</span> <span class="keywordflow">not</span> task_status_future.done():</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>                <span class="keywordflow">if</span> future.cancelled():</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>                    task_status_future.cancel()</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>                <span class="keywordflow">elif</span> future.exception():</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>                    task_status_future.set_exception(future.exception())</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>                <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>                    exc = RuntimeError(</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>                        <span class="stringliteral">&quot;Task exited without calling task_status.started()&quot;</span></div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>                    )</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>                    task_status_future.set_exception(exc)</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span> </div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>        self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1c7e2c8b207f3fa28b8b7dfd3b1fd520">_check_running</a>()</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>        task_status_future: Future = Future()</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>        task_status = <a class="code hl_class" href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html">_BlockingPortalTaskStatus</a>(task_status_future)</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>        f: Future = Future()</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>        f.add_done_callback(task_done)</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>        self.<a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a7450c66adeb71f733f69e14af497d7da">_spawn_task_from_thread</a>(func, args, {<span class="stringliteral">&quot;task_status&quot;</span>: task_status}, name, f)</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>        <span class="keywordflow">return</span> f, task_status_future.result()</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span> </div>
+</div>
+<div class="foldopen" id="foldopen00411" data-start="" data-end="">
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a86c2f3d0f1ebe60da3b890f6685e70c8">  411</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classanyio_1_1from__thread_1_1_blocking_portal.html#a86c2f3d0f1ebe60da3b890f6685e70c8">wrap_async_context_manager</a>(</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>        self, cm: AbstractAsyncContextManager[T_co]</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>    ) -&gt; AbstractContextManager[T_co]:</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span><span class="stringliteral">        Wrap an async context manager as a synchronous context manager via this portal.</span></div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span><span class="stringliteral">        Spawns a task that will call both ``__aenter__()`` and ``__aexit__()``, stopping</span></div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span><span class="stringliteral">        in the middle until the synchronous context manager exits.</span></div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span><span class="stringliteral">        :param cm: an asynchronous context manager</span></div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span><span class="stringliteral">        :return: a synchronous context manager</span></div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span><span class="stringliteral">        .. versionadded:: 2.1</span></div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html">_BlockingAsyncContextManager</a>(cm, self)</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span> </div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span> </div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span><span class="preprocessor">@dataclass</span></div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00430" data-start="" data-end="">
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html">  430</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html">BlockingPortalProvider</a>:</div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span><span class="stringliteral">    A manager for a blocking portal. Used as a context manager. The first thread to</span></div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span><span class="stringliteral">    enter this context manager causes a blocking portal to be started with the specific</span></div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span><span class="stringliteral">    parameters, and the last thread to exit causes the portal to be shut down. Thus,</span></div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span><span class="stringliteral">    there will be exactly one blocking portal running in this context as long as at</span></div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span><span class="stringliteral">    least one thread has entered this context manager.</span></div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span><span class="stringliteral">    The parameters are the same as for :func:`~anyio.run`.</span></div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span><span class="stringliteral">    :param backend: name of the backend</span></div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span><span class="stringliteral">    :param backend_options: backend options</span></div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span><span class="stringliteral">    .. versionadded:: 4.4</span></div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span> </div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a748c45cbd8e22b8e1e15e58c0aa5966f">  446</a></span>    backend: str = <span class="stringliteral">&quot;asyncio&quot;</span></div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a4363d874e6d0873a2f3433cffc6b6fad">  447</a></span>    backend_options: dict[str, Any] | <span class="keywordtype">None</span> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#affbbd763f0cc2f17defe2f04eb47795d">  448</a></span>    _lock: Lock = field(init=<span class="keyword">False</span>, default_factory=Lock)</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a0d2bcc0ab23f67be7ce5d983eb7a15f8">  449</a></span>    _leases: int = field(init=<span class="keyword">False</span>, default=0)</div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a31e532498d9e2793ca76ff1ed578f900">  450</a></span>    _portal: BlockingPortal = field(init=<span class="keyword">False</span>)</div>
+<div class="line"><a id="l00451" name="l00451"></a><span class="lineno"><a class="line" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">  451</a></span>    _portal_cm: AbstractContextManager[BlockingPortal] | <span class="keywordtype">None</span> = field(</div>
+<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>        init=<span class="keyword">False</span>, default=<span class="keywordtype">None</span></div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>    )</div>
+<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span> </div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>    <span class="keyword">def </span>__enter__(self) -&gt; BlockingPortal:</div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>        <span class="keyword">with</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#affbbd763f0cc2f17defe2f04eb47795d">_lock</a>:</div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>            <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">_portal_cm</a> <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>                self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">_portal_cm</a> = <a class="code hl_function" href="namespaceanyio_1_1from__thread.html#af670520b4385160d851158b3c9aa30a7">start_blocking_portal</a>(</div>
+<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>                    self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a748c45cbd8e22b8e1e15e58c0aa5966f">backend</a>, self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a4363d874e6d0873a2f3433cffc6b6fad">backend_options</a></div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>                )</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>                self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a31e532498d9e2793ca76ff1ed578f900">_portal</a> = self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">_portal_cm</a>.__enter__()</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span> </div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>            self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a0d2bcc0ab23f67be7ce5d983eb7a15f8">_leases</a> += 1</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>            <span class="keywordflow">return</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a31e532498d9e2793ca76ff1ed578f900">_portal</a></div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span> </div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>    <span class="keyword">def </span>__exit__(</div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>        self,</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>        exc_type: type[BaseException] | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>        exc_val: BaseException | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>        exc_tb: TracebackType | <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span>    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>        portal_cm: AbstractContextManager[BlockingPortal] | <span class="keywordtype">None</span> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00473" name="l00473"></a><span class="lineno">  473</span>        <span class="keyword">with</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#affbbd763f0cc2f17defe2f04eb47795d">_lock</a>:</div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>            <span class="keyword">assert</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">_portal_cm</a></div>
+<div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span>            <span class="keyword">assert</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a0d2bcc0ab23f67be7ce5d983eb7a15f8">_leases</a> &gt; 0</div>
+<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>            self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a0d2bcc0ab23f67be7ce5d983eb7a15f8">_leases</a> -= 1</div>
+<div class="line"><a id="l00477" name="l00477"></a><span class="lineno">  477</span>            <span class="keywordflow">if</span> <span class="keywordflow">not</span> self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a0d2bcc0ab23f67be7ce5d983eb7a15f8">_leases</a>:</div>
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>                portal_cm = self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">_portal_cm</a></div>
+<div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span>                self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">_portal_cm</a> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>                del self.<a class="code hl_variable" href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a31e532498d9e2793ca76ff1ed578f900">_portal</a></div>
+<div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span> </div>
+<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>        <span class="keywordflow">if</span> portal_cm:</div>
+<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>            portal_cm.__exit__(<span class="keywordtype">None</span>, <span class="keywordtype">None</span>, <span class="keywordtype">None</span>)</div>
+<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span> </div>
+<div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span> </div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span><span class="preprocessor">@contextmanager</span></div>
+</div>
+<div class="foldopen" id="foldopen00487" data-start="" data-end="">
+<div class="line"><a id="l00487" name="l00487"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#af670520b4385160d851158b3c9aa30a7">  487</a></span><span class="keyword">def </span><a class="code hl_function" href="namespaceanyio_1_1from__thread.html#af670520b4385160d851158b3c9aa30a7">start_blocking_portal</a>(</div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>    backend: str = <span class="stringliteral">&quot;asyncio&quot;</span>,</div>
+<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>    backend_options: dict[str, Any] | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>    *,</div>
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>    name: str | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>) -&gt; Generator[BlockingPortal, Any, <span class="keywordtype">None</span>]:</div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span><span class="stringliteral">    Start a new event loop in a new thread and run a blocking portal in its main task.</span></div>
+<div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span><span class="stringliteral">    The parameters are the same as for :func:`~anyio.run`.</span></div>
+<div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span><span class="stringliteral">    :param backend: name of the backend</span></div>
+<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span><span class="stringliteral">    :param backend_options: backend options</span></div>
+<div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span><span class="stringliteral">    :param name: name of the thread</span></div>
+<div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span><span class="stringliteral">    :return: a context manager that yields a blocking portal</span></div>
+<div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span><span class="stringliteral">    .. versionchanged:: 3.0</span></div>
+<div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span><span class="stringliteral">        Usage as a context manager is now required.</span></div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span> </div>
+<div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span>    <span class="keyword">async def </span>run_portal() -&gt; None:</div>
+<div class="line"><a id="l00509" name="l00509"></a><span class="lineno">  509</span>        <span class="keyword">async</span> <span class="keyword">with</span> <a class="code hl_class" href="classanyio_1_1from__thread_1_1_blocking_portal.html">BlockingPortal</a>() <span class="keyword">as</span> portal_:</div>
+<div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span>            <span class="keywordflow">if</span> name <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>                current_thread().name = f<span class="stringliteral">&quot;{backend}-portal-{id(portal_):x}&quot;</span></div>
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span> </div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>            future.set_result(portal_)</div>
+<div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>            await portal_.sleep_until_stopped()</div>
+<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span> </div>
+<div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span>    <span class="keyword">def </span>run_blocking_portal() -&gt; None:</div>
+<div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span>        <span class="keywordflow">if</span> future.set_running_or_notify_cancel():</div>
+<div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span>            <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00519" name="l00519"></a><span class="lineno">  519</span>                run_eventloop(</div>
+<div class="line"><a id="l00520" name="l00520"></a><span class="lineno">  520</span>                    run_portal, backend=backend, backend_options=backend_options</div>
+<div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span>                )</div>
+<div class="line"><a id="l00522" name="l00522"></a><span class="lineno">  522</span>            <span class="keywordflow">except</span> BaseException <span class="keyword">as</span> exc:</div>
+<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>                <span class="keywordflow">if</span> <span class="keywordflow">not</span> future.done():</div>
+<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>                    future.set_exception(exc)</div>
+<div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span> </div>
+<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>    future: Future[BlockingPortal] = Future()</div>
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>    thread = Thread(target=run_blocking_portal, daemon=<span class="keyword">True</span>, name=name)</div>
+<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>    thread.start()</div>
+<div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span>        cancel_remaining_tasks = <span class="keyword">False</span></div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>        portal = future.result()</div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span>            <span class="keywordflow">yield</span> portal</div>
+<div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span>        <span class="keywordflow">except</span> BaseException:</div>
+<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span>            cancel_remaining_tasks = <span class="keyword">True</span></div>
+<div class="line"><a id="l00536" name="l00536"></a><span class="lineno">  536</span>            <span class="keywordflow">raise</span></div>
+<div class="line"><a id="l00537" name="l00537"></a><span class="lineno">  537</span>        <span class="keywordflow">finally</span>:</div>
+<div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>            <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>                portal.call(portal.stop, cancel_remaining_tasks)</div>
+<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>            <span class="keywordflow">except</span> RuntimeError:</div>
+<div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>                <span class="keywordflow">pass</span></div>
+<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>    <span class="keywordflow">finally</span>:</div>
+<div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>        thread.join()</div>
+<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span> </div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span> </div>
+</div>
+<div class="foldopen" id="foldopen00546" data-start="" data-end="">
+<div class="line"><a id="l00546" name="l00546"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1from__thread.html#a7083d3eaa22d40bfd4a43c771a49e082">  546</a></span><span class="keyword">def </span><a class="code hl_function" href="namespaceanyio_1_1from__thread.html#a7083d3eaa22d40bfd4a43c771a49e082">check_cancelled</a>() -&gt; None:</div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span><span class="stringliteral">    Check if the cancel scope of the host task&#39;s running the current worker thread has</span></div>
+<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span><span class="stringliteral">    been cancelled.</span></div>
+<div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span><span class="stringliteral">    If the host task&#39;s current cancel scope has indeed been cancelled, the</span></div>
+<div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span><span class="stringliteral">    backend-specific cancellation exception will be raised.</span></div>
+<div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span><span class="stringliteral">    :raises RuntimeError: if the current thread was not spawned by</span></div>
+<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span><span class="stringliteral">        :func:`.to_thread.run_sync`</span></div>
+<div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>        token: EventLoopToken = threadlocals.current_token</div>
+<div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>    <span class="keywordflow">except</span> AttributeError:</div>
+<div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classanyio_1_1__core_1_1__exceptions_1_1_no_event_loop_error.html">NoEventLoopError</a>(</div>
+<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>            <span class="stringliteral">&quot;This function can only be called inside an AnyIO worker thread&quot;</span></div>
+<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>        ) <span class="keyword">from</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span> </div>
+<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>    token.backend_class.check_cancelled()</div>
+</div>
+<div class="ttc" id="aclassanyio_1_1__core_1_1__exceptions_1_1_no_event_loop_error_html"><div class="ttname"><a href="classanyio_1_1__core_1_1__exceptions_1_1_no_event_loop_error.html">anyio._core._exceptions.NoEventLoopError</a></div><div class="ttdef"><b>Definition</b> <a href="__exceptions_8py_source.html#l00137">_exceptions.py:137</a></div></div>
+<div class="ttc" id="aclassanyio_1_1__core_1_1__synchronization_1_1_event_html"><div class="ttname"><a href="classanyio_1_1__core_1_1__synchronization_1_1_event.html">anyio._core._synchronization.Event</a></div><div class="ttdef"><b>Definition</b> <a href="__synchronization_8py_source.html#l00084">_synchronization.py:84</a></div></div>
+<div class="ttc" id="aclassanyio_1_1__core_1_1__tasks_1_1_cancel_scope_html"><div class="ttname"><a href="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope.html">anyio._core._tasks.CancelScope</a></div><div class="ttdef"><b>Definition</b> <a href="__core_2__tasks_8py_source.html#l00020">_tasks.py:20</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__tasks_1_1_task_status_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__tasks_1_1_task_status.html">anyio.abc._tasks.TaskStatus</a></div><div class="ttdef"><b>Definition</b> <a href="abc_2__tasks_8py_source.html#l00027">_tasks.py:27</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html">anyio.from_thread._BlockingAsyncContextManager</a></div><div class="ttdef"><b>Definition</b> <a href="#l00114">from_thread.py:114</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html_a194da01cf47b820f13580c1464a409e8"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a194da01cf47b820f13580c1464a409e8">anyio.from_thread._BlockingAsyncContextManager._exit_event</a></div><div class="ttdeci">_exit_event</div><div class="ttdef"><b>Definition</b> <a href="#l00130">from_thread.py:130</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html_a5de86d1792f3444fef39d464c3ea3afe"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a5de86d1792f3444fef39d464c3ea3afe">anyio.from_thread._BlockingAsyncContextManager.run_async_cm</a></div><div class="ttdeci">bool|None run_async_cm(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00128">from_thread.py:128</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html_a6d00a394faf779edfd2af94b97a58bc6"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a6d00a394faf779edfd2af94b97a58bc6">anyio.from_thread._BlockingAsyncContextManager._async_cm</a></div><div class="ttdeci">_async_cm</div><div class="ttdef"><b>Definition</b> <a href="#l00125">from_thread.py:125</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html_a9b1f4cb5e796087aa486f09c8ad4eb37"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#a9b1f4cb5e796087aa486f09c8ad4eb37">anyio.from_thread._BlockingAsyncContextManager._exit_exc_info</a></div><div class="ttdeci">tuple _exit_exc_info</div><div class="ttdef"><b>Definition</b> <a href="#l00118">from_thread.py:118</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html_ad05ebdd6a032e986b845748ca576c3a9"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#ad05ebdd6a032e986b845748ca576c3a9">anyio.from_thread._BlockingAsyncContextManager._portal</a></div><div class="ttdeci">_portal</div><div class="ttdef"><b>Definition</b> <a href="#l00126">from_thread.py:126</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html_aeecc3b7bc1e9007bbcab887f45f7649a"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#aeecc3b7bc1e9007bbcab887f45f7649a">anyio.from_thread._BlockingAsyncContextManager._enter_future</a></div><div class="ttdeci">Future _enter_future</div><div class="ttdef"><b>Definition</b> <a href="#l00115">from_thread.py:115</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_async_context_manager_html_af2f5b74861bc4d34e06369fbddc827c4"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_async_context_manager.html#af2f5b74861bc4d34e06369fbddc827c4">anyio.from_thread._BlockingAsyncContextManager._exit_future</a></div><div class="ttdeci">Future _exit_future</div><div class="ttdef"><b>Definition</b> <a href="#l00116">from_thread.py:116</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_portal_task_status_html"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html">anyio.from_thread._BlockingPortalTaskStatus</a></div><div class="ttdef"><b>Definition</b> <a href="#l00168">from_thread.py:168</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_portal_task_status_html_a80bad0242c008312cbf69d28efe7f6ab"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html#a80bad0242c008312cbf69d28efe7f6ab">anyio.from_thread._BlockingPortalTaskStatus._future</a></div><div class="ttdeci">_future</div><div class="ttdef"><b>Definition</b> <a href="#l00170">from_thread.py:170</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1___blocking_portal_task_status_html_aa32bd71d08ef5f1f091b0d6ecc620f81"><div class="ttname"><a href="classanyio_1_1from__thread_1_1___blocking_portal_task_status.html#aa32bd71d08ef5f1f091b0d6ecc620f81">anyio.from_thread._BlockingPortalTaskStatus.started</a></div><div class="ttdeci">None started(self, object value=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00172">from_thread.py:172</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html">anyio.from_thread.BlockingPortal</a></div><div class="ttdef"><b>Definition</b> <a href="#l00176">from_thread.py:176</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a1920613b4be1d8fc3f954c75032b53d3"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1920613b4be1d8fc3f954c75032b53d3">anyio.from_thread.BlockingPortal._event_loop_thread_id</a></div><div class="ttdeci">int|None _event_loop_thread_id</div><div class="ttdef"><b>Definition</b> <a href="#l00183">from_thread.py:183</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a1aef949f7fed3687f4c4af6b9b522a72"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1aef949f7fed3687f4c4af6b9b522a72">anyio.from_thread.BlockingPortal.start_task_soon</a></div><div class="ttdeci">Future[T_Retval] start_task_soon(self, Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]] func, *Unpack[PosArgsT] args, object name=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00324">from_thread.py:329</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a1c7e2c8b207f3fa28b8b7dfd3b1fd520"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a1c7e2c8b207f3fa28b8b7dfd3b1fd520">anyio.from_thread.BlockingPortal._check_running</a></div><div class="ttdeci">None _check_running(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00201">from_thread.py:201</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a31fb27be539cd591acfd98489688b57d"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a31fb27be539cd591acfd98489688b57d">anyio.from_thread.BlockingPortal.call</a></div><div class="ttdeci">T_Retval call(self, Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]] func, *Unpack[PosArgsT] args)</div><div class="ttdef"><b>Definition</b> <a href="#l00295">from_thread.py:299</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a414a31ecbc6a48c6e010f7b7ccd1265c"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a414a31ecbc6a48c6e010f7b7ccd1265c">anyio.from_thread.BlockingPortal._cancelled_exc_class</a></div><div class="ttdeci">_cancelled_exc_class</div><div class="ttdef"><b>Definition</b> <a href="#l00186">from_thread.py:186</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a48536f0d82727c3ae792cac8b89d8830"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a48536f0d82727c3ae792cac8b89d8830">anyio.from_thread.BlockingPortal._call_func</a></div><div class="ttdeci">None _call_func(self, Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]|T_Retval] func, tuple[Unpack[PosArgsT]] args, dict[str, Any] kwargs, Future[T_Retval] future)</div><div class="ttdef"><b>Definition</b> <a href="#l00229">from_thread.py:235</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a6ec764d02fa3a54e7004cb978ed5f5d6"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a6ec764d02fa3a54e7004cb978ed5f5d6">anyio.from_thread.BlockingPortal.sleep_until_stopped</a></div><div class="ttdeci">None sleep_until_stopped(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00209">from_thread.py:209</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a7450c66adeb71f733f69e14af497d7da"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a7450c66adeb71f733f69e14af497d7da">anyio.from_thread.BlockingPortal._spawn_task_from_thread</a></div><div class="ttdeci">None _spawn_task_from_thread(self, Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]|T_Retval] func, tuple[Unpack[PosArgsT]] args, dict[str, Any] kwargs, object name, Future[T_Retval] future)</div><div class="ttdef"><b>Definition</b> <a href="#l00271">from_thread.py:278</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a86c2f3d0f1ebe60da3b890f6685e70c8"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a86c2f3d0f1ebe60da3b890f6685e70c8">anyio.from_thread.BlockingPortal.wrap_async_context_manager</a></div><div class="ttdeci">AbstractContextManager[T_co] wrap_async_context_manager(self, AbstractAsyncContextManager[T_co] cm)</div><div class="ttdef"><b>Definition</b> <a href="#l00411">from_thread.py:413</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a8758409756ad99bd7fa7f0d3169e610c"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8758409756ad99bd7fa7f0d3169e610c">anyio.from_thread.BlockingPortal._task_group</a></div><div class="ttdeci">_task_group</div><div class="ttdef"><b>Definition</b> <a href="#l00185">from_thread.py:185</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_a8a4b5805bd0bc26b053274fd21634cc7"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#a8a4b5805bd0bc26b053274fd21634cc7">anyio.from_thread.BlockingPortal._stop_event</a></div><div class="ttdeci">_stop_event</div><div class="ttdef"><b>Definition</b> <a href="#l00184">from_thread.py:184</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_ab2f07e3ab376dae2041b4cd241400264"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#ab2f07e3ab376dae2041b4cd241400264">anyio.from_thread.BlockingPortal.stop</a></div><div class="ttdeci">None stop(self, bool cancel_remaining=False)</div><div class="ttdef"><b>Definition</b> <a href="#l00213">from_thread.py:213</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_html_ae3450b9f72e00fece219699950d3b62d"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal.html#ae3450b9f72e00fece219699950d3b62d">anyio.from_thread.BlockingPortal.start_task</a></div><div class="ttdeci">tuple[Future[T_Retval], Any] start_task(self, Callable[..., Awaitable[T_Retval]] func, *object args, object name=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00368">from_thread.py:373</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_provider_html"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html">anyio.from_thread.BlockingPortalProvider</a></div><div class="ttdef"><b>Definition</b> <a href="#l00430">from_thread.py:430</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_provider_html_a0d2bcc0ab23f67be7ce5d983eb7a15f8"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a0d2bcc0ab23f67be7ce5d983eb7a15f8">anyio.from_thread.BlockingPortalProvider._leases</a></div><div class="ttdeci">int _leases</div><div class="ttdef"><b>Definition</b> <a href="#l00449">from_thread.py:449</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_provider_html_a31e532498d9e2793ca76ff1ed578f900"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a31e532498d9e2793ca76ff1ed578f900">anyio.from_thread.BlockingPortalProvider._portal</a></div><div class="ttdeci">BlockingPortal _portal</div><div class="ttdef"><b>Definition</b> <a href="#l00450">from_thread.py:450</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_provider_html_a4363d874e6d0873a2f3433cffc6b6fad"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a4363d874e6d0873a2f3433cffc6b6fad">anyio.from_thread.BlockingPortalProvider.backend_options</a></div><div class="ttdeci">dict backend_options</div><div class="ttdef"><b>Definition</b> <a href="#l00447">from_thread.py:447</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_provider_html_a55d6aa6307f3428ee5a084ce93e391ff"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a55d6aa6307f3428ee5a084ce93e391ff">anyio.from_thread.BlockingPortalProvider._portal_cm</a></div><div class="ttdeci">AbstractContextManager _portal_cm</div><div class="ttdef"><b>Definition</b> <a href="#l00451">from_thread.py:451</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_provider_html_a748c45cbd8e22b8e1e15e58c0aa5966f"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#a748c45cbd8e22b8e1e15e58c0aa5966f">anyio.from_thread.BlockingPortalProvider.backend</a></div><div class="ttdeci">str backend</div><div class="ttdef"><b>Definition</b> <a href="#l00446">from_thread.py:446</a></div></div>
+<div class="ttc" id="aclassanyio_1_1from__thread_1_1_blocking_portal_provider_html_affbbd763f0cc2f17defe2f04eb47795d"><div class="ttname"><a href="classanyio_1_1from__thread_1_1_blocking_portal_provider.html#affbbd763f0cc2f17defe2f04eb47795d">anyio.from_thread.BlockingPortalProvider._lock</a></div><div class="ttdeci">Lock _lock</div><div class="ttdef"><b>Definition</b> <a href="#l00448">from_thread.py:448</a></div></div>
+<div class="ttc" id="aclasstyping__extensions_1_1_type_var_tuple_html"><div class="ttname"><a href="classtyping__extensions_1_1_type_var_tuple.html">typing_extensions.TypeVarTuple</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2typing__extensions_8py_source.html#l02546">typing_extensions.py:2546</a></div></div>
+<div class="ttc" id="anamespaceanyio_1_1from__thread_html_a7083d3eaa22d40bfd4a43c771a49e082"><div class="ttname"><a href="namespaceanyio_1_1from__thread.html#a7083d3eaa22d40bfd4a43c771a49e082">anyio.from_thread.check_cancelled</a></div><div class="ttdeci">None check_cancelled()</div><div class="ttdef"><b>Definition</b> <a href="#l00546">from_thread.py:546</a></div></div>
+<div class="ttc" id="anamespaceanyio_1_1from__thread_html_a9c890666b4bd359216efd114a1671b74"><div class="ttname"><a href="namespaceanyio_1_1from__thread.html#a9c890666b4bd359216efd114a1671b74">anyio.from_thread._token_or_error</a></div><div class="ttdeci">EventLoopToken _token_or_error(EventLoopToken|None token)</div><div class="ttdef"><b>Definition</b> <a href="#l00045">from_thread.py:45</a></div></div>
+<div class="ttc" id="anamespaceanyio_1_1from__thread_html_ac2911b6b1ebcefcb26196cc228110d6f"><div class="ttname"><a href="namespaceanyio_1_1from__thread.html#ac2911b6b1ebcefcb26196cc228110d6f">anyio.from_thread.run</a></div><div class="ttdeci">T_Retval run(Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]] func, *Unpack[PosArgsT] args, EventLoopToken|None token=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00058">from_thread.py:62</a></div></div>
+<div class="ttc" id="anamespaceanyio_1_1from__thread_html_aed9eb910caec4d85842b37736d2faebc"><div class="ttname"><a href="namespaceanyio_1_1from__thread.html#aed9eb910caec4d85842b37736d2faebc">anyio.from_thread.run_sync</a></div><div class="ttdeci">T_Retval run_sync(Callable[[Unpack[PosArgsT]], T_Retval] func, *Unpack[PosArgsT] args, EventLoopToken|None token=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00086">from_thread.py:90</a></div></div>
+<div class="ttc" id="anamespaceanyio_1_1from__thread_html_af670520b4385160d851158b3c9aa30a7"><div class="ttname"><a href="namespaceanyio_1_1from__thread.html#af670520b4385160d851158b3c9aa30a7">anyio.from_thread.start_blocking_portal</a></div><div class="ttdeci">Generator[BlockingPortal, Any, None] start_blocking_portal(str backend=&quot;asyncio&quot;, dict[str, Any]|None backend_options=None, *, str|None name=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00487">from_thread.py:492</a></div></div>
+<div class="ttc" id="anamespacecollections_1_1abc_html"><div class="ttname"><a href="namespacecollections_1_1abc.html">collections.abc</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_2ce46c94b3470b3c43d4bdab7a0cec72.html">anyio</a></li><li class="navelem"><a href="from__thread_8py.html">from_thread.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

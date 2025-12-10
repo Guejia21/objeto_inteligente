@@ -1,0 +1,10 @@
+var namespacepip_1_1__vendor_1_1platformdirs_1_1android =
+[
+    [ "Android", "classpip_1_1__vendor_1_1platformdirs_1_1android_1_1_android.html", "classpip_1_1__vendor_1_1platformdirs_1_1android_1_1_android" ],
+    [ "_android_documents_folder", "namespacepip_1_1__vendor_1_1platformdirs_1_1android.html#abff8ac22c43a6ef51048daf003dea78d", null ],
+    [ "_android_downloads_folder", "namespacepip_1_1__vendor_1_1platformdirs_1_1android.html#aa777ca2c88b18ffcd4b5847778a5199c", null ],
+    [ "_android_folder", "namespacepip_1_1__vendor_1_1platformdirs_1_1android.html#a795937860696342566e1034c4f6441e4", null ],
+    [ "_android_music_folder", "namespacepip_1_1__vendor_1_1platformdirs_1_1android.html#ab2aa6b57cbcbf11496e41c811cef2b32", null ],
+    [ "_android_pictures_folder", "namespacepip_1_1__vendor_1_1platformdirs_1_1android.html#ad2e7c68ebf34cb283be41ab448378445", null ],
+    [ "_android_videos_folder", "namespacepip_1_1__vendor_1_1platformdirs_1_1android.html#a57770a19994dbbd07df9690ef2683a63", null ]
+];

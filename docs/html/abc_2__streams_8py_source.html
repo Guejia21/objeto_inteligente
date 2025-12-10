@@ -1,0 +1,411 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/anyio/abc/_streams.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('abc_2__streams_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">_streams.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="abc_2__streams_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1abc_1_1__streams.html">    1</a></span><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> sys</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">from</span> abc <span class="keyword">import</span> ABCMeta, abstractmethod</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacecollections_1_1abc.html">collections.abc</a> <span class="keyword">import</span> Callable</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">from</span> typing <span class="keyword">import</span> Any, Generic, TypeVar, Union</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">from</span> .._core._exceptions <span class="keyword">import</span> EndOfStream</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">from</span> .._core._typedattr <span class="keyword">import</span> TypedAttributeProvider</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">from</span> ._resources <span class="keyword">import</span> AsyncResource</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keyword">from</span> ._tasks <span class="keyword">import</span> TaskGroup</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keywordflow">if</span> sys.version_info &gt;= (3, 10):</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="keyword">from</span> typing <span class="keyword">import</span> TypeAlias</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keyword">from</span> typing_extensions <span class="keyword">import</span> TypeAlias</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1abc_1_1__streams.html#af678988c3bc5cf7395c147aad2003b2c">   18</a></span>T_Item = TypeVar(<span class="stringliteral">&quot;T_Item&quot;</span>)</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1abc_1_1__streams.html#abc0a2dbf45ebf3efe28ab16e806e7474">   19</a></span>T_co = TypeVar(<span class="stringliteral">&quot;T_co&quot;</span>, covariant=<span class="keyword">True</span>)</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="namespaceanyio_1_1abc_1_1__streams.html#a9076ab64499efefb24fd527c97997b71">   20</a></span>T_contra = TypeVar(<span class="stringliteral">&quot;T_contra&quot;</span>, contravariant=<span class="keyword">True</span>)</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="foldopen" id="foldopen00023" data-start="" data-end="">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html">   23</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html">UnreliableObjectReceiveStream</a>(</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    Generic[T_co], AsyncResource, TypedAttributeProvider</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>):</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="stringliteral">    An interface for receiving objects.</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="stringliteral">    This interface makes no guarantees that the received messages arrive in the order in</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="stringliteral">    which they were sent, or that no messages are missed.</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="stringliteral">    Asynchronously iterating over objects of this type will yield objects matching the</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="stringliteral">    given type parameter.</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">def </span>__aiter__(self) -&gt; UnreliableObjectReceiveStream[T_co]:</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">return</span> self</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">async def </span>__anext__(self) -&gt; T_co:</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            <span class="keywordflow">return</span> await self.<a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html#a4f4275efb5dc432015c153b02c24bbd4">receive</a>()</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keywordflow">except</span> EndOfStream:</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>            <span class="keywordflow">raise</span> StopAsyncIteration <span class="keyword">from</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00046" data-start="" data-end="">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html#a4f4275efb5dc432015c153b02c24bbd4">   46</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html#a4f4275efb5dc432015c153b02c24bbd4">receive</a>(self) -&gt; T_co:</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="stringliteral">        Receive the next item.</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="stringliteral">        :raises ~anyio.ClosedResourceError: if the receive stream has been explicitly</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="stringliteral">            closed</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="stringliteral">        :raises ~anyio.EndOfStream: if this stream has been closed from the other end</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="stringliteral">        :raises ~anyio.BrokenResourceError: if this stream has been rendered unusable</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="stringliteral">            due to external causes</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00058" data-start="" data-end="">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream.html">   58</a></span><span class="keyword">class </span>UnreliableObjectSendStream(</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    Generic[T_contra], AsyncResource, TypedAttributeProvider</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>):</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="stringliteral">    An interface for sending objects.</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="stringliteral">    This interface makes no guarantees that the messages sent will reach the</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="stringliteral">    recipient(s) in the same order in which they were sent, or at all.</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00069" data-start="" data-end="">
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream.html#a89fd94eaf55c2edda1dca022ffcd2860">   69</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream.html#a89fd94eaf55c2edda1dca022ffcd2860">send</a>(self, item: T_contra) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="stringliteral">        Send an item to the peer(s).</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="stringliteral">        :param item: the item to send</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="stringliteral">        :raises ~anyio.ClosedResourceError: if the send stream has been explicitly</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="stringliteral">            closed</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="stringliteral">        :raises ~anyio.BrokenResourceError: if this stream has been rendered unusable</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="stringliteral">            due to external causes</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00081" data-start="" data-end="">
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_stream.html">   81</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_stream.html">UnreliableObjectStream</a>(</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    UnreliableObjectReceiveStream[T_Item], UnreliableObjectSendStream[T_Item]</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>):</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="stringliteral">    A bidirectional message stream which does not guarantee the order or reliability of</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="stringliteral">    message delivery.</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+</div>
+<div class="foldopen" id="foldopen00090" data-start="" data-end="">
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_object_receive_stream.html">   90</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_object_receive_stream.html">ObjectReceiveStream</a>(<a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html">UnreliableObjectReceiveStream</a>[T_co]):</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="stringliteral">    A receive message stream which guarantees that messages are received in the same</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="stringliteral">    order in which they were sent, and that no messages are missed.</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+</div>
+<div class="foldopen" id="foldopen00097" data-start="" data-end="">
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_object_send_stream.html">   97</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_object_send_stream.html">ObjectSendStream</a>(<a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream.html">UnreliableObjectSendStream</a>[T_contra]):</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="stringliteral">    A send message stream which guarantees that messages are delivered in the same order</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="stringliteral">    in which they were sent, without missing any messages in the middle.</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+</div>
+<div class="foldopen" id="foldopen00104" data-start="" data-end="">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_object_stream.html">  104</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_object_stream.html">ObjectStream</a>(</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    ObjectReceiveStream[T_Item],</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    ObjectSendStream[T_Item],</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    UnreliableObjectStream[T_Item],</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>):</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="stringliteral">    A bidirectional message stream which guarantees the order and reliability of message</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="stringliteral">    delivery.</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00115" data-start="" data-end="">
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_object_stream.html#a78739912b103be6843e55dfa806008bc">  115</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_object_stream.html#a78739912b103be6843e55dfa806008bc">send_eof</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="stringliteral">        Send an end-of-file indication to the peer.</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="stringliteral">        You should not try to send any further data to this stream after calling this</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="stringliteral">        method. This method is idempotent (does nothing on successive calls).</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00124" data-start="" data-end="">
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_receive_stream.html">  124</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_byte_receive_stream.html">ByteReceiveStream</a>(<a class="code hl_class" href="classanyio_1_1abc_1_1__resources_1_1_async_resource.html">AsyncResource</a>, <a class="code hl_class" href="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider.html">TypedAttributeProvider</a>):</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="stringliteral">    An interface for receiving bytes from a single peer.</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="stringliteral">    Iterating this byte stream will yield a byte string of arbitrary length, but no more</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="stringliteral">    than 65536 bytes.</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keyword">def </span>__aiter__(self) -&gt; ByteReceiveStream:</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        <span class="keywordflow">return</span> self</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keyword">async def </span>__anext__(self) -&gt; bytes:</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>            <span class="keywordflow">return</span> await self.receive()</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="keywordflow">except</span> EndOfStream:</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>            <span class="keywordflow">raise</span> StopAsyncIteration <span class="keyword">from</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00142" data-start="" data-end="">
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_receive_stream.html#a06468412be105f64c6f137e8d13ede86">  142</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_byte_receive_stream.html#a06468412be105f64c6f137e8d13ede86">receive</a>(self, max_bytes: int = 65536) -&gt; bytes:</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="stringliteral">        Receive at most ``max_bytes`` bytes from the peer.</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="stringliteral">        .. note:: Implementers of this interface should not return an empty</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="stringliteral">            :class:`bytes` object, and users should ignore them.</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="stringliteral">        :param max_bytes: maximum number of bytes to receive</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="stringliteral">        :return: the received bytes</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="stringliteral">        :raises ~anyio.EndOfStream: if this stream has been closed from the other end</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00155" data-start="" data-end="">
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_send_stream.html">  155</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_byte_send_stream.html">ByteSendStream</a>(<a class="code hl_class" href="classanyio_1_1abc_1_1__resources_1_1_async_resource.html">AsyncResource</a>, <a class="code hl_class" href="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider.html">TypedAttributeProvider</a>):</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="stringliteral">&quot;&quot;&quot;An interface for sending bytes to a single peer.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00159" data-start="" data-end="">
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_send_stream.html#ac9cc7b82ca7775035dde45ae1c5d4c0b">  159</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_byte_send_stream.html#ac9cc7b82ca7775035dde45ae1c5d4c0b">send</a>(self, item: bytes) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="stringliteral">        Send the given bytes to the peer.</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="stringliteral">        :param item: the bytes to send</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00167" data-start="" data-end="">
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html">  167</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html">ByteStream</a>(<a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_byte_receive_stream.html">ByteReceiveStream</a>, <a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_byte_send_stream.html">ByteSendStream</a>):</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="stringliteral">&quot;&quot;&quot;A bidirectional byte stream.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00171" data-start="" data-end="">
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#a3292e0297e7a094c55d5c21693babc54">  171</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#a3292e0297e7a094c55d5c21693babc54">send_eof</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><span class="stringliteral">        Send an end-of-file indication to the peer.</span></div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="stringliteral">        You should not try to send any further data to this stream after calling this</span></div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span><span class="stringliteral">        method. This method is idempotent (does nothing on successive calls).</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span><span class="comment">#: Type alias for all unreliable bytes-oriented receive streams.</span></div>
+</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#a1d4c92bb72a90a4c723df75555af6920">  181</a></span>AnyUnreliableByteReceiveStream: TypeAlias = Union[</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    UnreliableObjectReceiveStream[bytes], ByteReceiveStream</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>]</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="comment">#: Type alias for all unreliable bytes-oriented send streams.</span></div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#a3774012c50f48387e59f726f8bbbce29">  185</a></span>AnyUnreliableByteSendStream: TypeAlias = Union[</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    UnreliableObjectSendStream[bytes], ByteSendStream</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>]</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="comment">#: Type alias for all unreliable bytes-oriented streams.</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#acd801373b4dc5cc61b75c3c24588d003">  189</a></span>AnyUnreliableByteStream: TypeAlias = Union[UnreliableObjectStream[bytes], ByteStream]</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="comment">#: Type alias for all bytes-oriented receive streams.</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#abfea8b6b8ff5879f109f9e0c5b085a57">  191</a></span>AnyByteReceiveStream: TypeAlias = Union[ObjectReceiveStream[bytes], ByteReceiveStream]</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="comment">#: Type alias for all bytes-oriented send streams.</span></div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#a3ff6eb7d8e79f29fe6b8b99b0f751e08">  193</a></span>AnyByteSendStream: TypeAlias = Union[ObjectSendStream[bytes], ByteSendStream]</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="comment">#: Type alias for all bytes-oriented streams.</span></div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#a6073fb5b5f9b4be349b8d84863991f71">  195</a></span>AnyByteStream: TypeAlias = Union[ObjectStream[bytes], ByteStream]</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
+</div>
+<div class="foldopen" id="foldopen00198" data-start="" data-end="">
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_listener.html">  198</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_listener.html">Listener</a>(Generic[T_co], AsyncResource, TypedAttributeProvider):</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="stringliteral">&quot;&quot;&quot;An interface for objects that let you accept incoming connections.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00202" data-start="" data-end="">
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_listener.html#a0f05c0308c62eb6a1872f9f0af9d9e87">  202</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_listener.html#a0f05c0308c62eb6a1872f9f0af9d9e87">serve</a>(</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        self, handler: Callable[[T_co], Any], task_group: TaskGroup | <span class="keywordtype">None</span> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="stringliteral">        Accept incoming connections as they come in and start tasks to handle them.</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="stringliteral">        :param handler: a callable that will be used to handle each accepted connection</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="stringliteral">        :param task_group: the task group that will be used to start tasks for handling</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="stringliteral">            each accepted connection (if omitted, an ad-hoc task group will be created)</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00214" data-start="" data-end="">
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_object_stream_connectable.html">  214</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_object_stream_connectable.html">ObjectStreamConnectable</a>(Generic[T_co], metaclass=ABCMeta):</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00216" data-start="" data-end="">
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_object_stream_connectable.html#ab75fc6b53a9e043ed3dac61fb4cc3e62">  216</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_object_stream_connectable.html#ab75fc6b53a9e043ed3dac61fb4cc3e62">connect</a>(self) -&gt; ObjectStream[T_co]:</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><span class="stringliteral">        Connect to the remote endpoint.</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="stringliteral">        :return: an object stream connected to the remote end</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="stringliteral">        :raises ConnectionFailed: if the connection fails</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00225" data-start="" data-end="">
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable.html">  225</a></span><span class="keyword">class </span><a class="code hl_class" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable.html">ByteStreamConnectable</a>(metaclass=ABCMeta):</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <span class="preprocessor">@abstractmethod</span></div>
+<div class="foldopen" id="foldopen00227" data-start="" data-end="">
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable.html#a67309e59618e916d26cb78e988a57ffb">  227</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable.html#a67309e59618e916d26cb78e988a57ffb">connect</a>(self) -&gt; ByteStream:</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span><span class="stringliteral">        Connect to the remote endpoint.</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span><span class="stringliteral">        :return: a bytestream connected to the remote end</span></div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span><span class="stringliteral">        :raises ConnectionFailed: if the connection fails</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span><span class="comment">#: Type alias for all connectables returning bytestreams or bytes-oriented object streams</span></div>
+</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno"><a class="line" href="classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable.html#acabb986347e974b454e4c359f2bf012b">  237</a></span>AnyByteStreamConnectable: TypeAlias = Union[</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    ObjectStreamConnectable[bytes], ByteStreamConnectable</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>]</div>
+</div>
+<div class="ttc" id="aclassanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_html"><div class="ttname"><a href="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider.html">anyio._core._typedattr.TypedAttributeProvider</a></div><div class="ttdef"><b>Definition</b> <a href="__typedattr_8py_source.html#l00036">_typedattr.py:36</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__resources_1_1_async_resource_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__resources_1_1_async_resource.html">anyio.abc._resources.AsyncResource</a></div><div class="ttdef"><b>Definition</b> <a href="abc_2__resources_8py_source.html#l00010">_resources.py:10</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_receive_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_receive_stream.html">anyio.abc._streams.ByteReceiveStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00124">_streams.py:124</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_receive_stream_html_a06468412be105f64c6f137e8d13ede86"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_receive_stream.html#a06468412be105f64c6f137e8d13ede86">anyio.abc._streams.ByteReceiveStream.receive</a></div><div class="ttdeci">bytes receive(self, int max_bytes=65536)</div><div class="ttdef"><b>Definition</b> <a href="#l00142">_streams.py:142</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_send_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_send_stream.html">anyio.abc._streams.ByteSendStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00155">_streams.py:155</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_send_stream_html_ac9cc7b82ca7775035dde45ae1c5d4c0b"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_send_stream.html#ac9cc7b82ca7775035dde45ae1c5d4c0b">anyio.abc._streams.ByteSendStream.send</a></div><div class="ttdeci">None send(self, bytes item)</div><div class="ttdef"><b>Definition</b> <a href="#l00159">_streams.py:159</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable.html">anyio.abc._streams.ByteStreamConnectable</a></div><div class="ttdef"><b>Definition</b> <a href="#l00225">_streams.py:225</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable_html_a67309e59618e916d26cb78e988a57ffb"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable.html#a67309e59618e916d26cb78e988a57ffb">anyio.abc._streams.ByteStreamConnectable.connect</a></div><div class="ttdeci">ByteStream connect(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00227">_streams.py:227</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html">anyio.abc._streams.ByteStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00167">_streams.py:167</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_byte_stream_html_a3292e0297e7a094c55d5c21693babc54"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_byte_stream.html#a3292e0297e7a094c55d5c21693babc54">anyio.abc._streams.ByteStream.send_eof</a></div><div class="ttdeci">None send_eof(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00171">_streams.py:171</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_listener_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_listener.html">anyio.abc._streams.Listener</a></div><div class="ttdef"><b>Definition</b> <a href="#l00198">_streams.py:198</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_listener_html_a0f05c0308c62eb6a1872f9f0af9d9e87"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_listener.html#a0f05c0308c62eb6a1872f9f0af9d9e87">anyio.abc._streams.Listener.serve</a></div><div class="ttdeci">None serve(self, Callable[[T_co], Any] handler, TaskGroup|None task_group=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00202">_streams.py:204</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_object_receive_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_object_receive_stream.html">anyio.abc._streams.ObjectReceiveStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00090">_streams.py:90</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_object_send_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_object_send_stream.html">anyio.abc._streams.ObjectSendStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00097">_streams.py:97</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_object_stream_connectable_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_object_stream_connectable.html">anyio.abc._streams.ObjectStreamConnectable</a></div><div class="ttdef"><b>Definition</b> <a href="#l00214">_streams.py:214</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_object_stream_connectable_html_ab75fc6b53a9e043ed3dac61fb4cc3e62"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_object_stream_connectable.html#ab75fc6b53a9e043ed3dac61fb4cc3e62">anyio.abc._streams.ObjectStreamConnectable.connect</a></div><div class="ttdeci">ObjectStream[T_co] connect(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00216">_streams.py:216</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_object_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_object_stream.html">anyio.abc._streams.ObjectStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00104">_streams.py:108</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_object_stream_html_a78739912b103be6843e55dfa806008bc"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_object_stream.html#a78739912b103be6843e55dfa806008bc">anyio.abc._streams.ObjectStream.send_eof</a></div><div class="ttdeci">None send_eof(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00115">_streams.py:115</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html">anyio.abc._streams.UnreliableObjectReceiveStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00023">_streams.py:25</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream_html_a4f4275efb5dc432015c153b02c24bbd4"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_receive_stream.html#a4f4275efb5dc432015c153b02c24bbd4">anyio.abc._streams.UnreliableObjectReceiveStream.receive</a></div><div class="ttdeci">T_co receive(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00046">_streams.py:46</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream.html">anyio.abc._streams.UnreliableObjectSendStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00058">_streams.py:60</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream_html_a89fd94eaf55c2edda1dca022ffcd2860"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream.html#a89fd94eaf55c2edda1dca022ffcd2860">anyio.abc._streams.UnreliableObjectSendStream.send</a></div><div class="ttdeci">None send(self, T_contra item)</div><div class="ttdef"><b>Definition</b> <a href="#l00069">_streams.py:69</a></div></div>
+<div class="ttc" id="aclassanyio_1_1abc_1_1__streams_1_1_unreliable_object_stream_html"><div class="ttname"><a href="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_stream.html">anyio.abc._streams.UnreliableObjectStream</a></div><div class="ttdef"><b>Definition</b> <a href="#l00081">_streams.py:83</a></div></div>
+<div class="ttc" id="anamespacecollections_1_1abc_html"><div class="ttname"><a href="namespacecollections_1_1abc.html">collections.abc</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_2ce46c94b3470b3c43d4bdab7a0cec72.html">anyio</a></li><li class="navelem"><a href="dir_34d59695746d724b055b217da9389a74.html">abc</a></li><li class="navelem"><a href="abc_2__streams_8py.html">_streams.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

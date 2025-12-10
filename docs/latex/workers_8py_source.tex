@@ -1,0 +1,117 @@
+\doxysection{workers.\+py}
+\hypertarget{workers_8py_source}{}\label{workers_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/uvicorn/workers.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/uvicorn/workers.py}}
+\mbox{\hyperlink{workers_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00001}\mbox{\hyperlink{namespaceuvicorn_1_1workers}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00003}00003\ \textcolor{keyword}{import}\ asyncio}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00004}00004\ \textcolor{keyword}{import}\ logging}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00005}00005\ \textcolor{keyword}{import}\ signal}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00006}00006\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00007}00007\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00008}00008\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00010}00010\ \textcolor{keyword}{from}\ gunicorn.arbiter\ \textcolor{keyword}{import}\ Arbiter}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00011}00011\ \textcolor{keyword}{from}\ gunicorn.workers.base\ \textcolor{keyword}{import}\ Worker}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00013}00013\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceuvicorn_1_1__compat}{uvicorn.\_compat}}\ \textcolor{keyword}{import}\ asyncio\_run}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00014}00014\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceuvicorn_1_1config}{uvicorn.config}}\ \textcolor{keyword}{import}\ Config}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00015}00015\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceuvicorn_1_1server}{uvicorn.server}}\ \textcolor{keyword}{import}\ Server}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00017}00017\ warnings.warn(}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00018}00018\ \ \ \ \ \textcolor{stringliteral}{"{}The\ \`{}uvicorn.workers`\ module\ is\ deprecated.\ Please\ use\ \`{}uvicorn-\/worker`\ package\ instead.\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00019}00019\ \ \ \ \ \textcolor{stringliteral}{"{}For\ more\ details,\ see\ https://github.com/Kludex/uvicorn-\/worker."{}},}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00020}00020\ \ \ \ \ DeprecationWarning,}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00021}00021\ )}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00024}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker}{00024}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker}{UvicornWorker}}(Worker):}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00025}00025\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ A\ worker\ class\ for\ Gunicorn\ that\ interfaces\ with\ an\ ASGI\ consumer\ callable,}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ rather\ than\ a\ WSGI\ callable.}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00030}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_a8b92398f61d5e521b0d8ae177806fa13}{00030}}\ \ \ \ \ CONFIG\_KWARGS:\ dict[str,\ Any]\ =\ \{\textcolor{stringliteral}{"{}loop"{}}:\ \textcolor{stringliteral}{"{}auto"{}},\ \textcolor{stringliteral}{"{}http"{}}:\ \textcolor{stringliteral}{"{}auto"{}}\}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00032}00032\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ *args:\ Any,\ **kwargs:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(*args,\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ logger\ =\ logging.getLogger(\textcolor{stringliteral}{"{}uvicorn.error"{}})}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ logger.handlers\ =\ self.log.error\_log.handlers}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ logger.setLevel(self.log.error\_log.level)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ logger.propagate\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ logger\ =\ logging.getLogger(\textcolor{stringliteral}{"{}uvicorn.access"{}})}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ logger.handlers\ =\ self.log.access\_log.handlers}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ logger.setLevel(self.log.access\_log.level)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ logger.propagate\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ config\_kwargs:\ dict\ =\ \{}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}app"{}}:\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}log\_config"{}}:\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}timeout\_keep\_alive"{}}:\ self.cfg.keepalive,}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}timeout\_notify"{}}:\ self.timeout,}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}callback\_notify"{}}:\ self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_af3b8e3537b6be404afd51fad89c9d0c0}{callback\_notify}},}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}limit\_max\_requests"{}}:\ self.max\_requests,}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}forwarded\_allow\_ips"{}}:\ self.cfg.forwarded\_allow\_ips,}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.cfg.is\_ssl:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ ssl\_kwargs\ =\ \{}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ssl\_keyfile"{}}:\ self.cfg.ssl\_options.get(\textcolor{stringliteral}{"{}keyfile"{}}),}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ssl\_certfile"{}}:\ self.cfg.ssl\_options.get(\textcolor{stringliteral}{"{}certfile"{}}),}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ssl\_keyfile\_password"{}}:\ self.cfg.ssl\_options.get(\textcolor{stringliteral}{"{}password"{}}),}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ssl\_version"{}}:\ self.cfg.ssl\_options.get(\textcolor{stringliteral}{"{}ssl\_version"{}}),}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ssl\_cert\_reqs"{}}:\ self.cfg.ssl\_options.get(\textcolor{stringliteral}{"{}cert\_reqs"{}}),}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ssl\_ca\_certs"{}}:\ self.cfg.ssl\_options.get(\textcolor{stringliteral}{"{}ca\_certs"{}}),}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ssl\_ciphers"{}}:\ self.cfg.ssl\_options.get(\textcolor{stringliteral}{"{}ciphers"{}}),}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ config\_kwargs.update(ssl\_kwargs)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.cfg.settings[\textcolor{stringliteral}{"{}backlog"{}}].value:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ config\_kwargs[\textcolor{stringliteral}{"{}backlog"{}}]\ =\ self.cfg.settings[\textcolor{stringliteral}{"{}backlog"{}}].value}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ config\_kwargs.update(self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_a8b92398f61d5e521b0d8ae177806fa13}{CONFIG\_KWARGS}})}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00072}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac36402ff8e852f8838af9ef7dbe9e8df}{00072}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac36402ff8e852f8838af9ef7dbe9e8df}{config}}\ =\ \mbox{\hyperlink{classuvicorn_1_1config_1_1_config}{Config}}(**config\_kwargs)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00074}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ab255bcee1f1efb25d9766f04acc679c8}{00074}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ab255bcee1f1efb25d9766f04acc679c8}{init\_signals}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Reset\ signals\ so\ Gunicorn\ doesn't\ swallow\ subprocess\ return\ codes}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ other\ signals\ are\ set\ up\ by\ Server.install\_signal\_handlers()}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ See:\ https://github.com/Kludex/uvicorn/issues/894}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00078}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_a05826f8815264901fb6e8d7b555b7d2e}{00078}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ s\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_a05826f8815264901fb6e8d7b555b7d2e}{SIGNALS}}:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ signal.signal(s,\ signal.SIG\_DFL)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00081}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_a2013f324181c893f7cd24052d7e8ce20}{00081}}\ \ \ \ \ \ \ \ \ signal.signal(signal.SIGUSR1,\ self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_a2013f324181c893f7cd24052d7e8ce20}{handle\_usr1}})}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Don't\ let\ SIGUSR1\ disturb\ active\ requests\ by\ interrupting\ system\ calls}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ signal.siginterrupt(signal.SIGUSR1,\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00085}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_af378fbbfefdf70f109ad66f5f112f374}{00085}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_af378fbbfefdf70f109ad66f5f112f374}{\_install\_sigquit\_handler}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Install\ a\ SIGQUIT\ handler\ on\ workers.}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00087}00087\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ https://github.com/Kludex/uvicorn/issues/1116}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ https://github.com/benoitc/gunicorn/issues/2604}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ loop\ =\ asyncio.get\_running\_loop()}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00093}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac915590be16fdbac05379cff1a8adbd5}{00093}}\ \ \ \ \ \ \ \ \ loop.add\_signal\_handler(signal.SIGQUIT,\ self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac915590be16fdbac05379cff1a8adbd5}{handle\_exit}},\ signal.SIGQUIT,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00095}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac58acd6791833c9c0116eb08523bae80}{00095}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac58acd6791833c9c0116eb08523bae80}{\_serve}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac36402ff8e852f8838af9ef7dbe9e8df}{config}}.app\ =\ self.wsgi}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ server\ =\ \mbox{\hyperlink{classuvicorn_1_1server_1_1_server}{Server}}(config=self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac36402ff8e852f8838af9ef7dbe9e8df}{config}})}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_af378fbbfefdf70f109ad66f5f112f374}{\_install\_sigquit\_handler}}()}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ await\ server.serve(sockets=self.sockets)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ server.started:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ sys.exit(Arbiter.WORKER\_BOOT\_ERROR)}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00103}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ad33a4e587f0b84b4197aca9b666add1f}{00103}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ad33a4e587f0b84b4197aca9b666add1f}{run}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ asyncio\_run(self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac58acd6791833c9c0116eb08523bae80}{\_serve}}(),\ loop\_factory=self.\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_ac36402ff8e852f8838af9ef7dbe9e8df}{config}}.get\_loop\_factory())}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00106}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_af3b8e3537b6be404afd51fad89c9d0c0}{00106}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker_af3b8e3537b6be404afd51fad89c9d0c0}{callback\_notify}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ self.notify()}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00110}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_h11_worker}{00110}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_h11_worker}{UvicornH11Worker}}(\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_worker}{UvicornWorker}}):}
+\DoxyCodeLine{\Hypertarget{workers_8py_source_l00111}\mbox{\hyperlink{classuvicorn_1_1workers_1_1_uvicorn_h11_worker}{00111}}\ \ \ \ \ CONFIG\_KWARGS\ =\ \{\textcolor{stringliteral}{"{}loop"{}}:\ \textcolor{stringliteral}{"{}asyncio"{}},\ \textcolor{stringliteral}{"{}http"{}}:\ \textcolor{stringliteral}{"{}h11"{}}\}}
+
+\end{DoxyCode}

@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="__typedattr_8py" kind="file" language="Python">
+    <compoundname>_typedattr.py</compoundname>
+    <innerclass refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_set" prot="public">anyio::_core::_typedattr::TypedAttributeSet</innerclass>
+    <innerclass refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider" prot="public">anyio::_core::_typedattr::TypedAttributeProvider</innerclass>
+    <innernamespace refid="namespaceanyio">anyio</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1__core">anyio::_core</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1__core_1_1__typedattr">anyio::_core::_typedattr</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespaceanyio_1_1__core_1_1__typedattr" refkind="compound"><highlight class="keyword">from</highlight><highlight class="normal"><sp/>__future__<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>annotations</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacecollections_1_1abc" kindref="compound">collections.abc</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Callable,<sp/>Mapping</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Any,<sp/>TypeVar,<sp/>final,<sp/>overload</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>._exceptions<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TypedAttributeLookupError</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8" refid="namespaceanyio_1_1__core_1_1__typedattr_1a7a8ff020e5927e12b86026740b29a579" refkind="member"><highlight class="normal">T_Attr<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&quot;T_Attr&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="9" refid="namespaceanyio_1_1__core_1_1__typedattr_1a7bae0a5fc9105576239aaa75db9ff1ad" refkind="member"><highlight class="normal">T_Default<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&quot;T_Default&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="10" refid="namespaceanyio_1_1__core_1_1__typedattr_1aa8bb214f4797a819447b707658aca9ff" refkind="member"><highlight class="normal">undefined<sp/>=<sp/>object()</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13" refid="namespaceanyio_1_1__core_1_1__typedattr_1ae545cfa1871d5eb0df3efb980a4eb36f" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__typedattr_1ae545cfa1871d5eb0df3efb980a4eb36f" kindref="member">typed_attribute</ref>()<sp/>-&gt;<sp/>Any:</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Return<sp/>a<sp/>unique<sp/>object,<sp/>used<sp/>to<sp/>mark<sp/>typed<sp/>attributes.&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>object()</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18" refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_set" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_set" kindref="compound">TypedAttributeSet</ref>:</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="20"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Superclass<sp/>for<sp/>typed<sp/>attribute<sp/>collections.</highlight></codeline>
+<codeline lineno="21"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="22"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Checks<sp/>that<sp/>every<sp/>public<sp/>attribute<sp/>of<sp/>every<sp/>subclass<sp/>has<sp/>a<sp/>type<sp/>annotation.</highlight></codeline>
+<codeline lineno="23"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__init_subclass__(cls)<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>annotations:<sp/>dict[str,<sp/>Any]<sp/>=<sp/>getattr(cls,<sp/></highlight><highlight class="stringliteral">&quot;__annotations__&quot;</highlight><highlight class="normal">,<sp/>{})</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>attrname<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>dir(cls):</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/>attrname.startswith(</highlight><highlight class="stringliteral">&quot;_&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keywordflow">and</highlight><highlight class="normal"><sp/>attrname<sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>annotations:</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>TypeError(</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>f</highlight><highlight class="stringliteral">&quot;Attribute<sp/>{attrname!r}<sp/>is<sp/>missing<sp/>its<sp/>type<sp/>annotation&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>super().__init_subclass__()</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36" refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider" kindref="compound">TypedAttributeProvider</ref>:</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Base<sp/>class<sp/>for<sp/>classes<sp/>that<sp/>wish<sp/>to<sp/>provide<sp/>typed<sp/>extra<sp/>attributes.&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40" refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a5cc7011249b325eeec1f0ce800b6cb9c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a5cc7011249b325eeec1f0ce800b6cb9c" kindref="member">extra_attributes</ref>(self)<sp/>-&gt;<sp/>Mapping[T_Attr,<sp/>Callable[[],<sp/>T_Attr]]:</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="42"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>A<sp/>mapping<sp/>of<sp/>the<sp/>extra<sp/>attributes<sp/>to<sp/>callables<sp/>that<sp/>return<sp/>the<sp/>corresponding</highlight></codeline>
+<codeline lineno="43"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>values.</highlight></codeline>
+<codeline lineno="44"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="45"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>If<sp/>the<sp/>provider<sp/>wraps<sp/>another<sp/>provider,<sp/>the<sp/>attributes<sp/>from<sp/>that<sp/>wrapper<sp/>should</highlight></codeline>
+<codeline lineno="46"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>also<sp/>be<sp/>included<sp/>in<sp/>the<sp/>returned<sp/>mapping<sp/>(but<sp/>the<sp/>wrapper<sp/>may<sp/>override<sp/>the</highlight></codeline>
+<codeline lineno="47"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>callables<sp/>from<sp/>the<sp/>wrapped<sp/>instance).</highlight></codeline>
+<codeline lineno="48"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="49"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>{}</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@overload</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="53" refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a583ae05b3f4227569fd625724231f958" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a583ae05b3f4227569fd625724231f958" kindref="member">extra</ref>(self,<sp/>attribute:<sp/>T_Attr)<sp/>-&gt;<sp/>T_Attr:<sp/>...</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@overload</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="56" refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a5e556cbe0c9200238aeb2ede71f6371a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a583ae05b3f4227569fd625724231f958" kindref="member">extra</ref>(self,<sp/>attribute:<sp/>T_Attr,<sp/>default:<sp/>T_Default)<sp/>-&gt;<sp/>T_Attr<sp/>|<sp/>T_Default:<sp/>...</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@final</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59" refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a20d92c5b7d90771b383b473f0f3699a7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a583ae05b3f4227569fd625724231f958" kindref="member">extra</ref>(self,<sp/>attribute:<sp/>Any,<sp/>default:<sp/>object<sp/>=<sp/>undefined)<sp/>-&gt;<sp/>object:</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="61"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>extra(attribute,<sp/>default=undefined)</highlight></codeline>
+<codeline lineno="62"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="63"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Return<sp/>the<sp/>value<sp/>of<sp/>the<sp/>given<sp/>typed<sp/>extra<sp/>attribute.</highlight></codeline>
+<codeline lineno="64"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="65"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>attribute:<sp/>the<sp/>attribute<sp/>(member<sp/>of<sp/>a<sp/>:class:`~TypedAttributeSet`)<sp/>to</highlight></codeline>
+<codeline lineno="66"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>look<sp/>for</highlight></codeline>
+<codeline lineno="67"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>default:<sp/>the<sp/>value<sp/>that<sp/>should<sp/>be<sp/>returned<sp/>if<sp/>no<sp/>value<sp/>is<sp/>found<sp/>for<sp/>the</highlight></codeline>
+<codeline lineno="68"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>attribute</highlight></codeline>
+<codeline lineno="69"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:raises<sp/>~anyio.TypedAttributeLookupError:<sp/>if<sp/>the<sp/>search<sp/>failed<sp/>and<sp/>no<sp/>default</highlight></codeline>
+<codeline lineno="70"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>value<sp/>was<sp/>given</highlight></codeline>
+<codeline lineno="71"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="72"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>getter<sp/>=<sp/>self.<ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider_1a5cc7011249b325eeec1f0ce800b6cb9c" kindref="member">extra_attributes</ref>[attribute]</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>KeyError:</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>default<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/>undefined:</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/><ref refid="classanyio_1_1__core_1_1__exceptions_1_1_typed_attribute_lookup_error" kindref="compound">TypedAttributeLookupError</ref>(</highlight><highlight class="stringliteral">&quot;Attribute<sp/>not<sp/>found&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>default</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>getter()</highlight></codeline>
+    </programlisting>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/anyio/_core/_typedattr.py"/>
+  </compounddef>
+</doxygen>

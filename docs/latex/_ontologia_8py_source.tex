@@ -1,0 +1,253 @@
+\doxysection{Ontologia.\+py}
+\hypertarget{_ontologia_8py_source}{}\label{_ontologia_8py_source}\index{micro\_gestion\_conocimiento/app/infraestructure/acceso\_ontologia/Ontologia.py@{micro\_gestion\_conocimiento/app/infraestructure/acceso\_ontologia/Ontologia.py}}
+\mbox{\hyperlink{_ontologia_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00001}\mbox{\hyperlink{namespace_ontologia}{00001}}\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00002}00002\ \textcolor{keyword}{import}\ rdflib}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00003}00003\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00004}00004\ \textcolor{keyword}{import}\ os,\ threading}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00005}00005\ \textcolor{keyword}{from}\ rdflib\ \textcolor{keyword}{import}\ *}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00006}00006\ \textcolor{keyword}{from}\ rdflib.namespace\ \textcolor{keyword}{import}\ RDF}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00007}00007\ \textcolor{keyword}{from}\ rdflib\ \textcolor{keyword}{import}\ Literal}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00009}\mbox{\hyperlink{class_ontologia_1_1_ontologia}{00009}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia}{Ontologia}}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00010}00010\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Gestor\ de\ operaciones\ sobre\ la\ ontología\ perteneciente\ al\ objeto.}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00011}00011\ \textcolor{stringliteral}{\ \ \ \ Proporciona\ carga,\ consultas\ (SPARQL),\ inserciones,\ actualizaciones\ y}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00012}00012\ \textcolor{stringliteral}{\ \ \ \ operaciones\ entre\ ontologías\ (resta).\ Cada\ método\ realiza\ la}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00013}00013\ \textcolor{stringliteral}{\ \ \ \ persistencia\ correspondiente\ en\ el\ fichero\ RDF\ asociado."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00015}00015\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ ontologiaIns\ =\ None,\ ontologiaOriginal\ =\ None):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00016}\mbox{\hyperlink{class_ontologia_1_1_ontologia_aa1befede11690a4c5a812ceb25228979}{00016}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aa1befede11690a4c5a812ceb25228979}{lock}}\ =\ threading.Lock()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ontologiaOriginal\ ==\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00018}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a4d4e5c50d7ec427e9efe92faab158548}{00018}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a4d4e5c50d7ec427e9efe92faab158548}{ontologia}}\ =\ settings.ONTOLOGIA\ \ \textcolor{comment}{\#\#Path\ de\ la\ ontologia\ sin\ instanciar}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a4d4e5c50d7ec427e9efe92faab158548}{ontologia}}\ =\ ontologiaOriginal\ \ \textcolor{comment}{\#\#Path\ de\ la\ ontologia\ sin\ instanciar}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00021}00021\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ontologiaIns\ ==\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00022}\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{00022}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}\ =\ settings.ONTOLOGIA\_INSTANCIADA\ \ \textcolor{comment}{\#\#Path\ de\ la\ ontologia\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}\ =\ ontologiaIns\ \ \textcolor{comment}{\#\#Path\ de\ la\ ontologia\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00027}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{00027}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}\ =\ rdflib.Graph()\ \ \textcolor{comment}{\#\#Carga\ la\ ontologia\ en\ el\ grafo}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00028}00028\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ Si\ ya\ esta\ instanciada,\ la\ toma,\ de\ lo\ contrario,\ carga\ la\ ontologia\ original\ para\ instanciarla}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.parse(self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.parse(self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a4d4e5c50d7ec427e9efe92faab158548}{ontologia}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}\ \ Error\ inicializando\ la\ ontologia\ \ "{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ Grafo\ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00045}00045\ \ \ \ \ \textcolor{comment}{\#\#Teniendo\ la\ direccion\ de\ la\ ontologia,\ la\ carga\ en\ el\ grafo\ g}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00046}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a75be611a0936b93f92820ecebd36e59a}{00046}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a75be611a0936b93f92820ecebd36e59a}{cargarOntologia}}(self,\ dirOntologia):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.parse(dirOntologia)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}\ \ Error\ cargando\ la\ ontologia\ \ del\ path\ "{}}\ +\ dirOntologia)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00056}00056\ \ \ \ \ \textcolor{comment}{\#\#Carga\ la\ ontologia\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00057}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{00057}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}(self):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.parse(self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00061}00061\ \ \ \ \ \textcolor{comment}{\#\#Si\ existe\ la\ ontologia\ instanciada\ la\ carga,\ de\ lo\ contrario\ carga\ la\ ontologia}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00062}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a95e956e070462941d276e19fe3b76f7b}{00062}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a95e956e070462941d276e19fe3b76f7b}{cargarGrafoOntologia}}(self):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.parse(self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.parse(self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a4d4e5c50d7ec427e9efe92faab158548}{ontologia}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00069}\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{00069}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{guardarGrafoOntologia}}(self):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.serialize(destination=self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}},\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00073}00073\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ Consultas\ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00074}\mbox{\hyperlink{class_ontologia_1_1_ontologia_ae21e4dd24f95aef89dbf85d3fda72b97}{00074}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_ae21e4dd24f95aef89dbf85d3fda72b97}{consultaInstancias}}(self,\ query):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aa1befede11690a4c5a812ceb25228979}{lock}}.acquire()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#\ \ \ \ \ \ \ \ self.cargarGrafoNuevo()}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ resultado\ =\ []}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ qrest\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.query(query)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ row\ \textcolor{keywordflow}{in}\ qrest:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ resultado.append(row[0].split(\textcolor{stringliteral}{"{}\#"{}})[1].replace(\textcolor{stringliteral}{"{}()"{}},\ (\textcolor{stringliteral}{"{}"{}})))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aa1befede11690a4c5a812ceb25228979}{lock}}.release()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultado}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00084}00084\ \ \ \ \ \textcolor{comment}{\#\#retorna\ una\ lista\ con\ los\ resultados\ [[],[]]}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00085}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a47abee22c2f936bf1f358c0e205cade3}{00085}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a47abee22c2f936bf1f358c0e205cade3}{consultaDataProperty}}(self,\ query):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aa1befede11690a4c5a812ceb25228979}{lock}}.acquire()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#\ \ \ \ \ \ \ \ self.cargarGrafoNuevo()}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ resultado\ =\ []}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ qrest\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.query(query)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ row\ \textcolor{keywordflow}{in}\ qrest:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ aux\ =\ []}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ subrow\ \textcolor{keywordflow}{in}\ row:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ subrow\ ==\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ aux.append(subrow.encode(\textcolor{stringliteral}{'utf-\/8'}))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ aux.append(\textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ resultado.append(aux)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aa1befede11690a4c5a812ceb25228979}{lock}}.release()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultado}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00101}00101\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ Insertar\ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00102}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a070b1aa05223672681c745e900de84b3}{00102}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a070b1aa05223672681c745e900de84b3}{insertarIndividuo}}(self,\ uriNuevo,\ uriClase):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ nodoNuevo\ =\ URIRef(uriNuevo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ clase\ =\ URIRef(uriClase)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((nodoNuevo,\ RDF.type,\ clase))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{guardarGrafoOntologia}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00108}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a1cdb8cd22f2235fc0bd1cfc5a6672da7}{00108}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a1cdb8cd22f2235fc0bd1cfc5a6672da7}{insertarListaIndividuos}}(self,\ lista):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ lista:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ nodoNuevo\ =\ URIRef(i[0])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ clase\ =\ URIRef(i[1])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((nodoNuevo,\ RDF.type,\ clase))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{guardarGrafoOntologia}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00115}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a93a3b68ff686a3203a943a149f948ede}{00115}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a93a3b68ff686a3203a943a149f948ede}{insertarDataProperty}}(self,\ uriIndividuo,\ uriData,\ valor):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ individuo\ =\ URIRef(uriIndividuo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ dataProperty\ =\ URIRef(uriData)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((individuo,\ dataProperty,\ valor))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{guardarGrafoOntologia}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00121}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a4e2ddfff9aed80844ca8153e26d17aee}{00121}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a4e2ddfff9aed80844ca8153e26d17aee}{insertarListaDataProperty}}(self,\ lista):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ lista:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ individuo\ =\ URIRef(i[0])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ dataProperty\ =\ URIRef(i[1])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((individuo,\ dataProperty,\ i[2]))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{guardarGrafoOntologia}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00128}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5abef8b6d9900494eab12495f610e12d}{00128}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5abef8b6d9900494eab12495f610e12d}{insertarObjectProperty}}(self,\ uriIndividuo,\ uriObjectProperty,\ uriIndividuo2):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ individuo1\ =\ URIRef(uriIndividuo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ individuo2\ =\ URIRef(uriIndividuo2)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ objectProperty\ =\ URIRef(uriObjectProperty)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((individuo1,\ objectProperty,\ individuo2))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{guardarGrafoOntologia}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00135}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a19bcff9e11b3d4a5b170e2be54acd66f}{00135}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a19bcff9e11b3d4a5b170e2be54acd66f}{insertarListaObjectProperty}}(self,\ lista):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ lista:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ individuo1\ =\ URIRef(i[0])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ objectProperty\ =\ URIRef(i[1])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ individuo2\ =\ URIRef(i[2])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((individuo1,\ objectProperty,\ individuo2))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_ad0cb68a7f6fab6c23d8fef2eb550c5e5}{guardarGrafoOntologia}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00143}00143\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ Modificar\ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00144}00144\ \textcolor{comment}{\ \ \ \ \#\#Este\ metodo\ modifica\ un\ valor\ en\ la\ ontologia}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00145}00145\ \textcolor{comment}{\ \ \ \ \#\#Tiene\ el\ inconveniente\ que\ agrega\ muchas\ mas\ laneas\ a\ la\ ontologia}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00146}00146\ \textcolor{comment}{\ \ \ \ \#\#por\ eso\ se\ creo\ el\ metodo\ ActualizarDataProperty}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00147}00147\ \textcolor{comment}{\ \ \ \ \#\ \ \ \ def\ setDataProperty(self,\ uriIndividuo,\ uriDataProperty,\ valorNuevo):}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00148}00148\ \textcolor{comment}{\ \ \ \ \#\ \ \ \ \ \ \ \ individuo\ =\ URIRef(uriIndividuo)}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00149}00149\ \textcolor{comment}{\ \ \ \ \#\ \ \ \ \ \ \ \ valor\ =\ valorNuevo}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00150}00150\ \textcolor{comment}{\ \ \ \ \#\ \ \ \ \ \ \ \ dataProperty\ =\ URIRef(uriDataProperty)}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00151}00151\ \textcolor{comment}{\ \ \ \ \#\ \ \ \ \ \ \ \ self.g.set\ ((individuo,\ dataProperty,\ Literal(valor)))}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00152}00152\ \textcolor{comment}{\ \ \ \ \#\ \ \ \ \ \ \ \ self.guardarGrafoOntologia()}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00154}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a05609aa9ab1413946ca2c8374650c7db}{00154}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a05609aa9ab1413946ca2c8374650c7db}{actualizarDataProperty}}(self,\ uriIndividuo,\ uriDataProperty,\ valorNuevo):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Primero\ se\ elimina\ de\ la\ ontologia\ y\ luego\ se\ inserta}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00156}00156\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#print(\ "{}Inicia\ a\ actualizar\ dataproperty\ "{}\ +\ time.ctime())}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ individuo\ =\ URIRef(uriIndividuo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ dataProperty\ =\ URIRef(uriDataProperty)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.remove((individuo,\ dataProperty,\ \textcolor{keywordtype}{None}))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((individuo,\ dataProperty,\ Literal(valorNuevo)))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.serialize(destination=self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}},\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00163}00163\ \ \ \ \ \ \ \ \textcolor{comment}{\#\ print(\ "{}Fin\ actualizar\ dataproperty\ "{}\ +\ time.ctime())}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00165}\mbox{\hyperlink{class_ontologia_1_1_ontologia_ab8efd0fa9f7a9573bd00d8bcd7c41e13}{00165}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_ab8efd0fa9f7a9573bd00d8bcd7c41e13}{actualizarListaDataProperty}}(self,\ listaIndividuos):\ \ \textcolor{comment}{\#\#[[uriind,\ uridata,valornuevo]]}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00166}00166\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\#Primero\ se\ elimina\ de\ la\ ontologia\ y\ luego\ se\ inserta}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ listaIndividuos:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ individuo\ =\ URIRef(item[0])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ dataProperty\ =\ URIRef(item[1])}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ valorNuevo\ =\ item[2]}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.remove((individuo,\ dataProperty,\ \textcolor{keywordtype}{None}))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.add((individuo,\ dataProperty,\ Literal(valorNuevo)))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a5ed7693850aa82389a9c09f9937aaf1c}{g}}.serialize(destination=self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}},\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00176}00176\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ Eliminar\ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00177}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a534e9d779069ad8c2157b65917534de4}{00177}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a534e9d779069ad8c2157b65917534de4}{eliminarTodoIndividuo}}(self,\ uriIndividuo):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ ontologiaInst\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ g\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ g.parse(ontologiaInst)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ individuo\ =\ URIRef(uriIndividuo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ g.remove((individuo,\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ g.serialize(destination=ontologiaInst,\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ ontologiaInst\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ g\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ g.parse(ontologiaInst)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ g.serialize(destination=ontologiaInst,\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}\ Problemas\ eliminando\ todo\ del\ individuo"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00196}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a31f00a774cccef5999f9115136e716da}{00196}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a31f00a774cccef5999f9115136e716da}{eliminarListaTodoIndividuo}}(self,\ ListauriIndividuo):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ ontologiaInst\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ g\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ g.parse(ontologiaInst)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ uriIndividuo\ \textcolor{keywordflow}{in}\ ListauriIndividuo:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ individuo\ =\ URIRef(uriIndividuo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ g.remove((individuo,\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ g.serialize(destination=ontologiaInst,\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ ontologiaInst\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ g\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ g.parse(ontologiaInst)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ g.serialize(destination=ontologiaInst,\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}\ Problemas\ eliminando\ todo\ del\ individuo"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00216}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a12392b0a4d104ba94aa366c96b084ce5}{00216}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a12392b0a4d104ba94aa366c96b084ce5}{eliminarDataProperty}}(self,\ uriIndividuo,\ uriDatapropertyP):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ ontologiaInst\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ g\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ g.parse(ontologiaInst)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ individuo\ =\ URIRef(uriIndividuo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ dataProperty\ =\ URIRef(uriDatapropertyP)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ g.remove((individuo,\ dataProperty,\ \textcolor{keywordtype}{None}))}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ g.serialize(destination=ontologiaInst,\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ ontologiaInst\ =\ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_aafac2dd981e97d23274d5666562eff2b}{ontologiaInst}}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ g\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ g.parse(ontologiaInst)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ g.serialize(destination=ontologiaInst,\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_ontologia_1_1_ontologia_a3803536893c24f646f22825a9bf67cbf}{cargarGrafoNuevo}}()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}\ Problemas\ eliminando\ DataProperty"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00236}00236\ \ \ \ \ \textcolor{comment}{\#\#\ \ \ \ def\ eliminarObjectProperty(self,\ uriIndividuo):}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00238}00238\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ Operaciones\ entre\ ontologias\ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00239}\mbox{\hyperlink{class_ontologia_1_1_ontologia_a67bec9de13ac6c17b34f20fb75238126}{00239}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_ontologia_1_1_ontologia_a67bec9de13ac6c17b34f20fb75238126}{restarOntologias}}(self,\ pathOntologiaMinuendo,\ pathOntologiaSustraendo,\ pathOntologiaResultado):}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ minuendo\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ sustraendo\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ r\ =\ rdflib.Graph()}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ sustraendo.parse(pathOntologiaSustraendo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ minuendo.parse(pathOntologiaMinuendo)}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ r\ =\ minuendo\ -\/\ sustraendo}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ r.serialize(destination=pathOntologiaResultado,\ format=\textcolor{stringliteral}{'xml'})}
+\DoxyCodeLine{\Hypertarget{_ontologia_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pathOntologiaResultado}
+
+\end{DoxyCode}

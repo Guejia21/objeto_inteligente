@@ -1,0 +1,377 @@
+\doxysection{filelist.\+py}
+\hypertarget{filelist_8py_source}{}\label{filelist_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/filelist.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/filelist.py}}
+\mbox{\hyperlink{filelist_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}distutils.filelist}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00002}00002\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00003}00003\ \textcolor{stringliteral}{Provides\ the\ FileList\ class,\ used\ for\ poking\ about\ the\ filesystem}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00004}00004\ \textcolor{stringliteral}{and\ building\ lists\ of\ files.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00005}00005\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00007}00007\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00008}00008\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00009}00009\ \textcolor{keyword}{import}\ fnmatch}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00010}00010\ \textcolor{keyword}{import}\ functools}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00012}00012\ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ convert\_path}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00013}00013\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ DistutilsTemplateError,\ DistutilsInternalError}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00014}00014\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00017}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list}{00017}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list}{FileList}}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00018}00018\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ list\ of\ files\ built\ by\ on\ exploring\ the\ filesystem\ and\ filtered\ by}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00019}00019\ \textcolor{stringliteral}{\ \ \ \ applying\ various\ patterns\ to\ what\ we\ find\ there.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00020}00020\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00021}00021\ \textcolor{stringliteral}{\ \ \ \ Instance\ attributes:}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ \ \ dir}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ directory\ from\ which\ files\ will\ be\ taken\ -\/-\/\ only\ used\ if}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'allfiles'\ not\ supplied\ to\ constructor}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ \ \ files}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ list\ of\ filenames\ currently\ being\ built/filtered/manipulated}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ \ \ allfiles}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ complete\ list\ of\ files\ under\ consideration\ (ie.\ without\ any}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00029}00029\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ filtering\ applied)}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00030}00030\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00032}00032\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ warn=None,\ debug\_print=None):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ ignore\ argument\ to\ FileList,\ but\ keep\ them\ for\ backwards}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ compatibility}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00035}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a1819dd24956f65d94ba94baea3f548c4}{00035}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a1819dd24956f65d94ba94baea3f548c4}{allfiles}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00036}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{00036}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}\ =\ []}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00038}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a05df4f81b1ab616b5abca71db6501f85}{00038}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a05df4f81b1ab616b5abca71db6501f85}{set\_allfiles}}(self,\ allfiles):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a1819dd24956f65d94ba94baea3f548c4}{allfiles}}\ =\ allfiles}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00041}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a22dd073fef214c99a16ab1c4b10def55}{00041}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a22dd073fef214c99a16ab1c4b10def55}{findall}}(self,\ dir=os.curdir):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a1819dd24956f65d94ba94baea3f548c4}{allfiles}}\ =\ \mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a22dd073fef214c99a16ab1c4b10def55}{findall}}(dir)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00044}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{00044}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(self,\ msg):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Print\ 'msg'\ to\ stdout\ if\ the\ global\ DEBUG\ (taken\ from\ the}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ DISTUTILS\_DEBUG\ environment\ variable)\ flag\ is\ true.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ distutils.debug\ \textcolor{keyword}{import}\ DEBUG}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ DEBUG:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ print(msg)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00053}00053\ \ \ \ \ \textcolor{comment}{\#\ Collection\ methods}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00055}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aa9ee6398f54c690ec1af5df79fb1fbac}{00055}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aa9ee6398f54c690ec1af5df79fb1fbac}{append}}(self,\ item):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aa9ee6398f54c690ec1af5df79fb1fbac}{append}}(item)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00058}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_afbb5d33eba4b305a48c0864d954956a4}{00058}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_afbb5d33eba4b305a48c0864d954956a4}{extend}}(self,\ items):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_afbb5d33eba4b305a48c0864d954956a4}{extend}}(items)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00061}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a22aca338a56171f45d6a8f9e7abe6498}{00061}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a22aca338a56171f45d6a8f9e7abe6498}{sort}}(self):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Not\ a\ strict\ lexical\ sort!}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ sortable\_files\ =\ sorted(map(os.path.split,\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}\ =\ []}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sort\_tuple\ \textcolor{keywordflow}{in}\ sortable\_files:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aa9ee6398f54c690ec1af5df79fb1fbac}{append}}(os.path.join(*sort\_tuple))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00068}00068\ \ \ \ \ \textcolor{comment}{\#\ Other\ miscellaneous\ utility\ methods}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00070}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a52bd4da0e3a5199cbc6b921965cef2d3}{00070}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a52bd4da0e3a5199cbc6b921965cef2d3}{remove\_duplicates}}(self):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Assumes\ list\ has\ been\ sorted!}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ range(len(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}})\ -\/\ 1,\ 0,\ -\/1):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}[i]\ ==\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}[i\ -\/\ 1]:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}[i]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00076}00076\ \ \ \ \ \textcolor{comment}{\#\ "{}File\ template"{}\ methods}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00078}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff924518208b7cb596b32af420f0a6c5}{00078}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff924518208b7cb596b32af420f0a6c5}{\_parse\_template\_line}}(self,\ line):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ words\ =\ line.split()}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ action\ =\ words[0]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ patterns\ =\ dir\ =\ dir\_pattern\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ action\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'include'},\ \textcolor{stringliteral}{'exclude'},\ \textcolor{stringliteral}{'global-\/include'},\ \textcolor{stringliteral}{'global-\/exclude'}):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(words)\ <\ 2:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsTemplateError(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}'\%s'\ expects\ <pattern1>\ <pattern2>\ ..."{}}\ \%\ action}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ patterns\ =\ [\mbox{\hyperlink{namespacesetuptools_a88d3013aac4d5258c5379d90a4fac663}{convert\_path}}(w)\ \textcolor{keywordflow}{for}\ w\ \textcolor{keywordflow}{in}\ words[1:]]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'recursive-\/include'},\ \textcolor{stringliteral}{'recursive-\/exclude'}):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(words)\ <\ 3:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsTemplateError(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}'\%s'\ expects\ <dir>\ <pattern1>\ <pattern2>\ ..."{}}\ \%\ action}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ dir\ =\ \mbox{\hyperlink{namespacesetuptools_a88d3013aac4d5258c5379d90a4fac663}{convert\_path}}(words[1])}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ patterns\ =\ [\mbox{\hyperlink{namespacesetuptools_a88d3013aac4d5258c5379d90a4fac663}{convert\_path}}(w)\ \textcolor{keywordflow}{for}\ w\ \textcolor{keywordflow}{in}\ words[2:]]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'graft'},\ \textcolor{stringliteral}{'prune'}):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(words)\ !=\ 2:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsTemplateError(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}'\%s'\ expects\ a\ single\ <dir\_pattern>"{}}\ \%\ action}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ dir\_pattern\ =\ \mbox{\hyperlink{namespacesetuptools_a88d3013aac4d5258c5379d90a4fac663}{convert\_path}}(words[1])}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsTemplateError(\textcolor{stringliteral}{"{}unknown\ action\ '\%s'"{}}\ \%\ action)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (action,\ patterns,\ dir,\ dir\_pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00108}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9fd0909c5726ab4389d2db5c61a3e223}{00108}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9fd0909c5726ab4389d2db5c61a3e223}{process\_template\_line}}(self,\ line):\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Parse\ the\ line:\ split\ it\ up,\ make\ sure\ the\ right\ number\ of\ words}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ is\ there,\ and\ return\ the\ relevant\ words.\ \ 'action'\ is\ always}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ defined:\ it's\ the\ first\ word\ of\ the\ line.\ \ Which\ of\ the\ other}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ three\ are\ defined\ depends\ on\ the\ action;\ it'll\ be\ either}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ patterns,\ (dir\ and\ patterns),\ or\ (dir\_pattern).}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ (action,\ patterns,\ dir,\ dir\_pattern)\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff924518208b7cb596b32af420f0a6c5}{\_parse\_template\_line}}(line)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ OK,\ now\ we\ know\ that\ the\ action\ is\ valid\ and\ we\ have\ the}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ right\ number\ of\ words\ on\ the\ line\ for\ that\ action\ -\/-\/\ so\ we}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ can\ proceed\ with\ minimal\ error-\/checking.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ action\ ==\ \textcolor{stringliteral}{'include'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}include\ "{}}\ +\ \textcolor{stringliteral}{'\ '}.join(patterns))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ patterns:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_ae9fe5a8142554ed017ad8c30fec0013d}{include\_pattern}}(pattern,\ anchor=1):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(\textcolor{stringliteral}{"{}warning:\ no\ files\ found\ matching\ '\%s'"{}},\ pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ ==\ \textcolor{stringliteral}{'exclude'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}exclude\ "{}}\ +\ \textcolor{stringliteral}{'\ '}.join(patterns))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ patterns:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff56d4a96467b8946dbe075f15525723}{exclude\_pattern}}(pattern,\ anchor=1):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}warning:\ no\ previously-\/included\ files\ "{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}found\ matching\ '\%s'"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pattern,}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ ==\ \textcolor{stringliteral}{'global-\/include'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}global-\/include\ "{}}\ +\ \textcolor{stringliteral}{'\ '}.join(patterns))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ patterns:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_ae9fe5a8142554ed017ad8c30fec0013d}{include\_pattern}}(pattern,\ anchor=0):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}warning:\ no\ files\ found\ matching\ '\%s'\ "{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}anywhere\ in\ distribution"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pattern,}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ ==\ \textcolor{stringliteral}{'global-\/exclude'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}global-\/exclude\ "{}}\ +\ \textcolor{stringliteral}{'\ '}.join(patterns))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ patterns:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff56d4a96467b8946dbe075f15525723}{exclude\_pattern}}(pattern,\ anchor=0):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}warning:\ no\ previously-\/included\ files\ matching\ "{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}'\%s'\ found\ anywhere\ in\ distribution"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pattern,}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ ==\ \textcolor{stringliteral}{'recursive-\/include'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}recursive-\/include\ \{\}\ \{\}"{}}.format(dir,\ \textcolor{stringliteral}{'\ '}.join(patterns)))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ patterns:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_ae9fe5a8142554ed017ad8c30fec0013d}{include\_pattern}}(pattern,\ prefix=dir):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ msg\ =\ (}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}warning:\ no\ files\ found\ matching\ '\%s'\ "{}}\ \textcolor{stringliteral}{"{}under\ directory\ '\%s'"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(msg,\ pattern,\ dir)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ ==\ \textcolor{stringliteral}{'recursive-\/exclude'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}recursive-\/exclude\ \{\}\ \{\}"{}}.format(dir,\ \textcolor{stringliteral}{'\ '}.join(patterns)))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ patterns:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff56d4a96467b8946dbe075f15525723}{exclude\_pattern}}(pattern,\ prefix=dir):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}warning:\ no\ previously-\/included\ files\ matching\ "{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}'\%s'\ found\ under\ directory\ '\%s'"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pattern,}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dir,}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ ==\ \textcolor{stringliteral}{'graft'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}graft\ "{}}\ +\ dir\_pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_ae9fe5a8142554ed017ad8c30fec0013d}{include\_pattern}}(\textcolor{keywordtype}{None},\ prefix=dir\_pattern):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(\textcolor{stringliteral}{"{}warning:\ no\ directories\ found\ matching\ '\%s'"{}},\ dir\_pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ action\ ==\ \textcolor{stringliteral}{'prune'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}prune\ "{}}\ +\ dir\_pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff56d4a96467b8946dbe075f15525723}{exclude\_pattern}}(\textcolor{keywordtype}{None},\ prefix=dir\_pattern):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}no\ previously-\/included\ directories\ found\ "{}}\ \textcolor{stringliteral}{"{}matching\ '\%s'"{}}),}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dir\_pattern,}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsInternalError(}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}this\ cannot\ happen:\ invalid\ action\ '\%s'"{}}\ \%\ action}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00200}00200\ \ \ \ \ \textcolor{comment}{\#\ Filtering/selection\ methods}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00202}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_ae9fe5a8142554ed017ad8c30fec0013d}{00202}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_ae9fe5a8142554ed017ad8c30fec0013d}{include\_pattern}}(self,\ pattern,\ anchor=1,\ prefix=None,\ is\_regex=0):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Select\ strings\ (presumably\ filenames)\ from\ 'self.files'\ that}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00204}00204\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ match\ 'pattern',\ a\ Unix-\/style\ wildcard\ (glob)\ pattern.\ \ Patterns}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00205}00205\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ are\ not\ quite\ the\ same\ as\ implemented\ by\ the\ 'fnmatch'\ module:\ '*'}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00206}00206\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ '?'\ \ match\ non-\/special\ characters,\ where\ "{}special"{}\ is\ platform-\/}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00207}00207\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ dependent:\ slash\ on\ Unix;\ colon,\ slash,\ and\ backslash\ on}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00208}00208\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ DOS/Windows;\ and\ colon\ on\ Mac\ OS.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00209}00209\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00210}00210\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ 'anchor'\ is\ true\ (the\ default),\ then\ the\ pattern\ match\ is\ more}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00211}00211\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ stringent:\ "{}*.py"{}\ will\ match\ "{}foo.py"{}\ but\ not\ "{}foo/bar.py"{}.\ \ If}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00212}00212\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'anchor'\ is\ false,\ both\ of\ these\ will\ match.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00213}00213\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00214}00214\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ 'prefix'\ is\ supplied,\ then\ only\ filenames\ starting\ with\ 'prefix'}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00215}00215\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ (itself\ a\ pattern)\ and\ ending\ with\ 'pattern',\ with\ anything\ in\ between}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00216}00216\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ them,\ will\ match.\ \ 'anchor'\ is\ ignored\ in\ this\ case.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00217}00217\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00218}00218\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ 'is\_regex'\ is\ true,\ 'anchor'\ and\ 'prefix'\ are\ ignored,\ and}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00219}00219\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'pattern'\ is\ assumed\ to\ be\ either\ a\ string\ containing\ a\ regex\ or\ a}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00220}00220\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ regex\ object\ -\/-\/\ no\ translation\ is\ done,\ the\ regex\ is\ just\ compiled}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00221}00221\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ used\ as-\/is.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00222}00222\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00223}00223\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Selected\ strings\ will\ be\ added\ to\ self.files.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00224}00224\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00225}00225\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Return\ True\ if\ files\ are\ found,\ False\ otherwise.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00226}00226\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ docstring\ lying\ about\ what\ the\ special\ chars\ are?}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ files\_found\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ pattern\_re\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a4e8345c93754a1b29b6252d4d052ef8c}{translate\_pattern}}(pattern,\ anchor,\ prefix,\ is\_regex)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}include\_pattern:\ applying\ regex\ r'\%s'"{}}\ \%\ pattern\_re.pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ delayed\ loading\ of\ allfiles\ list}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a1819dd24956f65d94ba94baea3f548c4}{allfiles}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a22dd073fef214c99a16ab1c4b10def55}{findall}}()}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a1819dd24956f65d94ba94baea3f548c4}{allfiles}}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ pattern\_re.search(name):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}\ adding\ "{}}\ +\ name)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aa9ee6398f54c690ec1af5df79fb1fbac}{append}}(name)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ files\_found\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ files\_found}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00243}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff56d4a96467b8946dbe075f15525723}{00243}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_aff56d4a96467b8946dbe075f15525723}{exclude\_pattern}}(self,\ pattern,\ anchor=1,\ prefix=None,\ is\_regex=0):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Remove\ strings\ (presumably\ filenames)\ from\ 'files'\ that\ match}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00245}00245\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'pattern'.\ \ Other\ parameters\ are\ the\ same\ as\ for}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00246}00246\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'include\_pattern()',\ above.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00247}00247\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ list\ 'self.files'\ is\ modified\ in\ place.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00248}00248\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Return\ True\ if\ files\ are\ found,\ False\ otherwise.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00249}00249\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ files\_found\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ pattern\_re\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a4e8345c93754a1b29b6252d4d052ef8c}{translate\_pattern}}(pattern,\ anchor,\ prefix,\ is\_regex)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}exclude\_pattern:\ applying\ regex\ r'\%s'"{}}\ \%\ pattern\_re.pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ range(len(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}})\ -\/\ 1,\ -\/1,\ -\/1):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ pattern\_re.search(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}[i]):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a9faef36c4ec9ad484a614dd64268ea69}{debug\_print}}(\textcolor{stringliteral}{"{}\ removing\ "{}}\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}[i])}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1_file_list_a5ef6a0159293f5a4ce1febf8a41891f0}{files}}[i]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ files\_found\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ files\_found}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00261}00261\ \textcolor{comment}{\#\ Utility\ functions}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00264}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a1616d8d44de0cb0b9edbea4910a95037}{00264}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a1616d8d44de0cb0b9edbea4910a95037}{\_find\_all\_simple}}(path):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00265}00265\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00266}00266\ \textcolor{stringliteral}{\ \ \ \ Find\ all\ files\ under\ 'path'}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00267}00267\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00268}00268\ \ \ \ \ all\_unique\ =\ \_UniqueDirs.filter(os.walk(path,\ followlinks=\textcolor{keyword}{True}))}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00269}00269\ \ \ \ \ results\ =\ (}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ os.path.join(base,\ file)\ \textcolor{keywordflow}{for}\ base,\ dirs,\ files\ \textcolor{keywordflow}{in}\ all\_unique\ \textcolor{keywordflow}{for}\ file\ \textcolor{keywordflow}{in}\ files}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00271}00271\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00272}00272\ \ \ \ \ \textcolor{keywordflow}{return}\ filter(os.path.isfile,\ results)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00275}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1___unique_dirs}{00275}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1___unique_dirs}{\_UniqueDirs}}(set):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00276}00276\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00277}00277\ \textcolor{stringliteral}{\ \ \ \ Exclude\ previously-\/seen\ dirs\ from\ walk\ results,}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00278}00278\ \textcolor{stringliteral}{\ \ \ \ avoiding\ infinite\ recursion.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00279}00279\ \textcolor{stringliteral}{\ \ \ \ Ref\ https://bugs.python.org/issue44497.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00280}00280\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00282}00282\ \ \ \ \ \textcolor{keyword}{def\ }\_\_call\_\_(self,\ walk\_item):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00284}00284\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Given\ an\ item\ from\ an\ os.walk\ result,\ determine}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00285}00285\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ if\ the\ item\ represents\ a\ unique\ dir\ for\ this\ instance}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00286}00286\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ if\ not,\ prevent\ further\ traversal.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00287}00287\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ base,\ dirs,\ files\ =\ walk\_item}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ stat\ =\ os.stat(base)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ candidate\ =\ stat.st\_dev,\ stat.st\_ino}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ found\ =\ candidate\ \textcolor{keywordflow}{in}\ self}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ found:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ del\ dirs[:]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ self.add(candidate)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordflow}{not}\ found}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00296}00296\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00297}00297\ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00298}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1___unique_dirs_a351fccd2f8d782034811f470cf8e3815}{00298}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1___unique_dirs_a351fccd2f8d782034811f470cf8e3815}{filter}}(cls,\ items):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classsetuptools_1_1__distutils_1_1filelist_1_1___unique_dirs_a351fccd2f8d782034811f470cf8e3815}{filter}}(cls(),\ items)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00302}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a86615ad4c0464303ef3a40f695d72bec}{00302}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a86615ad4c0464303ef3a40f695d72bec}{findall}}(dir=os.curdir):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00303}00303\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00304}00304\ \textcolor{stringliteral}{\ \ \ \ Find\ all\ files\ under\ 'dir'\ and\ return\ the\ list\ of\ full\ filenames.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00305}00305\ \textcolor{stringliteral}{\ \ \ \ Unless\ dir\ is\ '.',\ return\ full\ filenames\ with\ dir\ prepended.}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00306}00306\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00307}00307\ \ \ \ \ files\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a1616d8d44de0cb0b9edbea4910a95037}{\_find\_all\_simple}}(dir)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00308}00308\ \ \ \ \ \textcolor{keywordflow}{if}\ dir\ ==\ os.curdir:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ make\_rel\ =\ functools.partial(os.path.relpath,\ start=dir)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ files\ =\ map(make\_rel,\ files)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00311}00311\ \ \ \ \ \textcolor{keywordflow}{return}\ list(files)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00312}00312\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00314}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a863de85d22594f824e7d6874016a0100}{00314}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a863de85d22594f824e7d6874016a0100}{glob\_to\_re}}(pattern):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00315}00315\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Translate\ a\ shell-\/like\ glob\ pattern\ to\ a\ regular\ expression;\ return}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00316}00316\ \textcolor{stringliteral}{\ \ \ \ a\ string\ containing\ the\ regex.\ \ Differs\ from\ 'fnmatch.translate()'\ in}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00317}00317\ \textcolor{stringliteral}{\ \ \ \ that\ '*'\ does\ not\ match\ "{}special\ characters"{}\ (which\ are}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00318}00318\ \textcolor{stringliteral}{\ \ \ \ platform-\/specific).}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00319}00319\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00320}00320\ \ \ \ \ pattern\_re\ =\ fnmatch.translate(pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00322}00322\ \ \ \ \ \textcolor{comment}{\#\ '?'\ and\ '*'\ in\ the\ glob\ pattern\ become\ '.'\ and\ '.*'\ in\ the\ RE,\ which}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00323}00323\ \ \ \ \ \textcolor{comment}{\#\ IMHO\ is\ wrong\ -\/-\/\ '?'\ and\ '*'\ aren't\ supposed\ to\ match\ slash\ in\ Unix,}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00324}00324\ \ \ \ \ \textcolor{comment}{\#\ and\ by\ extension\ they\ shouldn't\ match\ such\ "{}special\ characters"{}\ under}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00325}00325\ \ \ \ \ \textcolor{comment}{\#\ any\ OS.\ \ So\ change\ all\ non-\/escaped\ dots\ in\ the\ RE\ to\ match\ any}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00326}00326\ \ \ \ \ \textcolor{comment}{\#\ character\ except\ the\ special\ characters\ (currently:\ just\ os.sep).}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00327}00327\ \ \ \ \ sep\ =\ os.sep}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00328}00328\ \ \ \ \ \textcolor{keywordflow}{if}\ os.sep\ ==\ \textcolor{stringliteral}{'\(\backslash\)\(\backslash\)'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we're\ using\ a\ regex\ to\ manipulate\ a\ regex,\ so\ we\ need}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ escape\ the\ backslash\ twice}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ sep\ =\ \textcolor{stringliteral}{r'\(\backslash\)\(\backslash\)\(\backslash\)\(\backslash\)'}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00332}00332\ \ \ \ \ escaped\ =\ \textcolor{stringliteral}{r'\(\backslash\)1[\string^\%s]'}\ \%\ sep}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00333}00333\ \ \ \ \ pattern\_re\ =\ re.sub(\textcolor{stringliteral}{r'((?<!\(\backslash\)\(\backslash\))(\(\backslash\)\(\backslash\)\(\backslash\)\(\backslash\))*)\(\backslash\).'},\ escaped,\ pattern\_re)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00334}00334\ \ \ \ \ \textcolor{keywordflow}{return}\ pattern\_re}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00336}00336\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00337}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a4e8345c93754a1b29b6252d4d052ef8c}{00337}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a4e8345c93754a1b29b6252d4d052ef8c}{translate\_pattern}}(pattern,\ anchor=1,\ prefix=None,\ is\_regex=0):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00338}00338\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Translate\ a\ shell-\/like\ wildcard\ pattern\ to\ a\ compiled\ regular}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00339}00339\ \textcolor{stringliteral}{\ \ \ \ expression.\ \ Return\ the\ compiled\ regex.\ \ If\ 'is\_regex'\ true,}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00340}00340\ \textcolor{stringliteral}{\ \ \ \ then\ 'pattern'\ is\ directly\ compiled\ to\ a\ regex\ (if\ it's\ a\ string)}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00341}00341\ \textcolor{stringliteral}{\ \ \ \ or\ just\ returned\ as-\/is\ (assumes\ it's\ a\ regex\ object).}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00342}00342\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00343}00343\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_regex:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(pattern,\ str):}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ re.compile(pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pattern}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00349}00349\ \ \ \ \ \textcolor{comment}{\#\ ditch\ start\ and\ end\ characters}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00350}00350\ \ \ \ \ start,\ \_,\ end\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a863de85d22594f824e7d6874016a0100}{glob\_to\_re}}(\textcolor{stringliteral}{'\_'}).partition(\textcolor{stringliteral}{'\_'})}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00352}00352\ \ \ \ \ \textcolor{keywordflow}{if}\ pattern:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ pattern\_re\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a863de85d22594f824e7d6874016a0100}{glob\_to\_re}}(pattern)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ pattern\_re.startswith(start)\ \textcolor{keywordflow}{and}\ pattern\_re.endswith(end)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00355}00355\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ pattern\_re\ =\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00358}00358\ \ \ \ \ \textcolor{keywordflow}{if}\ prefix\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ prefix\_re\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1filelist_a863de85d22594f824e7d6874016a0100}{glob\_to\_re}}(prefix)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ prefix\_re.startswith(start)\ \textcolor{keywordflow}{and}\ prefix\_re.endswith(end)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ prefix\_re\ =\ prefix\_re[len(start)\ :\ len(prefix\_re)\ -\/\ len(end)]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ sep\ =\ os.sep}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.sep\ ==\ \textcolor{stringliteral}{'\(\backslash\)\(\backslash\)'}:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ sep\ =\ \textcolor{stringliteral}{r'\(\backslash\)\(\backslash\)'}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ pattern\_re\ =\ pattern\_re[len(start)\ :\ len(pattern\_re)\ -\/\ len(end)]}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ pattern\_re\ =\ \textcolor{stringliteral}{r'\{\}\(\backslash\)A\{\}\{\}.*\{\}\{\}'}.format(start,\ prefix\_re,\ sep,\ pattern\_re,\ end)}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00367}00367\ \ \ \ \ \textcolor{keywordflow}{else}:\ \ \textcolor{comment}{\#\ no\ prefix\ -\/-\/\ respect\ anchor\ flag}}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ anchor:}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ pattern\_re\ =\ \textcolor{stringliteral}{r'\{\}\(\backslash\)A\{\}'}.format(start,\ pattern\_re[len(start)\ :])}
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00370}00370\ }
+\DoxyCodeLine{\Hypertarget{filelist_8py_source_l00371}00371\ \ \ \ \ \textcolor{keywordflow}{return}\ re.compile(pattern\_re)}
+
+\end{DoxyCode}

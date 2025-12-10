@@ -1,0 +1,401 @@
+\doxysection{cd.\+py}
+\hypertarget{cd_8py_source}{}\label{cd_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/charset\_normalizer/cd.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/charset\_normalizer/cd.py}}
+\mbox{\hyperlink{cd_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00001}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00003}00003\ \textcolor{keyword}{import}\ importlib}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00004}00004\ \textcolor{keyword}{from}\ codecs\ \textcolor{keyword}{import}\ IncrementalDecoder}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00005}00005\ \textcolor{keyword}{from}\ collections\ \textcolor{keyword}{import}\ Counter}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00006}00006\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ lru\_cache}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00007}00007\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Counter\ \textcolor{keyword}{as}\ TypeCounter}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00009}00009\ \textcolor{keyword}{from}\ .constant\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00010}00010\ \ \ \ \ FREQUENCIES,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00011}00011\ \ \ \ \ KO\_NAMES,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00012}00012\ \ \ \ \ LANGUAGE\_SUPPORTED\_COUNT,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00013}00013\ \ \ \ \ TOO\_SMALL\_SEQUENCE,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00014}00014\ \ \ \ \ ZH\_NAMES,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00015}00015\ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00016}00016\ \textcolor{keyword}{from}\ .md\ \textcolor{keyword}{import}\ is\_suspiciously\_successive\_range}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00017}00017\ \textcolor{keyword}{from}\ .models\ \textcolor{keyword}{import}\ CoherenceMatches}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00018}00018\ \textcolor{keyword}{from}\ .utils\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00019}00019\ \ \ \ \ is\_accentuated,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00020}00020\ \ \ \ \ is\_latin,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00021}00021\ \ \ \ \ is\_multi\_byte\_encoding,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00022}00022\ \ \ \ \ is\_unicode\_range\_secondary,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00023}00023\ \ \ \ \ unicode\_range,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00024}00024\ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00027}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_aafac37c72382da7128441a00625a842b}{00027}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_aafac37c72382da7128441a00625a842b}{encoding\_unicode\_range}}(iana\_name:\ str)\ -\/>\ list[str]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00028}00028\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00029}00029\ \textcolor{stringliteral}{\ \ \ \ Return\ associated\ unicode\ ranges\ in\ a\ single\ byte\ code\ page.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00030}00030\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00031}00031\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_multi\_byte\_encoding(iana\_name):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ OSError(\textcolor{stringliteral}{"{}Function\ not\ supported\ on\ multi-\/byte\ code\ page"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00034}00034\ \ \ \ \ decoder\ =\ importlib.import\_module(f\textcolor{stringliteral}{"{}encodings.\{iana\_name\}"{}}).IncrementalDecoder}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00036}00036\ \ \ \ \ p:\ IncrementalDecoder\ =\ decoder(errors=\textcolor{stringliteral}{"{}ignore"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00037}00037\ \ \ \ \ seen\_ranges:\ dict[str,\ int]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00038}00038\ \ \ \ \ character\_count:\ int\ =\ 0}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00040}00040\ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ range(0x40,\ 0xFF):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ chunk:\ str\ =\ p.decode(bytes([i]))}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ chunk:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ character\_range:\ str\ |\ \textcolor{keywordtype}{None}\ =\ unicode\_range(chunk)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ character\_range\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_unicode\_range\_secondary(character\_range)\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ character\_range\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ seen\_ranges:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seen\_ranges[character\_range]\ =\ 0}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seen\_ranges[character\_range]\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ character\_count\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00055}00055\ \ \ \ \ \textcolor{keywordflow}{return}\ sorted(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ character\_range}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ character\_range\ \textcolor{keywordflow}{in}\ seen\_ranges}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ seen\_ranges[character\_range]\ /\ character\_count\ >=\ 0.15}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00061}00061\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00064}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a7257096420b4a16e32a87fe88c0a7d9c}{00064}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a7257096420b4a16e32a87fe88c0a7d9c}{unicode\_range\_languages}}(primary\_range:\ str)\ -\/>\ list[str]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00065}00065\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ Return\ inferred\ languages\ used\ with\ a\ unicode\ range.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00067}00067\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00068}00068\ \ \ \ \ languages:\ list[str]\ =\ []}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{for}\ language,\ characters\ \textcolor{keywordflow}{in}\ FREQUENCIES.items():}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ character\ \textcolor{keywordflow}{in}\ characters:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ unicode\_range(character)\ ==\ primary\_range:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ languages.append(language)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00076}00076\ \ \ \ \ \textcolor{keywordflow}{return}\ languages}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00079}00079\ \textcolor{preprocessor}{@lru\_cache()}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00080}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a03602a762aa7f8495c25d13fb725623f}{00080}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a03602a762aa7f8495c25d13fb725623f}{encoding\_languages}}(iana\_name:\ str)\ -\/>\ list[str]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00081}00081\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ Single-\/byte\ encoding\ language\ association.\ Some\ code\ page\ are\ heavily\ linked\ to\ particular\ language(s).}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ This\ function\ does\ the\ correspondence.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00085}00085\ \ \ \ \ unicode\_ranges:\ list[str]\ =\ \mbox{\hyperlink{namespacecharset__normalizer_1_1cd_aafac37c72382da7128441a00625a842b}{encoding\_unicode\_range}}(iana\_name)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00086}00086\ \ \ \ \ primary\_range:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00088}00088\ \ \ \ \ \textcolor{keywordflow}{for}\ specified\_range\ \textcolor{keywordflow}{in}\ unicode\_ranges:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}Latin"{}}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ specified\_range:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ primary\_range\ =\ specified\_range}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{if}\ primary\_range\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [\textcolor{stringliteral}{"{}Latin\ Based"{}}]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00096}00096\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a7257096420b4a16e32a87fe88c0a7d9c}{unicode\_range\_languages}}(primary\_range)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00099}00099\ \textcolor{preprocessor}{@lru\_cache()}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00100}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_af478f028a6f5255d951fc09a47423620}{00100}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_af478f028a6f5255d951fc09a47423620}{mb\_encoding\_languages}}(iana\_name:\ str)\ -\/>\ list[str]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00101}00101\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ Multi-\/byte\ encoding\ language\ association.\ Some\ code\ page\ are\ heavily\ linked\ to\ particular\ language(s).}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ This\ function\ does\ the\ correspondence.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00105}00105\ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ iana\_name.startswith(\textcolor{stringliteral}{"{}shift\_"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ iana\_name.startswith(\textcolor{stringliteral}{"{}iso2022\_jp"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ iana\_name.startswith(\textcolor{stringliteral}{"{}euc\_j"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ iana\_name\ ==\ \textcolor{stringliteral}{"{}cp932"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00110}00110\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [\textcolor{stringliteral}{"{}Japanese"{}}]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00112}00112\ \ \ \ \ \textcolor{keywordflow}{if}\ iana\_name.startswith(\textcolor{stringliteral}{"{}gb"{}})\ \textcolor{keywordflow}{or}\ iana\_name\ \textcolor{keywordflow}{in}\ ZH\_NAMES:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [\textcolor{stringliteral}{"{}Chinese"{}}]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00114}00114\ \ \ \ \ \textcolor{keywordflow}{if}\ iana\_name.startswith(\textcolor{stringliteral}{"{}iso2022\_kr"{}})\ \textcolor{keywordflow}{or}\ iana\_name\ \textcolor{keywordflow}{in}\ KO\_NAMES:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [\textcolor{stringliteral}{"{}Korean"{}}]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00117}00117\ \ \ \ \ \textcolor{keywordflow}{return}\ []}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00120}00120\ \textcolor{preprocessor}{@lru\_cache(maxsize=LANGUAGE\_SUPPORTED\_COUNT)}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00121}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a24b0fd19ac83c18e4c3025957d5d44fb}{00121}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a24b0fd19ac83c18e4c3025957d5d44fb}{get\_target\_features}}(language:\ str)\ -\/>\ tuple[bool,\ bool]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00122}00122\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ Determine\ main\ aspects\ from\ a\ supported\ language\ if\ it\ contains\ accents\ and\ if\ is\ pure\ Latin.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00125}00125\ \ \ \ \ target\_have\_accents:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00126}00126\ \ \ \ \ target\_pure\_latin:\ bool\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00128}00128\ \ \ \ \ \textcolor{keywordflow}{for}\ character\ \textcolor{keywordflow}{in}\ FREQUENCIES[language]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ target\_have\_accents\ \textcolor{keywordflow}{and}\ is\_accentuated(character):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ target\_have\_accents\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ target\_pure\_latin\ \textcolor{keywordflow}{and}\ is\_latin(character)\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ target\_pure\_latin\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00134}00134\ \ \ \ \ \textcolor{keywordflow}{return}\ target\_have\_accents,\ target\_pure\_latin}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00137}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_abef6f0d2adb68b6979f21b25ae592929}{00137}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_abef6f0d2adb68b6979f21b25ae592929}{alphabet\_languages}}(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00138}00138\ \ \ \ \ characters:\ list[str],\ ignore\_non\_latin:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00139}00139\ )\ -\/>\ list[str]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00140}00140\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ Return\ associated\ languages\ associated\ to\ given\ characters.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00143}00143\ \ \ \ \ languages:\ list[tuple[str,\ float]]\ =\ []}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00145}00145\ \ \ \ \ source\_have\_accents\ =\ any(is\_accentuated(character)\ \textcolor{keywordflow}{for}\ character\ \textcolor{keywordflow}{in}\ characters)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00147}00147\ \ \ \ \ \textcolor{keywordflow}{for}\ language,\ language\_characters\ \textcolor{keywordflow}{in}\ FREQUENCIES.items():}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ target\_have\_accents,\ target\_pure\_latin\ =\ \mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a24b0fd19ac83c18e4c3025957d5d44fb}{get\_target\_features}}(language)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ignore\_non\_latin\ \textcolor{keywordflow}{and}\ target\_pure\_latin\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ target\_have\_accents\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}\ \textcolor{keywordflow}{and}\ source\_have\_accents:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ character\_count:\ int\ =\ len(language\_characters)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ character\_match\_count:\ int\ =\ len(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ [c\ \textcolor{keywordflow}{for}\ c\ \textcolor{keywordflow}{in}\ language\_characters\ \textcolor{keywordflow}{if}\ c\ \textcolor{keywordflow}{in}\ characters]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ ratio:\ float\ =\ character\_match\_count\ /\ character\_count}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ratio\ >=\ 0.2:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ languages.append((language,\ ratio))}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00167}00167\ \ \ \ \ languages\ =\ sorted(languages,\ key=\textcolor{keyword}{lambda}\ x:\ x[1],\ reverse=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00169}00169\ \ \ \ \ \textcolor{keywordflow}{return}\ [compatible\_language[0]\ \textcolor{keywordflow}{for}\ compatible\_language\ \textcolor{keywordflow}{in}\ languages]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00172}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a0a9d4c88002245af0f83968e4fcdc0d2}{00172}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a0a9d4c88002245af0f83968e4fcdc0d2}{characters\_popularity\_compare}}(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00173}00173\ \ \ \ \ language:\ str,\ ordered\_characters:\ list[str]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00174}00174\ )\ -\/>\ float:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00175}00175\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00176}00176\ \textcolor{stringliteral}{\ \ \ \ Determine\ if\ a\ ordered\ characters\ list\ (by\ occurrence\ from\ most\ appearance\ to\ rarest)\ match\ a\ particular\ language.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00177}00177\ \textcolor{stringliteral}{\ \ \ \ The\ result\ is\ a\ ratio\ between\ 0.\ (absolutely\ no\ correspondence)\ and\ 1.\ (near\ perfect\ fit).}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00178}00178\ \textcolor{stringliteral}{\ \ \ \ Beware\ that\ is\ function\ is\ not\ strict\ on\ the\ match\ in\ order\ to\ ease\ the\ detection.\ (Meaning\ close\ match\ is\ 1.)}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00179}00179\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00180}00180\ \ \ \ \ \textcolor{keywordflow}{if}\ language\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ FREQUENCIES:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(f\textcolor{stringliteral}{"{}\{language\}\ not\ available"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00183}00183\ \ \ \ \ character\_approved\_count:\ int\ =\ 0}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00184}00184\ \ \ \ \ FREQUENCIES\_language\_set\ =\ set(FREQUENCIES[language])}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00186}00186\ \ \ \ \ ordered\_characters\_count:\ int\ =\ len(ordered\_characters)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00187}00187\ \ \ \ \ target\_language\_characters\_count:\ int\ =\ len(FREQUENCIES[language])}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00189}00189\ \ \ \ \ large\_alphabet:\ bool\ =\ target\_language\_characters\_count\ >\ 26}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00191}00191\ \ \ \ \ \textcolor{keywordflow}{for}\ character,\ character\_rank\ \textcolor{keywordflow}{in}\ zip(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ ordered\_characters,\ range(0,\ ordered\_characters\_count)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00193}00193\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ character\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ FREQUENCIES\_language\_set:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ character\_rank\_in\_language:\ int\ =\ FREQUENCIES[language].index(character)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ expected\_projection\_ratio:\ float\ =\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ target\_language\_characters\_count\ /\ ordered\_characters\_count}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ character\_rank\_projection:\ int\ =\ int(character\_rank\ *\ expected\_projection\_ratio)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ large\_alphabet\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ abs(character\_rank\_projection\ -\/\ character\_rank\_in\_language)\ >\ 4}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ large\_alphabet\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ abs(character\_rank\_projection\ -\/\ character\_rank\_in\_language)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ <\ target\_language\_characters\_count\ /\ 3}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ character\_approved\_count\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ characters\_before\_source:\ list[str]\ =\ FREQUENCIES[language][}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ 0:character\_rank\_in\_language}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ characters\_after\_source:\ list[str]\ =\ FREQUENCIES[language][}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ character\_rank\_in\_language:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ characters\_before:\ list[str]\ =\ ordered\_characters[0:character\_rank]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ characters\_after:\ list[str]\ =\ ordered\_characters[character\_rank:]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ before\_match\_count:\ int\ =\ len(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ set(characters\_before)\ \&\ set(characters\_before\_source)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ after\_match\_count:\ int\ =\ len(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ set(characters\_after)\ \&\ set(characters\_after\_source)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00233}00233\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(characters\_before\_source)\ ==\ 0\ \textcolor{keywordflow}{and}\ before\_match\_count\ <=\ 4:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ character\_approved\_count\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(characters\_after\_source)\ ==\ 0\ \textcolor{keywordflow}{and}\ after\_match\_count\ <=\ 4:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ character\_approved\_count\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ before\_match\_count\ /\ len(characters\_before\_source)\ >=\ 0.4}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ after\_match\_count\ /\ len(characters\_after\_source)\ >=\ 0.4}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ character\_approved\_count\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{return}\ character\_approved\_count\ /\ len(ordered\_characters)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00252}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a15737b4a02e31940ca904814e52c3b67}{00252}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a15737b4a02e31940ca904814e52c3b67}{alpha\_unicode\_split}}(decoded\_sequence:\ str)\ -\/>\ list[str]:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00253}00253\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00254}00254\ \textcolor{stringliteral}{\ \ \ \ Given\ a\ decoded\ text\ sequence,\ return\ a\ list\ of\ str.\ Unicode\ range\ /\ alphabet\ separation.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00255}00255\ \textcolor{stringliteral}{\ \ \ \ Ex.\ a\ text\ containing\ English/Latin\ with\ a\ bit\ a\ Hebrew\ will\ return\ two\ items\ in\ the\ resulting\ list;}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00256}00256\ \textcolor{stringliteral}{\ \ \ \ One\ containing\ the\ latin\ letters\ and\ the\ other\ hebrew.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00257}00257\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00258}00258\ \ \ \ \ layers:\ dict[str,\ str]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00260}00260\ \ \ \ \ \textcolor{keywordflow}{for}\ character\ \textcolor{keywordflow}{in}\ decoded\_sequence:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ character.isalpha()\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ character\_range:\ str\ |\ \textcolor{keywordtype}{None}\ =\ unicode\_range(character)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ character\_range\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00268}00268\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ layer\_target\_range:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ discovered\_range\ \textcolor{keywordflow}{in}\ layers:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ is\_suspiciously\_successive\_range(discovered\_range,\ character\_range)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ layer\_target\_range\ =\ discovered\_range}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ layer\_target\_range\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ layer\_target\_range\ =\ character\_range}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ layer\_target\_range\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ layers:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ layers[layer\_target\_range]\ =\ character.lower()}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ layers[layer\_target\_range]\ +=\ character.lower()}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00288}00288\ \ \ \ \ \textcolor{keywordflow}{return}\ list(layers.values())}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00291}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_af981961944f8c8015fd9cd8bbed826a8}{00291}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_af981961944f8c8015fd9cd8bbed826a8}{merge\_coherence\_ratios}}(results:\ list[CoherenceMatches])\ -\/>\ CoherenceMatches:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00292}00292\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00293}00293\ \textcolor{stringliteral}{\ \ \ \ This\ function\ merge\ results\ previously\ given\ by\ the\ function\ coherence\_ratio.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00294}00294\ \textcolor{stringliteral}{\ \ \ \ The\ return\ type\ is\ the\ same\ as\ coherence\_ratio.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00295}00295\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00296}00296\ \ \ \ \ per\_language\_ratios:\ dict[str,\ list[float]]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00297}00297\ \ \ \ \ \textcolor{keywordflow}{for}\ result\ \textcolor{keywordflow}{in}\ results:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sub\_result\ \textcolor{keywordflow}{in}\ result:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ language,\ ratio\ =\ sub\_result}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ language\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ per\_language\_ratios:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ per\_language\_ratios[language]\ =\ [ratio]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ per\_language\_ratios[language].append(ratio)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00305}00305\ \ \ \ \ merge\ =\ [}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ language,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ round(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sum(per\_language\_ratios[language])\ /\ len(per\_language\_ratios[language]),}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 4,}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ language\ \textcolor{keywordflow}{in}\ per\_language\_ratios}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00314}00314\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00316}00316\ \ \ \ \ \textcolor{keywordflow}{return}\ sorted(merge,\ key=\textcolor{keyword}{lambda}\ x:\ x[1],\ reverse=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00317}00317\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00319}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a0fc8a05b7f3db2d96d19b4d801920626}{00319}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a0fc8a05b7f3db2d96d19b4d801920626}{filter\_alt\_coherence\_matches}}(results:\ CoherenceMatches)\ -\/>\ CoherenceMatches:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00320}00320\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00321}00321\ \textcolor{stringliteral}{\ \ \ \ We\ shall\ NOT\ return\ "{}English—"{}\ in\ CoherenceMatches\ because\ it\ is\ an\ alternative}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00322}00322\ \textcolor{stringliteral}{\ \ \ \ of\ "{}English"{}.\ This\ function\ only\ keeps\ the\ best\ match\ and\ remove\ the\ em-\/dash\ in\ it.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00323}00323\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00324}00324\ \ \ \ \ index\_results:\ dict[str,\ list[float]]\ =\ dict()}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00326}00326\ \ \ \ \ \textcolor{keywordflow}{for}\ result\ \textcolor{keywordflow}{in}\ results:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ language,\ ratio\ =\ result}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00328}00328\ \ \ \ \ \ \ \ \ no\_em\_name:\ str\ =\ language.replace(\textcolor{stringliteral}{"{}—"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00329}00329\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ no\_em\_name\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ index\_results:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ index\_results[no\_em\_name]\ =\ []}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ index\_results[no\_em\_name].append(ratio)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00335}00335\ \ \ \ \ \textcolor{keywordflow}{if}\ any(len(index\_results[e])\ >\ 1\ \textcolor{keywordflow}{for}\ e\ \textcolor{keywordflow}{in}\ index\_results):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ filtered\_results:\ CoherenceMatches\ =\ []}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00337}00337\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ language\ \textcolor{keywordflow}{in}\ index\_results:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ filtered\_results.append((language,\ max(index\_results[language])))}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00340}00340\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ filtered\_results}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00343}00343\ \ \ \ \ \textcolor{keywordflow}{return}\ results}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00344}00344\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00345}00345\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00346}00346\ \textcolor{preprocessor}{@lru\_cache(maxsize=2048)}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00347}\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_aa678e381454bcbe7f1974e7f837d3414}{00347}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacecharset__normalizer_1_1cd_aa678e381454bcbe7f1974e7f837d3414}{coherence\_ratio}}(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00348}00348\ \ \ \ \ decoded\_sequence:\ str,\ threshold:\ float\ =\ 0.1,\ lg\_inclusion:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00349}00349\ )\ -\/>\ CoherenceMatches:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00350}00350\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00351}00351\ \textcolor{stringliteral}{\ \ \ \ Detect\ ANY\ language\ that\ can\ be\ identified\ in\ given\ sequence.\ The\ sequence\ will\ be\ analysed\ by\ layers.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00352}00352\ \textcolor{stringliteral}{\ \ \ \ A\ layer\ =\ Character\ extraction\ by\ alphabets/ranges.}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00353}00353\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00354}00354\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00355}00355\ \ \ \ \ results:\ list[tuple[str,\ float]]\ =\ []}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00356}00356\ \ \ \ \ ignore\_non\_latin:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00358}00358\ \ \ \ \ sufficient\_match\_count:\ int\ =\ 0}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00360}00360\ \ \ \ \ lg\_inclusion\_list\ =\ lg\_inclusion.split(\textcolor{stringliteral}{"{},"{}})\ \textcolor{keywordflow}{if}\ lg\_inclusion\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ []}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00361}00361\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}Latin\ Based"{}}\ \textcolor{keywordflow}{in}\ lg\_inclusion\_list:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ ignore\_non\_latin\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ lg\_inclusion\_list.remove(\textcolor{stringliteral}{"{}Latin\ Based"{}})}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00365}00365\ \ \ \ \ \textcolor{keywordflow}{for}\ layer\ \textcolor{keywordflow}{in}\ \mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a15737b4a02e31940ca904814e52c3b67}{alpha\_unicode\_split}}(decoded\_sequence):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ sequence\_frequencies:\ TypeCounter[str]\ =\ Counter(layer)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ most\_common\ =\ sequence\_frequencies.most\_common()}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ character\_count:\ int\ =\ sum(o\ \textcolor{keywordflow}{for}\ c,\ o\ \textcolor{keywordflow}{in}\ most\_common)}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00370}00370\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ character\_count\ <=\ TOO\_SMALL\_SEQUENCE:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ popular\_character\_ordered:\ list[str]\ =\ [c\ \textcolor{keywordflow}{for}\ c,\ o\ \textcolor{keywordflow}{in}\ most\_common]}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00375}00375\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ language\ \textcolor{keywordflow}{in}\ lg\_inclusion\_list\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{namespacecharset__normalizer_1_1cd_abef6f0d2adb68b6979f21b25ae592929}{alphabet\_languages}}(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ popular\_character\_ordered,\ ignore\_non\_latin}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ ratio:\ float\ =\ \mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a0a9d4c88002245af0f83968e4fcdc0d2}{characters\_popularity\_compare}}(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ language,\ popular\_character\_ordered}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ratio\ <\ threshold:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ ratio\ >=\ 0.8:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00386}00386\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sufficient\_match\_count\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00387}00387\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ results.append((language,\ round(ratio,\ 4)))}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00389}00389\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sufficient\_match\_count\ >=\ 3:}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00393}00393\ \ \ \ \ \textcolor{keywordflow}{return}\ sorted(}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacecharset__normalizer_1_1cd_a0fc8a05b7f3db2d96d19b4d801920626}{filter\_alt\_coherence\_matches}}(results),\ key=\textcolor{keyword}{lambda}\ x:\ x[1],\ reverse=\textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{cd_8py_source_l00395}00395\ \ \ \ \ )}
+
+\end{DoxyCode}

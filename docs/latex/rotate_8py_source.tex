@@ -1,0 +1,70 @@
+\doxysection{rotate.\+py}
+\hypertarget{rotate_8py_source}{}\label{rotate_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/rotate.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/rotate.py}}
+\mbox{\hyperlink{rotate_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1rotate}{00001}}\ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ convert\_path}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00002}00002\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00003}00003\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ DistutilsOptionError}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00004}00004\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00005}00005\ \textcolor{keyword}{import}\ shutil}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00007}00007\ \textcolor{keyword}{from}\ setuptools\ \textcolor{keyword}{import}\ Command}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00010}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate}{00010}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate}{rotate}}(\mbox{\hyperlink{classsetuptools_1_1_command}{Command}}):}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00011}00011\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Delete\ older\ distributions"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00013}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_ae23b5fa5d0dd4ea1f5388c2447f42f73}{00013}}\ \ \ \ \ description\ =\ \textcolor{stringliteral}{"{}delete\ older\ distributions,\ keeping\ N\ newest\ files"{}}}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00014}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a33329e2d34a8ef0f7ef14c9b1708325b}{00014}}\ \ \ \ \ user\_options\ =\ [}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'match='},\ \textcolor{stringliteral}{'m'},\ \textcolor{stringliteral}{"{}patterns\ to\ match\ (required)"{}}),}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00016}00016\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'dist-\/dir='},\ \textcolor{stringliteral}{'d'},\ \textcolor{stringliteral}{"{}directory\ where\ the\ distributions\ are"{}}),}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'keep='},\ \textcolor{stringliteral}{'k'},\ \textcolor{stringliteral}{"{}number\ of\ matching\ distributions\ to\ keep"{}}),}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00018}00018\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00020}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_ae689a0cacec7c17ec8286705d58eb01b}{00020}}\ \ \ \ \ boolean\_options\ =\ []}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00022}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_afa9e9793b5de9219fd96b69e0b3e163b}{00022}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_afa9e9793b5de9219fd96b69e0b3e163b}{initialize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00023}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aad28873ea7841e9e3a363080894c3c31}{00023}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aad28873ea7841e9e3a363080894c3c31}{match}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00024}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aca12ffc1c06ceed3253ca385f11d5e40}{00024}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aca12ffc1c06ceed3253ca385f11d5e40}{dist\_dir}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00025}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a5d5aeaa431c28bf2504ae02606f40342}{00025}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a5d5aeaa431c28bf2504ae02606f40342}{keep}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00027}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aed1e56d8e1336d87779bac825e8d8f72}{00027}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aed1e56d8e1336d87779bac825e8d8f72}{finalize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aad28873ea7841e9e3a363080894c3c31}{match}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Must\ specify\ one\ or\ more\ (comma-\/separated)\ match\ patterns\ "{}}}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}(e.g.\ '.zip'\ or\ '.egg')"{}}}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a5d5aeaa431c28bf2504ae02606f40342}{keep}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(\textcolor{stringliteral}{"{}Must\ specify\ number\ of\ files\ to\ keep"{}})}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a5d5aeaa431c28bf2504ae02606f40342}{keep}}\ =\ int(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a5d5aeaa431c28bf2504ae02606f40342}{keep}})}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(\textcolor{stringliteral}{"{}-\/-\/keep\ must\ be\ an\ integer"{}})\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aad28873ea7841e9e3a363080894c3c31}{match}},\ str):}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aad28873ea7841e9e3a363080894c3c31}{match}}\ =\ [}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_a88d3013aac4d5258c5379d90a4fac663}{convert\_path}}(p.strip())\ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aad28873ea7841e9e3a363080894c3c31}{match}}.split(\textcolor{stringliteral}{','})}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ self.set\_undefined\_options(\textcolor{stringliteral}{'bdist'},\ (\textcolor{stringliteral}{'dist\_dir'},\ \textcolor{stringliteral}{'dist\_dir'}))}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00045}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a9054b17464c6a651b9c7e2ec5ea23fcf}{00045}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a9054b17464c6a651b9c7e2ec5ea23fcf}{run}}(self):}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ self.run\_command(\textcolor{stringliteral}{"{}egg\_info"{}})}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ glob\ \textcolor{keyword}{import}\ glob}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aad28873ea7841e9e3a363080894c3c31}{match}}:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ pattern\ =\ self.distribution.get\_name()\ +\ \textcolor{stringliteral}{'*'}\ +\ pattern}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ files\ =\ glob(os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_aca12ffc1c06ceed3253ca385f11d5e40}{dist\_dir}},\ pattern))}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ files\ =\ [(os.path.getmtime(f),\ f)\ \textcolor{keywordflow}{for}\ f\ \textcolor{keywordflow}{in}\ files]}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ files.sort()}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ files.reverse()}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{"{}\%d\ file(s)\ matching\ \%s"{}},\ len(files),\ pattern)}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ files\ =\ files[self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a5d5aeaa431c28bf2504ae02606f40342}{keep}}:]}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (t,\ f)\ \textcolor{keywordflow}{in}\ files:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{"{}Deleting\ \%s"{}},\ f)}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00060}\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a7621f261b2323c10c342e1bcc8e425b4}{00060}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1rotate_1_1rotate_a7621f261b2323c10c342e1bcc8e425b4}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isdir(f):}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shutil.rmtree(f)}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{rotate_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.unlink(f)}
+
+\end{DoxyCode}

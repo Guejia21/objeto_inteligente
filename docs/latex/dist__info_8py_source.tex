@@ -1,0 +1,148 @@
+\doxysection{dist\+\_\+info.\+py}
+\hypertarget{dist__info_8py_source}{}\label{dist__info_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/dist\_info.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/dist\_info.py}}
+\mbox{\hyperlink{dist__info_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00002}00002\ \textcolor{stringliteral}{Create\ a\ dist\_info\ directory}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00003}00003\ \textcolor{stringliteral}{As\ defined\ in\ the\ wheel\ specification}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00004}00004\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00006}00006\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00007}00007\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00008}00008\ \textcolor{keyword}{import}\ shutil}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00009}00009\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00010}00010\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00011}00011\ \textcolor{keyword}{from}\ contextlib\ \textcolor{keyword}{import}\ contextmanager}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00012}00012\ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ cleandoc}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00013}00013\ \textcolor{keyword}{from}\ pathlib\ \textcolor{keyword}{import}\ Path}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00015}00015\ \textcolor{keyword}{from}\ distutils.core\ \textcolor{keyword}{import}\ Command}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00016}00016\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00017}00017\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1extern}{setuptools.extern}}\ \textcolor{keyword}{import}\ packaging}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00018}00018\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1__deprecation__warning}{setuptools.\_deprecation\_warning}}\ \textcolor{keyword}{import}\ SetuptoolsDeprecationWarning}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00021}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info}{00021}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info}{dist\_info}}(\mbox{\hyperlink{classsetuptools_1_1_command}{Command}}):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00023}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_afed70e6b2fefbc746b02a2e28ad8225f}{00023}}\ \ \ \ \ description\ =\ \textcolor{stringliteral}{'create\ a\ .dist-\/info\ directory'}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00025}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_ac80b6554c63458f2a5d11d369a83706c}{00025}}\ \ \ \ \ user\_options\ =\ [}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'egg-\/base='},\ \textcolor{stringliteral}{'e'},\ \textcolor{stringliteral}{"{}directory\ containing\ .egg-\/info\ directories"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ (default:\ top\ of\ the\ source\ tree)"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ DEPRECATED:\ use\ -\/-\/output-\/dir."{}}),}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'output-\/dir='},\ \textcolor{stringliteral}{'o'},\ \textcolor{stringliteral}{"{}directory\ inside\ of\ which\ the\ .dist-\/info\ will\ be"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}created\ (default:\ top\ of\ the\ source\ tree)"{}}),}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'tag-\/date'},\ \textcolor{stringliteral}{'d'},\ \textcolor{stringliteral}{"{}Add\ date\ stamp\ (e.g.\ 20050528)\ to\ version\ number"{}}),}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'tag-\/build='},\ \textcolor{stringliteral}{'b'},\ \textcolor{stringliteral}{"{}Specify\ explicit\ tag\ to\ add\ to\ version\ number"{}}),}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'no-\/date'},\ \textcolor{stringliteral}{'D'},\ \textcolor{stringliteral}{"{}Don't\ include\ date\ stamp\ [default]"{}}),}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'keep-\/egg-\/info'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}*TRANSITIONAL*\ will\ be\ removed\ in\ the\ future"{}}),}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00035}00035\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00037}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_ac5a73d7142289af414d66396e4249e1a}{00037}}\ \ \ \ \ boolean\_options\ =\ [\textcolor{stringliteral}{'tag-\/date'},\ \textcolor{stringliteral}{'keep-\/egg-\/info'}]}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00038}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a09fd655f8647adc6daee76712e59c6d4}{00038}}\ \ \ \ \ negative\_opt\ =\ \{\textcolor{stringliteral}{'no-\/date'}:\ \textcolor{stringliteral}{'tag-\/date'}\}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00040}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a5e51a6b9201239f4607fba2e63ca4391}{00040}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a5e51a6b9201239f4607fba2e63ca4391}{initialize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00041}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a796157c75a15a432209243acd7c74774}{00041}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a796157c75a15a432209243acd7c74774}{egg\_base}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00042}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{00042}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00043}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_af2d364a41091ae17287a9ba03b009085}{00043}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_af2d364a41091ae17287a9ba03b009085}{name}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00044}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a610dadc3ee4dc4c4b10a1467a87f92a5}{00044}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a610dadc3ee4dc4c4b10a1467a87f92a5}{dist\_info\_dir}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00045}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_abca4f2d45ead9d48aa4581be56fde1a9}{00045}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_abca4f2d45ead9d48aa4581be56fde1a9}{tag\_date}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00046}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a0ff4485bf1224edc4f059ad6b0e9f6f4}{00046}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a0ff4485bf1224edc4f059ad6b0e9f6f4}{tag\_build}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00047}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a5669ea7e991cd1e346431d5496acec5f}{00047}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a5669ea7e991cd1e346431d5496acec5f}{keep\_egg\_info}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00049}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a1d2714e2ca4129b5b846f52e4c8e3a64}{00049}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a1d2714e2ca4129b5b846f52e4c8e3a64}{finalize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a796157c75a15a432209243acd7c74774}{egg\_base}}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ msg\ =\ \textcolor{stringliteral}{"{}-\/-\/egg-\/base\ is\ deprecated\ for\ dist\_info\ command.\ Use\ -\/-\/output-\/dir."{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ warnings.warn(msg,\ SetuptoolsDeprecationWarning)}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a796157c75a15a432209243acd7c74774}{egg\_base}}\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ dist\ =\ self.distribution}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ project\_dir\ =\ dist.src\_root\ \textcolor{keywordflow}{or}\ os.curdir}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}}\ =\ Path(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}}\ \textcolor{keywordflow}{or}\ project\_dir)}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ egg\_info\ =\ self.\mbox{\hyperlink{classsetuptools_1_1_command_a9d9c051523abcdd1a31f1b0af60aecbb}{reinitialize\_command}}(\textcolor{stringliteral}{"{}egg\_info"{}})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ egg\_info.egg\_base\ =\ str(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_abca4f2d45ead9d48aa4581be56fde1a9}{tag\_date}}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ egg\_info.tag\_date\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_abca4f2d45ead9d48aa4581be56fde1a9}{tag\_date}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_abca4f2d45ead9d48aa4581be56fde1a9}{tag\_date}}\ =\ egg\_info.tag\_date}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a0ff4485bf1224edc4f059ad6b0e9f6f4}{tag\_build}}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ egg\_info.tag\_build\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a0ff4485bf1224edc4f059ad6b0e9f6f4}{tag\_build}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a0ff4485bf1224edc4f059ad6b0e9f6f4}{tag\_build}}\ =\ egg\_info.tag\_build}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ egg\_info.finalize\_options()}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00073}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a6fc4ba06ee7f2c7c23fdcdbd8e847326}{00073}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a6fc4ba06ee7f2c7c23fdcdbd8e847326}{egg\_info}}\ =\ egg\_info}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ name\ =\ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_ae56e81b70eba91781bc6f93b983a16d1}{\_safe}}(dist.get\_name())}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ version\ =\ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_a18cb1293567a008a97e42b5c1c2e1646}{\_version}}(dist.get\_version())}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_af2d364a41091ae17287a9ba03b009085}{name}}\ =\ f\textcolor{stringliteral}{"{}\{name\}-\/\{version\}"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a610dadc3ee4dc4c4b10a1467a87f92a5}{dist\_info\_dir}}\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}},\ f\textcolor{stringliteral}{"{}\{self.name\}.dist-\/info"{}})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00080}00080\ \ \ \ \ \textcolor{preprocessor}{@contextmanager}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00081}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a132c311b8c6b684ec1a2960e994b7b33}{00081}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a132c311b8c6b684ec1a2960e994b7b33}{\_maybe\_bkp\_dir}}(self,\ dir\_path:\ str,\ requires\_bkp:\ bool):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ requires\_bkp:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ bkp\_name\ =\ f\textcolor{stringliteral}{"{}\{dir\_path\}.\_\_bkp\_\_"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_a8acee13d126968705d171597fdead454}{\_rm}}(bkp\_name,\ ignore\_errors=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_ab7f1c44907bac0b288deab4a6f5f0432}{\_copy}}(dir\_path,\ bkp\_name,\ dirs\_exist\_ok=\textcolor{keyword}{True},\ symlinks=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_a8acee13d126968705d171597fdead454}{\_rm}}(dir\_path,\ ignore\_errors=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shutil.move(bkp\_name,\ dir\_path)}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00094}\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_ac6a4c8330bdc45176c512d74b27a795b}{00094}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_ac6a4c8330bdc45176c512d74b27a795b}{run}}(self):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_aef9f18aa9e9e3622a0c33f5f2d9b3923}{output\_dir}}.mkdir(parents=\textcolor{keyword}{True},\ exist\_ok=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a6fc4ba06ee7f2c7c23fdcdbd8e847326}{egg\_info}}.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_ac6a4c8330bdc45176c512d74b27a795b}{run}}()}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ egg\_info\_dir\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a6fc4ba06ee7f2c7c23fdcdbd8e847326}{egg\_info}}.egg\_info}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ os.path.isdir(egg\_info\_dir),\ \textcolor{stringliteral}{"{}.egg-\/info\ dir\ should\ have\ been\ created"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{"{}creating\ '\{\}'"{}}.format(os.path.abspath(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a610dadc3ee4dc4c4b10a1467a87f92a5}{dist\_info\_dir}})))}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ bdist\_wheel\ =\ self.get\_finalized\_command(\textcolor{stringliteral}{'bdist\_wheel'})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TODO:\ if\ bdist\_wheel\ if\ merged\ into\ setuptools,\ just\ add\ "{}keep\_egg\_info"{}\ there}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a132c311b8c6b684ec1a2960e994b7b33}{\_maybe\_bkp\_dir}}(egg\_info\_dir,\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a5669ea7e991cd1e346431d5496acec5f}{keep\_egg\_info}}):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ bdist\_wheel.egg2dist(egg\_info\_dir,\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1dist__info_1_1dist__info_a610dadc3ee4dc4c4b10a1467a87f92a5}{dist\_info\_dir}})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00108}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_ae56e81b70eba91781bc6f93b983a16d1}{00108}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_ae56e81b70eba91781bc6f93b983a16d1}{\_safe}}(component:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00109}00109\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Escape\ a\ component\ used\ to\ form\ a\ wheel\ name\ according\ to\ PEP\ 491"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00110}00110\ \ \ \ \ \textcolor{keywordflow}{return}\ re.sub(\textcolor{stringliteral}{r"{}[\string^\(\backslash\)w\(\backslash\)d.]+"{}},\ \textcolor{stringliteral}{"{}\_"{}},\ component)}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00113}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_a18cb1293567a008a97e42b5c1c2e1646}{00113}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_a18cb1293567a008a97e42b5c1c2e1646}{\_version}}(version:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00114}00114\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Convert\ an\ arbitrary\ string\ to\ a\ version\ string."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00115}00115\ \ \ \ \ v\ =\ version.replace(\textcolor{stringliteral}{'\ '},\ \textcolor{stringliteral}{'.'})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00116}00116\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(packaging.version.Version(v)).replace(\textcolor{stringliteral}{"{}-\/"{}},\ \textcolor{stringliteral}{"{}\_"{}})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00118}00118\ \ \ \ \ \textcolor{keywordflow}{except}\ packaging.version.InvalidVersion:}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ msg\ =\ f\textcolor{stringliteral}{"{}"{}"{}Invalid\ version:\ \{version!r\}.}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ !!\(\backslash\)n\(\backslash\)n}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00121}00121\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#\ Invalid\ version\ \#}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \{version!r\}\ is\ not\ valid\ according\ to\ PEP\ 440.\(\backslash\)n}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00125}00125\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Please\ make\ sure\ specify\ a\ valid\ version\ for\ your\ package.}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00126}00126\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Also\ note\ that\ future\ releases\ of\ setuptools\ may\ halt\ the\ build\ process}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00127}00127\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ if\ an\ invalid\ version\ is\ given.}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \(\backslash\)n\(\backslash\)n!!}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00129}00129\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ warnings.warn(cleandoc(msg))}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_ae56e81b70eba91781bc6f93b983a16d1}{\_safe}}(v).strip(\textcolor{stringliteral}{"{}\_"{}})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00134}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_a8acee13d126968705d171597fdead454}{00134}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_a8acee13d126968705d171597fdead454}{\_rm}}(dir\_name,\ **opts):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00135}00135\ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isdir(dir\_name):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ shutil.rmtree(dir\_name,\ **opts)}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00139}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_ab7f1c44907bac0b288deab4a6f5f0432}{00139}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1dist__info_ab7f1c44907bac0b288deab4a6f5f0432}{\_copy}}(src,\ dst,\ **opts):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00140}00140\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 8):}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ opts.pop(\textcolor{stringliteral}{"{}dirs\_exist\_ok"{}},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{dist__info_8py_source_l00142}00142\ \ \ \ \ shutil.copytree(src,\ dst,\ **opts)}
+
+\end{DoxyCode}

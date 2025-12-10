@@ -1,0 +1,325 @@
+\doxysection{register.\+py}
+\hypertarget{__distutils_2command_2register_8py_source}{}\label{__distutils_2command_2register_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/command/register.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/command/register.py}}
+\mbox{\hyperlink{__distutils_2command_2register_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1command_1_1register}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}distutils.command.register}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00002}00002\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00003}00003\ \textcolor{stringliteral}{Implements\ the\ Distutils\ 'register'\ command\ (register\ with\ the\ repository).}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00004}00004\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00006}00006\ \textcolor{comment}{\#\ created\ 2002/10/21,\ Richard\ Jones}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00008}00008\ \textcolor{keyword}{import}\ getpass}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00009}00009\ \textcolor{keyword}{import}\ io}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00010}00010\ \textcolor{keyword}{import}\ urllib.parse}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00011}00011\ \textcolor{keyword}{import}\ urllib.request}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00012}00012\ \textcolor{keyword}{from}\ warnings\ \textcolor{keyword}{import}\ warn}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00014}00014\ \textcolor{keyword}{from}\ distutils.core\ \textcolor{keyword}{import}\ PyPIRCCommand}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00015}00015\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00018}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register}{00018}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register}{register}}(PyPIRCCommand):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00020}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a71cb4cf1582fbeeb3264e139a204a51b}{00020}}\ \ \ \ \ description\ =\ \textcolor{stringliteral}{"{}register\ the\ distribution\ with\ the\ Python\ package\ index"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00021}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_acfa9cb5c35ad6e28e6b0a018091c45fa}{00021}}\ \ \ \ \ user\_options\ =\ PyPIRCCommand.user\_options\ +\ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00022}00022\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'list-\/classifiers'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{'list\ the\ valid\ Trove\ classifiers'}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'strict'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Will\ stop\ the\ registering\ if\ the\ meta-\/data\ are\ not\ fully\ compliant'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00028}00028\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00029}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a92c68136d2a22fdebf00f0d6557a5f53}{00029}}\ \ \ \ \ boolean\_options\ =\ PyPIRCCommand.boolean\_options\ +\ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'verify'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'list-\/classifiers'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'strict'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00033}00033\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00035}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ae2b785739621e83219033036f8f00ea1}{00035}}\ \ \ \ \ sub\_commands\ =\ [(\textcolor{stringliteral}{'check'},\ \textcolor{keyword}{lambda}\ self:\ \textcolor{keyword}{True})]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00037}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_af11f46f3a8bfee6c1b6044555da14054}{00037}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_af11f46f3a8bfee6c1b6044555da14054}{initialize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ PyPIRCCommand.initialize\_options(self)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00039}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a688be99370faf2582dc8288d7e9a6d05}{00039}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a688be99370faf2582dc8288d7e9a6d05}{list\_classifiers}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00040}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ab56c9f55af78a372e5911515b1109ce4}{00040}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ab56c9f55af78a372e5911515b1109ce4}{strict}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00042}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ab6680520d1eabb30e11e0e0f6c850c16}{00042}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ab6680520d1eabb30e11e0e0f6c850c16}{finalize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ PyPIRCCommand.finalize\_options(self)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ setting\ options\ for\ the\ \`{}check`\ subcommand}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ check\_options\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'strict'}:\ (\textcolor{stringliteral}{'register'},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ab56c9f55af78a372e5911515b1109ce4}{strict}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'restructuredtext'}:\ (\textcolor{stringliteral}{'register'},\ 1),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ self.distribution.command\_options[\textcolor{stringliteral}{'check'}]\ =\ check\_options}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00051}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a2c04b126757f477c907033d7f3d0e169}{00051}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a2c04b126757f477c907033d7f3d0e169}{run}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ab6680520d1eabb30e11e0e0f6c850c16}{finalize\_options}}()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a5df9fa18811c2ab9d81a2e3007585e3a}{\_set\_config}}()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Run\ sub\ commands}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ cmd\_name\ \textcolor{keywordflow}{in}\ self.get\_sub\_commands():}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ self.run\_command(cmd\_name)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00059}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_af83dcd650c42832947dfe9f23e4f9ad3}{00059}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_af83dcd650c42832947dfe9f23e4f9ad3}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a210a90eaa4684fa24cf4106b95807e2b}{verify\_metadata}}()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a688be99370faf2582dc8288d7e9a6d05}{list\_classifiers}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ac12d60e1242245531b2f237e054ecad8}{classifiers}}()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a715e1c12f5ecb7f04a16446f0ef72b48}{send\_metadata}}()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00066}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a68669e8e94243715e60877682084236f}{00066}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a68669e8e94243715e60877682084236f}{check\_metadata}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Deprecated\ API."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ warn(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}distutils.command.register.check\_metadata\ is\ deprecated;\ "{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}use\ the\ check\ command\ instead"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ DeprecationWarning,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ check\ =\ self.distribution.get\_command\_obj(\textcolor{stringliteral}{'check'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ check.ensure\_finalized()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ check.strict\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ab56c9f55af78a372e5911515b1109ce4}{strict}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ check.restructuredtext\ =\ 1}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ check.run()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00079}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a5df9fa18811c2ab9d81a2e3007585e3a}{00079}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a5df9fa18811c2ab9d81a2e3007585e3a}{\_set\_config}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'''Reads\ the\ configuration\ file\ and\ set\ attributes.'''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ config\ =\ self.\_read\_pypirc()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ config\ !=\ \{\}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00083}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a7c504b9729dcea5abf66fbcf8343dd1c}{00083}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a7c504b9729dcea5abf66fbcf8343dd1c}{username}}\ =\ config[\textcolor{stringliteral}{'username'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00084}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aaa3a52b8aa66aa68830a57d3131574fe}{00084}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aaa3a52b8aa66aa68830a57d3131574fe}{password}}\ =\ config[\textcolor{stringliteral}{'password'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00085}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{00085}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}}\ =\ config[\textcolor{stringliteral}{'repository'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00086}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a31893855f33b23f7609bee213f192b3b}{00086}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a31893855f33b23f7609bee213f192b3b}{realm}}\ =\ config[\textcolor{stringliteral}{'realm'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00087}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a267898bf65dfac9adb945aa62ac58c4d}{00087}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a267898bf65dfac9adb945aa62ac58c4d}{has\_config}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00089}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aa0602c5b29ce2e75980c8e14d23a58dc}{00089}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'pypi'},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aa0602c5b29ce2e75980c8e14d23a58dc}{DEFAULT\_REPOSITORY}}):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{'\%s\ not\ found\ in\ .pypirc'}\ \%\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}}\ ==\ \textcolor{stringliteral}{'pypi'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aa0602c5b29ce2e75980c8e14d23a58dc}{DEFAULT\_REPOSITORY}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a267898bf65dfac9adb945aa62ac58c4d}{has\_config}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00095}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ac12d60e1242245531b2f237e054ecad8}{00095}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_ac12d60e1242245531b2f237e054ecad8}{classifiers}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'''Fetch\ the\ list\ of\ classifiers\ from\ the\ server.'''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ url\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}}\ +\ \textcolor{stringliteral}{'?:action=list\_classifiers'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ response\ =\ urllib.request.urlopen(url)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ log.info(self.\_read\_pypi\_response(response))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00101}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a210a90eaa4684fa24cf4106b95807e2b}{00101}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a210a90eaa4684fa24cf4106b95807e2b}{verify\_metadata}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'''Send\ the\ metadata\ to\ the\ package\ index\ server\ to\ be\ checked.'''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ send\ the\ info\ to\ the\ server\ and\ report\ the\ result}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ (code,\ result)\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a443b5453169d93a19384b4c50c3dcefc}{post\_to\_server}}(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a3fff1b38c65b96a06cc416b58032723d}{build\_post\_data}}(\textcolor{stringliteral}{'verify'}))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{'Server\ response\ (\%s):\ \%s'},\ code,\ result)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00107}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a715e1c12f5ecb7f04a16446f0ef72b48}{00107}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a715e1c12f5ecb7f04a16446f0ef72b48}{send\_metadata}}(self):\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'''Send\ the\ metadata\ to\ the\ package\ index\ server.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00109}00109\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Well,\ do\ the\ following:}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 1.\ figure\ who\ the\ user\ is,\ and\ then}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 2.\ send\ the\ data\ as\ a\ Basic\ auth'ed\ POST.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00113}00113\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00114}00114\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ First\ we\ try\ to\ read\ the\ username/password\ from\ \$HOME/.pypirc,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00115}00115\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ which\ is\ a\ ConfigParser-\/formatted\ file\ with\ a\ section}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00116}00116\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ [distutils]\ containing\ username\ and\ password\ entries\ (both}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00117}00117\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ in\ clear\ text).\ Eg:}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00118}00118\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00119}00119\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ [distutils]}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ index-\/servers\ =}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00121}00121\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pypi}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00122}00122\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ [pypi]}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ username:\ fred}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00125}00125\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ password:\ sekrit}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00126}00126\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00127}00127\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Otherwise,\ to\ figure\ who\ the\ user\ is,\ we\ offer\ the\ user\ three}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ choices:}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00129}00129\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00130}00130\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ 1.\ use\ existing\ login,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00131}00131\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ 2.\ register\ as\ a\ new\ user,\ or}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00132}00132\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ 3.\ set\ the\ password\ to\ a\ random\ string\ and\ email\ the\ user.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00133}00133\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00134}00134\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ '''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ see\ if\ we\ can\ short-\/cut\ and\ get\ the\ username/password\ from\ the}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ config}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a267898bf65dfac9adb945aa62ac58c4d}{has\_config}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ choice\ =\ \textcolor{stringliteral}{'1'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ username\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a7c504b9729dcea5abf66fbcf8343dd1c}{username}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ password\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aaa3a52b8aa66aa68830a57d3131574fe}{password}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ choice\ =\ \textcolor{stringliteral}{'x'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ username\ =\ password\ =\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ get\ the\ user's\ login\ info}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ choices\ =\ \textcolor{stringliteral}{'1\ 2\ 3\ 4'}.split()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ choice\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ choices:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ self.announce(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'''\(\backslash\)}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00150}00150\ \textcolor{stringliteral}{We\ need\ to\ know\ who\ you\ are,\ so\ please\ choose\ either:}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00151}00151\ \textcolor{stringliteral}{\ 1.\ use\ your\ existing\ login,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00152}00152\ \textcolor{stringliteral}{\ 2.\ register\ as\ a\ new\ user,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00153}00153\ \textcolor{stringliteral}{\ 3.\ have\ the\ server\ generate\ a\ new\ password\ for\ you\ (and\ email\ it\ to\ you),\ or}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00154}00154\ \textcolor{stringliteral}{\ 4.\ quit}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00155}00155\ \textcolor{stringliteral}{Your\ selection\ [default\ 1]:\ '''},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.INFO,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ choice\ =\ input()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ choice:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ choice\ =\ \textcolor{stringliteral}{'1'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ choice\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ choices:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{'Please\ choose\ one\ of\ the\ four\ options!'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ choice\ ==\ \textcolor{stringliteral}{'1'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ get\ the\ username\ and\ password}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ username:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ username\ =\ input(\textcolor{stringliteral}{'Username:\ '})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ password:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ password\ =\ getpass.getpass(\textcolor{stringliteral}{'Password:\ '})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ set\ up\ the\ authentication}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ auth\ =\ urllib.request.HTTPPasswordMgr()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ host\ =\ urllib.parse.urlparse(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}})[1]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ auth.add\_password(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a31893855f33b23f7609bee213f192b3b}{realm}},\ host,\ username,\ password)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ send\ the\ info\ to\ the\ server\ and\ report\ the\ result}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ code,\ result\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a443b5453169d93a19384b4c50c3dcefc}{post\_to\_server}}(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a3fff1b38c65b96a06cc416b58032723d}{build\_post\_data}}(\textcolor{stringliteral}{'submit'}),\ auth)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ self.announce(\textcolor{stringliteral}{'Server\ response\ (\{\}):\ \{\}'}.format(code,\ result),\ log.INFO)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00178}00178\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ possibly\ save\ the\ login}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a267898bf65dfac9adb945aa62ac58c4d}{has\_config}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ sharing\ the\ password\ in\ the\ distribution\ instance}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ so\ the\ upload\ command\ can\ reuse\ it}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.distribution.password\ =\ password}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.announce(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'I\ can\ store\ your\ PyPI\ login\ so\ future\ '}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'submissions\ will\ be\ faster.'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.INFO,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.announce(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'(the\ login\ will\ be\ stored\ in\ \%s)'}\ \%\ self.\_get\_rc\_file(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.INFO,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ choice\ =\ \textcolor{stringliteral}{'X'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ choice.lower()\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ \textcolor{stringliteral}{'yn'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ choice\ =\ input(\textcolor{stringliteral}{'Save\ your\ login\ (y/N)?'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ choice:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ choice\ =\ \textcolor{stringliteral}{'n'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ choice.lower()\ ==\ \textcolor{stringliteral}{'y'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\_store\_pypirc(username,\ password)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ choice\ ==\ \textcolor{stringliteral}{'2'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ \{\textcolor{stringliteral}{':action'}:\ \textcolor{stringliteral}{'user'}\}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'name'}]\ =\ data[\textcolor{stringliteral}{'password'}]\ =\ data[\textcolor{stringliteral}{'email'}]\ =\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'confirm'}]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ data[\textcolor{stringliteral}{'name'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'name'}]\ =\ input(\textcolor{stringliteral}{'Username:\ '})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ data[\textcolor{stringliteral}{'password'}]\ !=\ data[\textcolor{stringliteral}{'confirm'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ data[\textcolor{stringliteral}{'password'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'password'}]\ =\ getpass.getpass(\textcolor{stringliteral}{'Password:\ '})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ data[\textcolor{stringliteral}{'confirm'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'confirm'}]\ =\ getpass.getpass(\textcolor{stringliteral}{'\ Confirm:\ '})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ data[\textcolor{stringliteral}{'password'}]\ !=\ data[\textcolor{stringliteral}{'confirm'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'password'}]\ =\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'confirm'}]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}Password\ and\ confirm\ don't\ match!"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ data[\textcolor{stringliteral}{'email'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'email'}]\ =\ input(\textcolor{stringliteral}{'\ \ \ EMail:\ '})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ code,\ result\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a443b5453169d93a19384b4c50c3dcefc}{post\_to\_server}}(data)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ code\ !=\ 200:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{'Server\ response\ (\%s):\ \%s'},\ code,\ result)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{'You\ will\ receive\ an\ email\ shortly.'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{'Follow\ the\ instructions\ in\ it\ to\ '}\ \textcolor{stringliteral}{'complete\ registration.'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ choice\ ==\ \textcolor{stringliteral}{'3'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ \{\textcolor{stringliteral}{':action'}:\ \textcolor{stringliteral}{'password\_reset'}\}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'email'}]\ =\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ data[\textcolor{stringliteral}{'email'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'email'}]\ =\ input(\textcolor{stringliteral}{'Your\ email\ address:\ '})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ code,\ result\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a443b5453169d93a19384b4c50c3dcefc}{post\_to\_server}}(data)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{'Server\ response\ (\%s):\ \%s'},\ code,\ result)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00236}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a3fff1b38c65b96a06cc416b58032723d}{00236}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a3fff1b38c65b96a06cc416b58032723d}{build\_post\_data}}(self,\ action):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ figure\ the\ data\ to\ send\ -\/\ the\ metadata\ plus\ some\ additional}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ information\ used\ by\ the\ package\ server}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ meta\ =\ self.distribution.metadata}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ data\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{':action'}:\ action,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'metadata\_version'}:\ \textcolor{stringliteral}{'1.0'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'name'}:\ meta.get\_name(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'version'}:\ meta.get\_version(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'summary'}:\ meta.get\_description(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'home\_page'}:\ meta.get\_url(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'author'}:\ meta.get\_contact(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'author\_email'}:\ meta.get\_contact\_email(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'license'}:\ meta.get\_licence(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'description'}:\ meta.get\_long\_description(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'keywords'}:\ meta.get\_keywords(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'platform'}:\ meta.get\_platforms(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'classifiers'}:\ meta.get\_classifiers(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'download\_url'}:\ meta.get\_download\_url(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ PEP\ 314}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'provides'}:\ meta.get\_provides(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'requires'}:\ meta.get\_requires(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'obsoletes'}:\ meta.get\_obsoletes(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ data[\textcolor{stringliteral}{'provides'}]\ \textcolor{keywordflow}{or}\ data[\textcolor{stringliteral}{'requires'}]\ \textcolor{keywordflow}{or}\ data[\textcolor{stringliteral}{'obsoletes'}]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ data[\textcolor{stringliteral}{'metadata\_version'}]\ =\ \textcolor{stringliteral}{'1.1'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ data}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00264}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a443b5453169d93a19384b4c50c3dcefc}{00264}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_a443b5453169d93a19384b4c50c3dcefc}{post\_to\_server}}(self,\ data,\ auth=None):\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'''Post\ a\ query\ to\ the\ server,\ and\ return\ a\ string\ response.'''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'name'}\ \textcolor{keywordflow}{in}\ data:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ self.announce(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Registering\ \{\}\ to\ \{\}'}.format(data[\textcolor{stringliteral}{'name'}],\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}}),\ log.INFO}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Build\ up\ the\ MIME\ payload\ for\ the\ urllib2\ POST\ data}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ boundary\ =\ \textcolor{stringliteral}{'-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/GHSKFJDLGDS7543FJKLFHRE75642756743254'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ sep\_boundary\ =\ \textcolor{stringliteral}{'\(\backslash\)n-\/-\/'}\ +\ boundary}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ end\_boundary\ =\ sep\_boundary\ +\ \textcolor{stringliteral}{'-\/-\/'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ body\ =\ io.StringIO()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ data.items():}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ handle\ multiple\ entries\ for\ the\ same\ name}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type(value)\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ (type([]),\ type(())):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ [value]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ value\ \textcolor{keywordflow}{in}\ value:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ str(value)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body.write(sep\_boundary)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body.write(\textcolor{stringliteral}{'\(\backslash\)nContent-\/Disposition:\ form-\/data;\ name="{}\%s"{}'}\ \%\ key)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body.write(\textcolor{stringliteral}{"{}\(\backslash\)n\(\backslash\)n"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body.write(value)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value\ \textcolor{keywordflow}{and}\ value[-\/1]\ ==\ \textcolor{stringliteral}{'\(\backslash\)r'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body.write(\textcolor{stringliteral}{'\(\backslash\)n'})\ \ \textcolor{comment}{\#\ write\ an\ extra\ newline\ (lurve\ Macs)}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ body.write(end\_boundary)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ body.write(\textcolor{stringliteral}{"{}\(\backslash\)n"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ body\ =\ body.getvalue().encode(\textcolor{stringliteral}{"{}utf-\/8"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ build\ the\ Request}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ headers\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Content-\/type'}:\ \textcolor{stringliteral}{'multipart/form-\/data;\ boundary=\%s;\ charset=utf-\/8'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \%\ boundary,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Content-\/length'}:\ str(len(body)),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ req\ =\ urllib.request.Request(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aab886ed41331da421ed347478207908e}{repository}},\ body,\ headers)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ handle\ HTTP\ and\ include\ the\ Basic\ Auth\ handler}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ opener\ =\ urllib.request.build\_opener(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ urllib.request.HTTPBasicAuthHandler(password\_mgr=auth)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ data\ =\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ result\ =\ opener.open(req)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ urllib.error.HTTPError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00307}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aa8cac21fc6cd31bd703f0054c0bf0fb2}{00307}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aa8cac21fc6cd31bd703f0054c0bf0fb2}{show\_response}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ e.fp.read()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ result\ =\ e.code,\ e.msg}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ urllib.error.URLError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ result\ =\ 500,\ str(e)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aa8cac21fc6cd31bd703f0054c0bf0fb2}{show\_response}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ self.\_read\_pypi\_response(result)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ result\ =\ 200,\ \textcolor{stringliteral}{'OK'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1register_1_1register_aa8cac21fc6cd31bd703f0054c0bf0fb2}{show\_response}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ msg\ =\ \textcolor{stringliteral}{'\(\backslash\)n'}.join((\textcolor{stringliteral}{'-\/'}\ *\ 75,\ data,\ \textcolor{stringliteral}{'-\/'}\ *\ 75))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ self.announce(msg,\ log.INFO)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2register_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result}
+
+\end{DoxyCode}

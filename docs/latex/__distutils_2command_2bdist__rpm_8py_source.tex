@@ -1,0 +1,621 @@
+\doxysection{bdist\+\_\+rpm.\+py}
+\hypertarget{__distutils_2command_2bdist__rpm_8py_source}{}\label{__distutils_2command_2bdist__rpm_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/command/bdist\_rpm.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/command/bdist\_rpm.py}}
+\mbox{\hyperlink{__distutils_2command_2bdist__rpm_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1command_1_1bdist__rpm}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}distutils.command.bdist\_rpm}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00002}00002\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00003}00003\ \textcolor{stringliteral}{Implements\ the\ Distutils\ 'bdist\_rpm'\ command\ (create\ RPM\ source\ and\ binary}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00004}00004\ \textcolor{stringliteral}{distributions)."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00006}00006\ \textcolor{keyword}{import}\ subprocess}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00007}00007\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00008}00008\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00010}00010\ \textcolor{keyword}{from}\ distutils.core\ \textcolor{keyword}{import}\ Command}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00011}00011\ \textcolor{keyword}{from}\ distutils.debug\ \textcolor{keyword}{import}\ DEBUG}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00012}00012\ \textcolor{keyword}{from}\ distutils.file\_util\ \textcolor{keyword}{import}\ write\_file}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00013}00013\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00014}00014\ \ \ \ \ DistutilsOptionError,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00015}00015\ \ \ \ \ DistutilsPlatformError,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00016}00016\ \ \ \ \ DistutilsFileError,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00017}00017\ \ \ \ \ DistutilsExecError,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00018}00018\ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00019}00019\ \textcolor{keyword}{from}\ distutils.sysconfig\ \textcolor{keyword}{import}\ get\_python\_version}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00020}00020\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00023}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm}{00023}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm}{bdist\_rpm}}(\mbox{\hyperlink{classsetuptools_1_1_command}{Command}}):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00025}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a53777bf9fce115ac77fb1c1f32f0cc1e}{00025}}\ \ \ \ \ description\ =\ \textcolor{stringliteral}{"{}create\ an\ RPM\ distribution"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00027}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a22297eeacecfee87174cf379ed80ca83}{00027}}\ \ \ \ \ user\_options\ =\ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'bdist-\/base='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}base\ directory\ for\ creating\ built\ distributions"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'rpm-\/base='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}base\ directory\ for\ creating\ RPMs\ (defaults\ to\ \(\backslash\)"{}rpm\(\backslash\)"{}\ under\ "{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}-\/-\/bdist-\/base;\ must\ be\ specified\ for\ RPM\ 2)"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'dist-\/dir='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'d'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}directory\ to\ put\ final\ RPM\ files\ in\ "{}}\ \textcolor{stringliteral}{"{}(and\ .spec\ files\ if\ -\/-\/spec-\/only)"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'python='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}path\ to\ Python\ interpreter\ to\ hard-\/code\ in\ the\ .spec\ file\ "{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}(default:\ \(\backslash\)"{}python\(\backslash\)"{})"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'fix-\/python'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}hard-\/code\ the\ exact\ path\ to\ the\ current\ Python\ interpreter\ in\ "{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}the\ .spec\ file"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'spec-\/only'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}only\ regenerate\ spec\ file"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'source-\/only'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}only\ generate\ source\ RPM"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'binary-\/only'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}only\ generate\ binary\ RPM"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'use-\/bzip2'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}use\ bzip2\ instead\ of\ gzip\ to\ create\ source\ distribution"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ More\ meta-\/data:\ too\ RPM-\/specific\ to\ put\ in\ the\ setup\ script,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ but\ needs\ to\ go\ in\ the\ .spec\ file\ -\/-\/\ so\ we\ make\ these\ options}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ "{}bdist\_rpm"{}.\ \ The\ idea\ is\ that\ packagers\ would\ put\ this}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ info\ in\ setup.cfg,\ although\ they\ are\ of\ course\ free\ to}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ supply\ it\ on\ the\ command\ line.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'distribution-\/name='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}name\ of\ the\ (Linux)\ distribution\ to\ which\ this\ "{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}RPM\ applies\ (*not*\ the\ name\ of\ the\ module\ distribution!)"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'group='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}package\ classification\ [default:\ \(\backslash\)"{}Development/Libraries\(\backslash\)"{}]"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'release='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}RPM\ release\ number"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'serial='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}RPM\ serial\ number"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'vendor='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}RPM\ \(\backslash\)"{}vendor\(\backslash\)"{}\ (eg.\ \(\backslash\)"{}Joe\ Blow\ <joe@example.com>\(\backslash\)"{})\ "{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}[default:\ maintainer\ or\ author\ from\ setup\ script]"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'packager='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}RPM\ packager\ (eg.\ \(\backslash\)"{}Jane\ Doe\ <jane@example.net>\(\backslash\)"{})\ "{}}\ \textcolor{stringliteral}{"{}[default:\ vendor]"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'doc-\/files='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}list\ of\ documentation\ files\ (space\ or\ comma-\/separated)"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'changelog='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}RPM\ changelog"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'icon='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}name\ of\ icon\ file"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'provides='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}capabilities\ provided\ by\ this\ package"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'requires='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}capabilities\ required\ by\ this\ package"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'conflicts='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}capabilities\ which\ conflict\ with\ this\ package"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'build-\/requires='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}capabilities\ required\ to\ build\ this\ package"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'obsoletes='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}capabilities\ made\ obsolete\ by\ this\ package"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'no-\/autoreq'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}do\ not\ automatically\ calculate\ dependencies"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Actions\ to\ take\ when\ building\ RPM}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'keep-\/temp'},\ \textcolor{stringliteral}{'k'},\ \textcolor{stringliteral}{"{}don't\ clean\ up\ RPM\ build\ directory"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'no-\/keep-\/temp'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}clean\ up\ RPM\ build\ directory\ [default]"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'use-\/rpm-\/opt-\/flags'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}compile\ with\ RPM\_OPT\_FLAGS\ when\ building\ from\ source\ RPM"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'no-\/rpm-\/opt-\/flags'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}do\ not\ pass\ any\ RPM\ CFLAGS\ to\ compiler"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'rpm3-\/mode'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}RPM\ 3\ compatibility\ mode\ (default)"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'rpm2-\/mode'},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}RPM\ 2\ compatibility\ mode"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Add\ the\ hooks\ necessary\ for\ specifying\ custom\ scripts}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'prep-\/script='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ PREP\ phase\ of\ RPM\ building"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'build-\/script='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ BUILD\ phase\ of\ RPM\ building"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'pre-\/install='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ pre-\/INSTALL\ phase\ of\ RPM\ building"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'install-\/script='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ INSTALL\ phase\ of\ RPM\ building"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'post-\/install='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ post-\/INSTALL\ phase\ of\ RPM\ building"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'pre-\/uninstall='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ pre-\/UNINSTALL\ phase\ of\ RPM\ building"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'post-\/uninstall='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ post-\/UNINSTALL\ phase\ of\ RPM\ building"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'clean-\/script='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ CLEAN\ phase\ of\ RPM\ building"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'verify-\/script='},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Specify\ a\ script\ for\ the\ VERIFY\ phase\ of\ the\ RPM\ build"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Allow\ a\ packager\ to\ explicitly\ force\ an\ architecture}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'force-\/arch='},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}Force\ an\ architecture\ onto\ the\ RPM\ build\ process"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'quiet'},\ \textcolor{stringliteral}{'q'},\ \textcolor{stringliteral}{"{}Run\ the\ INSTALL\ phase\ of\ RPM\ building\ in\ quiet\ mode"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00138}00138\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00140}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aa0923d41d645c65c34c368bdd145b7db}{00140}}\ \ \ \ \ boolean\_options\ =\ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'keep-\/temp'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'use-\/rpm-\/opt-\/flags'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'rpm3-\/mode'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'no-\/autoreq'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'quiet'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00146}00146\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00148}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a2f085547739b74123de1dcae5ce0b2e3}{00148}}\ \ \ \ \ negative\_opt\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'no-\/keep-\/temp'}:\ \textcolor{stringliteral}{'keep-\/temp'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'no-\/rpm-\/opt-\/flags'}:\ \textcolor{stringliteral}{'use-\/rpm-\/opt-\/flags'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'rpm2-\/mode'}:\ \textcolor{stringliteral}{'rpm3-\/mode'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00152}00152\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00154}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_af7ebdd74fe1be760ab2949552b4e5273}{00154}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_af7ebdd74fe1be760ab2949552b4e5273}{initialize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00155}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a5804bcc39b8cf8fd8346e745f41fcc29}{00155}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a5804bcc39b8cf8fd8346e745f41fcc29}{bdist\_base}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00156}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad8c623869ecd3f5be59f90b6d1598e45}{00156}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad8c623869ecd3f5be59f90b6d1598e45}{rpm\_base}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00157}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{00157}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{dist\_dir}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00158}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a36503936095b077c3f5850df06fd67b1}{00158}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a36503936095b077c3f5850df06fd67b1}{python}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00159}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab880540463d6d23df0e067ae062830a1}{00159}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab880540463d6d23df0e067ae062830a1}{fix\_python}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00160}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a3a51b39b2e4bb49563127548a551bbaa}{00160}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a3a51b39b2e4bb49563127548a551bbaa}{spec\_only}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00161}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aba5b2ec446291b3f0f2fc4a9286df033}{00161}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aba5b2ec446291b3f0f2fc4a9286df033}{binary\_only}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00162}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a19b6082262b02344a8c194dfc9fbf7cb}{00162}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a19b6082262b02344a8c194dfc9fbf7cb}{source\_only}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00163}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abac81db438efe9a1a4404b5ce227e57a}{00163}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abac81db438efe9a1a4404b5ce227e57a}{use\_bzip2}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00165}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab2c9afc79856d17637ab551434b6a532}{00165}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab2c9afc79856d17637ab551434b6a532}{distribution\_name}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00166}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a53a3d8b6a042f026c47b295cc90f3c01}{00166}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a53a3d8b6a042f026c47b295cc90f3c01}{group}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00167}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aa4fdc0822f4b0302ba4eb022b6576b9a}{00167}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aa4fdc0822f4b0302ba4eb022b6576b9a}{release}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00168}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab543a6f87ce2f261cb8022553a9d5250}{00168}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab543a6f87ce2f261cb8022553a9d5250}{serial}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00169}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a864a4e564433b2bf2b7078ad465a386a}{00169}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a864a4e564433b2bf2b7078ad465a386a}{vendor}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00170}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a2a865ce16173aceb1af6e346c5af4212}{00170}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a2a865ce16173aceb1af6e346c5af4212}{packager}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00171}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{00171}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{doc\_files}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00172}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a33d9907746da44802b384c95bd48a00d}{00172}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a33d9907746da44802b384c95bd48a00d}{changelog}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00173}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{00173}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{icon}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00175}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a80534892ccafef0ad5851b40dc05417d}{00175}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a80534892ccafef0ad5851b40dc05417d}{prep\_script}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00176}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad6b2b75fcc47b053f9e51f9883d8bd82}{00176}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad6b2b75fcc47b053f9e51f9883d8bd82}{build\_script}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00177}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ac3917281836c692f803d35756701087b}{00177}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ac3917281836c692f803d35756701087b}{install\_script}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00178}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a7eec70815b105aaa3ba4cc56b39214f4}{00178}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a7eec70815b105aaa3ba4cc56b39214f4}{clean\_script}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00179}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a3e4a4f7bbcb57922e3ed0b5637ca0edd}{00179}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a3e4a4f7bbcb57922e3ed0b5637ca0edd}{verify\_script}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00180}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a23c87ff808fd43c0176596fe0bb8e070}{00180}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a23c87ff808fd43c0176596fe0bb8e070}{pre\_install}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00181}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a118eaeae1a50c370c03141d63dfb790b}{00181}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a118eaeae1a50c370c03141d63dfb790b}{post\_install}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00182}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1f3b00477ab40f5d0c30cc09aabfa533}{00182}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1f3b00477ab40f5d0c30cc09aabfa533}{pre\_uninstall}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00183}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a7da087c626a1874f0611786e54230b4e}{00183}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a7da087c626a1874f0611786e54230b4e}{post\_uninstall}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00184}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8c638302f121e3345513acdaa6d277be}{00184}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8c638302f121e3345513acdaa6d277be}{prep}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00185}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1b5acea147c6727d2ac453e083ea560f}{00185}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1b5acea147c6727d2ac453e083ea560f}{provides}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00186}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ac5ad6f66157f3ce0483992e224b2fcc4}{00186}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ac5ad6f66157f3ce0483992e224b2fcc4}{requires}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00187}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abd9b3dfc1baefd41cddd64d8ed4ea19a}{00187}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abd9b3dfc1baefd41cddd64d8ed4ea19a}{conflicts}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00188}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1533f9d56503169e15abc798aa2601e5}{00188}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1533f9d56503169e15abc798aa2601e5}{build\_requires}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00189}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aa534d46c0c15ab041f0110707d2d6545}{00189}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aa534d46c0c15ab041f0110707d2d6545}{obsoletes}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00191}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_af911ad5181ec12de4e5992487df7d0b5}{00191}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_af911ad5181ec12de4e5992487df7d0b5}{keep\_temp}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00192}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a861859aaa6884012624213c0083fc90f}{00192}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a861859aaa6884012624213c0083fc90f}{use\_rpm\_opt\_flags}}\ =\ 1}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00193}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a17a88b7f24dc6c3ea1f59d4d5c67430e}{00193}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a17a88b7f24dc6c3ea1f59d4d5c67430e}{rpm3\_mode}}\ =\ 1}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00194}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aed1a2f5ba7a23885e4496d4274354bdc}{00194}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aed1a2f5ba7a23885e4496d4274354bdc}{no\_autoreq}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00196}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc478baea6a0c6ef006e6badd42f85b1}{00196}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc478baea6a0c6ef006e6badd42f85b1}{force\_arch}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00197}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a9cce5b9c410242c3b76a53ec4aa94465}{00197}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a9cce5b9c410242c3b76a53ec4aa94465}{quiet}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00199}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_adb05f9370f8b76608c53652607eea7f3}{00199}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_adb05f9370f8b76608c53652607eea7f3}{finalize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ self.set\_undefined\_options(\textcolor{stringliteral}{'bdist'},\ (\textcolor{stringliteral}{'bdist\_base'},\ \textcolor{stringliteral}{'bdist\_base'}))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad8c623869ecd3f5be59f90b6d1598e45}{rpm\_base}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a17a88b7f24dc6c3ea1f59d4d5c67430e}{rpm3\_mode}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(\textcolor{stringliteral}{"{}you\ must\ specify\ -\/-\/rpm-\/base\ in\ RPM\ 2\ mode"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad8c623869ecd3f5be59f90b6d1598e45}{rpm\_base}}\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a5804bcc39b8cf8fd8346e745f41fcc29}{bdist\_base}},\ \textcolor{stringliteral}{"{}rpm"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a36503936095b077c3f5850df06fd67b1}{python}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab880540463d6d23df0e067ae062830a1}{fix\_python}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a36503936095b077c3f5850df06fd67b1}{python}}\ =\ sys.executable}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a36503936095b077c3f5850df06fd67b1}{python}}\ =\ \textcolor{stringliteral}{"{}python3"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab880540463d6d23df0e067ae062830a1}{fix\_python}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}-\/-\/python\ and\ -\/-\/fix-\/python\ are\ mutually\ exclusive\ options"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.name\ !=\ \textcolor{stringliteral}{'posix'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}don't\ know\ how\ to\ create\ RPM\ "{}}\ \textcolor{stringliteral}{"{}distributions\ on\ platform\ \%s"{}}\ \%\ os.name}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aba5b2ec446291b3f0f2fc4a9286df033}{binary\_only}}\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a19b6082262b02344a8c194dfc9fbf7cb}{source\_only}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}cannot\ supply\ both\ '-\/-\/source-\/only'\ and\ '-\/-\/binary-\/only'"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ don't\ pass\ CFLAGS\ to\ pure\ python\ distributions}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.distribution.has\_ext\_modules():}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a861859aaa6884012624213c0083fc90f}{use\_rpm\_opt\_flags}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ self.set\_undefined\_options(\textcolor{stringliteral}{'bdist'},\ (\textcolor{stringliteral}{'dist\_dir'},\ \textcolor{stringliteral}{'dist\_dir'}))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a80df3f388f4ca7b5f388ca812f8f17cd}{finalize\_package\_data}}()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00232}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a80df3f388f4ca7b5f388ca812f8f17cd}{00232}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a80df3f388f4ca7b5f388ca812f8f17cd}{finalize\_package\_data}}(self):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ self.ensure\_string(\textcolor{stringliteral}{'group'},\ \textcolor{stringliteral}{"{}Development/Libraries"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ self.ensure\_string(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'vendor'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\%s\ <\%s>"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \%\ (self.distribution.get\_contact(),\ self.distribution.get\_contact\_email()),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ self.ensure\_string(\textcolor{stringliteral}{'packager'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1_command_a57ba07315c2c0694aeea3b4d17d94bf7}{ensure\_string\_list}}(\textcolor{stringliteral}{'doc\_files'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{doc\_files}},\ list):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ readme\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'README'},\ \textcolor{stringliteral}{'README.txt'}):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(readme)\ \textcolor{keywordflow}{and}\ readme\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{doc\_files}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{doc\_files}}.append(readme)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ self.ensure\_string(\textcolor{stringliteral}{'release'},\ \textcolor{stringliteral}{"{}1"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ self.ensure\_string(\textcolor{stringliteral}{'serial'})\ \ \textcolor{comment}{\#\ should\ it\ be\ an\ int?}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00248}00248\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ self.ensure\_string(\textcolor{stringliteral}{'distribution\_name'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ self.ensure\_string(\textcolor{stringliteral}{'changelog'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Format\ changelog\ correctly}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a33d9907746da44802b384c95bd48a00d}{changelog}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a7f878f58ffcb4170524c8cd706706c43}{\_format\_changelog}}(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a33d9907746da44802b384c95bd48a00d}{changelog}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'icon'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'prep\_script'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'build\_script'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'install\_script'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'clean\_script'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'verify\_script'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'pre\_install'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'post\_install'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'pre\_uninstall'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ self.ensure\_filename(\textcolor{stringliteral}{'post\_uninstall'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ don't\ forget\ we\ punted\ on\ summaries\ and\ descriptions\ -\/-\/\ they}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ should\ be\ handled\ here\ eventually!}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00269}00269\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Now\ *this*\ is\ some\ meta-\/data\ that\ belongs\ in\ the\ setup\ script...}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1_command_a57ba07315c2c0694aeea3b4d17d94bf7}{ensure\_string\_list}}(\textcolor{stringliteral}{'provides'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1_command_a57ba07315c2c0694aeea3b4d17d94bf7}{ensure\_string\_list}}(\textcolor{stringliteral}{'requires'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1_command_a57ba07315c2c0694aeea3b4d17d94bf7}{ensure\_string\_list}}(\textcolor{stringliteral}{'conflicts'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1_command_a57ba07315c2c0694aeea3b4d17d94bf7}{ensure\_string\_list}}(\textcolor{stringliteral}{'build\_requires'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1_command_a57ba07315c2c0694aeea3b4d17d94bf7}{ensure\_string\_list}}(\textcolor{stringliteral}{'obsoletes'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ self.ensure\_string(\textcolor{stringliteral}{'force\_arch'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00279}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_adcee42c05da0e307fe50ccba1f7efd75}{00279}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_adcee42c05da0e307fe50ccba1f7efd75}{run}}(self):\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ DEBUG:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}before\ \_get\_package\_data():"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}vendor\ ="{}},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a864a4e564433b2bf2b7078ad465a386a}{vendor}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}packager\ ="{}},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a2a865ce16173aceb1af6e346c5af4212}{packager}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}doc\_files\ ="{}},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{doc\_files}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}changelog\ ="{}},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a33d9907746da44802b384c95bd48a00d}{changelog}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00286}00286\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ make\ directories}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a3a51b39b2e4bb49563127548a551bbaa}{spec\_only}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_dir\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{dist\_dir}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ self.mkpath(spec\_dir)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_dir\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ d\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'SOURCES'},\ \textcolor{stringliteral}{'SPECS'},\ \textcolor{stringliteral}{'BUILD'},\ \textcolor{stringliteral}{'RPMS'},\ \textcolor{stringliteral}{'SRPMS'}):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_dir[d]\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad8c623869ecd3f5be59f90b6d1598e45}{rpm\_base}},\ d)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.mkpath(rpm\_dir[d])}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_dir\ =\ rpm\_dir[\textcolor{stringliteral}{'SPECS'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00297}00297\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Spec\ file\ goes\ into\ 'dist\_dir'\ if\ '-\/-\/spec-\/only\ specified',}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ build/rpm.<plat>\ otherwise.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ spec\_path\ =\ os.path.join(spec\_dir,\ \textcolor{stringliteral}{"{}\%s.spec"{}}\ \%\ self.distribution.get\_name())}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ self.execute(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ write\_file,\ (spec\_path,\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a91b9f825675d777c2c1dc22bcdc5459e}{\_make\_spec\_file}}()),\ \textcolor{stringliteral}{"{}writing\ '\%s'"{}}\ \%\ spec\_path}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a3a51b39b2e4bb49563127548a551bbaa}{spec\_only}}:\ \ \textcolor{comment}{\#\ stop\ if\ requested}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Make\ a\ source\ distribution\ and\ copy\ to\ SOURCES\ directory\ with}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ optional\ icon.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ saved\_dist\_files\ =\ self.distribution.dist\_files[:]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ sdist\ =\ self.\mbox{\hyperlink{classsetuptools_1_1_command_a9d9c051523abcdd1a31f1b0af60aecbb}{reinitialize\_command}}(\textcolor{stringliteral}{'sdist'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abac81db438efe9a1a4404b5ce227e57a}{use\_bzip2}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ sdist.formats\ =\ [\textcolor{stringliteral}{'bztar'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ sdist.formats\ =\ [\textcolor{stringliteral}{'gztar'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ self.run\_command(\textcolor{stringliteral}{'sdist'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ self.distribution.dist\_files\ =\ saved\_dist\_files}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ source\ =\ sdist.get\_archive\_files()[0]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ source\_dir\ =\ rpm\_dir[\textcolor{stringliteral}{'SOURCES'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ self.copy\_file(source,\ source\_dir)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{icon}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{icon}}):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.copy\_file(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{icon}},\ source\_dir)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsFileError(\textcolor{stringliteral}{"{}icon\ file\ '\%s'\ does\ not\ exist"{}}\ \%\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{icon}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ build\ package}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{"{}building\ RPMs"{}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ rpm\_cmd\ =\ [\textcolor{stringliteral}{'rpmbuild'}]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a19b6082262b02344a8c194dfc9fbf7cb}{source\_only}}:\ \ \textcolor{comment}{\#\ what\ kind\ of\ RPMs?}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_cmd.append(\textcolor{stringliteral}{'-\/bs'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aba5b2ec446291b3f0f2fc4a9286df033}{binary\_only}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_cmd.append(\textcolor{stringliteral}{'-\/bb'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_cmd.append(\textcolor{stringliteral}{'-\/ba'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ rpm\_cmd.extend([\textcolor{stringliteral}{'-\/-\/define'},\ \textcolor{stringliteral}{'\_\_python\ \%s'}\ \%\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a36503936095b077c3f5850df06fd67b1}{python}}])}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a17a88b7f24dc6c3ea1f59d4d5c67430e}{rpm3\_mode}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_cmd.extend([\textcolor{stringliteral}{'-\/-\/define'},\ \textcolor{stringliteral}{'\_topdir\ \%s'}\ \%\ os.path.abspath(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad8c623869ecd3f5be59f90b6d1598e45}{rpm\_base}})])}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_af911ad5181ec12de4e5992487df7d0b5}{keep\_temp}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_cmd.append(\textcolor{stringliteral}{'-\/-\/clean'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00344}00344\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a9cce5b9c410242c3b76a53ec4aa94465}{quiet}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ rpm\_cmd.append(\textcolor{stringliteral}{'-\/-\/quiet'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ rpm\_cmd.append(spec\_path)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Determine\ the\ binary\ rpm\ names\ that\ should\ be\ built\ out\ of\ this\ spec}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ file}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Note\ that\ some\ of\ these\ may\ not\ be\ really\ built\ (if\ the\ file}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ list\ is\ empty)}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ nvr\_string\ =\ \textcolor{stringliteral}{"{}\%\{name\}-\/\%\{version\}-\/\%\{release\}"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ src\_rpm\ =\ nvr\_string\ +\ \textcolor{stringliteral}{"{}.src.rpm"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ non\_src\_rpm\ =\ \textcolor{stringliteral}{"{}\%\{arch\}/"{}}\ +\ nvr\_string\ +\ \textcolor{stringliteral}{"{}.\%\{arch\}.rpm"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ q\_cmd\ =\ \textcolor{stringliteral}{r"{}rpm\ -\/q\ -\/-\/qf\ '\{\}\ \{\}\(\backslash\)n'\ -\/-\/specfile\ '\{\}'"{}}.format(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ src\_rpm,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ non\_src\_rpm,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_path,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ out\ =\ os.popen(q\_cmd)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ binary\_rpms\ =\ []}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ source\_rpm\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ line\ =\ out.readline()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ line:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ell\ =\ line.strip().split()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ len(ell)\ ==\ 2}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ binary\_rpms.append(ell[1])}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ The\ source\ rpm\ is\ named\ after\ the\ first\ entry\ in\ the\ spec\ file}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ source\_rpm\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ source\_rpm\ =\ ell[0]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ status\ =\ out.close()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ status:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsExecError(\textcolor{stringliteral}{"{}Failed\ to\ execute:\ \%s"{}}\ \%\ repr(q\_cmd))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00380}00380\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ out.close()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ self.spawn(rpm\_cmd)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00385}00385\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00386}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad9cb5dbe9fc551f8b13a0a7009686bb7}{00386}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ad9cb5dbe9fc551f8b13a0a7009686bb7}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.distribution.has\_ext\_modules():}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pyversion\ =\ get\_python\_version()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pyversion\ =\ \textcolor{stringliteral}{'any'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aba5b2ec446291b3f0f2fc4a9286df033}{binary\_only}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ srpm\ =\ os.path.join(rpm\_dir[\textcolor{stringliteral}{'SRPMS'}],\ source\_rpm)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ os.path.exists(srpm)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.move\_file(srpm,\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{dist\_dir}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ filename\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{dist\_dir}},\ source\_rpm)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.distribution.dist\_files.append((\textcolor{stringliteral}{'bdist\_rpm'},\ pyversion,\ filename))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a19b6082262b02344a8c194dfc9fbf7cb}{source\_only}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ rpm\ \textcolor{keywordflow}{in}\ binary\_rpms:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rpm\ =\ os.path.join(rpm\_dir[\textcolor{stringliteral}{'RPMS'}],\ rpm)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(rpm):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.move\_file(rpm,\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{dist\_dir}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ filename\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{dist\_dir}},\ os.path.basename(rpm))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.distribution.dist\_files.append(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'bdist\_rpm'},\ pyversion,\ filename)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00408}00408\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00409}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a10ac639109d8947068e3aa95a8d9e207}{00409}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a10ac639109d8947068e3aa95a8d9e207}{\_dist\_path}}(self,\ path):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00410}00410\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc5548e9afed24782483d0758190e1b5}{dist\_dir}},\ os.path.basename(path))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00411}00411\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00412}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a91b9f825675d777c2c1dc22bcdc5459e}{00412}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a91b9f825675d777c2c1dc22bcdc5459e}{\_make\_spec\_file}}(self):\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00413}00413\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Generate\ the\ text\ of\ an\ RPM\ spec\ file\ and\ return\ it\ as\ a}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00414}00414\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ list\ of\ strings\ (one\ per\ line).}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00415}00415\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00416}00416\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ definitions\ and\ headers}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ spec\_file\ =\ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%define\ name\ '}\ +\ self.distribution.get\_name(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%define\ version\ '}\ +\ self.distribution.get\_version().replace(\textcolor{stringliteral}{'-\/'},\ \textcolor{stringliteral}{'\_'}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%define\ unmangled\_version\ '}\ +\ self.distribution.get\_version(),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%define\ release\ '}\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aa4fdc0822f4b0302ba4eb022b6576b9a}{release}}.replace(\textcolor{stringliteral}{'-\/'},\ \textcolor{stringliteral}{'\_'}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{''},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00423}00423\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Summary:\ '}\ +\ (self.distribution.get\_description()\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}UNKNOWN"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00426}00426\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Workaround\ for\ \#14443\ which\ affects\ some\ RPM\ based\ systems\ such\ as}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00427}00427\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ RHEL6\ (and\ probably\ derivatives)}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00428}00428\ \ \ \ \ \ \ \ \ vendor\_hook\ =\ subprocess.getoutput(\textcolor{stringliteral}{'rpm\ -\/-\/eval\ \%\{\_\_os\_install\_post\}'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00429}00429\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Generate\ a\ potential\ replacement\ value\ for\ \_\_os\_install\_post\ (whilst}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00430}00430\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ normalizing\ the\ whitespace\ to\ simplify\ the\ test\ for\ whether\ the}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00431}00431\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ invocation\ of\ brp-\/python-\/bytecompile\ passes\ in\ \_\_python):}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00432}00432\ \ \ \ \ \ \ \ \ vendor\_hook\ =\ \textcolor{stringliteral}{'\(\backslash\)n'}.join(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ [\textcolor{stringliteral}{'\ \ \%s\ \(\backslash\)\(\backslash\)'}\ \%\ line.strip()\ \textcolor{keywordflow}{for}\ line\ \textcolor{keywordflow}{in}\ vendor\_hook.splitlines()]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00434}00434\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00435}00435\ \ \ \ \ \ \ \ \ problem\ =\ \textcolor{stringliteral}{"{}brp-\/python-\/bytecompile\ \(\backslash\)\(\backslash\)\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00436}00436\ \ \ \ \ \ \ \ \ fixed\ =\ \textcolor{stringliteral}{"{}brp-\/python-\/bytecompile\ \%\{\_\_python\}\ \(\backslash\)\(\backslash\)\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ fixed\_hook\ =\ vendor\_hook.replace(problem,\ fixed)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fixed\_hook\ !=\ vendor\_hook:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'\#\ Workaround\ for\ http://bugs.python.org/issue14443'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'\%define\ \_\_os\_install\_post\ '}\ +\ fixed\_hook\ +\ \textcolor{stringliteral}{'\(\backslash\)n'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00441}00441\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ put\ locale\ summaries\ into\ spec\ file}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ not\ supported\ for\ now\ (hard\ to\ put\ a\ dictionary}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00444}00444\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ in\ a\ config\ file\ -\/-\/\ arg!)}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00445}00445\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ for\ locale\ in\ self.summaries.keys():}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ spec\_file.append('Summary(\%s):\ \%s'\ \%\ (locale,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.summaries[locale]))}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00448}00448\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ spec\_file.extend(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Name:\ \%\{name\}'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Version:\ \%\{version\}'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Release:\ \%\{release\}'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ yuck!\ this\ filename\ is\ available\ from\ the\ "{}sdist"{}\ command,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ but\ only\ after\ it\ has\ run:\ and\ we\ create\ the\ spec\ file\ before}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00459}00459\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ running\ "{}sdist"{},\ in\ case\ of\ -\/-\/spec-\/only.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abac81db438efe9a1a4404b5ce227e57a}{use\_bzip2}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'Source0:\ \%\{name\}-\/\%\{unmangled\_version\}.tar.bz2'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00463}00463\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'Source0:\ \%\{name\}-\/\%\{unmangled\_version\}.tar.gz'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00464}00464\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ spec\_file.extend(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'License:\ '}\ +\ (self.distribution.get\_license()\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}UNKNOWN"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Group:\ '}\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a53a3d8b6a042f026c47b295cc90f3c01}{group}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'BuildRoot:\ \%\{\_tmppath\}/\%\{name\}-\/\%\{version\}-\/\%\{release\}-\/buildroot'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Prefix:\ \%\{\_prefix\}'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00473}00473\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc478baea6a0c6ef006e6badd42f85b1}{force\_arch}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ noarch\ if\ no\ extension\ modules}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.distribution.has\_ext\_modules():}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'BuildArch:\ noarch'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'BuildArch:\ \%s'}\ \%\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_abc478baea6a0c6ef006e6badd42f85b1}{force\_arch}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00480}00480\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Vendor'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Packager'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Provides'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Requires'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Conflicts'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Obsoletes'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ val\ =\ getattr(self,\ field.lower())}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(val,\ list):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'\{\}:\ \{\}'}.format(field,\ \textcolor{stringliteral}{'\ '}.join(val)))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ val\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'\{\}:\ \{\}'}.format(field,\ val))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00494}00494\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.distribution.get\_url():}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'Url:\ '}\ +\ self.distribution.get\_url())}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00497}00497\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab2c9afc79856d17637ab551434b6a532}{distribution\_name}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'Distribution:\ '}\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_ab2c9afc79856d17637ab551434b6a532}{distribution\_name}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00500}00500\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00501}00501\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1533f9d56503169e15abc798aa2601e5}{build\_requires}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'BuildRequires:\ '}\ +\ \textcolor{stringliteral}{'\ '}.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a1533f9d56503169e15abc798aa2601e5}{build\_requires}}))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00503}00503\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{icon}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'Icon:\ '}\ +\ os.path.basename(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a8d17cf55b0a217e836da729b6d3831ae}{icon}}))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00506}00506\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_aed1a2f5ba7a23885e4496d4274354bdc}{no\_autoreq}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'AutoReq:\ 0'})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ spec\_file.extend(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{''},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00513}00513\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%description'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00514}00514\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.distribution.get\_long\_description()\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}"{}},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00516}00516\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00517}00517\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00518}00518\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ put\ locale\ descriptions\ into\ spec\ file}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ again,\ suppressed\ because\ config\ file\ syntax\ doesn't}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00520}00520\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ easily\ support\ this\ ;-\/(}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ for\ locale\ in\ self.descriptions.keys():}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ spec\_file.extend([}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00523}00523\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ \ \ \ '',}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ \ \ \ '\%description\ -\/l\ '\ +\ locale,}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ \ \ \ self.descriptions[locale],}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ \ \ \ ])}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00527}00527\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00528}00528\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ rpm\ scripts}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ figure\ out\ default\ build\ script}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ def\_setup\_call\ =\ \textcolor{stringliteral}{"{}\{\}\ \{\}"{}}.format(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a36503936095b077c3f5850df06fd67b1}{python}},\ os.path.basename(sys.argv[0]))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ def\_build\ =\ \textcolor{stringliteral}{"{}\%s\ build"{}}\ \%\ def\_setup\_call}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a861859aaa6884012624213c0083fc90f}{use\_rpm\_opt\_flags}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ def\_build\ =\ \textcolor{stringliteral}{'env\ CFLAGS="{}\$RPM\_OPT\_FLAGS"{}\ '}\ +\ def\_build}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00534}00534\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00535}00535\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ insert\ contents\ of\ files}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00536}00536\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00537}00537\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ this\ is\ kind\ of\ misleading:\ user-\/supplied\ options\ are\ files}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00538}00538\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ that\ we\ open\ and\ interpolate\ into\ the\ spec\ file,\ but\ the\ defaults}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00539}00539\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ are\ just\ text\ that\ we\ drop\ in\ as-\/is.\ \ Hmmm.}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00540}00540\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ install\_cmd\ =\ (}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%s\ install\ -\/O1\ -\/-\/root=\$RPM\_BUILD\_ROOT\ '}\ \textcolor{stringliteral}{'-\/-\/record=INSTALLED\_FILES'}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ )\ \%\ def\_setup\_call}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00544}00544\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ script\_options\ =\ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00546}00546\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'prep'},\ \textcolor{stringliteral}{'prep\_script'},\ \textcolor{stringliteral}{"{}\%setup\ -\/n\ \%\{name\}-\/\%\{unmangled\_version\}"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'build'},\ \textcolor{stringliteral}{'build\_script'},\ def\_build),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'install'},\ \textcolor{stringliteral}{'install\_script'},\ install\_cmd),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'clean'},\ \textcolor{stringliteral}{'clean\_script'},\ \textcolor{stringliteral}{"{}rm\ -\/rf\ \$RPM\_BUILD\_ROOT"{}}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'verifyscript'},\ \textcolor{stringliteral}{'verify\_script'},\ \textcolor{keywordtype}{None}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'pre'},\ \textcolor{stringliteral}{'pre\_install'},\ \textcolor{keywordtype}{None}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'post'},\ \textcolor{stringliteral}{'post\_install'},\ \textcolor{keywordtype}{None}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00553}00553\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'preun'},\ \textcolor{stringliteral}{'pre\_uninstall'},\ \textcolor{keywordtype}{None}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00554}00554\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{'postun'},\ \textcolor{stringliteral}{'post\_uninstall'},\ \textcolor{keywordtype}{None}),}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00555}00555\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00556}00556\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00557}00557\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (rpm\_opt,\ attr,\ default)\ \textcolor{keywordflow}{in}\ script\_options:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Insert\ contents\ of\ file\ referred\ to,\ if\ no\ file\ is\ referred\ to}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00559}00559\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ use\ 'default'\ as\ contents\ of\ script}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00560}00560\ \ \ \ \ \ \ \ \ \ \ \ \ val\ =\ getattr(self,\ attr)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00561}00561\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ val\ \textcolor{keywordflow}{or}\ default:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00562}00562\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.extend(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00563}00563\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{''},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%'}\ +\ rpm\_opt,}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00566}00566\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ val:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ open(val)\ \textcolor{keyword}{as}\ f:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.extend(f.read().split(\textcolor{stringliteral}{'\(\backslash\)n'}))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00571}00571\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00572}00572\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(default)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00573}00573\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00574}00574\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ files\ section}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00575}00575\ \ \ \ \ \ \ \ \ spec\_file.extend(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00577}00577\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{''},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%files\ -\/f\ INSTALLED\_FILES'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00579}00579\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%defattr(-\/,root,root)'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00581}00581\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00582}00582\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00583}00583\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{doc\_files}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.append(\textcolor{stringliteral}{'\%doc\ '}\ +\ \textcolor{stringliteral}{'\ '}.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a667e9638b954e7f72b6a8fea3d074cad}{doc\_files}}))}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00585}00585\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00586}00586\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a33d9907746da44802b384c95bd48a00d}{changelog}}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.extend(}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00588}00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00589}00589\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{''},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00590}00590\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\%changelog'},}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00592}00592\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00593}00593\ \ \ \ \ \ \ \ \ \ \ \ \ spec\_file.extend(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a33d9907746da44802b384c95bd48a00d}{changelog}})}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00594}00594\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00595}00595\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ spec\_file}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00596}00596\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00597}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a7f878f58ffcb4170524c8cd706706c43}{00597}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1command_1_1bdist__rpm_1_1bdist__rpm_a7f878f58ffcb4170524c8cd706706c43}{\_format\_changelog}}(self,\ changelog):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00598}00598\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Format\ the\ changelog\ correctly\ and\ convert\ it\ to\ a\ list\ of\ strings"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00599}00599\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ changelog:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00600}00600\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ changelog}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00601}00601\ \ \ \ \ \ \ \ \ new\_changelog\ =\ []}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00602}00602\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ line\ \textcolor{keywordflow}{in}\ changelog.strip().split(\textcolor{stringliteral}{'\(\backslash\)n'}):}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00603}00603\ \ \ \ \ \ \ \ \ \ \ \ \ line\ =\ line.strip()}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00604}00604\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ line[0]\ ==\ \textcolor{stringliteral}{'*'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00605}00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_changelog.extend([\textcolor{stringliteral}{''},\ line])}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00606}00606\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ line[0]\ ==\ \textcolor{stringliteral}{'-\/'}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00607}00607\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_changelog.append(line)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00608}00608\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00609}00609\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_changelog.append(\textcolor{stringliteral}{'\ \ '}\ +\ line)}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00610}00610\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00611}00611\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ strip\ trailing\ newline\ inserted\ by\ first\ changelog\ entry}}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00612}00612\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ new\_changelog[0]:}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00613}00613\ \ \ \ \ \ \ \ \ \ \ \ \ del\ new\_changelog[0]}
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00614}00614\ }
+\DoxyCodeLine{\Hypertarget{__distutils_2command_2bdist__rpm_8py_source_l00615}00615\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ new\_changelog}
+
+\end{DoxyCode}

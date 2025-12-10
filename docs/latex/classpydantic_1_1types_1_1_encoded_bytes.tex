@@ -1,0 +1,154 @@
+\doxysection{Referencia de la clase pydantic.\+types.\+Encoded\+Bytes}
+\hypertarget{classpydantic_1_1types_1_1_encoded_bytes}{}\label{classpydantic_1_1types_1_1_encoded_bytes}\index{pydantic.types.EncodedBytes@{pydantic.types.EncodedBytes}}
+\doxysubsubsection*{Métodos públicos}
+\begin{DoxyCompactItemize}
+\item 
+bytes \mbox{\hyperlink{classpydantic_1_1types_1_1_encoded_bytes_a9db6fa8647e0be2c64364e6dfa7edf63}{decode}} (self, bytes data, \mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_validation_info}{core\+\_\+schema.\+Validation\+Info}} \+\_\+)
+\item 
+bytes \mbox{\hyperlink{classpydantic_1_1types_1_1_encoded_bytes_a61fdec3432c7bfbdf31b8ddaaca6a74c}{encode}} (self, bytes value)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Atributos públicos estáticos}
+\begin{DoxyCompactItemize}
+\item 
+type \mbox{\hyperlink{classpydantic_1_1types_1_1_encoded_bytes_ac8e8fb790f04399d4c756757047adf2a}{encoder}} \mbox{[}\mbox{\hyperlink{classpydantic_1_1types_1_1_encoder_protocol}{Encoder\+Protocol}}\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+\begin{DoxyVerb}A bytes type that is encoded and decoded using the specified encoder.
+
+`EncodedBytes` needs an encoder that implements `EncoderProtocol` to operate.
+
+```python
+from typing import Annotated
+
+from pydantic import BaseModel, EncodedBytes, EncoderProtocol, ValidationError
+
+class MyEncoder(EncoderProtocol):
+    @classmethod
+    def decode(cls, data: bytes) -> bytes:
+        if data == b'**undecodable**':
+            raise ValueError('Cannot decode data')
+        return data[13:]
+
+    @classmethod
+    def encode(cls, value: bytes) -> bytes:
+        return b'**encoded**: ' + value
+
+    @classmethod
+    def get_json_format(cls) -> str:
+        return 'my-encoder'
+
+MyEncodedBytes = Annotated[bytes, EncodedBytes(encoder=MyEncoder)]
+
+class Model(BaseModel):
+    my_encoded_bytes: MyEncodedBytes
+
+# Initialize the model with encoded data
+m = Model(my_encoded_bytes=b'**encoded**: some bytes')
+
+# Access decoded value
+print(m.my_encoded_bytes)
+#> b'some bytes'
+
+# Serialize into the encoded form
+print(m.model_dump())
+#> {'my_encoded_bytes': b'**encoded**: some bytes'}
+
+# Validate encoded data
+try:
+    Model(my_encoded_bytes=b'**undecodable**')
+except ValidationError as e:
+    print(e)
+    '''
+    1 validation error for Model
+    my_encoded_bytes
+      Value error, Cannot decode data [type=value_error, input_value=b'**undecodable**', input_type=bytes]
+    '''
+```
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l02472}{2472}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{classpydantic_1_1types_1_1_encoded_bytes_doc-func-members}
+\doxysubsection{Documentación de funciones miembro}
+\Hypertarget{classpydantic_1_1types_1_1_encoded_bytes_a9db6fa8647e0be2c64364e6dfa7edf63}\index{pydantic.types.EncodedBytes@{pydantic.types.EncodedBytes}!decode@{decode}}
+\index{decode@{decode}!pydantic.types.EncodedBytes@{pydantic.types.EncodedBytes}}
+\doxysubsubsection{\texorpdfstring{decode()}{decode()}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_encoded_bytes_a9db6fa8647e0be2c64364e6dfa7edf63} 
+ bytes pydantic.\+types.\+Encoded\+Bytes.\+decode (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{bytes}]{data}{, }\item[{\mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_validation_info}{core\+\_\+schema.\+Validation\+Info}}}]{\+\_\+}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Decode the data using the specified encoder.
+
+Args:
+    data: The data to decode.
+
+Returns:
+    The decoded data.
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l02544}{2544}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{pydantic_2types_8py_source_l02544}{decode()}} y \mbox{\hyperlink{pydantic_2types_8py_source_l02526}{encoder}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pydantic_2types_8py_source_l02544}{decode()}} y \mbox{\hyperlink{endpoints_8py_source_l00066}{starlette.\+endpoints.\+Web\+Socket\+Endpoint.\+dispatch()}}.
+
+\Hypertarget{classpydantic_1_1types_1_1_encoded_bytes_a61fdec3432c7bfbdf31b8ddaaca6a74c}\index{pydantic.types.EncodedBytes@{pydantic.types.EncodedBytes}!encode@{encode}}
+\index{encode@{encode}!pydantic.types.EncodedBytes@{pydantic.types.EncodedBytes}}
+\doxysubsubsection{\texorpdfstring{encode()}{encode()}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_encoded_bytes_a61fdec3432c7bfbdf31b8ddaaca6a74c} 
+ bytes pydantic.\+types.\+Encoded\+Bytes.\+encode (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{bytes}]{value}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Encode the data using the specified encoder.
+
+Args:
+    value: The data to encode.
+
+Returns:
+    The encoded data.
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l02555}{2555}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{pydantic_2types_8py_source_l02555}{encode()}} y \mbox{\hyperlink{pydantic_2types_8py_source_l02526}{encoder}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pydantic_2types_8py_source_l02555}{encode()}}.
+
+
+
+\label{doc-variable-members}
+\Hypertarget{classpydantic_1_1types_1_1_encoded_bytes_doc-variable-members}
+\doxysubsection{Documentación de datos miembro}
+\Hypertarget{classpydantic_1_1types_1_1_encoded_bytes_ac8e8fb790f04399d4c756757047adf2a}\index{pydantic.types.EncodedBytes@{pydantic.types.EncodedBytes}!encoder@{encoder}}
+\index{encoder@{encoder}!pydantic.types.EncodedBytes@{pydantic.types.EncodedBytes}}
+\doxysubsubsection{\texorpdfstring{encoder}{encoder}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_encoded_bytes_ac8e8fb790f04399d4c756757047adf2a} 
+pydantic.\+types.\+Encoded\+Bytes.\+encoder \mbox{[}\mbox{\hyperlink{classpydantic_1_1types_1_1_encoder_protocol}{Encoder\+Protocol}}\mbox{]}\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l02526}{2526}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pydantic_2types_8py_source_l02544}{decode()}}, \mbox{\hyperlink{pydantic_2types_8py_source_l02643}{pydantic.\+types.\+Encoded\+Str.\+decode\+\_\+str()}}, \mbox{\hyperlink{pydantic_2types_8py_source_l02555}{encode()}} y \mbox{\hyperlink{pydantic_2types_8py_source_l02654}{pydantic.\+types.\+Encoded\+Str.\+encode\+\_\+str()}}.
+
+
+
+La documentación de esta clase está generada del siguiente archivo\+:\begin{DoxyCompactItemize}
+\item 
+micro\+\_\+gestion\+\_\+objetos/venv/\+Lib/site-\/packages/pydantic/\mbox{\hyperlink{pydantic_2types_8py}{types.\+py}}\end{DoxyCompactItemize}

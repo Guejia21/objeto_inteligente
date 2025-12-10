@@ -1,0 +1,164 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="eca__task__manager_8py" kind="file" language="Python">
+    <compoundname>eca_task_manager.py</compoundname>
+    <innerclass refid="classeca__task__manager_1_1_e_c_a_task_manager" prot="public">eca_task_manager::ECATaskManager</innerclass>
+    <innernamespace refid="namespaceeca__task__manager">eca_task_manager</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespaceeca__task__manager" refkind="compound"><highlight class="stringliteral">&quot;&quot;&quot;Gestor<sp/>de<sp/>tareas<sp/>ECA<sp/>que<sp/>escucha<sp/>telemetría<sp/>MQTT&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>asyncio</highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>json</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Dict,<sp/>Optional</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>domain.eca_evaluator<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>ECAEvaluator</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>infra.logging.Logging<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>logger</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>infra.logging.ILogPanelMQTT<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>ILogPanelMQTT</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>config<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>settings</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11" refid="classeca__task__manager_1_1_e_c_a_task_manager" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classeca__task__manager_1_1_e_c_a_task_manager" kindref="compound">ECATaskManager</ref>:</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Gestiona<sp/>las<sp/>tareas<sp/>de<sp/>monitoreo<sp/>de<sp/>ECAs&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__init__(self):</highlight></codeline>
+<codeline lineno="15" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a2c95406e57bad313e53ff5e2b1209db4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classeca__task__manager_1_1_e_c_a_task_manager_1a2c95406e57bad313e53ff5e2b1209db4" kindref="member">active_ecas</ref>:<sp/>Dict[str,<sp/>ECAEvaluator]<sp/>=<sp/>{}</highlight></codeline>
+<codeline lineno="16" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a55fc463d0d3bc522b34b920a15d3fa59" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classeca__task__manager_1_1_e_c_a_task_manager_1a55fc463d0d3bc522b34b920a15d3fa59" kindref="member">broker</ref>:<sp/>Optional[ILogPanelMQTT]<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17" refid="classeca__task__manager_1_1_e_c_a_task_manager_1ad8c8eea81969d7450392ac0f7c4b52da" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classeca__task__manager_1_1_e_c_a_task_manager_1ad8c8eea81969d7450392ac0f7c4b52da" kindref="member">telemetry_topic</ref><sp/>=<sp/>settings.MQTT_TELEMETRY_TOPIC</highlight></codeline>
+<codeline lineno="18" refid="classeca__task__manager_1_1_e_c_a_task_manager_1ac4b44b06d22ca357d09de5d830b6aa28" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classeca__task__manager_1_1_e_c_a_task_manager_1ac4b44b06d22ca357d09de5d830b6aa28" kindref="member">is_listening</ref><sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a559a43b1f56b709fdad74f0de403166e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classeca__task__manager_1_1_e_c_a_task_manager_1a559a43b1f56b709fdad74f0de403166e" kindref="member">_listener_started</ref><sp/>=<sp/>asyncio.Event()</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="21" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a42f4c5d1d5833c31f818803d4f4df33d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classeca__task__manager_1_1_e_c_a_task_manager_1a42f4c5d1d5833c31f818803d4f4df33d" kindref="member">set_broker</ref>(self,<sp/>broker:<sp/>ILogPanelMQTT):</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Configura<sp/>el<sp/>broker<sp/>MQTT<sp/>a<sp/>usar&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="23"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.broker<sp/>=<sp/>broker</highlight></codeline>
+<codeline lineno="24"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(&quot;Broker<sp/>MQTT<sp/>configurado<sp/>en<sp/>ECATaskManager&quot;)</highlight></codeline>
+<codeline lineno="25"><highlight class="stringliteral"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="26" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a219157b70844e686e2bc586932989b9e" refkind="member"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>async<sp/>def<sp/>register_eca(self,<sp/>eca_config:<sp/>Dict)<sp/>-&gt;<sp/>bool:</highlight></codeline>
+<codeline lineno="27"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Registra<sp/>un<sp/>nuevo<sp/>ECA<sp/>para<sp/>monitoreo</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eca_name<sp/>=<sp/>eca_config.get(&quot;name_eca&quot;,<sp/>&quot;&quot;)</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>user_eca<sp/>=<sp/>eca_config.get(&quot;user_eca&quot;,<sp/>&quot;default&quot;)</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eca_key<sp/>=<sp/>f&quot;{eca_name}_{user_eca}&quot;</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#<sp/>Crear<sp/>evaluador</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>evaluator<sp/>=<sp/>ECAEvaluator(eca_config)</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.active_ecas[eca_key]<sp/>=<sp/>evaluator</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(f&quot;ECA<sp/>registrado:<sp/>{eca_key}<sp/>(estado:<sp/>{evaluator.state})&quot;)</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#<sp/>Iniciar<sp/>listener<sp/>si<sp/>es<sp/>el<sp/>primer<sp/>ECA<sp/>activo</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>evaluator.state<sp/>==<sp/>&quot;on&quot;<sp/>and<sp/>not<sp/>self.is_listening:</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self._start_telemetry_listener()</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>True</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>except<sp/>Exception<sp/>as<sp/>e:</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.error(f&quot;Error<sp/>registrando<sp/>ECA:<sp/>{e}&quot;)</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>import<sp/>traceback</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>traceback.print_exc()</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>False</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="53" refid="classeca__task__manager_1_1_e_c_a_task_manager_1aa9e1ecf6265ea66b8c53ca719853899f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>def<sp/>unregister_eca(self,<sp/>eca_name:<sp/>str,<sp/>user_eca:<sp/>str<sp/>=<sp/>&quot;default&quot;)<sp/>-&gt;<sp/>bool:</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;Elimina<sp/>un<sp/>ECA<sp/>del<sp/>monitoreo&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eca_key<sp/>=<sp/>f&quot;{eca_name}_{user_eca}&quot;</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>eca_key<sp/>in<sp/>self.active_ecas:</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>del<sp/>self.active_ecas[eca_key]</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(f&quot;ECA<sp/>eliminado<sp/>del<sp/>monitoreo:<sp/>{eca_key}&quot;)</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>True</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>False</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="63" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a08b74607e25c286ccd457b8ff60395f9" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>async<sp/>def<sp/>update_eca_state(self,<sp/>eca_name:<sp/>str,<sp/>new_state:<sp/>str,<sp/>user_eca:<sp/>str<sp/>=<sp/>&quot;default&quot;):</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;Actualiza<sp/>el<sp/>estado<sp/>(on/off)<sp/>de<sp/>un<sp/>ECA<sp/>existente&quot;&quot;&quot;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eca_key<sp/>=<sp/>f&quot;{eca_name}_{user_eca}&quot;</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>eca_key<sp/>in<sp/>self.active_ecas.keys():</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.active_ecas[eca_key].state<sp/>=<sp/>new_state</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(f&quot;ECA<sp/>{eca_key}<sp/>cambió<sp/>a<sp/>estado:<sp/>{new_state}<sp/>en<sp/>gestor<sp/>de<sp/>tareas&quot;)</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>new_state<sp/>==<sp/>&quot;on&quot;<sp/>and<sp/>not<sp/>self.is_listening:</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self._start_telemetry_listener()</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.warning(f&quot;ECA<sp/>{eca_key}<sp/>no<sp/>encontrado<sp/>para<sp/>actualizar<sp/>estado&quot;)</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="76" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a3a5911c830813755d29b4a60ce128a0d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>async<sp/>def<sp/>_start_telemetry_listener(self):</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;Inicia<sp/>la<sp/>suscripción<sp/>al<sp/>tópico<sp/>de<sp/>telemetría&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>self.is_listening<sp/>or<sp/>not<sp/>self.broker:</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.warning(f&quot;No<sp/>se<sp/>puede<sp/>iniciar<sp/>listener:<sp/>is_listening={self.is_listening},<sp/>broker={self.broker<sp/>is<sp/>not<sp/>None}&quot;)</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.is_listening<sp/>=<sp/>True</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(f&quot;Iniciando<sp/>listener<sp/>de<sp/>telemetría<sp/>en:<sp/>{self.telemetry_topic}&quot;)</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#<sp/>Callback<sp/>async<sp/>directo<sp/>-<sp/>NO<sp/>usar<sp/>run_coroutine_threadsafe<sp/>aquí</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>async<sp/>def<sp/>on_telemetry(topic:<sp/>str,<sp/>message:<sp/>str):</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;Callback<sp/>async<sp/>cuando<sp/>llega<sp/>un<sp/>mensaje<sp/>de<sp/>telemetría&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#logger.debug(f&quot;Telemetría<sp/>recibida<sp/>en<sp/>topic<sp/>{topic}&quot;)</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self._process_telemetry_message(message)</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.broker.suscribir(self.telemetry_topic,<sp/>on_telemetry)</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self._listener_started.set()</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(&quot;Listener<sp/>de<sp/>telemetría<sp/>iniciado<sp/>correctamente&quot;)</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>except<sp/>Exception<sp/>as<sp/>e:</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.error(f&quot;Error<sp/>iniciando<sp/>listener:<sp/>{e}&quot;)</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.is_listening<sp/>=<sp/>False</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="99" refid="classeca__task__manager_1_1_e_c_a_task_manager_1a55b7417c9e97c2e6f98584810520b372" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>async<sp/>def<sp/>_process_telemetry_message(self,<sp/>message:<sp/>str):</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;Procesa<sp/>un<sp/>mensaje<sp/>de<sp/>telemetría<sp/>y<sp/>evalúa<sp/>todos<sp/>los<sp/>ECAs<sp/>activos&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#logger.debug(f&quot;Procesando<sp/>mensaje<sp/>de<sp/>telemetría:<sp/>{message}&quot;)</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>telemetry<sp/>=<sp/>json.loads(message)</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>not<sp/>self.active_ecas:</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#logger.debug(&quot;No<sp/>hay<sp/>ECAs<sp/>activos<sp/>para<sp/>procesar&quot;)</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>for<sp/>eca_key,<sp/>evaluator<sp/>in<sp/>self.active_ecas.items():</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>evaluator.state<sp/>!=<sp/>&quot;on&quot;:</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>continue</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>should_execute<sp/>=<sp/>evaluator.process_telemetry(telemetry)</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>expected_action<sp/>=<sp/>&quot;on&quot;<sp/>if<sp/>evaluator.action_value<sp/>else<sp/>&quot;off&quot;</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>should_execute:</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>evaluator.last_action_executed<sp/>!=<sp/>expected_action:</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(f&quot;ECA<sp/>[{eca_key}]:<sp/>Condición<sp/>cumplida,<sp/>ejecutando<sp/>acción...&quot;)</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>evaluator.execute_action()</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>else:</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#<sp/>La<sp/>condición<sp/>ya<sp/>no<sp/>se<sp/>cumple,<sp/>revertir<sp/>acción<sp/>si<sp/>fue<sp/>ejecutada</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>evaluator.last_action_executed<sp/>==<sp/>expected_action:</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.info(f&quot;ECA<sp/>[{eca_key}]:<sp/>La<sp/>condición<sp/>dejo<sp/>de<sp/>cumplirse,<sp/>revirtiendo<sp/>acción...&quot;)</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>evaluator.execute_inverse_action()</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>except<sp/>json.JSONDecodeError<sp/>as<sp/>e:</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.error(f&quot;Error<sp/>decodificando<sp/>telemetría:<sp/>{e}&quot;)</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>except<sp/>Exception<sp/>as<sp/>e:</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>logger.error(f&quot;Error<sp/>procesando<sp/>telemetría:<sp/>{e}&quot;)</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>import<sp/>traceback</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>traceback.print_exc()</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="132" refid="classeca__task__manager_1_1_e_c_a_task_manager_1ace0abf7289bfe919a7130ce9e83e40ae" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>def<sp/>get_active_ecas(self)<sp/>-&gt;<sp/>Dict[str,<sp/>Dict]:</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;Retorna<sp/>información<sp/>de<sp/>todos<sp/>los<sp/>ECAs<sp/>activos&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>{</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>key:<sp/>{</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;eca_name&quot;:<sp/>e.name,</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;eca_state&quot;:<sp/>e.state,</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;user_eca&quot;:<sp/>e.user_eca,</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;event_resource&quot;:<sp/>e.event_resource_id,</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;action_resource&quot;:<sp/>e.action_resource_id,</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;threshold&quot;:<sp/>e.threshold_value,</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;comparator&quot;:<sp/>e.comparator</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>for<sp/>key,<sp/>e<sp/>in<sp/>self.active_ecas.items()</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="146"><highlight class="normal"></highlight></codeline>
+<codeline lineno="147"><highlight class="normal"></highlight></codeline>
+<codeline lineno="148"><highlight class="normal">#<sp/>Instancia<sp/>global</highlight></codeline>
+<codeline lineno="149" refid="namespaceeca__task__manager_1a282159c4c8035dc30570d5c292d500ec" refkind="member"><highlight class="normal">eca_task_manager<sp/>=<sp/>ECATaskManager()</highlight></codeline>
+    </programlisting>
+    <location file="micro_automatizacion_ecas/app/domain/eca_task_manager.py"/>
+  </compounddef>
+</doxygen>

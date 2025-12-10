@@ -1,0 +1,181 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="__core_2__tasks_8py" kind="file" language="Python">
+    <compoundname>_tasks.py</compoundname>
+    <innerclass refid="classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status" prot="protected">anyio::_core::_tasks::_IgnoredTaskStatus</innerclass>
+    <innerclass refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope" prot="public">anyio::_core::_tasks::CancelScope</innerclass>
+    <innernamespace refid="namespaceanyio">anyio</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1__core">anyio::_core</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1__core_1_1__tasks">anyio::_core::_tasks</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespaceanyio_1_1__core_1_1__tasks" refkind="compound"><highlight class="keyword">from</highlight><highlight class="normal"><sp/>__future__<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>annotations</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>math</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacecollections_1_1abc" kindref="compound">collections.abc</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Generator</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>contextlib<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>contextmanager</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>types<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TracebackType</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>..abc._tasks<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TaskGroup,<sp/>TaskStatus</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>._eventloop<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>get_async_backend</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12" refid="classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status" kindref="compound">_IgnoredTaskStatus</ref>(<ref refid="classanyio_1_1abc_1_1__tasks_1_1_task_status" kindref="compound">TaskStatus</ref>[object]):</highlight></codeline>
+<codeline lineno="13" refid="classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status_1aef08e545a9ed5c48992e0d48d453f5c9" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status_1aef08e545a9ed5c48992e0d48d453f5c9" kindref="member">started</ref>(self,<sp/>value:<sp/>object<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">pass</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17" refid="namespaceanyio_1_1__core_1_1__tasks_1a3f0687b4553e81058f9bd51956d9f2f4" refkind="member"><highlight class="normal">TASK_STATUS_IGNORED<sp/>=<sp/><ref refid="classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status" kindref="compound">_IgnoredTaskStatus</ref>()</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope" kindref="compound">CancelScope</ref>:</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="22"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Wraps<sp/>a<sp/>unit<sp/>of<sp/>work<sp/>that<sp/>can<sp/>be<sp/>made<sp/>separately<sp/>cancellable.</highlight></codeline>
+<codeline lineno="23"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="24"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>deadline:<sp/>The<sp/>time<sp/>(clock<sp/>value)<sp/>when<sp/>this<sp/>scope<sp/>is<sp/>cancelled<sp/>automatically</highlight></codeline>
+<codeline lineno="25"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>shield:<sp/>``True``<sp/>to<sp/>shield<sp/>the<sp/>cancel<sp/>scope<sp/>from<sp/>external<sp/>cancellation</highlight></codeline>
+<codeline lineno="26"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__new__(</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cls,<sp/>*,<sp/>deadline:<sp/>float<sp/>=<sp/>math.inf,<sp/>shield:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/>CancelScope:</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>get_async_backend().create_cancel_scope(shield=shield,<sp/>deadline=deadline)</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a93ae679df189067691549dbc84ac7b59" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a93ae679df189067691549dbc84ac7b59" kindref="member">cancel</ref>(self,<sp/>reason:<sp/>str<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="35"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Cancel<sp/>this<sp/>scope<sp/>immediately.</highlight></codeline>
+<codeline lineno="36"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="37"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>reason:<sp/>a<sp/>message<sp/>describing<sp/>the<sp/>reason<sp/>for<sp/>the<sp/>cancellation</highlight></codeline>
+<codeline lineno="38"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="39"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1aa545f8886e54238a143870d7878fae15" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1aa545f8886e54238a143870d7878fae15" kindref="member">deadline</ref>(self)<sp/>-&gt;<sp/>float:</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="45"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>time<sp/>(clock<sp/>value)<sp/>when<sp/>this<sp/>scope<sp/>is<sp/>cancelled<sp/>automatically.</highlight></codeline>
+<codeline lineno="46"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="47"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Will<sp/>be<sp/>``float(&apos;inf&apos;)``<sp/>if<sp/>no<sp/>timeout<sp/>has<sp/>been<sp/>set.</highlight></codeline>
+<codeline lineno="48"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="49"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@deadline.setter</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="53" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a14d41ebdb11e3dfdc7adb845321594f7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1aa545f8886e54238a143870d7878fae15" kindref="member">deadline</ref>(self,<sp/>value:<sp/>float)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="57" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a4db6c6c5c0c8a367f061db338152d688" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a4db6c6c5c0c8a367f061db338152d688" kindref="member">cancel_called</ref>(self)<sp/>-&gt;<sp/>bool:</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;``True``<sp/>if<sp/>:meth:`cancel`<sp/>has<sp/>been<sp/>called.&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="62" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1af055ba83d8f509c63e718fdd512e9e76" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1af055ba83d8f509c63e718fdd512e9e76" kindref="member">cancelled_caught</ref>(self)<sp/>-&gt;<sp/>bool:</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="64"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``True``<sp/>if<sp/>this<sp/>scope<sp/>suppressed<sp/>a<sp/>cancellation<sp/>exception<sp/>it<sp/>itself<sp/>raised.</highlight></codeline>
+<codeline lineno="65"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="66"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>This<sp/>is<sp/>typically<sp/>used<sp/>to<sp/>check<sp/>if<sp/>any<sp/>work<sp/>was<sp/>interrupted,<sp/>or<sp/>to<sp/>see<sp/>if<sp/>the</highlight></codeline>
+<codeline lineno="67"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>scope<sp/>was<sp/>cancelled<sp/>due<sp/>to<sp/>its<sp/>deadline<sp/>being<sp/>reached.<sp/>The<sp/>value<sp/>will,<sp/>however,</highlight></codeline>
+<codeline lineno="68"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>only<sp/>be<sp/>``True``<sp/>if<sp/>the<sp/>cancellation<sp/>was<sp/>triggered<sp/>by<sp/>the<sp/>scope<sp/>itself<sp/>(and<sp/>not</highlight></codeline>
+<codeline lineno="69"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>an<sp/>outer<sp/>scope).</highlight></codeline>
+<codeline lineno="70"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="71"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="75" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a8841118ceac67bdfa4ade6c51aaa2d25" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a8841118ceac67bdfa4ade6c51aaa2d25" kindref="member">shield</ref>(self)<sp/>-&gt;<sp/>bool:</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="77"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``True``<sp/>if<sp/>this<sp/>scope<sp/>is<sp/>shielded<sp/>from<sp/>external<sp/>cancellation.</highlight></codeline>
+<codeline lineno="78"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="79"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>While<sp/>a<sp/>scope<sp/>is<sp/>shielded,<sp/>it<sp/>will<sp/>not<sp/>receive<sp/>cancellations<sp/>from<sp/>outside.</highlight></codeline>
+<codeline lineno="80"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="81"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@shield.setter</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="85" refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1aafaaa39d03bbc72b4d0c53c95bb61067" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_1a8841118ceac67bdfa4ade6c51aaa2d25" kindref="member">shield</ref>(self,<sp/>value:<sp/>bool)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__enter__(self)<sp/>-&gt;<sp/>CancelScope:</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"></highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__exit__(</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self,</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>exc_type:<sp/>type[BaseException]<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>exc_val:<sp/>BaseException<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>exc_tb:<sp/>TracebackType<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/>bool:</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>NotImplementedError</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight><highlight class="preprocessor">@contextmanager</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="101" refid="namespaceanyio_1_1__core_1_1__tasks_1a178020a9e90b692f4ae9090b38970a5c" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__tasks_1a178020a9e90b692f4ae9090b38970a5c" kindref="member">fail_after</ref>(</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/>delay:<sp/>float<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,<sp/>shield:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal">)<sp/>-&gt;<sp/>Generator[CancelScope,<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">]:</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="105"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Create<sp/>a<sp/>context<sp/>manager<sp/>which<sp/>raises<sp/>a<sp/>:class:`TimeoutError`<sp/>if<sp/>does<sp/>not<sp/>finish<sp/>in</highlight></codeline>
+<codeline lineno="106"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>time.</highlight></codeline>
+<codeline lineno="107"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="108"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>delay:<sp/>maximum<sp/>allowed<sp/>time<sp/>(in<sp/>seconds)<sp/>before<sp/>raising<sp/>the<sp/>exception,<sp/>or</highlight></codeline>
+<codeline lineno="109"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``None``<sp/>to<sp/>disable<sp/>the<sp/>timeout</highlight></codeline>
+<codeline lineno="110"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>shield:<sp/>``True``<sp/>to<sp/>shield<sp/>the<sp/>cancel<sp/>scope<sp/>from<sp/>external<sp/>cancellation</highlight></codeline>
+<codeline lineno="111"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>context<sp/>manager<sp/>that<sp/>yields<sp/>a<sp/>cancel<sp/>scope</highlight></codeline>
+<codeline lineno="112"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:rtype:<sp/>:class:`~typing.ContextManager`\\[:class:`~anyio.CancelScope`\\]</highlight></codeline>
+<codeline lineno="113"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="114"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/>current_time<sp/>=<sp/>get_async_backend().current_time</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/>deadline<sp/>=<sp/>(current_time()<sp/>+<sp/>delay)<sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>delay<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>math.inf</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">with</highlight><highlight class="normal"><sp/>get_async_backend().create_cancel_scope(</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>deadline=deadline,<sp/>shield=shield</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>cancel_scope:</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">yield</highlight><highlight class="normal"><sp/>cancel_scope</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>cancel_scope.cancelled_caught<sp/></highlight><highlight class="keywordflow">and</highlight><highlight class="normal"><sp/>current_time()<sp/>&gt;=<sp/>cancel_scope.deadline:</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>TimeoutError</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126" refid="namespaceanyio_1_1__core_1_1__tasks_1ab6d51d80c12c44a3d9782f7574b06120" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__tasks_1ab6d51d80c12c44a3d9782f7574b06120" kindref="member">move_on_after</ref>(delay:<sp/>float<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,<sp/>shield:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal">)<sp/>-&gt;<sp/>CancelScope:</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="128"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Create<sp/>a<sp/>cancel<sp/>scope<sp/>with<sp/>a<sp/>deadline<sp/>that<sp/>expires<sp/>after<sp/>the<sp/>given<sp/>delay.</highlight></codeline>
+<codeline lineno="129"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="130"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>delay:<sp/>maximum<sp/>allowed<sp/>time<sp/>(in<sp/>seconds)<sp/>before<sp/>exiting<sp/>the<sp/>context<sp/>block,<sp/>or</highlight></codeline>
+<codeline lineno="131"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``None``<sp/>to<sp/>disable<sp/>the<sp/>timeout</highlight></codeline>
+<codeline lineno="132"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>shield:<sp/>``True``<sp/>to<sp/>shield<sp/>the<sp/>cancel<sp/>scope<sp/>from<sp/>external<sp/>cancellation</highlight></codeline>
+<codeline lineno="133"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>cancel<sp/>scope</highlight></codeline>
+<codeline lineno="134"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="135"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/>deadline<sp/>=<sp/>(</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>(get_async_backend().current_time()<sp/>+<sp/>delay)<sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>delay<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>math.inf</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>get_async_backend().create_cancel_scope(deadline=deadline,<sp/>shield=shield)</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"></highlight></codeline>
+<codeline lineno="142" refid="namespaceanyio_1_1__core_1_1__tasks_1a352153ab7f94439abbc38122b7bba602" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__tasks_1a352153ab7f94439abbc38122b7bba602" kindref="member">current_effective_deadline</ref>()<sp/>-&gt;<sp/>float:</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="144"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Return<sp/>the<sp/>nearest<sp/>deadline<sp/>among<sp/>all<sp/>the<sp/>cancel<sp/>scopes<sp/>effective<sp/>for<sp/>the<sp/>current</highlight></codeline>
+<codeline lineno="145"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>task.</highlight></codeline>
+<codeline lineno="146"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="147"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>clock<sp/>value<sp/>from<sp/>the<sp/>event<sp/>loop&apos;s<sp/>internal<sp/>clock<sp/>(or<sp/>``float(&apos;inf&apos;)``<sp/>if</highlight></codeline>
+<codeline lineno="148"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>there<sp/>is<sp/>no<sp/>deadline<sp/>in<sp/>effect,<sp/>or<sp/>``float(&apos;-inf&apos;)``<sp/>if<sp/>the<sp/>current<sp/>scope<sp/>has</highlight></codeline>
+<codeline lineno="149"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>been<sp/>cancelled)</highlight></codeline>
+<codeline lineno="150"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:rtype:<sp/>float</highlight></codeline>
+<codeline lineno="151"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="152"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>get_async_backend().<ref refid="namespaceanyio_1_1__core_1_1__tasks_1a352153ab7f94439abbc38122b7bba602" kindref="member">current_effective_deadline</ref>()</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"></highlight></codeline>
+<codeline lineno="155"><highlight class="normal"></highlight></codeline>
+<codeline lineno="156" refid="namespaceanyio_1_1__core_1_1__tasks_1a0125af94932bdce29d507173c8c54d1a" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__tasks_1a0125af94932bdce29d507173c8c54d1a" kindref="member">create_task_group</ref>()<sp/>-&gt;<sp/>TaskGroup:</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="158"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Create<sp/>a<sp/>task<sp/>group.</highlight></codeline>
+<codeline lineno="159"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="160"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>task<sp/>group</highlight></codeline>
+<codeline lineno="161"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="162"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>get_async_backend().<ref refid="namespaceanyio_1_1__core_1_1__tasks_1a0125af94932bdce29d507173c8c54d1a" kindref="member">create_task_group</ref>()</highlight></codeline>
+    </programlisting>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/anyio/_core/_tasks.py"/>
+  </compounddef>
+</doxygen>

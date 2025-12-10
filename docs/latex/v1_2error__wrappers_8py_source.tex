@@ -1,0 +1,167 @@
+\doxysection{error\+\_\+wrappers.\+py}
+\hypertarget{v1_2error__wrappers_8py_source}{}\label{v1_2error__wrappers_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/error\_wrappers.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/error\_wrappers.py}}
+\mbox{\hyperlink{v1_2error__wrappers_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers}{00001}}\ \textcolor{keyword}{import}\ json}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00002}00002\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ Dict,\ Generator,\ List,\ Optional,\ Sequence,\ Tuple,\ Type,\ Union}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00003}00003\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00004}00004\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1json}{pydantic.v1.json}}\ \textcolor{keyword}{import}\ pydantic\_encoder}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00005}00005\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1utils}{pydantic.v1.utils}}\ \textcolor{keyword}{import}\ Representation}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00007}00007\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00008}00008\ \ \ \ \ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ TypedDict}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00010}00010\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1config}{pydantic.v1.config}}\ \textcolor{keyword}{import}\ BaseConfig}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00011}00011\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1types}{pydantic.v1.types}}\ \textcolor{keyword}{import}\ ModelOrDc}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00012}00012\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing}{pydantic.v1.typing}}\ \textcolor{keyword}{import}\ ReprArgs}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00014}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a53dfdb5555e3b768cacababc890a5966}{00014}}\ \ \ \ \ Loc\ =\ Tuple[Union[int,\ str],\ ...]}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00016}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1___error_dict_required}{00016}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1___error_dict_required}{\_ErrorDictRequired}}(TypedDict):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ loc:\ Loc}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ msg:\ str}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ type:\ str}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00021}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_dict}{00021}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_dict}{ErrorDict}}(\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1___error_dict_required}{\_ErrorDictRequired}},\ total=\textcolor{keyword}{False}):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00022}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_dict_a811275892001fd1d84ece90f45a9b2e7}{00022}}\ \ \ \ \ \ \ \ \ ctx:\ Dict[str,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00025}00025\ \_\_all\_\_\ =\ \textcolor{stringliteral}{'ErrorWrapper'},\ \textcolor{stringliteral}{'ValidationError'}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00028}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper}{00028}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper}{ErrorWrapper}}(\mbox{\hyperlink{classpydantic_1_1v1_1_1utils_1_1_representation}{Representation}}):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00029}00029\ \ \ \ \ \_\_slots\_\_\ =\ \textcolor{stringliteral}{'exc'},\ \textcolor{stringliteral}{'\_loc'}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00031}00031\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ exc:\ Exception,\ loc:\ Union[str,\ \textcolor{stringliteral}{'Loc'}])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00032}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_acb369ca39f487c18476c0679308b6684}{00032}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_acb369ca39f487c18476c0679308b6684}{exc}}\ =\ exc}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00033}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a639f6be2aa7e18bb6863549bd8b92be5}{00033}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a639f6be2aa7e18bb6863549bd8b92be5}{\_loc}}\ =\ loc}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00035}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a13b101116093fbf7879a369d6767a60b}{00035}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a13b101116093fbf7879a369d6767a60b}{loc\_tuple}}(self)\ -\/>\ 'Loc':}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a639f6be2aa7e18bb6863549bd8b92be5}{\_loc}},\ tuple):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a639f6be2aa7e18bb6863549bd8b92be5}{\_loc}}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a639f6be2aa7e18bb6863549bd8b92be5}{\_loc}},)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00041}00041\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_args\_\_(self)\ -\/>\ 'ReprArgs':}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [(\textcolor{stringliteral}{'exc'},\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_acb369ca39f487c18476c0679308b6684}{exc}}),\ (\textcolor{stringliteral}{'loc'},\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper_a13b101116093fbf7879a369d6767a60b}{loc\_tuple}}())]}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00045}00045\ \textcolor{comment}{\#\ ErrorList\ is\ something\ like\ Union[List[Union[List[ErrorWrapper],\ ErrorWrapper]],\ ErrorWrapper]}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00046}00046\ \textcolor{comment}{\#\ but\ recursive,\ therefore\ just\ use:}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00047}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_ac76957a489a6681c209b5e50b17ef7b5}{00047}}\ ErrorList\ =\ Union[Sequence[Any],\ ErrorWrapper]}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00050}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error}{00050}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error}{ValidationError}}(\mbox{\hyperlink{classpydantic_1_1v1_1_1utils_1_1_representation}{Representation}},\ ValueError):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00051}00051\ \ \ \ \ \_\_slots\_\_\ =\ \textcolor{stringliteral}{'raw\_errors'},\ \textcolor{stringliteral}{'model'},\ \textcolor{stringliteral}{'\_error\_cache'}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00053}00053\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ errors:\ Sequence[ErrorList],\ model:\ \textcolor{stringliteral}{'ModelOrDc'})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00054}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a8265aa64e1c84932e407da126f420d58}{00054}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a8265aa64e1c84932e407da126f420d58}{raw\_errors}}\ =\ errors}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00055}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_adf99c85dbf20c0a5329ee4e2cb2352e4}{00055}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_adf99c85dbf20c0a5329ee4e2cb2352e4}{model}}\ =\ model}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00056}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a075bcdd26a7434f4fca12faca386d0db}{00056}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a075bcdd26a7434f4fca12faca386d0db}{\_error\_cache}}:\ Optional[List[\textcolor{stringliteral}{'ErrorDict'}]]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00058}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a51d4db3dee30000160bb91b1c1516fb8}{00058}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceerrors}{errors}}(self)\ -\/>\ List['ErrorDict']:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a075bcdd26a7434f4fca12faca386d0db}{\_error\_cache}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ config\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_adf99c85dbf20c0a5329ee4e2cb2352e4}{model}}.\_\_config\_\_\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ config\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_adf99c85dbf20c0a5329ee4e2cb2352e4}{model}}.\_\_pydantic\_model\_\_.\_\_config\_\_\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a075bcdd26a7434f4fca12faca386d0db}{\_error\_cache}}\ =\ list(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a896a51e84db6c08b9e705e335d6e90ad}{flatten\_errors}}(self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a8265aa64e1c84932e407da126f420d58}{raw\_errors}},\ config))}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a075bcdd26a7434f4fca12faca386d0db}{\_error\_cache}}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00067}\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a128b39b24c3b3c611cb37effbf8a5efe}{00067}}\ \ \ \ \ \textcolor{keyword}{def\ }json(self,\ *,\ indent:\ Union[\textcolor{keywordtype}{None},\ int,\ str]\ =\ 2)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ json.dumps(self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a51d4db3dee30000160bb91b1c1516fb8}{errors}}(),\ indent=indent,\ default=pydantic\_encoder)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00070}00070\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ errors\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a51d4db3dee30000160bb91b1c1516fb8}{errors}}()}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ no\_errors\ =\ len(errors)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\{no\_errors\}\ validation\ error\{"{}"{}\ if\ no\_errors\ ==\ 1\ else\ "{}s"{}\}\ for\ \{self.model.\_\_name\_\_\}\(\backslash\)n'}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\{display\_errors(errors)\}'}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00078}00078\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_args\_\_(self)\ -\/>\ 'ReprArgs':}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [(\textcolor{stringliteral}{'model'},\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_adf99c85dbf20c0a5329ee4e2cb2352e4}{model}}.\_\_name\_\_),\ (\textcolor{stringliteral}{'errors'},\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_validation_error_a51d4db3dee30000160bb91b1c1516fb8}{errors}}())]}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00082}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a85ab50088c9f2742eb0d9f268fa89355}{00082}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a85ab50088c9f2742eb0d9f268fa89355}{display\_errors}}(errors:\ List[\textcolor{stringliteral}{'ErrorDict'}])\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00083}00083\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{'\(\backslash\)n'}.join(f\textcolor{stringliteral}{'\{\_display\_error\_loc(e)\}\(\backslash\)n\ \ \{e["{}msg"{}]\}\ (\{\_display\_error\_type\_and\_ctx(e)\})'}\ \textcolor{keywordflow}{for}\ e\ \textcolor{keywordflow}{in}\ errors)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00086}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a7b815df5eaacd5dd5cad5edb930c7a98}{00086}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a7b815df5eaacd5dd5cad5edb930c7a98}{\_display\_error\_loc}}(error:\ \textcolor{stringliteral}{'ErrorDict'})\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00087}00087\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{'\ -\/>\ '}.join(str(e)\ \textcolor{keywordflow}{for}\ e\ \textcolor{keywordflow}{in}\ error[\textcolor{stringliteral}{'loc'}])}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00090}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a158f72e67eb5100247be9e9ddc583661}{00090}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a158f72e67eb5100247be9e9ddc583661}{\_display\_error\_type\_and\_ctx}}(error:\ \textcolor{stringliteral}{'ErrorDict'})\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00091}00091\ \ \ \ \ t\ =\ \textcolor{stringliteral}{'type='}\ +\ error[\textcolor{stringliteral}{'type'}]}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00092}00092\ \ \ \ \ ctx\ =\ error.get(\textcolor{stringliteral}{'ctx'})}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{if}\ ctx:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t\ +\ \textcolor{stringliteral}{''}.join(f\textcolor{stringliteral}{';\ \{k\}=\{v\}'}\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ ctx.items())}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00095}00095\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00099}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a896a51e84db6c08b9e705e335d6e90ad}{00099}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a896a51e84db6c08b9e705e335d6e90ad}{flatten\_errors}}(}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00100}00100\ \ \ \ \ errors:\ Sequence[Any],\ config:\ Type[\textcolor{stringliteral}{'BaseConfig'}],\ loc:\ Optional[\textcolor{stringliteral}{'Loc'}]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00101}00101\ )\ -\/>\ Generator[\textcolor{stringliteral}{'ErrorDict'},\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00102}00102\ \ \ \ \ \textcolor{keywordflow}{for}\ error\ \textcolor{keywordflow}{in}\ errors:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(error,\ ErrorWrapper):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ loc:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ error\_loc\ =\ loc\ +\ error.loc\_tuple()}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ error\_loc\ =\ error.loc\_tuple()}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(error.exc,\ ValidationError):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a896a51e84db6c08b9e705e335d6e90ad}{flatten\_errors}}(error.exc.raw\_errors,\ config,\ error\_loc)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_ab7095e6e1d6977e1a5a9c85dda080e76}{error\_dict}}(error.exc,\ config,\ error\_loc)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(error,\ list):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a896a51e84db6c08b9e705e335d6e90ad}{flatten\_errors}}(error,\ config,\ loc=loc)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(f\textcolor{stringliteral}{'Unknown\ error\ object:\ \{error\}'})}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00119}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_ab7095e6e1d6977e1a5a9c85dda080e76}{00119}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_ab7095e6e1d6977e1a5a9c85dda080e76}{error\_dict}}(exc:\ Exception,\ config:\ Type[\textcolor{stringliteral}{'BaseConfig'}],\ loc:\ \textcolor{stringliteral}{'Loc'})\ -\/>\ \textcolor{stringliteral}{'ErrorDict'}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00120}00120\ \ \ \ \ type\_\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_ac1bf8c213fb16fa1b8a7ba3978d0ca31}{get\_exc\_type}}(exc.\_\_class\_\_)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00121}00121\ \ \ \ \ msg\_template\ =\ config.error\_msg\_templates.get(type\_)\ \textcolor{keywordflow}{or}\ getattr(exc,\ \textcolor{stringliteral}{'msg\_template'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00122}00122\ \ \ \ \ ctx\ =\ exc.\_\_dict\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{if}\ msg\_template:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ msg\ =\ msg\_template.format(**ctx)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00125}00125\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ msg\ =\ str(exc)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00128}00128\ \ \ \ \ d:\ \textcolor{stringliteral}{'ErrorDict'}\ =\ \{\textcolor{stringliteral}{'loc'}:\ loc,\ \textcolor{stringliteral}{'msg'}:\ msg,\ \textcolor{stringliteral}{'type'}:\ type\_\}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00130}00130\ \ \ \ \ \textcolor{keywordflow}{if}\ ctx:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ d[\textcolor{stringliteral}{'ctx'}]\ =\ ctx}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{return}\ d}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00136}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_aedd45eb84c79d3a43435f27087d353b7}{00136}}\ \_EXC\_TYPE\_CACHE:\ Dict[Type[Exception],\ str]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00139}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_ac1bf8c213fb16fa1b8a7ba3978d0ca31}{00139}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_ac1bf8c213fb16fa1b8a7ba3978d0ca31}{get\_exc\_type}}(cls:\ Type[Exception])\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00140}00140\ \ \ \ \ \textcolor{comment}{\#\ slightly\ more\ efficient\ than\ using\ lru\_cache\ since\ we\ don't\ need\ to\ worry\ about\ the\ cache\ filling\ up}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00141}00141\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_EXC\_TYPE\_CACHE[cls]}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00143}00143\ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ r\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a9831caa3670e1b8be2ce7538ac270507}{\_get\_exc\_type}}(cls)}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \_EXC\_TYPE\_CACHE[cls]\ =\ r}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ r}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00149}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a9831caa3670e1b8be2ce7538ac270507}{00149}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers_a9831caa3670e1b8be2ce7538ac270507}{\_get\_exc\_type}}(cls:\ Type[Exception])\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00150}00150\ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(cls,\ AssertionError):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{'assertion\_error'}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00153}00153\ \ \ \ \ base\_name\ =\ \textcolor{stringliteral}{'type\_error'}\ \textcolor{keywordflow}{if}\ issubclass(cls,\ TypeError)\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'value\_error'}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00154}00154\ \ \ \ \ \textcolor{keywordflow}{if}\ cls\ \textcolor{keywordflow}{in}\ (TypeError,\ ValueError):}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ just\ TypeError\ or\ ValueError,\ no\ extra\ code}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base\_name}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00158}00158\ \ \ \ \ \textcolor{comment}{\#\ if\ it's\ not\ a\ TypeError\ or\ ValueError,\ we\ just\ take\ the\ lowercase\ of\ the\ exception\ name}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00159}00159\ \ \ \ \ \textcolor{comment}{\#\ no\ chaining\ or\ snake\ case\ logic,\ use\ "{}code"{}\ for\ more\ complex\ error\ types.}}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00160}00160\ \ \ \ \ code\ =\ getattr(cls,\ \textcolor{stringliteral}{'code'},\ \textcolor{keywordtype}{None})\ \textcolor{keywordflow}{or}\ cls.\_\_name\_\_.replace(\textcolor{stringliteral}{'Error'},\ \textcolor{stringliteral}{''}).lower()}
+\DoxyCodeLine{\Hypertarget{v1_2error__wrappers_8py_source_l00161}00161\ \ \ \ \ \textcolor{keywordflow}{return}\ base\_name\ +\ \textcolor{stringliteral}{'.'}\ +\ code}
+
+\end{DoxyCode}

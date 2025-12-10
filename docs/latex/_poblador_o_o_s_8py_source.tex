@@ -1,0 +1,403 @@
+\doxysection{Poblador\+OOS.\+py}
+\hypertarget{_poblador_o_o_s_8py_source}{}\label{_poblador_o_o_s_8py_source}\index{micro\_gestion\_conocimiento/app/infraestructure/adaptadores/PobladorOOS.py@{micro\_gestion\_conocimiento/app/infraestructure/adaptadores/PobladorOOS.py}}
+\mbox{\hyperlink{_poblador_o_o_s_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00001}\mbox{\hyperlink{namespace_poblador_o_o_s}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Adaptador\ de\ Población\ de\ la\ Ontología\ OOS"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00002}00002\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00003}00003\ \textcolor{keyword}{import}\ os,\ shutil}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00004}00004\ \textcolor{keyword}{from}\ infraestructure.interfaces.IPoblacion\ \textcolor{keyword}{import}\ IPoblacion}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00005}00005\ \textcolor{keyword}{from}\ infraestructure.acceso\_ontologia.Ontologia\ \textcolor{keyword}{import}\ Ontologia}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00006}00006\ \textcolor{keyword}{from}\ owlready2\ \textcolor{keyword}{import}\ *}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00007}00007\ \textcolor{keyword}{from}\ infraestructure.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00008}00008\ \textcolor{keyword}{from}\ rdflib\ \textcolor{keyword}{import}\ Literal}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceinfraestructure_1_1util_1_1_uris_o_o_s}{infraestructure.util.UrisOOS}}\ \textcolor{keyword}{import}\ UrisOOS}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00011}\mbox{\hyperlink{namespace_poblador_o_o_s_aa3dd1f7e007a835f90a291b41500bd09}{00011}}\ onto\_path\ =\ [settings.PATH\_OWL]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00012}00012\ logger.info(\textcolor{stringliteral}{"{}Ruta\ Ontologias:\ "{}}\ +\ settings.PATH\_OWL)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00015}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{00015}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{PobladorOOS}}(IPoblacion):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00016}00016\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00017}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a5787c6e0e2d0c28d8a42e11da3b9b402}{00017}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a5787c6e0e2d0c28d8a42e11da3b9b402}{individuoObjecto}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00018}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{00018}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00019}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{00019}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00020}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{00020}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}\ =\ \mbox{\hyperlink{namespace_uris_o_o_s}{UrisOOS}}()}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00021}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a6d05debac53656b016a96d8e787f37b0}{00021}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a6d05debac53656b016a96d8e787f37b0}{ontologia}}\ =\ \mbox{\hyperlink{namespace_ontologia}{Ontologia}}()}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00022}00022\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a813d584d5055ad9d6ee0003b1d614521}{\_inicializar\_ontologia\_instanciada}}()}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00024}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a813d584d5055ad9d6ee0003b1d614521}{00024}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a813d584d5055ad9d6ee0003b1d614521}{\_inicializar\_ontologia\_instanciada}}(self):\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(settings.PATH\_OWL):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ os.makedirs(settings.PATH\_OWL,\ mode=0o777)\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(settings.ONTOLOGIA\_INSTANCIADA):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.debug(\textcolor{stringliteral}{"{}La\ ontologia\ instanciada\ no\ existe,\ se\ crea\ una\ nueva\ a\ partir\ de\ la\ base"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shutil.copyfile(settings.ONTOLOGIA,\ settings.ONTOLOGIA\_INSTANCIADA)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Fallo\ al\ copiar\ ontologia\ base\ a\ ontologia\ instanciada"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(e)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae81b1e8bae6f98a870601591ff773def}{\_cargar\_ontologia}}()}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00036}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae81b1e8bae6f98a870601591ff773def}{00036}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae81b1e8bae6f98a870601591ff773def}{\_cargar\_ontologia}}(self):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Carga\ la\ ontología\ instanciada."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00038}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{00038}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}\ =\ get\_ontology(\textcolor{stringliteral}{"{}file://"{}}\ +\ settings.ONTOLOGIA\_INSTANCIADA).load(reload\_if\_newer=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Ontologia\ Cargada\ (owlready2):\ "{}}\ +\ str(self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.loaded))}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00041}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a40dbc5ce3bc047e24fa928346e74eefc}{00041}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a40dbc5ce3bc047e24fa928346e74eefc}{\_recargar\_ontologia}}(self):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Recarga\ la\ ontología\ instanciada\ después\ de\ cambios."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}\ =\ get\_ontology(\textcolor{stringliteral}{"{}file://"{}}\ +\ settings.ONTOLOGIA\_INSTANCIADA).load(reload=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ logger.debug(\textcolor{stringliteral}{"{}Ontologia\ recargada\ desde\ archivo"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00046}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a559790ef886584d8dc2e808bc78efacf}{00046}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a559790ef886584d8dc2e808bc78efacf}{\_get\_class}}(self,\ class\_name:\ str):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Obtiene\ una\ clase\ de\ la\ ontología\ instanciada\ por\ nombre."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=f\textcolor{stringliteral}{"{}*\{class\_name\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00050}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a7fbafc16be2ec0440236e4548294190f}{00050}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a7fbafc16be2ec0440236e4548294190f}{poblarMetadatosObjeto}}(self,\ diccionarioObjeto:dict,\ listaRecursos:dict):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Pobla\ los\ metadatos\ del\ objeto\ inteligente\ usando\ owlready2."{}"{}"{}}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Limpiar\ objetos\ existentes}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ existing\_objects\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search(id\_object=str(diccionarioObjeto[\textcolor{stringliteral}{"{}id"{}}]))}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ obj\ \textcolor{keywordflow}{in}\ existing\_objects:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ destroy\_entity(obj)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Limpiados\ objetos\ existentes\ con\ ID\ \{diccionarioObjeto['id']\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ cleanup\_error:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.warning(f\textcolor{stringliteral}{"{}Error\ durante\ limpieza:\ \{cleanup\_error\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Obtener\ las\ clases\ de\ la\ ontología\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ StateClass\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.ns\_oos\ +\ \textcolor{stringliteral}{"{}State"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ ObjectClass\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.ns\_oos\ +\ \textcolor{stringliteral}{"{}Object"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ LocationClass\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.ns\_oos\ +\ \textcolor{stringliteral}{"{}location"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ all([StateClass,\ ObjectClass,\ LocationClass]):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}No\ se\ encontraron\ las\ clases\ necesarias\ en\ la\ ontología"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Crear\ individuos\ en\ la\ ontología\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}\ =\ StateClass(\textcolor{stringliteral}{"{}Estado"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a5787c6e0e2d0c28d8a42e11da3b9b402}{individuoObjecto}}\ =\ ObjectClass(\textcolor{stringliteral}{"{}Objeto"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}\ =\ LocationClass(\textcolor{stringliteral}{"{}Localizacion"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarObjecto}}(diccionarioObjeto)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarEstado}}(diccionarioObjeto)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarLocation}}(diccionarioObjeto)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarDataStreams}}(listaRecursos)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Guardar\ la\ ontología\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.save(file=settings.ONTOLOGIA\_INSTANCIADA,\ format=\textcolor{stringliteral}{"{}rdfxml"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Ontología\ guardada\ correctamente"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Población\ de\ metadatos\ exitosa"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ en\ poblarMetadatosObjeto:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ traceback}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(traceback.format\_exc())}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Limpieza\ en\ caso\ de\ error}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(self,\ \textcolor{stringliteral}{'individuoEstado'})\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ destroy\_entity(self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(self,\ \textcolor{stringliteral}{'individuoObjecto'})\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a5787c6e0e2d0c28d8a42e11da3b9b402}{individuoObjecto}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ destroy\_entity(self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a5787c6e0e2d0c28d8a42e11da3b9b402}{individuoObjecto}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(self,\ \textcolor{stringliteral}{'location'})\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ destroy\_entity(self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00107}00107\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarObjecto(self,\ diccionarioObjeto):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Pobla\ propiedades\ del\ objeto."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a5787c6e0e2d0c28d8a42e11da3b9b402}{individuoObjecto}}.id\_object\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}id"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}ip\_object"{}}\ \textcolor{keywordflow}{in}\ diccionarioObjeto:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a5787c6e0e2d0c28d8a42e11da3b9b402}{individuoObjecto}}.ip\_object\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}ip\_object"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ logger.debug(f\textcolor{stringliteral}{"{}Objeto\ poblado:\ id=\{diccionarioObjeto['id']\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00114}00114\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarEstado(self,\ diccionarioObjeto):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Pobla\ propiedades\ del\ estado."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.version\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}version"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.creator\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}creator"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.status\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}status"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}tags"{}}\ \textcolor{keywordflow}{in}\ diccionarioObjeto:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ diccionarioObjeto[\textcolor{stringliteral}{"{}tags"{}}]:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.tags.append(item)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.title\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}title"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.private\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}private"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.description\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}description"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.updated\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}updated"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.website\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}website"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.feed\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}feed"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_ae6b99fe84e15600bdff957e5d1d99d9b}{individuoEstado}}.created\ =\ [diccionarioObjeto[\textcolor{stringliteral}{"{}created"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ logger.debug(f\textcolor{stringliteral}{"{}Estado\ poblado:\ title=\{diccionarioObjeto['title']\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00133}00133\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarLocation(self,\ ds):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Pobla\ propiedades\ de\ la\ localización."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}.lon\ =\ [ds[\textcolor{stringliteral}{"{}lon"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}.lat\ =\ [ds[\textcolor{stringliteral}{"{}lat"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}.name\_location\ =\ [ds[\textcolor{stringliteral}{"{}name"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}.domain\ =\ [ds[\textcolor{stringliteral}{"{}domain"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a074b6d664961b318a9fad58dea49da27}{location}}.ele\ =\ [ds[\textcolor{stringliteral}{"{}ele"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ logger.debug(f\textcolor{stringliteral}{"{}Localización\ poblada:\ \{ds['name']\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00142}00142\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarDataStreams(self,\ listaRecursos):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Pobla\ los\ datastreams\ del\ objeto."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Poblando\ DataStreams..."{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Obtener\ clases\ de\ la\ ontología\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ DatastreamsClass\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.ns\_oos\ +\ \textcolor{stringliteral}{"{}datastreams"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ UnitClass\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.ns\_kos\ +\ \textcolor{stringliteral}{"{}Unit"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ EntitiesOfInterestClass\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.ns\_oos\ +\ \textcolor{stringliteral}{"{}EntitiesOfInterest"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ FeatureOfInterestClass\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.ns\_ssn\ +\ \textcolor{stringliteral}{"{}FeatureOfInterest"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ all([DatastreamsClass,\ UnitClass,\ EntitiesOfInterestClass,\ FeatureOfInterestClass]):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}No\ se\ encontraron\ las\ clases\ necesarias\ para\ DataStreams"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ listaRecursos:\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ dataStreamsIRI\ =\ item[\textcolor{stringliteral}{"{}datastream\_id"{}}]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ unidadIRI\ =\ dataStreamsIRI\ +\ \textcolor{stringliteral}{"{}\_unidad"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ entityIRI\ =\ dataStreamsIRI\ +\ \textcolor{stringliteral}{"{}\_entity\_of\_interest"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ featureIRI\ =\ dataStreamsIRI\ +\ \textcolor{stringliteral}{"{}\_feature\_of\_interest"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Limpiar\ recursos\ existentes}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ iri\ \textcolor{keywordflow}{in}\ [dataStreamsIRI,\ unidadIRI,\ entityIRI,\ featureIRI]:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ existing\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search(iri=\textcolor{stringliteral}{"{}*"{}}\ +\ iri)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ entity\ \textcolor{keywordflow}{in}\ existing:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ destroy\_entity(entity)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.debug(f\textcolor{stringliteral}{"{}Limpiado\ recurso\ existente:\ \{iri\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ cleanup\_error:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.warning(f\textcolor{stringliteral}{"{}Error\ durante\ limpieza\ de\ recursos:\ \{cleanup\_error\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Crear\ individuos\ con\ las\ clases\ de\ la\ ontología\ instanciada}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj\ =\ DatastreamsClass(dataStreamsIRI)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ unidadObj\ =\ UnitClass(unidadIRI)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ entityObj\ =\ EntitiesOfInterestClass(entityIRI)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ featureObj\ =\ FeatureOfInterestClass(featureIRI)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00178}00178\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Propiedades\ del\ datastream}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj.min\_value\ =\ [str(item[\textcolor{stringliteral}{"{}min\_value"{}}])]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj.max\_value\ =\ [str(item[\textcolor{stringliteral}{"{}max\_value"{}}])]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj.datastream\_id\ =\ [item[\textcolor{stringliteral}{"{}datastream\_id"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj.datastream\_type\ =\ [item[\textcolor{stringliteral}{"{}datastream\_type"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj.datastream\_format\ =\ [item[\textcolor{stringliteral}{"{}datastream\_format"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}tags"{}}\ \textcolor{keywordflow}{in}\ item:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ tag\ \textcolor{keywordflow}{in}\ item[\textcolor{stringliteral}{'tags'}]:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj.tags.append(tag)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ unidadObj.label\ =\ [item[\textcolor{stringliteral}{"{}label"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ unidadObj.symbol\ =\ [item[\textcolor{stringliteral}{"{}symbol"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ featureObj.name\_feature\ =\ [item[\textcolor{stringliteral}{"{}featureofinterest"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ entityObj.name\_entity\ =\ [item[\textcolor{stringliteral}{"{}entityofinterest"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Relaciones}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ datastreamObj.isMeasured.append(unidadObj)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ entityObj.isDefinedBy.append(featureObj)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ logger.debug(f\textcolor{stringliteral}{"{}DataStream\ poblado:\ \{item['datastream\_id']\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}DataStreams\ poblados\ correctamente\ (\{len(listaRecursos)\}\ recursos)"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00204}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a1613e2fcd62ef9e1ddd499fb3eece197}{00204}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a1613e2fcd62ef9e1ddd499fb3eece197}{poblarECA}}(self,\ diccionarioECA:dict):\ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Pobla\ una\ regla\ ECA\ usando\ RDFLib\ (clase\ Ontologia)."{}"{}"{}}\ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(settings.ONTOLOGIA\_INSTANCIADA):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ instanciada\ no\ existe\ en\ la\ ruta\ especificada."{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Poblando\ regla\ ECA..."{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ user\_eca\ =\ diccionarioECA.get(\textcolor{stringliteral}{"{}user\_eca"{}},\ \textcolor{stringliteral}{"{}default"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ nombreEca\ =\ diccionarioECA[\textcolor{stringliteral}{'name\_eca'}].replace(\textcolor{stringliteral}{"{}\ "{}},\ \textcolor{stringliteral}{"{}\_"{}})\ +\ user\_eca}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ individuoECA\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ individuoEvento\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca\ +\ \textcolor{stringliteral}{"{}evento"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ individuoAccion\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca\ +\ \textcolor{stringliteral}{"{}accion"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ individuoCondicion\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca\ +\ \textcolor{stringliteral}{"{}condicion"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ listaIndividuos\ =\ []}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ listaIndividuos.append([individuoECA,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.clase\_dinamic])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ listaIndividuos.append([individuoEvento,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.clase\_event])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ listaIndividuos.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.clase\_Action])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ listaIndividuos.append([individuoCondicion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.clase\_condition])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a6d05debac53656b016a96d8e787f37b0}{ontologia}}.insertarListaIndividuos(listaIndividuos)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ dinamic\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarDinamic}}(diccionarioECA,\ individuoECA)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ event\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarEvent}}(diccionarioECA,\ individuoEvento)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ accion\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarAction}}(diccionarioECA,\ individuoAccion)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ condicion\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_poblarCondition}}(diccionarioECA,\ individuoCondicion)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a6d05debac53656b016a96d8e787f37b0}{ontologia}}.insertarListaDataProperty(dinamic\ +\ event\ +\ accion\ +\ condicion)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ listaObjectProperty\ =\ []}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ listaObjectProperty.append([individuoECA,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.op\_starts\_with,\ individuoEvento])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ listaObjectProperty.append([individuoEvento,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.op\_check,\ individuoCondicion])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ listaObjectProperty.append([individuoCondicion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.op\_is\_related\_with,\ individuoAccion])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a6d05debac53656b016a96d8e787f37b0}{ontologia}}.insertarListaObjectProperty(listaObjectProperty)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ CRÍTICO:\ Recargar\ owlready2\ después\ de\ que\ RDFLib\ guardó}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a40dbc5ce3bc047e24fa928346e74eefc}{\_recargar\_ontologia}}()}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Regla\ ECA\ poblada\ correctamente."{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00244}00244\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarDinamic(self,\ diccionarioECA,\ individuoECA):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ dinamic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ nombreEca\ =\ diccionarioECA[\textcolor{stringliteral}{'name\_eca'}].replace(\textcolor{stringliteral}{"{}\ "{}},\ \textcolor{stringliteral}{"{}\_"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}interest\_entity\_eca"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ dinamic.append(}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [individuoECA,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_interest\_entity\_eca,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}interest\_entity\_eca"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ dinamic.append([individuoECA,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_name\_eca,\ Literal(nombreEca)])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ dinamic.append([individuoECA,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_state\_eca,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}state\_eca"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ user\_eca\ =\ diccionarioECA.get(\textcolor{stringliteral}{"{}user\_eca"{}},\ \textcolor{stringliteral}{"{}default"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ dinamic.append([individuoECA,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_user\_eca,\ Literal(user\_eca)])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dinamic}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00256}00256\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarEvent(self,\ diccionarioECA,\ individuoEvento):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ event\ =\ []}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ event.append([individuoEvento,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_id\_event\_object,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}id\_event\_object"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ event.append([individuoEvento,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_ip\_event\_object,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}ip\_event\_object"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ event.append([individuoEvento,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_id\_event\_resource,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}id\_event\_resource"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ event.append([individuoEvento,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_name\_event\_resource,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}name\_event\_resource"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ event.append([individuoEvento,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_name\_event\_object,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}name\_event\_object"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ event}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00265}00265\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarAction(self,\ diccionarioECA,\ individuoAccion):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ action\ =\ []}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_comparator\_action,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}comparator\_action"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_id\_action\_resource,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}id\_action\_resource"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_id\_action\_object,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}id\_action\_object"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_ip\_action\_object,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}ip\_action\_object"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_meaning\_action,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}meaning\_action"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_name\_action\_object,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}name\_action\_object"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_name\_action\_resource,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}name\_action\_resource"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_type\_variable\_action,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}type\_variable\_action"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_unit\_action,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}unit\_action"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ action.append([individuoAccion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_variable\_action,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}variable\_action"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ action}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00278}00278\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00279}00279\ \ \ \ \ \textcolor{keyword}{def\ }\_\_poblarCondition(self,\ diccionarioECA,\ individuoCondicion):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ condition\ =\ []}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ condition.append([individuoCondicion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_comparator\_condition,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}comparator\_condition"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ condition.append([individuoCondicion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_meaning\_condition,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}meaning\_condition"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ condition.append([individuoCondicion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_type\_variable\_condition,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}type\_variable\_condition"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ condition.append([individuoCondicion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_unit\_condition,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}unit\_condition"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ condition.append([individuoCondicion,\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.dp\_variable\_condition,\ Literal(diccionarioECA[\textcolor{stringliteral}{"{}variable\_condition"{}}])])}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ condition}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00288}\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a015b3262f15a919cbe54660f51314f0c}{00288}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a015b3262f15a919cbe54660f51314f0c}{editarECA}}(self,\ diccionarioECA)-\/>bool:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Edita\ una\ regla\ ECA\ usando\ owlready2."{}"{}"{}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ user\_eca\ =\ diccionarioECA.get(\textcolor{stringliteral}{"{}user\_eca"{}},\ \textcolor{stringliteral}{"{}default"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ nombreEca\ =\ diccionarioECA[\textcolor{stringliteral}{'name\_eca'}].replace(\textcolor{stringliteral}{"{}\ "{}},\ \textcolor{stringliteral}{"{}\_"{}})\ +\ user\_eca}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Nombre\ ECA\ a\ editar:\ \{nombreEca\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ iri\_eca\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ iri\_evento\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca\ +\ \textcolor{stringliteral}{"{}evento"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ iri\_accion\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca\ +\ \textcolor{stringliteral}{"{}accion"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ iri\_condicion\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.prefijo\ +\ nombreEca\ +\ \textcolor{stringliteral}{"{}condicion"{}}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Buscar\ con\ owlready2}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ individuoECA\_list\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search(iri=iri\_eca)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ individuoEvento\_list\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search(iri=iri\_evento)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion\_list\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search(iri=iri\_accion)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ individuoCondicion\_list\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search(iri=iri\_condicion)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ individuoECA\_list:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}No\ se\ encontró\ la\ regla\ ECA\ con\ IRI:\ \{iri\_eca\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Reglas\ ECA\ disponibles\ en\ la\ ontología:"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dinamics\ =\ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search(type=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.search\_one(iri=self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a4166a3799693ca73f4a8429d68f1557e}{uris}}.clase\_dinamic))}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ d\ \textcolor{keywordflow}{in}\ dinamics:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}\ \ -\/\ \{d.iri\}\ (name:\ \{d.name\_eca\ if\ hasattr(d,\ 'name\_eca')\ else\ 'N/A'\})"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ individuoEvento\_list\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ individuoAccion\_list\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ individuoCondicion\_list:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}No\ se\ encontraron\ todos\ los\ componentes\ del\ ECA"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ individuoECA\ =\ individuoECA\_list[0]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ individuoEvento\ =\ individuoEvento\_list[0]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion\ =\ individuoAccion\_list[0]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ individuoCondicion\ =\ individuoCondicion\_list[0]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Todos\ los\ individuos\ encontrados.\ Procediendo\ a\ editar..."{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_editarDinamic}}(diccionarioECA,\ individuoECA)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_editarEvent}}(diccionarioECA,\ individuoEvento)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_editarAction}}(diccionarioECA,\ individuoAccion)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00328}00328\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s}{\_\_editarCondition}}(diccionarioECA,\ individuoCondicion)}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Guardar\ con\ owlready2\ y\ recargar}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a415d6c41d33808eaed0869707350f073}{onto}}.save(file=settings.ONTOLOGIA\_INSTANCIADA,\ format=\textcolor{stringliteral}{"{}rdfxml"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_poblador_o_o_s_1_1_poblador_o_o_s_a40dbc5ce3bc047e24fa928346e74eefc}{\_recargar\_ontologia}}()}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Regla\ ECA\ '\{diccionarioECA['name\_eca']\}'\ editada\ correctamente."{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ inesperado\ al\ editar\ el\ ECA:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ traceback}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(traceback.format\_exc())}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00343}00343\ \ \ \ \ \textcolor{keyword}{def\ }\_\_editarDinamic(self,\ diccionarioECA,\ individuoECA):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}interest\_entity\_eca"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ individuoECA.interest\_entity\_eca\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}interest\_entity\_eca"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}name\_eca"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ individuoECA.name\_eca\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}name\_eca"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}state\_eca"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ \ \ \ \ individuoECA.state\_eca\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}state\_eca"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ user\_eca\ =\ diccionarioECA.get(\textcolor{stringliteral}{"{}user\_eca"{}},\ \textcolor{stringliteral}{"{}default"{}})}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ individuoECA.user\_eca\ =\ [user\_eca]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00353}00353\ \ \ \ \ \textcolor{keyword}{def\ }\_\_editarEvent(self,\ diccionarioECA,\ individuoEvento):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}id\_event\_object"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ individuoEvento.id\_event\_object\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}id\_event\_object"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}ip\_event\_object"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ individuoEvento.ip\_event\_object\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}ip\_event\_object"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}id\_event\_resource"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ individuoEvento.id\_event\_resource\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}id\_event\_resource"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}name\_event\_resource"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ individuoEvento.name\_event\_resource\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}name\_event\_resource"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}name\_event\_object"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ individuoEvento.name\_event\_object\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}name\_event\_object"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00365}00365\ \ \ \ \ \textcolor{keyword}{def\ }\_\_editarAction(self,\ diccionarioECA,\ individuoAccion):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}comparator\_action"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.comparator\_action\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}comparator\_action"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}id\_action\_resource"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.id\_action\_resource\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}id\_action\_resource"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}id\_action\_object"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.id\_action\_object\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}id\_action\_object"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}ip\_action\_object"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.ip\_action\_object\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}ip\_action\_object"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}meaning\_action"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.meaning\_action\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}meaning\_action"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}name\_action\_object"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.name\_action\_object\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}name\_action\_object"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}name\_action\_resource"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.name\_action\_resource\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}name\_action\_resource"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}type\_variable\_action"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.type\_variable\_action\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}type\_variable\_action"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}unit\_action"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.unit\_action\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}unit\_action"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}variable\_action"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ individuoAccion.variable\_action\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}variable\_action"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00386}00386\ }
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00387}00387\ \ \ \ \ \textcolor{keyword}{def\ }\_\_editarCondition(self,\ diccionarioECA,\ individuoCondicion):}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}comparator\_condition"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \ \ \ \ individuoCondicion.comparator\_condition\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}comparator\_condition"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}meaning\_condition"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ individuoCondicion.meaning\_condition\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}meaning\_condition"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}type\_variable\_condition"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ individuoCondicion.type\_variable\_condition\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}type\_variable\_condition"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}unit\_condition"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ individuoCondicion.unit\_condition\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}unit\_condition"{}}]]}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}variable\_condition"{}}\ \textcolor{keywordflow}{in}\ diccionarioECA:}
+\DoxyCodeLine{\Hypertarget{_poblador_o_o_s_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ individuoCondicion.variable\_condition\ =\ [diccionarioECA[\textcolor{stringliteral}{"{}variable\_condition"{}}]]}
+
+\end{DoxyCode}

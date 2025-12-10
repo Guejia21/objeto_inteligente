@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/starlette/websockets.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('starlette_2websockets_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">websockets.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="starlette_2websockets_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespacestarlette_1_1websockets.html">    1</a></span><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> enum</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">import</span> json</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacecollections_1_1abc.html">collections.abc</a> <span class="keyword">import</span> AsyncIterator, Iterable</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">from</span> typing <span class="keyword">import</span> Any, cast</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacestarlette_1_1requests.html">starlette.requests</a> <span class="keyword">import</span> HTTPConnection</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacestarlette_1_1responses.html">starlette.responses</a> <span class="keyword">import</span> Response</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacestarlette_1_1types.html">starlette.types</a> <span class="keyword">import</span> Message, Receive, Scope, Send</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="foldopen" id="foldopen00013" data-start="" data-end="">
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_state.html">   13</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1websockets_1_1_web_socket_state.html">WebSocketState</a>(enum.Enum):</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_state.html#a45459dff39407d0397c429c2ee2016df">   14</a></span>    CONNECTING = 0</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_state.html#a1f54b464f410ac0ddb0daaed0d0dc73a">   15</a></span>    CONNECTED = 1</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_state.html#a357a3ad369a0f2826fc39a8da6a8656b">   16</a></span>    DISCONNECTED = 2</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_state.html#a07270d3f81cfd75c83c92c4b6d091599">   17</a></span>    RESPONSE = 3</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+</div>
+<div class="foldopen" id="foldopen00020" data-start="" data-end="">
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html">   20</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html">WebSocketDisconnect</a>(Exception):</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">def </span>__init__(self, code: int = 1000, reason: str | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html#a0f9685c2676c994b9866bd13e3c828f7">   22</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html#a0f9685c2676c994b9866bd13e3c828f7">code</a> = code</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html#a0976f54dc4cb086eddf965dcfd4a10cd">   23</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html#a0976f54dc4cb086eddf965dcfd4a10cd">reason</a> = reason <span class="keywordflow">or</span> <span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+</div>
+<div class="foldopen" id="foldopen00026" data-start="" data-end="">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html">   26</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1websockets_1_1_web_socket.html">WebSocket</a>(<a class="code hl_class" href="classstarlette_1_1requests_1_1_h_t_t_p_connection.html">HTTPConnection</a>):</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">def </span>__init__(self, scope: Scope, receive: Receive, send: Send) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        super().__init__(scope)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keyword">assert</span> scope[<span class="stringliteral">&quot;type&quot;</span>] == <span class="stringliteral">&quot;websocket&quot;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a11dac1fa14750a20ccb60d4d0e7f59a5">   30</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a11dac1fa14750a20ccb60d4d0e7f59a5">_receive</a> = receive</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#aaa315cfaba233beed909deef5f5111a3">   31</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aaa315cfaba233beed909deef5f5111a3">_send</a> = send</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">   32</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">client_state</a> = WebSocketState.CONNECTING</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">   33</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> = WebSocketState.CONNECTING</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="" data-end="">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a41305d2645098c0489cd7d18a5e9f3c6">   35</a></span>    <span class="keyword">async def </span><a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">receive</a>(self) -&gt; Message:</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="stringliteral">        Receive ASGI websocket messages, ensuring valid state transitions.</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">client_state</a> == WebSocketState.CONNECTING:</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            message = await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a11dac1fa14750a20ccb60d4d0e7f59a5">_receive</a>()</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            message_type = message[<span class="stringliteral">&quot;type&quot;</span>]</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            <span class="keywordflow">if</span> message_type != <span class="stringliteral">&quot;websocket.connect&quot;</span>:</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>                <span class="keywordflow">raise</span> RuntimeError(f<span class="stringliteral">&#39;Expected ASGI message &quot;websocket.connect&quot;, but got {message_type!r}&#39;</span>)</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">client_state</a> = WebSocketState.CONNECTED</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            <span class="keywordflow">return</span> message</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keywordflow">elif</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">client_state</a> == WebSocketState.CONNECTED:</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            message = await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a11dac1fa14750a20ccb60d4d0e7f59a5">_receive</a>()</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>            message_type = message[<span class="stringliteral">&quot;type&quot;</span>]</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>            <span class="keywordflow">if</span> message_type <span class="keywordflow">not</span> <span class="keywordflow">in</span> {<span class="stringliteral">&quot;websocket.receive&quot;</span>, <span class="stringliteral">&quot;websocket.disconnect&quot;</span>}:</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>                <span class="keywordflow">raise</span> RuntimeError(</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                    f<span class="stringliteral">&#39;Expected ASGI message &quot;websocket.receive&quot; or &quot;websocket.disconnect&quot;, but got {message_type!r}&#39;</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                )</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>            <span class="keywordflow">if</span> message_type == <span class="stringliteral">&quot;websocket.disconnect&quot;</span>:</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>                self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">client_state</a> = WebSocketState.DISCONNECTED</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>            <span class="keywordflow">return</span> message</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&#39;Cannot call &quot;receive&quot; once a disconnect message has been received.&#39;</span>)</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+</div>
+<div class="foldopen" id="foldopen00059" data-start="" data-end="">
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#ad1219ba6d5b09c95d104244d0fd785f9">   59</a></span>    <span class="keyword">async def </span><a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>(self, message: Message) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="stringliteral">        Send ASGI websocket messages, ensuring valid state transitions.</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> == WebSocketState.CONNECTING:</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            message_type = message[<span class="stringliteral">&quot;type&quot;</span>]</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            <span class="keywordflow">if</span> message_type <span class="keywordflow">not</span> <span class="keywordflow">in</span> {<span class="stringliteral">&quot;websocket.accept&quot;</span>, <span class="stringliteral">&quot;websocket.close&quot;</span>, <span class="stringliteral">&quot;websocket.http.response.start&quot;</span>}:</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                <span class="keywordflow">raise</span> RuntimeError(</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                    <span class="stringliteral">&#39;Expected ASGI message &quot;websocket.accept&quot;, &quot;websocket.close&quot; or &quot;websocket.http.response.start&quot;, &#39;</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                    f<span class="stringliteral">&quot;but got {message_type!r}&quot;</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                )</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            <span class="keywordflow">if</span> message_type == <span class="stringliteral">&quot;websocket.close&quot;</span>:</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>                self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> = WebSocketState.DISCONNECTED</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordflow">elif</span> message_type == <span class="stringliteral">&quot;websocket.http.response.start&quot;</span>:</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> = WebSocketState.RESPONSE</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> = WebSocketState.CONNECTED</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aaa315cfaba233beed909deef5f5111a3">_send</a>(message)</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordflow">elif</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> == WebSocketState.CONNECTED:</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>            message_type = message[<span class="stringliteral">&quot;type&quot;</span>]</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>            <span class="keywordflow">if</span> message_type <span class="keywordflow">not</span> <span class="keywordflow">in</span> {<span class="stringliteral">&quot;websocket.send&quot;</span>, <span class="stringliteral">&quot;websocket.close&quot;</span>}:</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                <span class="keywordflow">raise</span> RuntimeError(</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                    f<span class="stringliteral">&#39;Expected ASGI message &quot;websocket.send&quot; or &quot;websocket.close&quot;, but got {message_type!r}&#39;</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                )</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            <span class="keywordflow">if</span> message_type == <span class="stringliteral">&quot;websocket.close&quot;</span>:</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> = WebSocketState.DISCONNECTED</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aaa315cfaba233beed909deef5f5111a3">_send</a>(message)</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <span class="keywordflow">except</span> OSError:</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>                self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> = WebSocketState.DISCONNECTED</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                <span class="keywordflow">raise</span> <a class="code hl_class" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html">WebSocketDisconnect</a>(code=1006)</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <span class="keywordflow">elif</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> == WebSocketState.RESPONSE:</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            message_type = message[<span class="stringliteral">&quot;type&quot;</span>]</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            <span class="keywordflow">if</span> message_type != <span class="stringliteral">&quot;websocket.http.response.body&quot;</span>:</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                <span class="keywordflow">raise</span> RuntimeError(f<span class="stringliteral">&#39;Expected ASGI message &quot;websocket.http.response.body&quot;, but got {message_type!r}&#39;</span>)</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            <span class="keywordflow">if</span> <span class="keywordflow">not</span> message.get(<span class="stringliteral">&quot;more_body&quot;</span>, <span class="keyword">False</span>):</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> = WebSocketState.DISCONNECTED</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aaa315cfaba233beed909deef5f5111a3">_send</a>(message)</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&#39;Cannot call &quot;send&quot; once a close message has been sent.&#39;</span>)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+</div>
+<div class="foldopen" id="foldopen00100" data-start="" data-end="">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a5eb825eb3e8ad83d851461fea314b1d1">  100</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a5eb825eb3e8ad83d851461fea314b1d1">accept</a>(</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        self,</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        subprotocol: str | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        headers: Iterable[tuple[bytes, bytes]] | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        headers = headers <span class="keywordflow">or</span> []</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">client_state</a> == WebSocketState.CONNECTING:  <span class="comment"># pragma: no branch</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            <span class="comment"># If we haven&#39;t yet seen the &#39;connect&#39; message, then wait for it first.</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">receive</a>()</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>({<span class="stringliteral">&quot;type&quot;</span>: <span class="stringliteral">&quot;websocket.accept&quot;</span>, <span class="stringliteral">&quot;subprotocol&quot;</span>: subprotocol, <span class="stringliteral">&quot;headers&quot;</span>: headers})</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+</div>
+<div class="foldopen" id="foldopen00112" data-start="" data-end="">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a202ecf00a5befa0281709522c78a6953">  112</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a202ecf00a5befa0281709522c78a6953">_raise_on_disconnect</a>(self, message: Message) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        <span class="keywordflow">if</span> message[<span class="stringliteral">&quot;type&quot;</span>] == <span class="stringliteral">&quot;websocket.disconnect&quot;</span>:</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>            <span class="keywordflow">raise</span> <a class="code hl_class" href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html">WebSocketDisconnect</a>(message[<span class="stringliteral">&quot;code&quot;</span>], message.get(<span class="stringliteral">&quot;reason&quot;</span>))</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+</div>
+<div class="foldopen" id="foldopen00116" data-start="" data-end="">
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a06473773640c34d61c6407f6e40d766c">  116</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a06473773640c34d61c6407f6e40d766c">receive_text</a>(self) -&gt; str:</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> != WebSocketState.CONNECTED:</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&#39;WebSocket is not connected. Need to call &quot;accept&quot; first.&#39;</span>)</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        message = await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">receive</a>()</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        self.<a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a202ecf00a5befa0281709522c78a6953">_raise_on_disconnect</a>(message)</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        <span class="keywordflow">return</span> cast(str, message[<span class="stringliteral">&quot;text&quot;</span>])</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+</div>
+<div class="foldopen" id="foldopen00123" data-start="" data-end="">
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#ad87e60f86c7d878f53228337fd37032e">  123</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#ad87e60f86c7d878f53228337fd37032e">receive_bytes</a>(self) -&gt; bytes:</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> != WebSocketState.CONNECTED:</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&#39;WebSocket is not connected. Need to call &quot;accept&quot; first.&#39;</span>)</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        message = await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">receive</a>()</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        self.<a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a202ecf00a5befa0281709522c78a6953">_raise_on_disconnect</a>(message)</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        <span class="keywordflow">return</span> cast(bytes, message[<span class="stringliteral">&quot;bytes&quot;</span>])</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+</div>
+<div class="foldopen" id="foldopen00130" data-start="" data-end="">
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a6a704fbc7a8a59738295ba14a3aab6d9">  130</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a6a704fbc7a8a59738295ba14a3aab6d9">receive_json</a>(self, mode: str = <span class="stringliteral">&quot;text&quot;</span>) -&gt; Any:</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        <span class="keywordflow">if</span> mode <span class="keywordflow">not</span> <span class="keywordflow">in</span> {<span class="stringliteral">&quot;text&quot;</span>, <span class="stringliteral">&quot;binary&quot;</span>}:</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&#39;The &quot;mode&quot; argument should be &quot;text&quot; or &quot;binary&quot;.&#39;</span>)</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">application_state</a> != WebSocketState.CONNECTED:</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&#39;WebSocket is not connected. Need to call &quot;accept&quot; first.&#39;</span>)</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        message = await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">receive</a>()</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        self.<a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a202ecf00a5befa0281709522c78a6953">_raise_on_disconnect</a>(message)</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="keywordflow">if</span> mode == <span class="stringliteral">&quot;text&quot;</span>:</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>            text = message[<span class="stringliteral">&quot;text&quot;</span>]</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>            text = message[<span class="stringliteral">&quot;bytes&quot;</span>].decode(<span class="stringliteral">&quot;utf-8&quot;</span>)</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keywordflow">return</span> json.loads(text)</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+</div>
+<div class="foldopen" id="foldopen00144" data-start="" data-end="">
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a041829b5a46af1d4007b324e0dbb684c">  144</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a041829b5a46af1d4007b324e0dbb684c">iter_text</a>(self) -&gt; AsyncIterator[str]:</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>            <span class="keywordflow">while</span> <span class="keyword">True</span>:</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>                <span class="keywordflow">yield</span> await self.<a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a06473773640c34d61c6407f6e40d766c">receive_text</a>()</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <span class="keywordflow">except</span> WebSocketDisconnect:</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>            <span class="keywordflow">pass</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+</div>
+<div class="foldopen" id="foldopen00151" data-start="" data-end="">
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a32eb7c45bc790a6110854f6863f732f0">  151</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a32eb7c45bc790a6110854f6863f732f0">iter_bytes</a>(self) -&gt; AsyncIterator[bytes]:</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>            <span class="keywordflow">while</span> <span class="keyword">True</span>:</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>                <span class="keywordflow">yield</span> await self.<a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#ad87e60f86c7d878f53228337fd37032e">receive_bytes</a>()</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="keywordflow">except</span> WebSocketDisconnect:</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            <span class="keywordflow">pass</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+</div>
+<div class="foldopen" id="foldopen00158" data-start="" data-end="">
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a4df749f1e05f0b436883a279390bd94b">  158</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a4df749f1e05f0b436883a279390bd94b">iter_json</a>(self) -&gt; AsyncIterator[Any]:</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>            <span class="keywordflow">while</span> <span class="keyword">True</span>:</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>                <span class="keywordflow">yield</span> await self.<a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a6a704fbc7a8a59738295ba14a3aab6d9">receive_json</a>()</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keywordflow">except</span> WebSocketDisconnect:</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>            <span class="keywordflow">pass</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+</div>
+<div class="foldopen" id="foldopen00165" data-start="" data-end="">
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#ab622eae9860aa28bb0fcddd4443835b5">  165</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#ab622eae9860aa28bb0fcddd4443835b5">send_text</a>(self, data: str) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>({<span class="stringliteral">&quot;type&quot;</span>: <span class="stringliteral">&quot;websocket.send&quot;</span>, <span class="stringliteral">&quot;text&quot;</span>: data})</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+</div>
+<div class="foldopen" id="foldopen00168" data-start="" data-end="">
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#abe1493c473f41098b9048404fde60396">  168</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#abe1493c473f41098b9048404fde60396">send_bytes</a>(self, data: bytes) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>({<span class="stringliteral">&quot;type&quot;</span>: <span class="stringliteral">&quot;websocket.send&quot;</span>, <span class="stringliteral">&quot;bytes&quot;</span>: data})</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+</div>
+<div class="foldopen" id="foldopen00171" data-start="" data-end="">
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#af6c9cb4cbdf0853cfaad0799c0a6cd2b">  171</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#af6c9cb4cbdf0853cfaad0799c0a6cd2b">send_json</a>(self, data: Any, mode: str = <span class="stringliteral">&quot;text&quot;</span>) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        <span class="keywordflow">if</span> mode <span class="keywordflow">not</span> <span class="keywordflow">in</span> {<span class="stringliteral">&quot;text&quot;</span>, <span class="stringliteral">&quot;binary&quot;</span>}:</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&#39;The &quot;mode&quot; argument should be &quot;text&quot; or &quot;binary&quot;.&#39;</span>)</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        text = json.dumps(data, separators=(<span class="stringliteral">&quot;,&quot;</span>, <span class="stringliteral">&quot;:&quot;</span>), ensure_ascii=<span class="keyword">False</span>)</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <span class="keywordflow">if</span> mode == <span class="stringliteral">&quot;text&quot;</span>:</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>            await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>({<span class="stringliteral">&quot;type&quot;</span>: <span class="stringliteral">&quot;websocket.send&quot;</span>, <span class="stringliteral">&quot;text&quot;</span>: text})</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>            await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>({<span class="stringliteral">&quot;type&quot;</span>: <span class="stringliteral">&quot;websocket.send&quot;</span>, <span class="stringliteral">&quot;bytes&quot;</span>: text.encode(<span class="stringliteral">&quot;utf-8&quot;</span>)})</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+</div>
+<div class="foldopen" id="foldopen00180" data-start="" data-end="">
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a2efadc3badd6307e65f078322d8ca9d3">  180</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#a2efadc3badd6307e65f078322d8ca9d3">close</a>(self, code: int = 1000, reason: str | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        await self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>({<span class="stringliteral">&quot;type&quot;</span>: <span class="stringliteral">&quot;websocket.close&quot;</span>, <span class="stringliteral">&quot;code&quot;</span>: code, <span class="stringliteral">&quot;reason&quot;</span>: reason <span class="keywordflow">or</span> <span class="stringliteral">&quot;&quot;</span>})</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+</div>
+<div class="foldopen" id="foldopen00183" data-start="" data-end="">
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#acc6a2493dba2632d2af7b9703dba12f7">  183</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1websockets_1_1_web_socket.html#acc6a2493dba2632d2af7b9703dba12f7">send_denial_response</a>(self, response: Response) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        <span class="keywordflow">if</span> <span class="stringliteral">&quot;websocket.http.response&quot;</span> <span class="keywordflow">in</span> self.<a class="code hl_variable" href="classstarlette_1_1requests_1_1_h_t_t_p_connection.html#a416ca956b3f50a2ba3103a435c6ce005">scope</a>.get(<span class="stringliteral">&quot;extensions&quot;</span>, {}):</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">  185</a></span>            await response(self.<a class="code hl_variable" href="classstarlette_1_1requests_1_1_h_t_t_p_connection.html#a416ca956b3f50a2ba3103a435c6ce005">scope</a>, self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">receive</a>, self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">send</a>)</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>            <span class="keywordflow">raise</span> RuntimeError(<span class="stringliteral">&quot;The server doesn&#39;t support the Websocket Denial Response extension.&quot;</span>)</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00190" data-start="" data-end="">
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_close.html">  190</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1websockets_1_1_web_socket_close.html">WebSocketClose</a>:</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="keyword">def </span>__init__(self, code: int = 1000, reason: str | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_close.html#ad8a040fb8caf56b275328603051278a6">  192</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket_close.html#ad8a040fb8caf56b275328603051278a6">code</a> = code</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="classstarlette_1_1websockets_1_1_web_socket_close.html#a235c81b9eeceab7528b249eb68af6e85">  193</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket_close.html#a235c81b9eeceab7528b249eb68af6e85">reason</a> = reason <span class="keywordflow">or</span> <span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="keyword">async def </span>__call__(self, scope: Scope, receive: Receive, send: Send) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        await send({<span class="stringliteral">&quot;type&quot;</span>: <span class="stringliteral">&quot;websocket.close&quot;</span>, <span class="stringliteral">&quot;code&quot;</span>: self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket_close.html#ad8a040fb8caf56b275328603051278a6">code</a>, <span class="stringliteral">&quot;reason&quot;</span>: self.<a class="code hl_variable" href="classstarlette_1_1websockets_1_1_web_socket_close.html#a235c81b9eeceab7528b249eb68af6e85">reason</a>})</div>
+</div>
+<div class="ttc" id="aclassstarlette_1_1requests_1_1_h_t_t_p_connection_html"><div class="ttname"><a href="classstarlette_1_1requests_1_1_h_t_t_p_connection.html">starlette.requests.HTTPConnection</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2requests_8py_source.html#l00071">requests.py:71</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1requests_1_1_h_t_t_p_connection_html_a416ca956b3f50a2ba3103a435c6ce005"><div class="ttname"><a href="classstarlette_1_1requests_1_1_h_t_t_p_connection.html#a416ca956b3f50a2ba3103a435c6ce005">starlette.requests.HTTPConnection.scope</a></div><div class="ttdeci">scope</div><div class="ttdef"><b>Definition</b> <a href="starlette_2requests_8py_source.html#l00079">requests.py:79</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_close_html"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket_close.html">starlette.websockets.WebSocketClose</a></div><div class="ttdef"><b>Definition</b> <a href="#l00190">websockets.py:190</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_close_html_a235c81b9eeceab7528b249eb68af6e85"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket_close.html#a235c81b9eeceab7528b249eb68af6e85">starlette.websockets.WebSocketClose.reason</a></div><div class="ttdeci">str reason</div><div class="ttdef"><b>Definition</b> <a href="#l00193">websockets.py:193</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_close_html_ad8a040fb8caf56b275328603051278a6"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket_close.html#ad8a040fb8caf56b275328603051278a6">starlette.websockets.WebSocketClose.code</a></div><div class="ttdeci">code</div><div class="ttdef"><b>Definition</b> <a href="#l00192">websockets.py:192</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_disconnect_html"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html">starlette.websockets.WebSocketDisconnect</a></div><div class="ttdef"><b>Definition</b> <a href="#l00020">websockets.py:20</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_disconnect_html_a0976f54dc4cb086eddf965dcfd4a10cd"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html#a0976f54dc4cb086eddf965dcfd4a10cd">starlette.websockets.WebSocketDisconnect.reason</a></div><div class="ttdeci">str reason</div><div class="ttdef"><b>Definition</b> <a href="#l00023">websockets.py:23</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_disconnect_html_a0f9685c2676c994b9866bd13e3c828f7"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket_disconnect.html#a0f9685c2676c994b9866bd13e3c828f7">starlette.websockets.WebSocketDisconnect.code</a></div><div class="ttdeci">code</div><div class="ttdef"><b>Definition</b> <a href="#l00022">websockets.py:22</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html">starlette.websockets.WebSocket</a></div><div class="ttdef"><b>Definition</b> <a href="#l00026">websockets.py:26</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a041829b5a46af1d4007b324e0dbb684c"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a041829b5a46af1d4007b324e0dbb684c">starlette.websockets.WebSocket.iter_text</a></div><div class="ttdeci">AsyncIterator[str] iter_text(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00144">websockets.py:144</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a06473773640c34d61c6407f6e40d766c"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a06473773640c34d61c6407f6e40d766c">starlette.websockets.WebSocket.receive_text</a></div><div class="ttdeci">str receive_text(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00116">websockets.py:116</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a096ab37aa4c1cda5159b4cfb5d27c119"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a096ab37aa4c1cda5159b4cfb5d27c119">starlette.websockets.WebSocket.receive</a></div><div class="ttdeci">receive</div><div class="ttdef"><b>Definition</b> <a href="#l00185">websockets.py:185</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a11dac1fa14750a20ccb60d4d0e7f59a5"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a11dac1fa14750a20ccb60d4d0e7f59a5">starlette.websockets.WebSocket._receive</a></div><div class="ttdeci">Message _receive</div><div class="ttdef"><b>Definition</b> <a href="#l00030">websockets.py:30</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a202ecf00a5befa0281709522c78a6953"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a202ecf00a5befa0281709522c78a6953">starlette.websockets.WebSocket._raise_on_disconnect</a></div><div class="ttdeci">None _raise_on_disconnect(self, Message message)</div><div class="ttdef"><b>Definition</b> <a href="#l00112">websockets.py:112</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a2efadc3badd6307e65f078322d8ca9d3"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a2efadc3badd6307e65f078322d8ca9d3">starlette.websockets.WebSocket.close</a></div><div class="ttdeci">None close(self, int code=1000, str|None reason=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00180">websockets.py:180</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a32eb7c45bc790a6110854f6863f732f0"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a32eb7c45bc790a6110854f6863f732f0">starlette.websockets.WebSocket.iter_bytes</a></div><div class="ttdeci">AsyncIterator[bytes] iter_bytes(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00151">websockets.py:151</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a4df749f1e05f0b436883a279390bd94b"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a4df749f1e05f0b436883a279390bd94b">starlette.websockets.WebSocket.iter_json</a></div><div class="ttdeci">AsyncIterator[Any] iter_json(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00158">websockets.py:158</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a5eb825eb3e8ad83d851461fea314b1d1"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a5eb825eb3e8ad83d851461fea314b1d1">starlette.websockets.WebSocket.accept</a></div><div class="ttdeci">None accept(self, str|None subprotocol=None, Iterable[tuple[bytes, bytes]]|None headers=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00100">websockets.py:104</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a631604ae4ace6f1a8d736e5d300d80a8"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a631604ae4ace6f1a8d736e5d300d80a8">starlette.websockets.WebSocket.client_state</a></div><div class="ttdeci">client_state</div><div class="ttdef"><b>Definition</b> <a href="#l00032">websockets.py:32</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a6a704fbc7a8a59738295ba14a3aab6d9"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a6a704fbc7a8a59738295ba14a3aab6d9">starlette.websockets.WebSocket.receive_json</a></div><div class="ttdeci">Any receive_json(self, str mode=&quot;text&quot;)</div><div class="ttdef"><b>Definition</b> <a href="#l00130">websockets.py:130</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_a7e3e69540d2ecd357b050f1b84c511bd"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#a7e3e69540d2ecd357b050f1b84c511bd">starlette.websockets.WebSocket.send</a></div><div class="ttdeci">send</div><div class="ttdef"><b>Definition</b> <a href="#l00185">websockets.py:185</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_aa4750a7f9775c10242943471297cee88"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#aa4750a7f9775c10242943471297cee88">starlette.websockets.WebSocket.application_state</a></div><div class="ttdeci">application_state</div><div class="ttdef"><b>Definition</b> <a href="#l00033">websockets.py:33</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_aaa315cfaba233beed909deef5f5111a3"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#aaa315cfaba233beed909deef5f5111a3">starlette.websockets.WebSocket._send</a></div><div class="ttdeci">None _send</div><div class="ttdef"><b>Definition</b> <a href="#l00031">websockets.py:31</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_ab622eae9860aa28bb0fcddd4443835b5"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#ab622eae9860aa28bb0fcddd4443835b5">starlette.websockets.WebSocket.send_text</a></div><div class="ttdeci">None send_text(self, str data)</div><div class="ttdef"><b>Definition</b> <a href="#l00165">websockets.py:165</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_abe1493c473f41098b9048404fde60396"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#abe1493c473f41098b9048404fde60396">starlette.websockets.WebSocket.send_bytes</a></div><div class="ttdeci">None send_bytes(self, bytes data)</div><div class="ttdef"><b>Definition</b> <a href="#l00168">websockets.py:168</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_acc6a2493dba2632d2af7b9703dba12f7"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#acc6a2493dba2632d2af7b9703dba12f7">starlette.websockets.WebSocket.send_denial_response</a></div><div class="ttdeci">None send_denial_response(self, Response response)</div><div class="ttdef"><b>Definition</b> <a href="#l00183">websockets.py:183</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_ad87e60f86c7d878f53228337fd37032e"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#ad87e60f86c7d878f53228337fd37032e">starlette.websockets.WebSocket.receive_bytes</a></div><div class="ttdeci">bytes receive_bytes(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00123">websockets.py:123</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_html_af6c9cb4cbdf0853cfaad0799c0a6cd2b"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket.html#af6c9cb4cbdf0853cfaad0799c0a6cd2b">starlette.websockets.WebSocket.send_json</a></div><div class="ttdeci">None send_json(self, Any data, str mode=&quot;text&quot;)</div><div class="ttdef"><b>Definition</b> <a href="#l00171">websockets.py:171</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1websockets_1_1_web_socket_state_html"><div class="ttname"><a href="classstarlette_1_1websockets_1_1_web_socket_state.html">starlette.websockets.WebSocketState</a></div><div class="ttdef"><b>Definition</b> <a href="#l00013">websockets.py:13</a></div></div>
+<div class="ttc" id="anamespacecollections_1_1abc_html"><div class="ttname"><a href="namespacecollections_1_1abc.html">collections.abc</a></div></div>
+<div class="ttc" id="anamespacestarlette_1_1requests_html"><div class="ttname"><a href="namespacestarlette_1_1requests.html">starlette.requests</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2requests_8py_source.html#l00001">requests.py:1</a></div></div>
+<div class="ttc" id="anamespacestarlette_1_1responses_html"><div class="ttname"><a href="namespacestarlette_1_1responses.html">starlette.responses</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2responses_8py_source.html#l00001">responses.py:1</a></div></div>
+<div class="ttc" id="anamespacestarlette_1_1types_html"><div class="ttname"><a href="namespacestarlette_1_1types.html">starlette.types</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2types_8py_source.html#l00001">types.py:1</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_c6002d85afba549a1634e9775b371108.html">starlette</a></li><li class="navelem"><a href="starlette_2websockets_8py.html">websockets.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

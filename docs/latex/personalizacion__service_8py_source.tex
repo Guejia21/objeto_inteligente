@@ -1,0 +1,413 @@
+\doxysection{personalizacion\+\_\+service.\+py}
+\hypertarget{personalizacion__service_8py_source}{}\label{personalizacion__service_8py_source}\index{microservicio\_personalizacion/app/domain/services/personalizacion\_service.py@{microservicio\_personalizacion/app/domain/services/personalizacion\_service.py}}
+\mbox{\hyperlink{personalizacion__service_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00001}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00002}00002\ \textcolor{stringliteral}{\ \ \ \ @file\ personalizacion\_service.py}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00003}00003\ \textcolor{stringliteral}{\ \ \ \ @brief\ Servicio\ de\ aplicación\ para\ gestión\ de\ personalización\ de\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00004}00004\ \textcolor{stringliteral}{\ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00005}00005\ \textcolor{stringliteral}{\ \ \ \ Implementa\ la\ lógica\ de\ negocio\ para:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00006}00006\ \textcolor{stringliteral}{\ \ \ \ -\/\ Gestión\ de\ preferencias/contratos\ ECA\ del\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00007}00007\ \textcolor{stringliteral}{\ \ \ \ -\/\ Carga\ y\ activación\ de\ ontologías\ de\ perfil}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00008}00008\ \textcolor{stringliteral}{\ \ \ \ -\/\ Coordinación\ con\ microservicio\ de\ automatización}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00009}00009\ \textcolor{stringliteral}{\ \ \ \ -\/\ Registro\ de\ interacciones\ usuario-\/objeto}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00010}00010\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00011}00011\ \textcolor{stringliteral}{\ \ \ \ Patrón:\ Application\ Service\ +\ Domain\ Service}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00012}00012\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00013}00013\ \textcolor{stringliteral}{\ \ \ \ Dependencias\ externas:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00014}00014\ \textcolor{stringliteral}{\ \ \ \ -\/\ micro\_gestion\_conocimiento:\ para\ carga\ de\ ontologías}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00015}00015\ \textcolor{stringliteral}{\ \ \ \ -\/\ micro\_automatizacion:\ para\ creación/gestión\ de\ ECAs}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00016}00016\ \textcolor{stringliteral}{\ \ \ \ -\/\ microservicio\_data\_stream:\ para\ registros\ de\ interacción}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00017}00017\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00018}00018\ \textcolor{stringliteral}{\ \ \ \ @author\ Sistema\ Objeto\ Inteligente}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00019}00019\ \textcolor{stringliteral}{\ \ \ \ @version\ 1.0}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00020}00020\ \textcolor{stringliteral}{\ \ \ \ @date\ 2025-\/01-\/10}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00021}00021\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ @see\ PersonalizacionService\ Para\ endpoints}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ @see\ ontology\_service\ Para\ operaciones\ de\ ontología}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ @see\ eca\_service\ Para\ gestión\ de\ reglas\ ECA}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00025}00025\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00027}00027\ \textcolor{keyword}{import}\ json}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00028}00028\ \textcolor{keyword}{import}\ logging}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00029}00029\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00031}00031\ \textcolor{keyword}{import}\ requests}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00032}00032\ \textcolor{keyword}{from}\ infrastructure\ \textcolor{keyword}{import}\ util}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00033}00033\ \textcolor{keyword}{from}\ datetime\ \textcolor{keyword}{import}\ time}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00035}00035\ \textcolor{keyword}{from}\ fastapi\ \textcolor{keyword}{import}\ UploadFile}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00036}00036\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacefastapi_1_1responses}{fastapi.responses}}\ \textcolor{keyword}{import}\ JSONResponse}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00038}00038\ \textcolor{keyword}{from}\ config.settings\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00039}00039\ \textcolor{keyword}{from}\ domain.services\ \textcolor{keyword}{import}\ ontology\_service}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00040}00040\ \textcolor{keyword}{import}\ threading}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00042}00042\ \textcolor{keyword}{from}\ domain.services\ \textcolor{keyword}{import}\ eca\_service}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00043}00043\ \textcolor{keyword}{from}\ application.dtos.request\_dtos\ \textcolor{keyword}{import}\ MakeContractRequest,\ RegistroInteraccionDTO}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00044}00044\ \textcolor{keyword}{from}\ domain.services.ConexionPu\ \textcolor{keyword}{import}\ ConexionPu\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00045}00045\ \textcolor{keyword}{from}\ infrastructure.logging.ILogPanelMQTT\ \textcolor{keyword}{import}\ ILogPanelMQTT}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00046}00046\ \textcolor{keyword}{from}\ infrastructure.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00048}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service}{00048}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service}{PersonalizacionService}}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00049}00049\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @class\ PersonalizacionService}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @brief\ Servicio\ de\ aplicación\ para\ gestión\ de\ preferencias\ e\ interacciones\ de\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00052}00052\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00053}00053\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00054}00054\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Responsabilidades:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00055}00055\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ Orquestar\ carga\ de\ ontologías\ de\ perfil\ de\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00056}00056\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ Coordinar\ creación\ de\ preferencias/ECAs\ con\ micro\_automatizacion}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00057}00057\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ Activar/desactivar\ ECAs\ del\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00058}00058\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ Registrar\ interacciones\ usuario-\/objeto\ para\ personalización}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00059}00059\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ Mantener\ conexión\ con\ servidor\ de\ perfil\ de\ usuario\ (ConexionPu)}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00060}00060\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00061}00061\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Atributos:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00062}00062\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ osid:\ ID\ del\ objeto\ inteligente\ activo}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00063}00063\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ ipServidorPU:\ dirección\ del\ servidor\ de\ perfil\ de\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00064}00064\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ path:\ ruta\ donde\ se\ guardan\ las\ ECAs}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00065}00065\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ conexion\_pu:\ cliente\ para\ comunicación\ con\ servidor\ perfil}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ Log:\ cliente\ MQTT\ para\ logging\ distribuido}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00067}00067\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00068}00068\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @note\ Esta\ clase\ coordina\ múltiples\ microservicios\ de\ forma\ distribuida.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00069}00069\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ Considerar\ implementar\ sagas/compensación\ para\ operaciones\ compuestas.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00070}00070\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00071}00071\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @author\ Sistema\ Objeto\ Inteligente}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @date\ 2025-\/01-\/10}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00074}00074\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ log\ =\ ILogPanelMQTT):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00076}00076\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @brief\ Constructor\ del\ servicio\ de\ personalización.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00077}00077\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @param\ log\ Instancia\ del\ cliente\ MQTT\ para\ logging\ distribuido.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Inicializa\ conexiones\ a\ servicios\ externos\ y\ configura\ rutas.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00083}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a2df7c70f0f7919efa7f194a49ea7eda7}{00083}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a2df7c70f0f7919efa7f194a49ea7eda7}{osid}}\ =\ ontology\_service.get\_osid()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00084}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a05889f39107a5a88b2b8cc262d826376}{00084}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a05889f39107a5a88b2b8cc262d826376}{ipServidorPU}}\ =\ \textcolor{stringliteral}{"{}http://localhost"{}}\ \ \textcolor{comment}{\#\ Dirección\ del\ servidor\ de\ perfil\ de\ usuario\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00085}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a1a5c9f2533eee6882439e5737d2ebcb4}{00085}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a1a5c9f2533eee6882439e5737d2ebcb4}{path}}\ =settings.PATH\_ECAS}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00086}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a89c26b2ae8d32fabdfb479de10e33c2b}{00086}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a89c26b2ae8d32fabdfb479de10e33c2b}{conexion\_pu}}\ =\ \mbox{\hyperlink{classapp_1_1domain_1_1services_1_1_conexion_pu_1_1_conexion_pu}{ConexionPu}}()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00087}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ade88b01890801c7f7f1fd686c0ea3644}{00087}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ade88b01890801c7f7f1fd686c0ea3644}{Log}}\ =\ log}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00088}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ab600a1b7c03aff746520b47301524f01}{00088}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ab600a1b7c03aff746520b47301524f01}{recibir\_ontologia}}(self,file:UploadFile,\ nombre:\ str,\ ipCoordinador:\ str)\ -\/>\ JSONResponse:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @brief\ Recibe\ una\ ontología\ desde\ el\ coordinador\ y\ la\ envía\ al\ microservicio\ de\ ontologías.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00091}00091\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @param\ file\ Archivo\ .owl\ con\ la\ ontología\ de\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @param\ nombre\ Identificador/nombre\ de\ la\ ontología.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @param\ ipCoordinador\ IP\ del\ coordinador\ que\ envía\ la\ ontología\ (para\ tracking).}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00095}00095\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @return\ JSONResponse\ con\ status\ 200\ si\ exitoso,\ o\ error\ 400/500.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @exception\ ValueError\ Si\ el\ archivo\ no\ es\ .owl.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @exception\ RuntimeError\ Si\ falla\ el\ envío\ a\ micro\_gestion\_conocimiento.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Flujo:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 1.\ Valida\ que\ el\ archivo\ sea\ .owl}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 2.\ Delega\ carga\ en\ ontology\_service\ (que\ se\ comunica\ con\ micro\_gestion\_conocimiento)}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 3.\ Guarda\ IP\ del\ coordinador\ en\ archivo\ (para\ auditoría)}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 4.\ Activa\ ECAs\ del\ usuario\ actual}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @note\ Esta\ operación\ es\ distribuida:\ coordina\ con\ micro\_gestion\_conocimiento}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y\ micro\_automatizacion.\ Considerar\ saga\ si\ falla\ en\ mitad.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @see\ ontology\_service.cargar\_ontologia()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @see\ activarEcasUsuario()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Recibiendo\ ontología:\ \{nombre\}\ desde\ \{ipCoordinador\}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Validar\ tipo\ de\ archivo}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ file.filename.endswith(\textcolor{stringliteral}{'.owl'}):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ status\_code=400,}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}Tipo\ de\ archivo\ inválido.\ Se\ espera\ un\ archivo\ .owl"{}}\}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Enviar\ la\ ontología\ al\ microservicio\ de\ ontologías}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ontology\_service.cargar\_ontologia(file,\ nombre,\ ipCoordinador):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Ontología\ \{nombre\}\ enviada\ exitosamente\ al\ microservicio\ de\ ontologías"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ util.guardarIpCoordinadorEnArchivo(ipCoordinador)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_acfcfbaf38f85ed2d82abef2f60a8338d}{activarEcasUsuario}}()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ status\_code=200,}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ content=\{\textcolor{stringliteral}{"{}mensaje"{}}:\ \textcolor{stringliteral}{"{}Ontología\ recibida\ y\ enviada\ al\ microservicio\ de\ ontologías\ exitosamente"{}}\}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ enviando\ ontología\ \{nombre\}\ al\ microservicio\ de\ ontologías"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ status\_code=500,}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}Error\ enviando\ ontología\ al\ microservicio\ de\ ontologías"{}}\}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ )\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00137}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a189ff6db69d330c419702b0785997c77}{00137}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a189ff6db69d330c419702b0785997c77}{crear\_preferencia}}(self,\ data:MakeContractRequest)\ -\/>\ JSONResponse:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00139}00139\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @brief\ Crea\ una\ nueva\ preferencia/contrato\ ECA\ para\ el\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00140}00140\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @param\ data\ DTO\ MakeContractRequest\ con\ definición\ del\ contrato.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00143}00143\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @return\ JSONResponse\ con\ status\ 200\ si\ exitoso,\ o\ error\ 400/500.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00144}00144\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00145}00145\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @exception\ ValueError\ Si\ email\ no\ coincide\ con\ usuario\ actual.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00146}00146\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @exception\ RuntimeError\ Si\ falla\ comunicación\ con\ micro\_automatizacion.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00147}00147\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00148}00148\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Flujo:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 1.\ Valida\ que\ el\ email\ del\ DTO\ coincida\ con\ el\ usuario\ activo}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 2.\ Envía\ solicitud\ POST\ a\ micro\_automatizacion}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 3.\ Si\ es\ exitoso,\ registra\ preferencia\ en\ ontología\ de\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00153}00153\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00154}00154\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @note\ Operación\ distribuida:\ requiere\ coordinación\ con\ micro\_automatizacion.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Si\ micro\_automatizacion\ responde\ error,\ la\ preferencia\ no\ se\ registra.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00156}00156\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00157}00157\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @see\ MakeContractRequest\ DTO}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ @see\ settings.AUTOMATIZACION\_MS\_URL\ Para\ endpoint\ remoto}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ requests.post(}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}\{settings.AUTOMATIZACION\_MS\_URL\}"{}},}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ json=data.model\_dump(),}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeout=30.0}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response.status\_code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ status\_code=200,}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ content=\{\textcolor{stringliteral}{"{}mensaje"{}}:\ \textcolor{stringliteral}{"{}Preferencia\ creada\ exitosamente"{}}\}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ al\ crear\ preferencia:\ \{response.text\}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ status\_code=response.status\_code,}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}Error\ al\ crear\ preferencia\ en\ el\ microservicio\ de\ automatización"{}}\}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ \mbox{\hyperlink{classrequests_1_1exceptions_1_1_request_exception}{requests.RequestException}}\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ al\ crear\ preferencia:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ status\_code=500,}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}Error\ al\ comunicarse\ con\ el\ microservicio\ de\ automatización"{}}\}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00183}00183\ \ \ \ \ \textcolor{comment}{\#\ Métodos\ adaptados\ desde\ ModuloDePersonalizacion,\ debido\ a\ que\ no\ se\ tiene\ comunicacion\ con\ el\ servidor\ de\ PU}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00184}00184\ \ \ \ \ \textcolor{comment}{\#\ ni\ a\ la\ ontologia\ PU,\ no\ se\ pueden\ probar\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00185}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_acfcfbaf38f85ed2d82abef2f60a8338d}{00185}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_acfcfbaf38f85ed2d82abef2f60a8338d}{activarEcasUsuario}}(self):\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Cada\ Usuario\ va\ a\ tener\ un\ archivo\ email.txt\ donde\ se\ almacena\ el\ nombre\ del\ ECA\ y\ su\ estado.\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00187}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{00187}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{user\_eca}}\ =\ ontology\_service.consultar\_email\_usuario()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{user\_eca}}\ ==\ \textcolor{stringliteral}{"{}"{}}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}No\ se\ pudo\ consultar\ el\ email\ del\ usuario\ desde\ el\ microservicio\ de\ ontologías"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ logger.info(\ \textcolor{stringliteral}{"{}BIENVENIDO\ "{}}\ +\ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{user\_eca}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Consulta\ los\ Ecas\ que\ tiene\ la\ ontologia\ del\ Usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00193}00193\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\#OjO\ Cambias\ esto\ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\ time.ctime())}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a05889f39107a5a88b2b8cc262d826376}{ipServidorPU}}\ +\ \textcolor{stringliteral}{':8080/ConsultarEcasPorObjeto?email='}+self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{user\_eca}}+\textcolor{stringliteral}{'\&osid='}+self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a2df7c70f0f7919efa7f194a49ea7eda7}{osid}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ r\ =\ requests.get(self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a05889f39107a5a88b2b8cc262d826376}{ipServidorPU}}\ +\ \textcolor{stringliteral}{':8080/ConsultarEcasPorObjeto?email='}\ +\ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{user\_eca}}\ +\ \textcolor{stringliteral}{'\&osid='}\ +\ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a2df7c70f0f7919efa7f194a49ea7eda7}{osid}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ resp\ =\ r.content}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00199}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a615aae7687732f1ab49adca9619d2a2c}{00199}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a615aae7687732f1ab49adca9619d2a2c}{ecasUsuario}}\ \ =\ json.loads(resp)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}**************************Ecas\ Usuario***********************************************\ "{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ iten\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a615aae7687732f1ab49adca9619d2a2c}{ecasUsuario}}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(iten[\textcolor{stringliteral}{'name\_eca'}]+\textcolor{stringliteral}{"{}\ "{}}+iten[\textcolor{stringliteral}{'state\_eca'}])}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\ time.ctime())}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ en\ el\ modulo\ de\ personalizacion\ no\ se\ puede\ comunicar\ con\ el\ servidor\ de\ personalizacion\ de\ usuario\ "{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a615aae7687732f1ab49adca9619d2a2c}{ecasUsuario}}\ \ =\ ontology\_service.consultar\_lista\_preferencias\_por\_osid(self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a2df7c70f0f7919efa7f194a49ea7eda7}{osid}})\ \textcolor{comment}{\#\#\ Si\ no\ se\ puede\ comunicar\ con\ el\ servidor\ que\ las\ consulte\ localmente}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a615aae7687732f1ab49adca9619d2a2c}{ecasUsuario}})\ ==\ 0:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Desde\ Modulo\ personalizacion\ NO\ existen\ ECAS\ para\ el\ usuario\ "{}}+self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{user\_eca}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00211}00211\ \ \ \ \ \ \ \textcolor{comment}{\#\#OjO\ Cambias\ esto\ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00212}\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ae2b7d0f2d862d4fa88497a472ef0ff44}{00212}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ae2b7d0f2d862d4fa88497a472ef0ff44}{pathEcasUsuario}}\ =\ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_a1a5c9f2533eee6882439e5737d2ebcb4}{path}}\ +\ self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_af900dcd3f19174ccd07a52e248799c0d}{user\_eca}}\ +\textcolor{stringliteral}{"{}.txt"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ae2b7d0f2d862d4fa88497a472ef0ff44}{pathEcasUsuario}}):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Desde\ Modulo\ personalizacion\ NO\ existe\ el\ archivo\ "{}}+self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ae2b7d0f2d862d4fa88497a472ef0ff44}{pathEcasUsuario}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ archivo=open(self.\mbox{\hyperlink{classapp_1_1domain_1_1services_1_1personalizacion__service_1_1_personalizacion_service_ae2b7d0f2d862d4fa88497a472ef0ff44}{pathEcasUsuario}},\textcolor{stringliteral}{'wb'})\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ archivo.close()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ ecasArchivo\ =\ []\ \textcolor{comment}{\#\#\ Contiene\ diccionarios\ \{"{}eca\_name"{},\ "{}eca\_state"{}\}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ ecasArchivo\ =\ self.ecasArchivoADiccionario()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00219}00219\ \textcolor{comment}{\#\#listaEcasCrear\ [\{'name\_event\_resource':\ 'temperatura',\ 'unit\_action':\ 'None',\ 'type\_variable\_action':\ 'bool',\ 'comparator\_action':\ 'igual',\ 'id\_action\_object':\ '708637323',\ 'ip\_action\_object':\ '192.168.123.104',\ 'name\_eca':\ 'subirTemperatura',\ 'end\_date\_activity':\ '',\ 'variable\_condition':\ '20',\ 'comparator\_condition':\ 'igual',\ 'meaning\_condition':\ 'hace\ calor',\ 'state\_eca':\ 'on',\ 'name\_action\_object':\ 'Regulador\ Temperatura',\ 'id\_action\_resource':\ 'ventilador',\ 'start\_date\_activity':\ '',\ 'name\_activity':\ '',\ 'meaning\_action':\ 'encender\ ventilador',\ 'name\_event\_object':\ 'Regulador\ Temperatura',\ 'id\_event\_resource':\ 'temperatura',\ 'variable\_action':\ '1',\ 'ip\_event\_object':\ '192.168.123.104',\ 'unit\_condition':\ '\%',\ 'id\_event\_object':\ '708637323',\ 'name\_action\_resource':\ 'ventilador',\ 'type\_variable\_condition':\ 'float'\}]}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00220}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a9fd324616a5cf02beec186f5c58f7396}{00220}}\ \ \ \ \ \ \ \ \ listaEcasEliminar\ =\ []}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00221}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ab684c89dfd4ec2f16c83f1335c5f299d}{00221}}\ \ \ \ \ \ \ \ \ listaEcasIgualEstado\ =\ []}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00222}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_aa2767b2af43986712ec841bdd37adef7}{00222}}\ \ \ \ \ \ \ \ \ listaEcasModificarEstado\ =\ []}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00223}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a2ab48e5c318af295d5a8a4241fd5e2d7}{00223}}\ \ \ \ \ \ \ \ \ listaEcasCrear\ =\ []}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00224}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_aa3607d6ec3524b21192452bfeb5cb229}{00224}}\ \ \ \ \ \ \ \ \ posicionesEcasEncontrados\ =\ []}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ self.ecasUsuario:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00226}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_abfe38c85f4926f744caa654aac5cdb3f}{00226}}\ \ \ \ \ \ \ \ \ \ \ \ \ posicion\ =\ self.posicionValor(ecasArchivo,\ \textcolor{stringliteral}{"{}name\_eca"{}},\ item[\textcolor{stringliteral}{"{}name\_eca"{}}])}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \ posicion\ !=\ -\/1:\ \textcolor{comment}{\#\#Si\ el\ eca\ del\ archivo\ esta\ en\ los\ del\ usuario,\ hay\ que\ activarlo\ osea\ ecaArchivo\ en\ listaEcasUsuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00228}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_aab64c7d2ba574c0c574c5babf009b8fa}{00228}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ itemEcaArchivo\ =\ ecasArchivo[posicion]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(item)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(itemEcaArchivo)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ itemEcaArchivo[\textcolor{stringliteral}{"{}state\_eca"{}}]\ ==\ item[\textcolor{stringliteral}{'state\_eca'}]:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ listaEcasIgualEstado.append(item)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ listaEcasModificarEstado.append(item)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ posicionesEcasEncontrados.append(posicion)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:\ \textcolor{comment}{\#\#Esta\ en\ los\ ecas\ del\ usuario,\ pero\ no\ el\ el\ archivo}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ listaEcasCrear.append(item)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00238}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a32faaee5948602a5cc428e672b60401e}{00238}}\ \ \ \ \ \ \ \ \ i\ =\ 0}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ ecasArchivo:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ i\ \textcolor{keywordflow}{in}\ posicionesEcasEncontrados:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ listaEcasEliminar.append(ecasArchivo[i])}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ i\ =\ i\ +\ 1}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Desde\ modulo\ de\ personalizacion\ ECAS\ A\ CREAR"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ iten\ \textcolor{keywordflow}{in}\ listaEcasCrear:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(iten[\textcolor{stringliteral}{'name\_eca'}])\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Desde\ modulo\ de\ personalizacion\ lista\ ECAS\ A\ MODIFICAR\ "{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ iten\ \textcolor{keywordflow}{in}\ listaEcasModificarEstado:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(iten[\textcolor{stringliteral}{'name\_eca'}])\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Desde\ modulo\ de\ personalizacion\ lista\ ECAS\ A\ ELIMINAR\ "{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ iten\ \textcolor{keywordflow}{in}\ listaEcasEliminar:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(iten[\textcolor{stringliteral}{'name\_eca'}])\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Desde\ modulo\ de\ personalizacion\ lista\ ECAS\ A\ LANZAR"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ iten\ \textcolor{keywordflow}{in}\ listaEcasIgualEstado:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(iten[\textcolor{stringliteral}{'name\_eca'}])\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00256}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_aba9d199425dd41013b56d9ed599066b4}{00256}}\ \ \ \ \ \ \ \ \ hiloCrearEcas\ =\ threading.Thread(target\ =\ self.crearEcas,\ name=\textcolor{stringliteral}{"{}HiloCrearEcas"{}},\ args\ =(listaEcasCrear,))}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00257}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a4803b2c84d7fae4e8c9dffc490c2cf04}{00257}}\ \ \ \ \ \ \ \ \ hiloinicializarEcasUsuario\ =\ threading.Thread(target\ =\ self.inicializarEcasUsuario,\ name=\textcolor{stringliteral}{"{}HiloInicializarEcasUsuario"{}},\ args\ =(listaEcasIgualEstado,))}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00258}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a0fa43818061d24da9623f8a6b9607323}{00258}}\ \ \ \ \ \ \ \ \ hiloEliminarEcasUsurio\ =\ threading.Thread(target\ =\ self.eliminarEcas,\ name=\textcolor{stringliteral}{"{}HiloEliminarEcasUsurio"{}},\ args\ =(listaEcasEliminar,))}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00259}00259\ \textcolor{comment}{\#\#}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ hiloCrearEcas.start()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ hiloinicializarEcasUsuario.start()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ hiloEliminarEcasUsurio.start()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Sobreescribo\ el\ archivo\ para\ que\ solo\ tenga\ los\ ecas\ de\ la\ ontologia\ del\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00264}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ad3d616e046a3a742a036cddfee1c692b}{00264}}\ \ \ \ \ \ \ \ \ archivo=open(self.pathEcasUsuario,\textcolor{stringliteral}{'w+'})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00265}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ac0a5917d5a2b11da3b4b6639a71d7452}{00265}}\ \ \ \ \ \ \ \ \ listaEcasArchivo\ =\ listaEcasCrear\ +\ listaEcasModificarEstado\ +\ listaEcasIgualEstado}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ listaEcasArchivo\ :}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00267}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a8596c2ac7722136bba938e77f5f6d15d}{00267}}\ \ \ \ \ \ \ \ \ \ \ \ \ linea\ =\ item[\textcolor{stringliteral}{"{}name\_eca"{}}]\ +\ \textcolor{stringliteral}{"{},"{}}\ +\ item[\textcolor{stringliteral}{"{}state\_eca"{}}]\ +\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ archivo.write(linea)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ archivo.close()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00271}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ac9bfbc073df7194be1288e9848e78270}{00271}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ac9bfbc073df7194be1288e9848e78270}{desactivarEcasUsuarioActual}}(self)-\/>JSONResponse:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Cada\ Usuario\ va\ a\ tener\ un\ archivo\ email.txt\ donde\ se\ almacena\ el\ nombre\ del\ ECA\ y\ su\ estado.\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00273}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a049e403b3570389ff53d2cda29716360}{00273}}\ \ \ \ \ \ \ \ \ self.user\_eca\ =\ ontology\_service.consultar\_email\_usuario()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.user\_eca\ ==\ \textcolor{stringliteral}{"{}"{}}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}El\ usuario\ no\ existe\ en\ la\ ontologia\ PU"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}No\ se\ pudo\ consultar\ el\ email\ del\ usuario"{}}\},\ status\_code=500)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00277}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ab1961a46631ed1a1bbf3210d147cf507}{00277}}\ \ \ \ \ \ \ \ \ self.pathEcasUsuario\ =\ self.path\ +\ self.user\_eca\ +\textcolor{stringliteral}{"{}.txt"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \ os.path.exists(self.pathEcasUsuario):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#ecasArchivo\ =\ self.ecasArchivoADiccionario()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#Apaga\ las\ ecas\ haciendo\ un\ llamado\ al\ micro\ de\ ecas}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#Suponemos\ que\ las\ ecas\ contenidas\ en\ el\ archivo\ .txt\ equivalen\ a\ todas\ las\ ecas\ del\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00282}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ae080dc3cb17cf25bcd6bc09cad492512}{00282}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ eca\_service.apagar\_ecas(self.osid):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}ECAS\ del\ usuario\ "{}}+\ self.user\_eca\ +\textcolor{stringliteral}{"{}\ apagadas\ correctamente"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ apagando\ las\ ECAS\ del\ usuario\ "{}}+\ self.user\_eca)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}Error\ apagando\ ECAs\ del\ usuario"{}}\},\ status\_code=500)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#Elimina\ la\ ontologia\ del\ usuario\ en\ el\ micro\ de\ ontologias}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ontology\_service.eliminar\_ontologia\_usuario():}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Ontologia\ del\ usuario\ "{}}+\ self.user\_eca\ +\textcolor{stringliteral}{"{}\ eliminada\ correctamente"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ eliminando\ la\ ontologia\ del\ usuario\ "{}}+\ self.user\_eca)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}Error\ eliminando\ ontología\ del\ usuario"{}}\},\ status\_code=500)\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#modulo.setClean()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(content=\{\textcolor{stringliteral}{"{}message"{}}:\ \textcolor{stringliteral}{"{}Salida\ de\ usuario\ procesada\ exitosamente"{}}\},\ status\_code=200)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00295}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a7b805be6ce48f5c6a79d7d23b51097fe}{00295}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a7b805be6ce48f5c6a79d7d23b51097fe}{crearEcas}}(self,\ listaEcasCrear):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#Retorna\ todos\ los\ datos\ del\ eca}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#?name\_activity\ ?start\_date\_activity\ ?end\_date\_activity}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Se\ deben\ consultar\ los\ ecas\ del\ objeto\ para\ encender\ los\ que\ son\ del\ usuario\ y\ apagar\ lo0s\ demas}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00299}00299\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\#Si\ un\ eca\ no\ existe,\ debe\ crearlo}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}\ \ \ Creando\ ECAs\ Desde\ el\ Modulo\ de\ Personalizacion."{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}Creando\ un\ total\ de\ "{}}\ +\ str(len(listaEcasCrear))\ +\ \textcolor{stringliteral}{"{}\ ECAs"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Lanza\ todos\ los\ ecas\ que\ esten\ en\ ON}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ listaEcasCrear:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}Creando\ Eca\ "{}}\ +\ item[\textcolor{stringliteral}{"{}name\_activity"{}}])}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ item[\textcolor{stringliteral}{'user\_eca'}]\ =\ self.user\_eca}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ item[\textcolor{stringliteral}{"{}name\_activity"{}}]\ !=\ \textcolor{stringliteral}{"{}"{}}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ item[\textcolor{stringliteral}{"{}variable\_condition"{}}]\ ==\ \textcolor{stringliteral}{"{}1"{}}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ item[\textcolor{stringliteral}{"{}variable\_condition"{}}]\ =\ item[\textcolor{stringliteral}{"{}start\_date\_activity"{}}]}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ item[\textcolor{stringliteral}{"{}variable\_condition"{}}]\ ==\ \textcolor{stringliteral}{"{}0"{}}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ item[\textcolor{stringliteral}{"{}variable\_condition"{}}]\ =\ item[\textcolor{stringliteral}{"{}end\_date\_activity"{}}]}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{print}\ (\textcolor{stringliteral}{"{}Desde\ Personalizar,\ el\ eca\ tiene\ actividad,\ pero\ la\ variable\ condicion\ no\ es\ 0\ ni\ 1:\ "{}}+\ item[\textcolor{stringliteral}{'name\_eca'}])}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ self.Log.PubUserLog(\ self.user\_eca\ ,self.osid\ ,\ \textcolor{stringliteral}{"{}ModuloDePersonalizacion"{}},\ \textcolor{stringliteral}{"{}inicia\ poblar\ ecas\ cantidad\ "{}}+str(len(listaEcasCrear)))}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ self.eca.poblarListaEca(listaEcasCrear)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ self.Log.PubUserLog(\ self.user\_eca\ ,self.osid\ ,\ \textcolor{stringliteral}{"{}ModuloDePersonalizacion"{}},\ \textcolor{stringliteral}{"{}fin\ poblar\ ecas\ cantidad\ "{}}+str(len(listaEcasCrear)))}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}ECAS\ Creados\ Desde\ el\ Modulo\ de\ Personalizacion"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00319}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_aae7e5d20a9f355076b8d5f9903e06751}{00319}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_aae7e5d20a9f355076b8d5f9903e06751}{inicializarEcasUsuario}}(self,\ listaEcasActivar):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}Inicializando\ un\ total\ de\ "{}}\ +\ str(len(listaEcasActivar))\ +\ \textcolor{stringliteral}{"{}\ ECAs"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ self.Log.PubUserLog(\ self.user\_eca\ ,self.osid\ ,\ \textcolor{stringliteral}{"{}ModuloDePersonalizacion"{}},\ \textcolor{stringliteral}{"{}inicia\ inicializando\ ecas\ cantidad\ "{}}+str(len(listaEcasActivar)))}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ self.eca.lanzarHiloListaEca(listaEcasActivar)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}ECAS\ iniciados\ Desde\ el\ Modulo\ de\ Personalizacion"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00326}00326\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}def\ modificarEstadoEcasUsuario(self,\ listaEcasModificar):}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00327}00327\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ print(\ "{}Modificando\ estado\ de\ \ un\ total\ de\ "{}\ +\ str(len(listaEcasModificar))\ +\ "{}\ ECAs"{})}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00328}00328\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ self.Log.PubUserLog(\ self.user\_eca\ ,self.osid\ ,\ "{}ModuloDePersonalizacion"{},\ "{}inicia\ modificar\ estado\ ecas\ cantidad\ "{}+str(len(listaEcasModificar)))}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00329}00329\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ self.eca.cambiarEstadoListaEcas(listaEcasModificar)}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00330}00330\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ print(\ "{}ECAS\ con\ estado\ modificado\ Desde\ el\ Modulo\ de\ Personalizacion"{})"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00331}00331\ \ \ \ \ \textcolor{comment}{\#Modificar\ para\ que\ elimine\ ecas\ en\ el\ micro\ de\ ecas}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00332}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a2527f6f145c877b6a607575dd6f0efc8}{00332}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a2527f6f145c877b6a607575dd6f0efc8}{eliminarEcas}}(self,\ listaEcasEliminar):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}Eliminando\ estado\ de\ \ un\ total\ de\ "{}}\ +\ str(len(listaEcasEliminar))\ +\ \textcolor{stringliteral}{"{}\ ECAs"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ self.eca.eliminarListaEcas(listaEcasEliminar)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}ECAS\ ELIMINADOS\ Desde\ el\ Modulo\ de\ Personalizacion"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00336}00336\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00337}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a9c882b9e65c59f73c377ed5da559fa31}{00337}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a9c882b9e65c59f73c377ed5da559fa31}{verificarUsuario}}(self,\ email):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#Convertir\ a\ consulta\ de\ ontologia\ de\ perfil\ de\ usuario\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \ ontology\_service.consultar\_email\_usuario()\ ==\ email:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00343}00343\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00344}00344\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}def\ eliminarEcaUsuario(self,\ listaEcasUsuario,\ clave,\ valor):}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00345}00345\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ for\ item\ in\ listaEcasUsuario:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00346}00346\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ if\ item[clave]\ ==\ valor:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00347}00347\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ listaEcasUsuario.remove(item)}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00348}00348\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ return\ listaEcasUsuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00349}00349\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ return\ listaEcasUsuario"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00351}00351\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}def\ estaValor(self,\ listaDic,\ clave,\ valor):}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00352}00352\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ for\ item\ in\ listaDic:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00353}00353\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ if\ item[clave]\ ==\ valor:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00354}00354\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ return\ True}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00355}00355\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ return\ False"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00356}00356\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00357}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a1fa87e44ae034f58574c2b7123f7cd95}{00357}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a1fa87e44ae034f58574c2b7123f7cd95}{posicionValor}}(self,\ listaDic,\ clave,\ valor):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ i\ =\ 0}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ listaDic:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ item[clave]\ ==\ valor:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ i}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ i\ =\ i\ +\ 1}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/1}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00365}00365\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00366}00366\ \textcolor{stringliteral}{\ \ \ \ def\ guardarEcasArchivo(self,\ rutaArchivo,\ listaEcas):}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00367}00367\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ archivo\ =\ open(rutaArchivo,\ \ 'r+')}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00368}00368\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ for\ item\ in\ listaEcas:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00369}00369\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ linea\ =\ item["{}name\_eca"{}]\ +\ "{},"{}\ +\ item["{}state\_eca"{}]}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00370}00370\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00371}00371\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00372}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ae4e2a7716d0b54ac26d2d56018214226}{00372}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_ae4e2a7716d0b54ac26d2d56018214226}{ecasArchivoADiccionario}}(self):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ rutaArchivo\ =\ self.pathEcasUsuario}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ archivo\ =\ open(rutaArchivo,\ \ \textcolor{stringliteral}{'r+'})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ lineas\ =\ archivo.readlines()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ archivo.close()}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ ecasArchivo\ =\ []}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#TODO\ Cambiar\ el\ archivo}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ linea\ \textcolor{keywordflow}{in}\ lineas:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ linea\ =\ linea.rstrip(\textcolor{stringliteral}{'\(\backslash\)n'})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ split\ =\ linea.split(\textcolor{stringliteral}{"{},"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ nombreEca\ =\ split[0]}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ estadoEca\ =\ split[1]}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ dicEca\ =\ \{\textcolor{stringliteral}{"{}name\_eca"{}}:\ nombreEca,\ \textcolor{stringliteral}{"{}state\_eca"{}}\ :\ estadoEca\}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ ecasArchivo.append(dicEca)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00386}00386\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ecasArchivo}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00387}00387\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00388}\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a30bb0c913de5516d6fcc3600afca1ce9}{00388}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp_1_1domain_1_1services_1_1personalizacion__service_a30bb0c913de5516d6fcc3600afca1ce9}{registroInteraccionUsuarioObjeto}}(self,data:RegistroInteraccionDTO)-\/>JSONResponse:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}if\ os.path.exists(AppUtil.pathOWL\ +\ mac\ +\ \ "{}.owl"{}):}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00390}00390\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ poblador\ =\ PoblarPerfilUsuario(mac,\ email,\ "{}CARGAR"{})}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00391}00391\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ poblador.registroInteraccionUsuarioObjeto(\ email,\ idDataStream,\ comando,\ osid,\ dateInteraction)"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#Si\ la\ ontologia\ existe,\ se\ registra\ la\ interaccion\ en\ el\ micro\ de\ ontologias}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ontology\_service.verificar\_perfil\_activo():}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ontology\_service.registrar\_interaccion(data):}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(content=\{\textcolor{stringliteral}{"{}message"{}}:\ \textcolor{stringliteral}{"{}Interacción\ registrada\ exitosamente\ en\ el\ microservicio\ de\ ontologías"{}}\},\ status\_code=200)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(content=\{\textcolor{stringliteral}{"{}error"{}}:\ \textcolor{stringliteral}{"{}Error\ registrando\ la\ interacción\ en\ el\ microservicio\ de\ ontologías"{}}\},\ status\_code=500)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}El\ usuario\ no\ esta\ en\ la\ casa,\ notificando\ al\ servidor\ de\ perfil\ usuario"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#EL\ usuario\ no\ esta\ en\ la\ casa\ actualmente,\ por\ eso\ se\ envia\ la\ peticion\ al\ servidor\ perfil\ de\ usuario\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ self.conexion\_pu.enviarRegistroInteraccionUsuarioObjetoAlServidorPerfilUsuario(data.email,data.idDataStream,\ data.comando,data.osid,\ data.mac,\ \ data.dateInteraction)}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_j_s_o_n_response}{JSONResponse}}(content=\{\textcolor{stringliteral}{"{}message"{}}:\ \textcolor{stringliteral}{"{}La\ interacción\ fue\ registrada\ en\ el\ servidor\ de\ perfil\ de\ usuario"{}}\},\ status\_code=200)\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00403}00403\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00404}00404\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ def\ enviarRegistroInteraccionUsuarioObjetoAlCoordinador(self,\ email,idDataStream,comando,\ osid,\ mac,\ dateInteraction):}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00405}00405\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ conexion\ =\ ConexionPu()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00406}00406\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ conexion.enviarRegistroInteraccionUsuarioObjetoAlCoordinador(email,\ idDataStream,comando,\ osid,\ mac,\ dateInteraction)}}
+\DoxyCodeLine{\Hypertarget{personalizacion__service_8py_source_l00407}00407\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+
+\end{DoxyCode}

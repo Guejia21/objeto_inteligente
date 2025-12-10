@@ -1,0 +1,205 @@
+\doxysection{wsgi.\+py}
+\hypertarget{uvicorn_2middleware_2wsgi_8py_source}{}\label{uvicorn_2middleware_2wsgi_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/uvicorn/middleware/wsgi.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/uvicorn/middleware/wsgi.py}}
+\mbox{\hyperlink{uvicorn_2middleware_2wsgi_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00001}\mbox{\hyperlink{namespaceuvicorn_1_1middleware_1_1wsgi}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00003}00003\ \textcolor{keyword}{import}\ asyncio}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00004}00004\ \textcolor{keyword}{import}\ concurrent.futures}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00005}00005\ \textcolor{keyword}{import}\ io}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00006}00006\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00007}00007\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00008}00008\ \textcolor{keyword}{from}\ collections\ \textcolor{keyword}{import}\ deque}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Iterable}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00011}00011\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceuvicorn_1_1__types}{uvicorn.\_types}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00012}00012\ \ \ \ \ ASGIReceiveCallable,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00013}00013\ \ \ \ \ ASGIReceiveEvent,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00014}00014\ \ \ \ \ ASGISendCallable,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00015}00015\ \ \ \ \ ASGISendEvent,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00016}00016\ \ \ \ \ Environ,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00017}00017\ \ \ \ \ ExcInfo,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00018}00018\ \ \ \ \ HTTPRequestEvent,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00019}00019\ \ \ \ \ HTTPResponseBodyEvent,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00020}00020\ \ \ \ \ HTTPResponseStartEvent,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00021}00021\ \ \ \ \ HTTPScope,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00022}00022\ \ \ \ \ StartResponse,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00023}00023\ \ \ \ \ WSGIApp,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00024}00024\ )}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00027}\mbox{\hyperlink{namespaceuvicorn_1_1middleware_1_1wsgi_a9218493c34a586102c47d1ba79573a56}{00027}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceuvicorn_1_1middleware_1_1wsgi_a9218493c34a586102c47d1ba79573a56}{build\_environ}}(scope:\ HTTPScope,\ message:\ ASGIReceiveEvent,\ body:\ io.BytesIO)\ -\/>\ Environ:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00028}00028\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00029}00029\ \textcolor{stringliteral}{\ \ \ \ Builds\ a\ scope\ and\ request\ message\ into\ a\ WSGI\ environ\ object.}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00030}00030\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00031}00031\ \ \ \ \ script\_name\ =\ scope.get(\textcolor{stringliteral}{"{}root\_path"{}},\ \textcolor{stringliteral}{"{}"{}}).encode(\textcolor{stringliteral}{"{}utf8"{}}).decode(\textcolor{stringliteral}{"{}latin1"{}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00032}00032\ \ \ \ \ path\_info\ =\ scope[\textcolor{stringliteral}{"{}path"{}}].encode(\textcolor{stringliteral}{"{}utf8"{}}).decode(\textcolor{stringliteral}{"{}latin1"{}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00033}00033\ \ \ \ \ \textcolor{keywordflow}{if}\ path\_info.startswith(script\_name):}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ path\_info\ =\ path\_info[len(script\_name)\ :]}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00035}00035\ \ \ \ \ environ\ =\ \{}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}REQUEST\_METHOD"{}}:\ scope[\textcolor{stringliteral}{"{}method"{}}],}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}SCRIPT\_NAME"{}}:\ script\_name,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}PATH\_INFO"{}}:\ path\_info,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}QUERY\_STRING"{}}:\ scope[\textcolor{stringliteral}{"{}query\_string"{}}].decode(\textcolor{stringliteral}{"{}ascii"{}}),}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}SERVER\_PROTOCOL"{}}:\ \textcolor{stringliteral}{"{}HTTP/\%s"{}}\ \%\ scope[\textcolor{stringliteral}{"{}http\_version"{}}],}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wsgi.version"{}}:\ (1,\ 0),}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wsgi.url\_scheme"{}}:\ scope.get(\textcolor{stringliteral}{"{}scheme"{}},\ \textcolor{stringliteral}{"{}http"{}}),}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wsgi.input"{}}:\ body,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wsgi.errors"{}}:\ sys.stdout,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wsgi.multithread"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wsgi.multiprocess"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}wsgi.run\_once"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00048}00048\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00050}00050\ \ \ \ \ \textcolor{comment}{\#\ Get\ server\ name\ and\ port\ -\/\ required\ in\ WSGI,\ not\ in\ ASGI}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00051}00051\ \ \ \ \ server\ =\ scope.get(\textcolor{stringliteral}{"{}server"{}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{if}\ server\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ server\ =\ (\textcolor{stringliteral}{"{}localhost"{}},\ 80)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00054}00054\ \ \ \ \ environ[\textcolor{stringliteral}{"{}SERVER\_NAME"{}}]\ =\ server[0]}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00055}00055\ \ \ \ \ environ[\textcolor{stringliteral}{"{}SERVER\_PORT"{}}]\ =\ server[1]}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00057}00057\ \ \ \ \ \textcolor{comment}{\#\ Get\ client\ IP\ address}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00058}00058\ \ \ \ \ client\ =\ scope.get(\textcolor{stringliteral}{"{}client"{}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00059}00059\ \ \ \ \ \textcolor{keywordflow}{if}\ client\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ environ[\textcolor{stringliteral}{"{}REMOTE\_ADDR"{}}]\ =\ client[0]}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00062}00062\ \ \ \ \ \textcolor{comment}{\#\ Go\ through\ headers\ and\ make\ them\ into\ environ\ entries}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00063}00063\ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ scope.get(\textcolor{stringliteral}{"{}headers"{}},\ []):}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ name\_str:\ str\ =\ name.decode(\textcolor{stringliteral}{"{}latin1"{}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\_str\ ==\ \textcolor{stringliteral}{"{}content-\/length"{}}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ corrected\_name\ =\ \textcolor{stringliteral}{"{}CONTENT\_LENGTH"{}}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ name\_str\ ==\ \textcolor{stringliteral}{"{}content-\/type"{}}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ corrected\_name\ =\ \textcolor{stringliteral}{"{}CONTENT\_TYPE"{}}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ corrected\_name\ =\ \textcolor{stringliteral}{"{}HTTP\_\%s"{}}\ \%\ name\_str.upper().replace(\textcolor{stringliteral}{"{}-\/"{}},\ \textcolor{stringliteral}{"{}\_"{}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ HTTPbis\ say\ only\ ASCII\ chars\ are\ allowed\ in\ headers,\ but\ we\ latin1}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ just\ in\ case}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ value\_str:\ str\ =\ value.decode(\textcolor{stringliteral}{"{}latin1"{}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ corrected\_name\ \textcolor{keywordflow}{in}\ environ:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ corrected\_name\_environ\ =\ environ[corrected\_name]}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(corrected\_name\_environ,\ str)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ value\_str\ =\ corrected\_name\_environ\ +\ \textcolor{stringliteral}{"{},"{}}\ +\ value\_str}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ environ[corrected\_name]\ =\ value\_str}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00079}00079\ \ \ \ \ \textcolor{keywordflow}{return}\ environ}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00082}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware}{00082}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware}{\_WSGIMiddleware}}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00083}00083\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ app:\ WSGIApp,\ workers:\ int\ =\ 10):}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ warnings.warn(}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Uvicorn's\ native\ WSGI\ implementation\ is\ deprecated,\ you\ should\ switch\ to\ a2wsgi\ (`pip\ install\ a2wsgi`)."{}},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ DeprecationWarning,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00088}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware_a5a4d8a84112e0d4336df35b4161b27a6}{00088}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware_a5a4d8a84112e0d4336df35b4161b27a6}{app}}\ =\ app}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00089}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware_ad72c24d6f799422943fb6eeeb013cd1c}{00089}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware_ad72c24d6f799422943fb6eeeb013cd1c}{executor}}\ =\ concurrent.futures.ThreadPoolExecutor(max\_workers=workers)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00091}00091\ \ \ \ \ \textcolor{keyword}{async\ def\ }\_\_call\_\_(}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ scope:\ HTTPScope,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ receive:\ ASGIReceiveCallable,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ send:\ ASGISendCallable,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00096}00096\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ scope[\textcolor{stringliteral}{"{}type"{}}]\ ==\ \textcolor{stringliteral}{"{}http"{}}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ instance\ =\ \mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder}{WSGIResponder}}(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware_a5a4d8a84112e0d4336df35b4161b27a6}{app}},\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1___w_s_g_i_middleware_ad72c24d6f799422943fb6eeeb013cd1c}{executor}},\ scope)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ await\ instance(receive,\ send)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00102}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder}{00102}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder}{WSGIResponder}}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00103}00103\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ app:\ WSGIApp,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ executor:\ concurrent.futures.ThreadPoolExecutor,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ scope:\ HTTPScope,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00108}00108\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00109}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a2216be765ecac3f220e641602e98ff64}{00109}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a2216be765ecac3f220e641602e98ff64}{app}}\ =\ app}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00110}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_ad982e2d063fc640e434d5c3c6af73fa4}{00110}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_ad982e2d063fc640e434d5c3c6af73fa4}{executor}}\ =\ executor}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00111}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a1da1df7a45b236cafa55b9300cb1050c}{00111}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a1da1df7a45b236cafa55b9300cb1050c}{scope}}\ =\ scope}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00112}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_acb946261e0fa939b88ac9e976bd88bd1}{00112}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_acb946261e0fa939b88ac9e976bd88bd1}{status}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00113}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a37b09132ece81efddb18fda948dc6fa4}{00113}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a37b09132ece81efddb18fda948dc6fa4}{response\_headers}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00114}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{00114}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{send\_event}}\ =\ asyncio.Event()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00115}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{00115}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{send\_queue}}:\ deque[ASGISendEvent\ |\ \textcolor{keywordtype}{None}]\ =\ deque()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00116}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{00116}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{loop}}:\ asyncio.AbstractEventLoop\ =\ asyncio.get\_event\_loop()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00117}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_af9d95700ce4a5a20a9ef715e28849459}{00117}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_af9d95700ce4a5a20a9ef715e28849459}{response\_started}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00118}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aea7aaeb27481d9241eb833513e79932c}{00118}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aea7aaeb27481d9241eb833513e79932c}{exc\_info}}:\ ExcInfo\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00120}00120\ \ \ \ \ \textcolor{keyword}{async\ def\ }\_\_call\_\_(self,\ receive:\ ASGIReceiveCallable,\ send:\ ASGISendCallable)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ message:\ HTTPRequestEvent\ =\ await\ receive()\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ body\ =\ io.BytesIO(message.get(\textcolor{stringliteral}{"{}body"{}},\ b\textcolor{stringliteral}{"{}"{}}))}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ more\_body\ =\ message.get(\textcolor{stringliteral}{"{}more\_body"{}},\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ more\_body:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ body.seek(0,\ io.SEEK\_END)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ more\_body:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body\_message:\ HTTPRequestEvent\ =\ (}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ receive()\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body.write(body\_message.get(\textcolor{stringliteral}{"{}body"{}},\ b\textcolor{stringliteral}{"{}"{}}))}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ more\_body\ =\ body\_message.get(\textcolor{stringliteral}{"{}more\_body"{}},\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ body.seek(0)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ environ\ =\ \mbox{\hyperlink{namespaceuvicorn_1_1middleware_1_1wsgi_a9218493c34a586102c47d1ba79573a56}{build\_environ}}(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a1da1df7a45b236cafa55b9300cb1050c}{scope}},\ message,\ body)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{loop}}\ =\ asyncio.get\_event\_loop()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ wsgi\ =\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{loop}}.run\_in\_executor(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_ad982e2d063fc640e434d5c3c6af73fa4}{executor}},\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a88941739b6019872d04ba705563ff3c1}{wsgi}},\ environ,\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a1055f7b17abb267f9829fba1c40f254f}{start\_response}})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ sender\ =\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{loop}}.create\_task(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aae29fe7f245dd88557916daaf7baf4bf}{sender}}(send))}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ await\ asyncio.wait\_for(wsgi,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{send\_queue}}.append(\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{send\_event}}.set()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ await\ asyncio.wait\_for(sender,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aea7aaeb27481d9241eb833513e79932c}{exc\_info}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aea7aaeb27481d9241eb833513e79932c}{exc\_info}}[0].with\_traceback(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aea7aaeb27481d9241eb833513e79932c}{exc\_info}}[1],\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aea7aaeb27481d9241eb833513e79932c}{exc\_info}}[2])}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00146}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aae29fe7f245dd88557916daaf7baf4bf}{00146}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aae29fe7f245dd88557916daaf7baf4bf}{sender}}(self,\ send:\ ASGISendCallable)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{send\_queue}}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ message\ =\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{send\_queue}}.popleft()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ message\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ send(message)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{send\_event}}.wait()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{send\_event}}.clear()}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00157}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a1055f7b17abb267f9829fba1c40f254f}{00157}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a1055f7b17abb267f9829fba1c40f254f}{start\_response}}(}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ status:\ str,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ response\_headers:\ Iterable[tuple[str,\ str]],}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ exc\_info:\ ExcInfo\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00162}00162\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_aea7aaeb27481d9241eb833513e79932c}{exc\_info}}\ =\ exc\_info}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_af9d95700ce4a5a20a9ef715e28849459}{response\_started}}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_af9d95700ce4a5a20a9ef715e28849459}{response\_started}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ status\_code\_str,\ \_\ =\ status.split(\textcolor{stringliteral}{"{}\ "{}},\ 1)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ status\_code\ =\ int(status\_code\_str)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ headers\ =\ [(name.encode(\textcolor{stringliteral}{"{}ascii"{}}),\ value.encode(\textcolor{stringliteral}{"{}ascii"{}}))\ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ response\_headers]}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ http\_response\_start\_event:\ HTTPResponseStartEvent\ =\ \{}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}type"{}}:\ \textcolor{stringliteral}{"{}http.response.start"{}},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}status"{}}:\ status\_code,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}headers"{}}:\ headers,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{send\_queue}}.append(http\_response\_start\_event)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{loop}}.call\_soon\_threadsafe(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{send\_event}}.set)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00177}\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a88941739b6019872d04ba705563ff3c1}{00177}}\ \ \ \ \ \textcolor{keyword}{def\ }wsgi(self,\ environ:\ Environ,\ start\_response:\ StartResponse)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ chunk\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a2216be765ecac3f220e641602e98ff64}{app}}(environ,\ start\_response):\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ response\_body:\ HTTPResponseBodyEvent\ =\ \{}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}type"{}}:\ \textcolor{stringliteral}{"{}http.response.body"{}},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}body"{}}:\ chunk,}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}more\_body"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{send\_queue}}.append(response\_body)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{loop}}.call\_soon\_threadsafe(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{send\_event}}.set)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ empty\_body:\ HTTPResponseBodyEvent\ =\ \{}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}type"{}}:\ \textcolor{stringliteral}{"{}http.response.body"{}},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}body"{}}:\ b\textcolor{stringliteral}{"{}"{}},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}more\_body"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a5c62cb14ad894d08337bb9d81946838f}{send\_queue}}.append(empty\_body)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a0b1fbea7d09cf346f8f206efd1e11d0b}{loop}}.call\_soon\_threadsafe(self.\mbox{\hyperlink{classuvicorn_1_1middleware_1_1wsgi_1_1_w_s_g_i_responder_a4150c7ad1dead35febce818cb469a820}{send\_event}}.set)}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00196}00196\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00197}00197\ \ \ \ \ \textcolor{keyword}{from}\ a2wsgi\ \textcolor{keyword}{import}\ WSGIMiddleware}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00198}00198\ \textcolor{keywordflow}{except}\ ModuleNotFoundError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{uvicorn_2middleware_2wsgi_8py_source_l00199}\mbox{\hyperlink{namespaceuvicorn_1_1middleware_1_1wsgi_a0370ed1f90f261ea34429b7ec6330aef}{00199}}\ \ \ \ \ WSGIMiddleware\ =\ \_WSGIMiddleware\ \ \textcolor{comment}{\#\ type:\ ignore[misc,\ assignment]}}
+
+\end{DoxyCode}

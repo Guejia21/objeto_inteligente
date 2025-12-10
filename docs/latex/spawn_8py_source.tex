@@ -1,0 +1,115 @@
+\doxysection{spawn.\+py}
+\hypertarget{spawn_8py_source}{}\label{spawn_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/spawn.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/spawn.py}}
+\mbox{\hyperlink{spawn_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1spawn}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}distutils.spawn}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00002}00002\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00003}00003\ \textcolor{stringliteral}{Provides\ the\ 'spawn()'\ function,\ a\ front-\/end\ to\ various\ platform-\/}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00004}00004\ \textcolor{stringliteral}{specific\ functions\ for\ launching\ another\ program\ in\ a\ sub-\/process.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00005}00005\ \textcolor{stringliteral}{Also\ provides\ the\ 'find\_executable()'\ to\ search\ the\ path\ for\ a\ given}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00006}00006\ \textcolor{stringliteral}{executable\ name.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00007}00007\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00009}00009\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00010}00010\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00011}00011\ \textcolor{keyword}{import}\ subprocess}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00013}00013\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ DistutilsExecError}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00014}00014\ \textcolor{keyword}{from}\ distutils.debug\ \textcolor{keyword}{import}\ DEBUG}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00015}00015\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00018}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1spawn_a51385c5651f66e1b5a529d991d18f4c7}{00018}}\ \textcolor{keyword}{def\ }spawn(cmd,\ search\_path=1,\ verbose=0,\ dry\_run=0,\ env=None):\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00019}00019\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Run\ another\ program,\ specified\ as\ a\ command\ list\ 'cmd',\ in\ a\ new\ process.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00020}00020\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00021}00021\ \textcolor{stringliteral}{\ \ \ \ 'cmd'\ is\ just\ the\ argument\ list\ for\ the\ new\ process,\ ie.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ cmd[0]\ is\ the\ program\ to\ run\ and\ cmd[1:]\ are\ the\ rest\ of\ its\ arguments.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ There\ is\ no\ way\ to\ run\ a\ program\ with\ a\ name\ different\ from\ that\ of\ its}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ executable.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00025}00025\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ If\ 'search\_path'\ is\ true\ (the\ default),\ the\ system's\ executable}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ search\ path\ will\ be\ used\ to\ find\ the\ program;\ otherwise,\ cmd[0]}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ must\ be\ the\ exact\ path\ to\ the\ executable.\ \ If\ 'dry\_run'\ is\ true,}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00029}00029\ \textcolor{stringliteral}{\ \ \ \ the\ command\ will\ not\ actually\ be\ run.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00030}00030\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00031}00031\ \textcolor{stringliteral}{\ \ \ \ Raise\ DistutilsExecError\ if\ running\ the\ program\ fails\ in\ any\ way;\ just}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00032}00032\ \textcolor{stringliteral}{\ \ \ \ return\ on\ success.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00033}00033\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00034}00034\ \ \ \ \ \textcolor{comment}{\#\ cmd\ is\ documented\ as\ a\ list,\ but\ just\ in\ case\ some\ code\ passes\ a\ tuple}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00035}00035\ \ \ \ \ \textcolor{comment}{\#\ in,\ protect\ our\ \%-\/formatting\ code\ against\ horrible\ death}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00036}00036\ \ \ \ \ cmd\ =\ list(cmd)}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00038}00038\ \ \ \ \ log.info(subprocess.list2cmdline(cmd))}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00039}00039\ \ \ \ \ \textcolor{keywordflow}{if}\ dry\_run:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00042}00042\ \ \ \ \ \textcolor{keywordflow}{if}\ search\_path:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ executable\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1spawn_a4dfcf97a520165258a14278b720faedd}{find\_executable}}(cmd[0])}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ executable\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ cmd[0]\ =\ executable}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00047}00047\ \ \ \ \ env\ =\ env\ \textcolor{keywordflow}{if}\ env\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ dict(os.environ)}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00049}00049\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.platform\ ==\ \textcolor{stringliteral}{'darwin'}:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ MACOSX\_VERSION\_VAR,\ get\_macosx\_target\_ver}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ macosx\_target\_ver\ =\ get\_macosx\_target\_ver()}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ macosx\_target\_ver:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ env[MACOSX\_VERSION\_VAR]\ =\ macosx\_target\_ver}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ proc\ =\ subprocess.Popen(cmd,\ env=env)}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ proc.wait()}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ exitcode\ =\ proc.returncode}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00060}00060\ \ \ \ \ \textcolor{keywordflow}{except}\ OSError\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ DEBUG:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ cmd\ =\ cmd[0]}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsExecError(}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}command\ \{!r\}\ failed:\ \{\}"{}}.format(cmd,\ exc.args[-\/1])}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{from}\ exc}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00067}00067\ \ \ \ \ \textcolor{keywordflow}{if}\ exitcode:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ DEBUG:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ cmd\ =\ cmd[0]}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsExecError(}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}command\ \{!r\}\ failed\ with\ exit\ code\ \{\}"{}}.format(cmd,\ exitcode)}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00075}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1spawn_a4dfcf97a520165258a14278b720faedd}{00075}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1spawn_a4dfcf97a520165258a14278b720faedd}{find\_executable}}(executable,\ path=None):}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00076}00076\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Tries\ to\ find\ 'executable'\ in\ the\ directories\ listed\ in\ 'path'.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00077}00077\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ A\ string\ listing\ directories\ separated\ by\ 'os.pathsep';\ defaults\ to}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ os.environ['PATH'].\ \ Returns\ the\ complete\ filename\ or\ None\ if\ not\ found.}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00081}00081\ \ \ \ \ \_,\ ext\ =\ os.path.splitext(executable)}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00082}00082\ \ \ \ \ \textcolor{keywordflow}{if}\ (sys.platform\ ==\ \textcolor{stringliteral}{'win32'})\ \textcolor{keywordflow}{and}\ (ext\ !=\ \textcolor{stringliteral}{'.exe'}):}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ executable\ =\ executable\ +\ \textcolor{stringliteral}{'.exe'}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00085}00085\ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isfile(executable):}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ executable}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00088}00088\ \ \ \ \ \textcolor{keywordflow}{if}\ path\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ path\ =\ os.environ.get(\textcolor{stringliteral}{'PATH'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ path\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ path\ =\ os.confstr(\textcolor{stringliteral}{"{}CS\_PATH"{}})}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ (AttributeError,\ ValueError):}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ os.confstr()\ or\ CS\_PATH\ is\ not\ available}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ path\ =\ os.defpath}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ bpo-\/35755:\ Don't\ use\ os.defpath\ if\ the\ PATH\ environment\ variable\ is}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ set\ to\ an\ empty\ string}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00099}00099\ \ \ \ \ \textcolor{comment}{\#\ PATH=''\ doesn't\ match,\ whereas\ PATH=':'\ looks\ in\ the\ current\ directory}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00100}00100\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ path:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00103}00103\ \ \ \ \ paths\ =\ path.split(os.pathsep)}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ paths:}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ f\ =\ os.path.join(p,\ executable)}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isfile(f):}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ file\ exists,\ we\ have\ a\ shot\ at\ spawn\ working}}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f}
+\DoxyCodeLine{\Hypertarget{spawn_8py_source_l00109}00109\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+
+\end{DoxyCode}

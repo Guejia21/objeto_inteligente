@@ -1,0 +1,1215 @@
+\doxysection{types.\+py}
+\hypertarget{click_2types_8py_source}{}\label{click_2types_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/click/types.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/click/types.py}}
+\mbox{\hyperlink{click_2types_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00001}\mbox{\hyperlink{namespaceclick_1_1types}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00003}00003\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{as}\ cabc}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00004}00004\ \textcolor{keyword}{import}\ enum}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00005}00005\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00006}00006\ \textcolor{keyword}{import}\ stat}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00007}00007\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00008}00008\ \textcolor{keyword}{import}\ typing\ \textcolor{keyword}{as}\ t}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00009}00009\ \textcolor{keyword}{from}\ datetime\ \textcolor{keyword}{import}\ datetime}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00010}00010\ \textcolor{keyword}{from}\ gettext\ \textcolor{keyword}{import}\ gettext\ \textcolor{keyword}{as}\ \_}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00011}00011\ \textcolor{keyword}{from}\ gettext\ \textcolor{keyword}{import}\ ngettext}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00013}00013\ \textcolor{keyword}{from}\ .\_compat\ \textcolor{keyword}{import}\ \_get\_argv\_encoding}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00014}00014\ \textcolor{keyword}{from}\ .\_compat\ \textcolor{keyword}{import}\ open\_stream}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00015}00015\ \textcolor{keyword}{from}\ .exceptions\ \textcolor{keyword}{import}\ BadParameter}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00016}00016\ \textcolor{keyword}{from}\ .utils\ \textcolor{keyword}{import}\ format\_filename}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00017}00017\ \textcolor{keyword}{from}\ .utils\ \textcolor{keyword}{import}\ LazyFile}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00018}00018\ \textcolor{keyword}{from}\ .utils\ \textcolor{keyword}{import}\ safecall}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00020}00020\ \textcolor{keywordflow}{if}\ t.TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00021}00021\ \ \ \ \ \textcolor{keyword}{import}\ typing\_extensions\ \textcolor{keyword}{as}\ te}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00023}00023\ \ \ \ \ \textcolor{keyword}{from}\ .core\ \textcolor{keyword}{import}\ Context}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00024}00024\ \ \ \ \ \textcolor{keyword}{from}\ .core\ \textcolor{keyword}{import}\ Parameter}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00025}00025\ \ \ \ \ \textcolor{keyword}{from}\ .shell\_completion\ \textcolor{keyword}{import}\ CompletionItem}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00027}\mbox{\hyperlink{namespaceclick_1_1types_a79b9ddc32ac74b16b4b11d224411cc99}{00027}}\ ParamTypeValue\ =\ t.TypeVar(\textcolor{stringliteral}{"{}ParamTypeValue"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00030}\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{00030}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00031}00031\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Represents\ the\ type\ of\ a\ parameter.\ Validates\ and\ converts\ values}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00032}00032\ \textcolor{stringliteral}{\ \ \ \ from\ the\ command\ line\ or\ Python\ into\ the\ correct\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00033}00033\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00034}00034\ \textcolor{stringliteral}{\ \ \ \ To\ implement\ a\ custom\ type,\ subclass\ and\ implement\ at\ least\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00035}00035\ \textcolor{stringliteral}{\ \ \ \ following:}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00036}00036\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00037}00037\ \textcolor{stringliteral}{\ \ \ \ -\/\ \ \ The\ :attr:\`{}name\`{}\ class\ attribute\ must\ be\ set.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00038}00038\ \textcolor{stringliteral}{\ \ \ \ -\/\ \ \ Calling\ an\ instance\ of\ the\ type\ with\ \`{}\`{}None\`{}\`{}\ must\ return}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00039}00039\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}None\`{}\`{}.\ This\ is\ already\ implemented\ by\ default.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00040}00040\ \textcolor{stringliteral}{\ \ \ \ -\/\ \ \ :meth:\`{}convert\`{}\ must\ convert\ string\ values\ to\ the\ correct\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00041}00041\ \textcolor{stringliteral}{\ \ \ \ -\/\ \ \ :meth:\`{}convert\`{}\ must\ accept\ values\ that\ are\ already\ the\ correct}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00042}00042\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ -\/\ \ \ It\ must\ be\ able\ to\ convert\ a\ value\ if\ the\ \`{}\`{}ctx\`{}\`{}\ and\ \`{}\`{}param\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ arguments\ are\ \`{}\`{}None\`{}\`{}.\ This\ can\ occur\ when\ converting\ prompt}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ input.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00048}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_aa3cca3ee75b343aaa15d1f5941055f1f}{00048}}\ \ \ \ \ is\_composite:\ t.ClassVar[bool]\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00049}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a0d5295f71efeb10a1541cea88db5d58f}{00049}}\ \ \ \ \ arity:\ t.ClassVar[int]\ =\ 1}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00051}00051\ \ \ \ \ \textcolor{comment}{\#:\ the\ descriptive\ name\ of\ this\ type}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00052}00052\ \ \ \ \ name:\ str}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00054}00054\ \ \ \ \ \textcolor{comment}{\#:\ if\ a\ list\ of\ this\ type\ is\ expected\ and\ the\ value\ is\ pulled\ from\ a}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00055}00055\ \ \ \ \ \textcolor{comment}{\#:\ string\ environment\ variable,\ this\ is\ what\ splits\ it\ up.\ \ \`{}None`}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00056}00056\ \ \ \ \ \textcolor{comment}{\#:\ means\ any\ whitespace.\ \ For\ all\ parameters\ the\ general\ rule\ is\ that}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00057}00057\ \ \ \ \ \textcolor{comment}{\#:\ whitespace\ splits\ them\ up.\ \ The\ exception\ are\ paths\ and\ files\ which}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00058}00058\ \ \ \ \ \textcolor{comment}{\#:\ are\ split\ by\ \`{}\`{}os.path.pathsep``\ by\ default\ ("{}:"{}\ on\ Unix\ and\ "{};"{}\ on}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00059}00059\ \ \ \ \ \textcolor{comment}{\#:\ Windows).}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00060}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a06246ae019eb11dcfe765bc968de78fe}{00060}}\ \ \ \ \ envvar\_list\_splitter:\ t.ClassVar[str\ |\ \textcolor{keywordtype}{None}]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00062}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_aa61d95bae6a1199881c46bf5788c61c3}{00062}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_aa61d95bae6a1199881c46bf5788c61c3}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Gather\ information\ that\ could\ be\ useful\ for\ a\ tool\ generating}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00064}00064\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ user-\/facing\ documentation.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00065}00065\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Use\ :meth:\`{}click.Context.to\_info\_dict\`{}\ to\ traverse\ the\ entire}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00067}00067\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ CLI\ structure.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00068}00068\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00069}00069\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00070}00070\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ The\ class\ name\ without\ the\ "{}ParamType"{}\ suffix.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ param\_type\ =\ type(self).\_\_name\_\_.partition(\textcolor{stringliteral}{"{}ParamType"{}})[0]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ param\_type\ =\ param\_type.partition(\textcolor{stringliteral}{"{}ParameterType"{}})[0]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Custom\ subclasses\ might\ not\ remember\ to\ set\ a\ name.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(self,\ \textcolor{stringliteral}{"{}name"{}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ name\ =\ self.name}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ name\ =\ param\_type}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\textcolor{stringliteral}{"{}param\_type"{}}:\ param\_type,\ \textcolor{stringliteral}{"{}name"{}}:\ name\}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00083}00083\ \ \ \ \ \textcolor{keyword}{def\ }\_\_call\_\_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ value:\ t.Any,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ param:\ Parameter\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ ctx:\ Context\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00088}00088\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a31fdfa396ce7c9ee6361bf7193493a87}{convert}}(value,\ param,\ ctx)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00092}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_acabcc865e7e1273b07152acb4a47f5e5}{00092}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_acabcc865e7e1273b07152acb4a47f5e5}{get\_metavar}}(self,\ param:\ Parameter,\ ctx:\ Context)\ -\/>\ str\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Returns\ the\ metavar\ default\ for\ this\ param\ if\ it\ provides\ one."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00095}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_af55c50ecee5eecfe52532f7ad571c770}{00095}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_af55c50ecee5eecfe52532f7ad571c770}{get\_missing\_message}}(self,\ param:\ Parameter,\ ctx:\ Context\ |\ \textcolor{keywordtype}{None})\ -\/>\ str\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Optionally\ might\ return\ extra\ information\ about\ a\ missing}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ parameter.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00098}00098\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 2.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00102}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a31fdfa396ce7c9ee6361bf7193493a87}{00102}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a31fdfa396ce7c9ee6361bf7193493a87}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00104}00104\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Convert\ the\ value\ to\ the\ correct\ type.\ This\ is\ not\ called\ if}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ value\ is\ \`{}\`{}None\`{}\`{}\ (the\ missing\ value).}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00107}00107\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ must\ accept\ string\ values\ from\ the\ command\ line,\ as\ well\ as}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ values\ that\ are\ already\ the\ correct\ type.\ It\ may\ also\ convert}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ other\ compatible\ types.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00111}00111\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ \`{}\`{}param\`{}\`{}\ and\ \`{}\`{}ctx\`{}\`{}\ arguments\ may\ be\ \`{}\`{}None\`{}\`{}\ in\ certain}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ situations,\ such\ as\ when\ converting\ prompt\ input.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00114}00114\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00115}00115\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ the\ value\ cannot\ be\ converted,\ call\ :meth:\`{}fail\`{}\ with\ a}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00116}00116\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ descriptive\ message.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00117}00117\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ value:\ The\ value\ to\ convert.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00119}00119\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ param:\ The\ parameter\ that\ is\ using\ this\ type\ to\ convert}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ its\ value.\ May\ be\ \`{}\`{}None\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00121}00121\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ ctx:\ The\ current\ context\ that\ arrived\ at\ this\ value.\ May}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ be\ \`{}\`{}None\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00126}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a10fe2d2b116b42fcaa109da1df760ee9}{00126}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a10fe2d2b116b42fcaa109da1df760ee9}{split\_envvar\_value}}(self,\ rv:\ str)\ -\/>\ cabc.Sequence[str]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Given\ a\ value\ from\ an\ environment\ variable\ this\ splits\ it\ up}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ into\ small\ chunks\ depending\ on\ the\ defined\ envvar\ list\ splitter.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00129}00129\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00130}00130\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ the\ splitter\ is\ set\ to\ \`{}None\`{},\ which\ means\ that\ whitespace\ splits,}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00131}00131\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ then\ leading\ and\ trailing\ whitespace\ is\ ignored.\ \ Otherwise,\ leading}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00132}00132\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ trailing\ splitters\ usually\ lead\ to\ empty\ items\ being\ included.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00133}00133\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (rv\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}"{}}).split(self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a06246ae019eb11dcfe765bc968de78fe}{envvar\_list\_splitter}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00136}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{00136}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ message:\ str,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ param:\ Parameter\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ ctx:\ Context\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00141}00141\ \ \ \ \ )\ -\/>\ t.NoReturn:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Helper\ method\ to\ fail\ with\ an\ invalid\ value\ message."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classclick_1_1exceptions_1_1_bad_parameter}{BadParameter}}(message,\ ctx=ctx,\ param=param)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00145}\mbox{\hyperlink{classclick_1_1types_1_1_param_type_af9b01d9709d700384a232a6172be8ed5}{00145}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_af9b01d9709d700384a232a6172be8ed5}{shell\_complete}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ self,\ ctx:\ Context,\ param:\ Parameter,\ incomplete:\ str}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00147}00147\ \ \ \ \ )\ -\/>\ list[CompletionItem]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ a\ list\ of}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :class:\`{}\string~click.shell\_completion.CompletionItem\`{}\ objects\ for\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ incomplete\ value.\ Most\ types\ do\ not\ provide\ completions,\ but}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ some\ do,\ and\ this\ allows\ custom\ types\ to\ provide\ custom}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ completions\ as\ well.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00153}00153\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00154}00154\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ ctx:\ Invocation\ context\ for\ this\ command.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ param:\ The\ parameter\ that\ is\ requesting\ completion.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00156}00156\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ incomplete:\ Value\ being\ completed.\ May\ be\ empty.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00157}00157\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ []}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00163}\mbox{\hyperlink{classclick_1_1types_1_1_composite_param_type}{00163}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_composite_param_type}{CompositeParamType}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00164}\mbox{\hyperlink{classclick_1_1types_1_1_composite_param_type}{00164}}\ \ \ \ \ is\_composite\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00166}00166\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00167}\mbox{\hyperlink{classclick_1_1types_1_1_composite_param_type_a97b869a201fc6e0ed65bf154ba320c6a}{00167}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a0d5295f71efeb10a1541cea88db5d58f}{arity}}(self)\ -\/>\ int:\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00171}\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type}{00171}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type}{FuncParamType}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00172}00172\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ func:\ t.Callable[[t.Any],\ t.Any])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00173}\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae3377ccb7582ad03220f6260e3bcfbee}{00173}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae3377ccb7582ad03220f6260e3bcfbee}{name}}:\ str\ =\ func.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00174}\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae70c55e1aa1a3d6c3ca44cfdbf0ef5b3}{00174}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae70c55e1aa1a3d6c3ca44cfdbf0ef5b3}{func}}\ =\ func}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00176}\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae4cdff278caa34d9dbffc9f898c4cf8a}{00176}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae4cdff278caa34d9dbffc9f898c4cf8a}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ info\_dict\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae4cdff278caa34d9dbffc9f898c4cf8a}{to\_info\_dict}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ info\_dict[\textcolor{stringliteral}{"{}func"{}}]\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae70c55e1aa1a3d6c3ca44cfdbf0ef5b3}{func}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_dict}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00181}\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_affa55055f24245a6b6d52e45edff0d8a}{00181}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_affa55055f24245a6b6d52e45edff0d8a}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00183}00183\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_func_param_type_ae70c55e1aa1a3d6c3ca44cfdbf0ef5b3}{func}}(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ str(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ UnicodeError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ value.decode(\textcolor{stringliteral}{"{}utf-\/8"{}},\ \textcolor{stringliteral}{"{}replace"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(value,\ param,\ ctx)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00195}\mbox{\hyperlink{classclick_1_1types_1_1_unprocessed_param_type}{00195}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_unprocessed_param_type}{UnprocessedParamType}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00196}\mbox{\hyperlink{classclick_1_1types_1_1_unprocessed_param_type_a86a8e5e8b0f925e292f4b9c2df19a6a7}{00196}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}text"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00198}\mbox{\hyperlink{classclick_1_1types_1_1_unprocessed_param_type_a78b5d8174dd2a643388fdda6fe348e3c}{00198}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_unprocessed_param_type_a78b5d8174dd2a643388fdda6fe348e3c}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00200}00200\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00203}00203\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}UNPROCESSED"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00207}\mbox{\hyperlink{classclick_1_1types_1_1_string_param_type}{00207}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_string_param_type}{StringParamType}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00208}\mbox{\hyperlink{classclick_1_1types_1_1_string_param_type_a35a14d07568f8baeb543b3565162d6f7}{00208}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}text"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00210}\mbox{\hyperlink{classclick_1_1types_1_1_string_param_type_a9cc2205d8d5da118119fdc57840f903e}{00210}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_string_param_type_a9cc2205d8d5da118119fdc57840f903e}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00212}00212\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ enc\ =\ \_get\_argv\_encoding()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ value.decode(enc)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ UnicodeError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fs\_enc\ =\ sys.getfilesystemencoding()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fs\_enc\ !=\ enc:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ value.decode(fs\_enc)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ UnicodeError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ value.decode(\textcolor{stringliteral}{"{}utf-\/8"{}},\ \textcolor{stringliteral}{"{}replace"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ value.decode(\textcolor{stringliteral}{"{}utf-\/8"{}},\ \textcolor{stringliteral}{"{}replace"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00229}00229\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}STRING"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00233}\mbox{\hyperlink{classclick_1_1types_1_1_choice}{00233}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice}{Choice}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}},\ t.Generic[ParamTypeValue]):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00234}00234\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ choice\ type\ allows\ a\ value\ to\ be\ checked\ against\ a\ fixed\ set}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00235}00235\ \textcolor{stringliteral}{\ \ \ \ of\ supported\ values.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00236}00236\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00237}00237\ \textcolor{stringliteral}{\ \ \ \ You\ may\ pass\ any\ iterable\ value\ which\ will\ be\ converted\ to\ a\ tuple}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00238}00238\ \textcolor{stringliteral}{\ \ \ \ and\ thus\ will\ only\ be\ iterated\ once.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00239}00239\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00240}00240\ \textcolor{stringliteral}{\ \ \ \ The\ resulting\ value\ will\ always\ be\ one\ of\ the\ originally\ passed\ choices.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00241}00241\ \textcolor{stringliteral}{\ \ \ \ See\ :meth:\`{}normalize\_choice\`{}\ for\ more\ info\ on\ the\ mapping\ of\ strings}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00242}00242\ \textcolor{stringliteral}{\ \ \ \ to\ choices.\ See\ :ref:\`{}choice-\/opts\`{}\ for\ an\ example.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00243}00243\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00244}00244\ \textcolor{stringliteral}{\ \ \ \ :param\ case\_sensitive:\ Set\ to\ false\ to\ make\ choices\ case}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00245}00245\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ insensitive.\ Defaults\ to\ true.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00246}00246\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00247}00247\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 8.2.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00248}00248\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Non-\/\`{}\`{}str\`{}\`{}\ \`{}\`{}choices\`{}\`{}\ are\ now\ supported.\ It\ can\ additionally\ be\ any}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00249}00249\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ iterable.\ Before\ you\ were\ not\ recommended\ to\ pass\ anything\ but\ a\ list\ or}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00250}00250\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ tuple.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00251}00251\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00252}00252\ \textcolor{stringliteral}{\ \ \ \ ..\ versionadded::\ 8.2.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00253}00253\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Choice\ normalization\ can\ be\ overridden\ via\ :meth:\`{}normalize\_choice\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00254}00254\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00256}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a50dd6d3a264dd4b81fc76b26f2b8e85e}{00256}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}choice"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00258}00258\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ self,\ choices:\ cabc.Iterable[ParamTypeValue],\ case\_sensitive:\ bool\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00260}00260\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00261}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a0ade89e6c0eb42680479b88621311568}{00261}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a0ade89e6c0eb42680479b88621311568}{choices}}:\ cabc.Sequence[ParamTypeValue]\ =\ tuple(choices)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00262}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a9d1ed128a16c3a2672e8fe7304a91ac7}{00262}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a9d1ed128a16c3a2672e8fe7304a91ac7}{case\_sensitive}}\ =\ case\_sensitive}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00264}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a85e88bd9d2cebc683af8016458107ca8}{00264}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a85e88bd9d2cebc683af8016458107ca8}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ info\_dict\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1_choice_a85e88bd9d2cebc683af8016458107ca8}{to\_info\_dict}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ info\_dict[\textcolor{stringliteral}{"{}choices"{}}]\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a0ade89e6c0eb42680479b88621311568}{choices}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ info\_dict[\textcolor{stringliteral}{"{}case\_sensitive"{}}]\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a9d1ed128a16c3a2672e8fe7304a91ac7}{case\_sensitive}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_dict}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00269}00269\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00270}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1da69d745e26649f3d1e3a5f408093d1}{00270}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1da69d745e26649f3d1e3a5f408093d1}{\_normalized\_mapping}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ self,\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00272}00272\ \ \ \ \ )\ -\/>\ cabc.Mapping[ParamTypeValue,\ str]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00274}00274\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ mapping\ where\ keys\ are\ the\ original\ choices\ and\ the\ values\ are}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00275}00275\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ normalized\ values\ that\ are\ accepted\ via\ the\ command\ line.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00276}00276\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00277}00277\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ is\ a\ simple\ wrapper\ around\ :meth:\`{}normalize\_choice\`{},\ use\ that}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00278}00278\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ instead\ which\ is\ supported.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00279}00279\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ choice:\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a48463d66a433505272f29aa6a69438ff}{normalize\_choice}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ choice=choice,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx=ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ choice\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a0ade89e6c0eb42680479b88621311568}{choices}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00288}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a48463d66a433505272f29aa6a69438ff}{00288}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a48463d66a433505272f29aa6a69438ff}{normalize\_choice}}(self,\ choice:\ ParamTypeValue,\ ctx:\ Context\ |\ \textcolor{keywordtype}{None})\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00290}00290\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Normalize\ a\ choice\ value,\ used\ to\ map\ a\ passed\ string\ to\ a\ choice.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00291}00291\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Each\ choice\ must\ have\ a\ unique\ normalized\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00292}00292\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00293}00293\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ By\ default\ uses\ :meth:\`{}Context.token\_normalize\_func\`{}\ and\ if\ not\ case}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00294}00294\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ sensitive,\ convert\ it\ to\ a\ casefolded\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00295}00295\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00296}00296\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 8.2.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00297}00297\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ normed\_value\ =\ choice.name\ \textcolor{keywordflow}{if}\ isinstance(choice,\ enum.Enum)\ \textcolor{keywordflow}{else}\ str(choice)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ctx\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ ctx.token\_normalize\_func\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ normed\_value\ =\ ctx.token\_normalize\_func(normed\_value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a9d1ed128a16c3a2672e8fe7304a91ac7}{case\_sensitive}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ normed\_value\ =\ normed\_value.casefold()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00305}00305\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ normed\_value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00308}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1ccaf24b14597c813676f94468e842e4}{00308}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1ccaf24b14597c813676f94468e842e4}{get\_metavar}}(self,\ param:\ Parameter,\ ctx:\ Context)\ -\/>\ str\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ param.param\_type\_name\ ==\ \textcolor{stringliteral}{"{}option"{}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ param.show\_choices:\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ choice\_metavars\ =\ [}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceclick_1_1types_ab9cc44d15e0eb6d6c7ac2772a9a5fec4}{convert\_type}}(type(choice)).name.upper()\ \textcolor{keywordflow}{for}\ choice\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a0ade89e6c0eb42680479b88621311568}{choices}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ choices\_str\ =\ \textcolor{stringliteral}{"{}|"{}}.join([*dict.fromkeys(choice\_metavars)])}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ choices\_str\ =\ \textcolor{stringliteral}{"{}|"{}}.join(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [str(i)\ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1da69d745e26649f3d1e3a5f408093d1}{\_normalized\_mapping}}(ctx=ctx).values()]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Use\ curly\ braces\ to\ indicate\ a\ required\ argument.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ param.required\ \textcolor{keywordflow}{and}\ param.param\_type\_name\ ==\ \textcolor{stringliteral}{"{}argument"{}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{\{\{choices\_str\}\}\}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Use\ square\ braces\ to\ indicate\ an\ option\ or\ optional\ argument.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}[\{choices\_str\}]"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00326}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a7d3a149875e06fb2511dab9b7121fc90}{00326}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a7d3a149875e06fb2511dab9b7121fc90}{get\_missing\_message}}(self,\ param:\ Parameter,\ ctx:\ Context\ |\ \textcolor{keywordtype}{None})\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00328}00328\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Message\ shown\ when\ no\ choice\ is\ passed.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00329}00329\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00330}00330\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionchanged::\ 8.2.0\ Added\ \`{}\`{}ctx\`{}\`{}\ argument.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00331}00331\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_(\textcolor{stringliteral}{"{}Choose\ from:\(\backslash\)n\(\backslash\)t\{choices\}"{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ choices=\textcolor{stringliteral}{"{},\(\backslash\)n\(\backslash\)t"{}}.join(self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1da69d745e26649f3d1e3a5f408093d1}{\_normalized\_mapping}}(ctx=ctx).values())}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00336}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a185d06a5ee62fb1ecb194eae42e45692}{00336}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a185d06a5ee62fb1ecb194eae42e45692}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00338}00338\ \ \ \ \ )\ -\/>\ ParamTypeValue:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00340}00340\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ For\ a\ given\ value\ from\ the\ parser,\ normalize\ it\ and\ find\ its}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00341}00341\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ matching\ normalized\ value\ in\ the\ list\ of\ choices.\ Then\ return\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00342}00342\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ matched\ "{}original"{}\ choice.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00343}00343\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ normed\_value\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a48463d66a433505272f29aa6a69438ff}{normalize\_choice}}(choice=value,\ ctx=ctx)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ normalized\_mapping\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1da69d745e26649f3d1e3a5f408093d1}{\_normalized\_mapping}}(ctx=ctx)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ next(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ original}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ original,\ normalized\ \textcolor{keywordflow}{in}\ normalized\_mapping.items()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ normalized\ ==\ normed\_value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ StopIteration:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a2ae9271ce04b530998978e25b97a5060}{get\_invalid\_choice\_message}}(value=value,\ ctx=ctx),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param=param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx=ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00360}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a2ae9271ce04b530998978e25b97a5060}{00360}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a2ae9271ce04b530998978e25b97a5060}{get\_invalid\_choice\_message}}(self,\ value:\ t.Any,\ ctx:\ Context\ |\ \textcolor{keywordtype}{None})\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ error\ message\ when\ the\ given\ choice\ is\ invalid.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00362}00362\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00363}00363\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ value:\ The\ invalid\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00364}00364\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00365}00365\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 8.2}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00366}00366\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ choices\_str\ =\ \textcolor{stringliteral}{"{},\ "{}}.join(map(repr,\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a1da69d745e26649f3d1e3a5f408093d1}{\_normalized\_mapping}}(ctx=ctx).values()))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ngettext(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\{value!r\}\ is\ not\ \{choice\}."{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\{value!r\}\ is\ not\ one\ of\ \{choices\}."{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ len(self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a0ade89e6c0eb42680479b88621311568}{choices}}),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ ).format(value=value,\ choice=choices\_str,\ choices=choices\_str)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00374}00374\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}Choice(\{list(self.choices)\})"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00377}\mbox{\hyperlink{classclick_1_1types_1_1_choice_a62e4be4a275ff109b911698d6bd96abf}{00377}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_choice_a62e4be4a275ff109b911698d6bd96abf}{shell\_complete}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ self,\ ctx:\ Context,\ param:\ Parameter,\ incomplete:\ str}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00379}00379\ \ \ \ \ )\ -\/>\ list[CompletionItem]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Complete\ choices\ that\ start\ with\ the\ incomplete\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00381}00381\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00382}00382\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ ctx:\ Invocation\ context\ for\ this\ command.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00383}00383\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ param:\ The\ parameter\ that\ is\ requesting\ completion.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00384}00384\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ incomplete:\ Value\ being\ completed.\ May\ be\ empty.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00385}00385\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00386}00386\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00387}00387\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceclick_1_1shell__completion}{click.shell\_completion}}\ \textcolor{keyword}{import}\ CompletionItem}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00389}00389\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ str\_choices\ =\ map(str,\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a0ade89e6c0eb42680479b88621311568}{choices}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_choice_a9d1ed128a16c3a2672e8fe7304a91ac7}{case\_sensitive}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ matched\ =\ (c\ \textcolor{keywordflow}{for}\ c\ \textcolor{keywordflow}{in}\ str\_choices\ \textcolor{keywordflow}{if}\ c.startswith(incomplete))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ incomplete\ =\ incomplete.lower()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ matched\ =\ (c\ \textcolor{keywordflow}{for}\ c\ \textcolor{keywordflow}{in}\ str\_choices\ \textcolor{keywordflow}{if}\ c.lower().startswith(incomplete))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [\mbox{\hyperlink{classclick_1_1shell__completion_1_1_completion_item}{CompletionItem}}(c)\ \textcolor{keywordflow}{for}\ c\ \textcolor{keywordflow}{in}\ matched]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00401}\mbox{\hyperlink{classclick_1_1types_1_1_date_time}{00401}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_date_time}{DateTime}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00402}00402\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ DateTime\ type\ converts\ date\ strings\ into\ \`{}datetime\`{}\ objects.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00403}00403\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00404}00404\ \textcolor{stringliteral}{\ \ \ \ The\ format\ strings\ which\ are\ checked\ are\ configurable,\ but\ default\ to\ some}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00405}00405\ \textcolor{stringliteral}{\ \ \ \ common\ (non-\/timezone\ aware)\ ISO\ 8601\ formats.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00406}00406\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00407}00407\ \textcolor{stringliteral}{\ \ \ \ When\ specifying\ *DateTime*\ formats,\ you\ should\ only\ pass\ a\ list\ or\ a\ tuple.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00408}00408\ \textcolor{stringliteral}{\ \ \ \ Other\ iterables,\ like\ generators,\ may\ lead\ to\ surprising\ results.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00409}00409\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00410}00410\ \textcolor{stringliteral}{\ \ \ \ The\ format\ strings\ are\ processed\ using\ \`{}\`{}datetime.strptime\`{}\`{},\ and\ this}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00411}00411\ \textcolor{stringliteral}{\ \ \ \ consequently\ defines\ the\ format\ strings\ which\ are\ allowed.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00412}00412\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00413}00413\ \textcolor{stringliteral}{\ \ \ \ Parsing\ is\ tried\ using\ each\ format,\ in\ order,\ and\ the\ first\ format\ which}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00414}00414\ \textcolor{stringliteral}{\ \ \ \ parses\ successfully\ is\ used.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00415}00415\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00416}00416\ \textcolor{stringliteral}{\ \ \ \ :param\ formats:\ A\ list\ or\ tuple\ of\ date\ format\ strings,\ in\ the\ order\ in}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00417}00417\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ which\ they\ should\ be\ tried.\ Defaults\ to}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00418}00418\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \`{}\`{}'\%Y-\/\%m-\/\%d'\`{}\`{},\ \`{}\`{}'\%Y-\/\%m-\/\%dT\%H:\%M:\%S'\`{}\`{},}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00419}00419\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \`{}\`{}'\%Y-\/\%m-\/\%d\ \%H:\%M:\%S'\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00420}00420\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00421}00421\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00422}\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a7158833f3a16d9208b6b66827d6f0c5d}{00422}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}datetime"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00423}00423\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00424}00424\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ formats:\ cabc.Sequence[str]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00425}\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a70e2e5e93d8511fcca797aa16fc6da8a}{00425}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a70e2e5e93d8511fcca797aa16fc6da8a}{formats}}:\ cabc.Sequence[str]\ =\ formats\ \textcolor{keywordflow}{or}\ [}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\%Y-\/\%m-\/\%d"{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\%Y-\/\%m-\/\%dT\%H:\%M:\%S"{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00428}00428\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\%Y-\/\%m-\/\%d\ \%H:\%M:\%S"{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00429}00429\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00430}00430\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00431}\mbox{\hyperlink{classclick_1_1types_1_1_date_time_ab61b7d2503fed816fd34f209b9e990b8}{00431}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_date_time_ab61b7d2503fed816fd34f209b9e990b8}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00432}00432\ \ \ \ \ \ \ \ \ info\_dict\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1_date_time_ab61b7d2503fed816fd34f209b9e990b8}{to\_info\_dict}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00433}00433\ \ \ \ \ \ \ \ \ info\_dict[\textcolor{stringliteral}{"{}formats"{}}]\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a70e2e5e93d8511fcca797aa16fc6da8a}{formats}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00434}00434\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_dict}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00435}00435\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00436}\mbox{\hyperlink{classclick_1_1types_1_1_date_time_ae6ba6a661d50ada65852f7997c8ee2ea}{00436}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_date_time_ae6ba6a661d50ada65852f7997c8ee2ea}{get\_metavar}}(self,\ param:\ Parameter,\ ctx:\ Context)\ -\/>\ str\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}[\{'|'.join(self.formats)\}]"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00438}00438\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00439}\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a4b4f6848b6d0760aa9aa8538070a8dde}{00439}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a4b4f6848b6d0760aa9aa8538070a8dde}{\_try\_to\_convert\_date}}(self,\ value:\ t.Any,\ format:\ str)\ -\/>\ datetime\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00440}00440\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ datetime.strptime(value,\ format)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00444}00444\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00445}\mbox{\hyperlink{classclick_1_1types_1_1_date_time_afccf292df91449add91a40693c30f158}{00445}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_date_time_afccf292df91449add91a40693c30f158}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00447}00447\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ datetime):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ format\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a70e2e5e93d8511fcca797aa16fc6da8a}{formats}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ converted\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a4b4f6848b6d0760aa9aa8538070a8dde}{\_try\_to\_convert\_date}}(value,\ format)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00453}00453\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ converted\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ converted}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ formats\_str\ =\ \textcolor{stringliteral}{"{},\ "{}}.join(map(repr,\ self.\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a70e2e5e93d8511fcca797aa16fc6da8a}{formats}}))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00459}00459\ \ \ \ \ \ \ \ \ \ \ \ \ ngettext(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\{value!r\}\ does\ not\ match\ the\ format\ \{format\}."{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\{value!r\}\ does\ not\ match\ the\ formats\ \{formats\}."{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ len(self.\mbox{\hyperlink{classclick_1_1types_1_1_date_time_a70e2e5e93d8511fcca797aa16fc6da8a}{formats}}),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00463}00463\ \ \ \ \ \ \ \ \ \ \ \ \ ).format(value=value,\ format=formats\_str,\ formats=formats\_str),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00464}00464\ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00467}00467\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00468}00468\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}DateTime"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00470}00470\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00471}00471\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00472}\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base}{00472}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base}{\_NumberParamTypeBase}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00473}\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base_a5b3492b623e6c31d7dc4f6b294db6241}{00473}}\ \ \ \ \ \_number\_class:\ t.ClassVar[type[t.Any]]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00474}00474\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00475}\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base_a44d101a2fef6684064a5912201347c58}{00475}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base_a44d101a2fef6684064a5912201347c58}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00477}00477\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base_a5b3492b623e6c31d7dc4f6b294db6241}{\_number\_class}}(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{value!r\}\ is\ not\ a\ valid\ \{number\_type\}."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value=value,\ number\_type=self.name}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00489}00489\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00490}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base}{00490}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base}{\_NumberRangeBase}}(\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base}{\_NumberParamTypeBase}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00491}00491\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ min:\ float\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00494}00494\ \ \ \ \ \ \ \ \ max:\ float\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ min\_open:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ max\_open:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ clamp:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00498}00498\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00499}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a4561ef521485e7677cbffdc525e2c597}{00499}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a4561ef521485e7677cbffdc525e2c597}{min}}\ =\ min}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00500}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a17b8d077269606a8a45979ab9c67a075}{00500}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a17b8d077269606a8a45979ab9c67a075}{max}}\ =\ max}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00501}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a67b4ffd4fe8f4c672bedeab12a3423ae}{00501}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a67b4ffd4fe8f4c672bedeab12a3423ae}{min\_open}}\ =\ min\_open}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00502}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_abbd136501c4c5e6674f4728537ac2deb}{00502}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_abbd136501c4c5e6674f4728537ac2deb}{max\_open}}\ =\ max\_open}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00503}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a821d9c24b3b89a04a077bfd38f1f0b4f}{00503}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a821d9c24b3b89a04a077bfd38f1f0b4f}{clamp}}\ =\ clamp}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00505}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a7a1d17e10f2334cba7fdefa85853d4e7}{00505}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a7a1d17e10f2334cba7fdefa85853d4e7}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ info\_dict\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a7a1d17e10f2334cba7fdefa85853d4e7}{to\_info\_dict}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ info\_dict.update(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ min=self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a4561ef521485e7677cbffdc525e2c597}{min}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ \ \ \ \ max=self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a17b8d077269606a8a45979ab9c67a075}{max}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ \ \ \ \ min\_open=self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a67b4ffd4fe8f4c672bedeab12a3423ae}{min\_open}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ max\_open=self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_abbd136501c4c5e6674f4728537ac2deb}{max\_open}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ clamp=self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a821d9c24b3b89a04a077bfd38f1f0b4f}{clamp}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00513}00513\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00514}00514\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_dict}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00516}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_ad79221ab7cee509d0a4e1036b584e2bc}{00516}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_ad79221ab7cee509d0a4e1036b584e2bc}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00517}00517\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00518}00518\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ operator}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ rv\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_ad79221ab7cee509d0a4e1036b584e2bc}{convert}}(value,\ param,\ ctx)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ lt\_min:\ bool\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a4561ef521485e7677cbffdc525e2c597}{min}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ (}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00523}00523\ \ \ \ \ \ \ \ \ \ \ \ \ operator.le\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a67b4ffd4fe8f4c672bedeab12a3423ae}{min\_open}}\ \textcolor{keywordflow}{else}\ operator.lt}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ )(rv,\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a4561ef521485e7677cbffdc525e2c597}{min}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ gt\_max:\ bool\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a17b8d077269606a8a45979ab9c67a075}{max}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ (}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ \ \ \ \ operator.ge\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_abbd136501c4c5e6674f4728537ac2deb}{max\_open}}\ \textcolor{keywordflow}{else}\ operator.gt}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00527}00527\ \ \ \ \ \ \ \ \ )(rv,\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a17b8d077269606a8a45979ab9c67a075}{max}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00528}00528\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a821d9c24b3b89a04a077bfd38f1f0b4f}{clamp}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ lt\_min:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a86aa7e2c98f443dd1d3d44a31d910ef9}{\_clamp}}(self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a4561ef521485e7677cbffdc525e2c597}{min}},\ 1,\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a67b4ffd4fe8f4c672bedeab12a3423ae}{min\_open}})\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00532}00532\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ gt\_max:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a86aa7e2c98f443dd1d3d44a31d910ef9}{\_clamp}}(self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a17b8d077269606a8a45979ab9c67a075}{max}},\ -\/1,\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_abbd136501c4c5e6674f4728537ac2deb}{max\_open}})\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00535}00535\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00536}00536\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ lt\_min\ \textcolor{keywordflow}{or}\ gt\_max:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00537}00537\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00538}00538\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{value\}\ is\ not\ in\ the\ range\ \{range\}."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00539}00539\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value=rv,\ range=self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_aefabc5738746ef4ae9e08fc943780b41}{\_describe\_range}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00544}00544\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ rv}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00546}00546\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00547}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a86aa7e2c98f443dd1d3d44a31d910ef9}{00547}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a86aa7e2c98f443dd1d3d44a31d910ef9}{\_clamp}}(self,\ bound:\ float,\ dir:\ t.Literal[1,\ -\/1],\ open:\ bool)\ -\/>\ float:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00548}00548\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Find\ the\ valid\ value\ to\ clamp\ to\ bound\ in\ the\ given}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00549}00549\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ direction.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00550}00550\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00551}00551\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ bound:\ The\ boundary\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00552}00552\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ dir:\ 1\ or\ -\/1\ indicating\ the\ direction\ to\ move.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00553}00553\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ open:\ If\ true,\ the\ range\ does\ not\ include\ the\ bound.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00554}00554\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00555}00555\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00556}00556\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00557}\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_aefabc5738746ef4ae9e08fc943780b41}{00557}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_aefabc5738746ef4ae9e08fc943780b41}{\_describe\_range}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00558}00558\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Describe\ the\ range\ for\ use\ in\ help\ text."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00559}00559\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a4561ef521485e7677cbffdc525e2c597}{min}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00560}00560\ \ \ \ \ \ \ \ \ \ \ \ \ op\ =\ \textcolor{stringliteral}{"{}<"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_abbd136501c4c5e6674f4728537ac2deb}{max\_open}}\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}<="{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00561}00561\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}x\{op\}\{self.max\}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00562}00562\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00563}00563\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a17b8d077269606a8a45979ab9c67a075}{max}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ op\ =\ \textcolor{stringliteral}{"{}>"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a67b4ffd4fe8f4c672bedeab12a3423ae}{min\_open}}\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}>="{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}x\{op\}\{self.min\}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00566}00566\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ lop\ =\ \textcolor{stringliteral}{"{}<"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a67b4ffd4fe8f4c672bedeab12a3423ae}{min\_open}}\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}<="{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00568}00568\ \ \ \ \ \ \ \ \ rop\ =\ \textcolor{stringliteral}{"{}<"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_abbd136501c4c5e6674f4728537ac2deb}{max\_open}}\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}<="{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00569}00569\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{self.min\}\{lop\}x\{rop\}\{self.max\}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00570}00570\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00571}00571\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00572}00572\ \ \ \ \ \ \ \ \ clamp\ =\ \textcolor{stringliteral}{"{}\ clamped"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base_a821d9c24b3b89a04a077bfd38f1f0b4f}{clamp}}\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}<\{type(self).\_\_name\_\_\}\ \{self.\_describe\_range()\}\{clamp\}>"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00575}00575\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00576}\mbox{\hyperlink{classclick_1_1types_1_1_int_param_type}{00576}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_int_param_type}{IntParamType}}(\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base}{\_NumberParamTypeBase}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00577}\mbox{\hyperlink{classclick_1_1types_1_1_int_param_type_a66e47ed81a2c5f8c434fd98f0f101d04}{00577}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}integer"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00578}\mbox{\hyperlink{classclick_1_1types_1_1_int_param_type}{00578}}\ \ \ \ \ \_number\_class\ =\ int}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00579}00579\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00580}00580\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00581}00581\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}INT"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00582}00582\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00583}00583\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00584}\mbox{\hyperlink{classclick_1_1types_1_1_int_range}{00584}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_int_range}{IntRange}}(\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base}{\_NumberRangeBase}},\ \mbox{\hyperlink{classclick_1_1types_1_1_int_param_type}{IntParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00585}00585\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Restrict\ an\ :data:\`{}click.INT\`{}\ value\ to\ a\ range\ of\ accepted}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00586}00586\ \textcolor{stringliteral}{\ \ \ \ values.\ See\ :ref:\`{}ranges\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00587}00587\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00588}00588\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}min\`{}\`{}\ or\ \`{}\`{}max\`{}\`{}\ are\ not\ passed,\ any\ value\ is\ accepted\ in\ that}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00589}00589\ \textcolor{stringliteral}{\ \ \ \ direction.\ If\ \`{}\`{}min\_open\`{}\`{}\ or\ \`{}\`{}max\_open\`{}\`{}\ are\ enabled,\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00590}00590\ \textcolor{stringliteral}{\ \ \ \ corresponding\ boundary\ is\ not\ included\ in\ the\ range.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00591}00591\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00592}00592\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}clamp\`{}\`{}\ is\ enabled,\ a\ value\ outside\ the\ range\ is\ clamped\ to\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00593}00593\ \textcolor{stringliteral}{\ \ \ \ boundary\ instead\ of\ failing.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00594}00594\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00595}00595\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00596}00596\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Added\ the\ \`{}\`{}min\_open\`{}\`{}\ and\ \`{}\`{}max\_open\`{}\`{}\ parameters.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00597}00597\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00598}00598\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00599}\mbox{\hyperlink{classclick_1_1types_1_1_int_range}{00599}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}integer\ range"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00600}00600\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00601}\mbox{\hyperlink{classclick_1_1types_1_1_int_range_ab33143c6612a8b321c3f0e7cab474b1f}{00601}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_int_range_ab33143c6612a8b321c3f0e7cab474b1f}{\_clamp}}(\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00602}00602\ \ \ \ \ \ \ \ \ self,\ bound:\ int,\ dir:\ t.Literal[1,\ -\/1],\ open:\ bool}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00603}00603\ \ \ \ \ )\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00604}00604\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ open:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00605}00605\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bound}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00606}00606\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00607}00607\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bound\ +\ dir}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00608}00608\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00609}00609\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00610}\mbox{\hyperlink{classclick_1_1types_1_1_float_param_type}{00610}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_float_param_type}{FloatParamType}}(\mbox{\hyperlink{classclick_1_1types_1_1___number_param_type_base}{\_NumberParamTypeBase}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00611}\mbox{\hyperlink{classclick_1_1types_1_1_float_param_type_a3450078692ad873f02e0f29e7c83944f}{00611}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}float"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00612}\mbox{\hyperlink{classclick_1_1types_1_1_float_param_type}{00612}}\ \ \ \ \ \_number\_class\ =\ float}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00613}00613\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00614}00614\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00615}00615\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}FLOAT"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00616}00616\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00617}00617\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00618}\mbox{\hyperlink{classclick_1_1types_1_1_float_range}{00618}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_float_range}{FloatRange}}(\mbox{\hyperlink{classclick_1_1types_1_1___number_range_base}{\_NumberRangeBase}},\ \mbox{\hyperlink{classclick_1_1types_1_1_float_param_type}{FloatParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00619}00619\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Restrict\ a\ :data:\`{}click.FLOAT\`{}\ value\ to\ a\ range\ of\ accepted}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00620}00620\ \textcolor{stringliteral}{\ \ \ \ values.\ See\ :ref:\`{}ranges\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00621}00621\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00622}00622\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}min\`{}\`{}\ or\ \`{}\`{}max\`{}\`{}\ are\ not\ passed,\ any\ value\ is\ accepted\ in\ that}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00623}00623\ \textcolor{stringliteral}{\ \ \ \ direction.\ If\ \`{}\`{}min\_open\`{}\`{}\ or\ \`{}\`{}max\_open\`{}\`{}\ are\ enabled,\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00624}00624\ \textcolor{stringliteral}{\ \ \ \ corresponding\ boundary\ is\ not\ included\ in\ the\ range.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00625}00625\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00626}00626\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}clamp\`{}\`{}\ is\ enabled,\ a\ value\ outside\ the\ range\ is\ clamped\ to\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00627}00627\ \textcolor{stringliteral}{\ \ \ \ boundary\ instead\ of\ failing.\ This\ is\ not\ supported\ if\ either}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00628}00628\ \textcolor{stringliteral}{\ \ \ \ boundary\ is\ marked\ \`{}\`{}open\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00629}00629\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00630}00630\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00631}00631\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Added\ the\ \`{}\`{}min\_open\`{}\`{}\ and\ \`{}\`{}max\_open\`{}\`{}\ parameters.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00632}00632\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00633}00633\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00634}\mbox{\hyperlink{classclick_1_1types_1_1_float_range}{00634}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}float\ range"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00635}00635\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00636}00636\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00637}00637\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00638}00638\ \ \ \ \ \ \ \ \ min:\ float\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00639}00639\ \ \ \ \ \ \ \ \ max:\ float\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ min\_open:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00641}00641\ \ \ \ \ \ \ \ \ max\_open:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00642}00642\ \ \ \ \ \ \ \ \ clamp:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00643}00643\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00644}00644\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ min=min,\ max=max,\ min\_open=min\_open,\ max\_open=max\_open,\ clamp=clamp}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00646}00646\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00647}00647\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00648}00648\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (min\_open\ \textcolor{keywordflow}{or}\ max\_open)\ \textcolor{keywordflow}{and}\ clamp:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(\textcolor{stringliteral}{"{}Clamping\ is\ not\ supported\ for\ open\ bounds."{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00650}00650\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00651}\mbox{\hyperlink{classclick_1_1types_1_1_float_range_a8c7f5262a3811bf98182767b46eff31e}{00651}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_float_range_a8c7f5262a3811bf98182767b46eff31e}{\_clamp}}(self,\ bound:\ float,\ dir:\ t.Literal[1,\ -\/1],\ open:\ bool)\ -\/>\ float:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00652}00652\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ open:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00653}00653\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bound}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00654}00654\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00655}00655\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Could\ use\ math.nextafter\ here,\ but\ clamping\ an}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00656}00656\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ open\ float\ range\ doesn't\ seem\ to\ be\ particularly\ useful.\ It's}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00657}00657\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ left\ up\ to\ the\ user\ to\ write\ a\ callback\ to\ do\ it\ if\ needed.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00658}00658\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{"{}Clamping\ is\ not\ supported\ for\ open\ bounds."{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00659}00659\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00660}00660\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00661}\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type}{00661}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type}{BoolParamType}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00662}\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_a3a9076c432075d7836a80dc0538146a7}{00662}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}boolean"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00663}00663\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00664}\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_af5dfbd43d71016586d98d8f117885295}{00664}}\ \ \ \ \ bool\_states:\ dict[str,\ bool]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00665}00665\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}1"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00666}00666\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}0"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00667}00667\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}yes"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00668}00668\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}no"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00669}00669\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}true"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00670}00670\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}false"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00671}00671\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}on"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00672}00672\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}off"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00673}00673\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}t"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00674}00674\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}f"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00675}00675\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}y"{}}:\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00676}00676\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}n"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00677}00677\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Absence\ of\ value\ is\ considered\ False.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00678}00678\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}}:\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00679}00679\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00680}00680\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ mapping\ of\ string\ values\ to\ boolean\ states.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00681}00681\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00682}00682\ \textcolor{stringliteral}{\ \ \ \ Mapping\ is\ inspired\ by\ :py:attr:\`{}configparser.ConfigParser.BOOLEAN\_STATES\`{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00683}00683\ \textcolor{stringliteral}{\ \ \ \ and\ extends\ it.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00684}00684\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00685}00685\ \textcolor{stringliteral}{\ \ \ \ ..\ caution::}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00686}00686\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ String\ values\ are\ lower-\/cased,\ as\ the\ \`{}\`{}str\_to\_bool\`{}\`{}\ comparison\ function}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00687}00687\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ below\ is\ case-\/insensitive.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00688}00688\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00689}00689\ \textcolor{stringliteral}{\ \ \ \ ..\ warning::}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00690}00690\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ mapping\ is\ not\ exhaustive,\ and\ does\ not\ cover\ all\ possible\ boolean\ strings}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00691}00691\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ representations.\ It\ will\ remains\ as\ it\ is\ to\ avoid\ endless\ bikeshedding.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00692}00692\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00693}00693\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Future\ work\ my\ be\ considered\ to\ make\ this\ mapping\ user-\/configurable\ from\ public}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00694}00694\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ API.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00695}00695\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00696}00696\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00697}00697\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00698}\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_a5a46b86dcff9573e2a0d6fea8e437771}{00698}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_a5a46b86dcff9573e2a0d6fea8e437771}{str\_to\_bool}}(value:\ str\ |\ bool)\ -\/>\ bool\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00699}00699\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Convert\ a\ string\ to\ a\ boolean\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00700}00700\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00701}00701\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ the\ value\ is\ already\ a\ boolean,\ it\ is\ returned\ as-\/is.\ If\ the\ value\ is\ a}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00702}00702\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ string,\ it\ is\ stripped\ of\ whitespaces\ and\ lower-\/cased,\ then\ checked\ against}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00703}00703\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ known\ boolean\ states\ pre-\/defined\ in\ the\ \`{}BoolParamType.bool\_states\`{}\ mapping}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00704}00704\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ above.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00705}00705\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00706}00706\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ \`{}None\`{}\ if\ the\ value\ does\ not\ match\ any\ known\ boolean\ state.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00707}00707\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00708}00708\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ bool):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00709}00709\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00710}00710\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ BoolParamType.bool\_states.get(value.strip().lower())}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00711}00711\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00712}\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_a6ad3d74ae90cdd8982dd07913452a1fb}{00712}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_a6ad3d74ae90cdd8982dd07913452a1fb}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00713}00713\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00714}00714\ \ \ \ \ )\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00715}00715\ \ \ \ \ \ \ \ \ normalized\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_a5a46b86dcff9573e2a0d6fea8e437771}{str\_to\_bool}}(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00716}00716\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ normalized\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00718}00718\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00719}00719\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\{value!r\}\ is\ not\ a\ valid\ boolean.\ Recognized\ values:\ \{states\}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00720}00720\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ).format(value=value,\ states=\textcolor{stringliteral}{"{},\ "{}}.join(sorted(self.\mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type_af5dfbd43d71016586d98d8f117885295}{bool\_states}}))),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00721}00721\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00722}00722\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00723}00723\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00724}00724\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ normalized}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00725}00725\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00726}00726\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00727}00727\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}BOOL"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00728}00728\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00729}00729\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00730}\mbox{\hyperlink{classclick_1_1types_1_1_u_u_i_d_parameter_type}{00730}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_u_u_i_d_parameter_type}{UUIDParameterType}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00731}\mbox{\hyperlink{classclick_1_1types_1_1_u_u_i_d_parameter_type_a65538402c0970b7c3601e5ccf63a7002}{00731}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}uuid"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00732}00732\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00733}\mbox{\hyperlink{classclick_1_1types_1_1_u_u_i_d_parameter_type_aae13c401953592a1af3e3e94988adffa}{00733}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_u_u_i_d_parameter_type_aae13c401953592a1af3e3e94988adffa}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00734}00734\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00735}00735\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00736}00736\ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ uuid}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00737}00737\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00738}00738\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ uuid.UUID):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00739}00739\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00740}00740\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00741}00741\ \ \ \ \ \ \ \ \ value\ =\ value.strip()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00742}00742\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00743}00743\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00744}00744\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ uuid.UUID(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00745}00745\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00746}00746\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00747}00747\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{value!r\}\ is\ not\ a\ valid\ UUID."{}}).format(value=value),\ param,\ ctx}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00748}00748\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00749}00749\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00750}00750\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00751}00751\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}UUID"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00752}00752\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00753}00753\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00754}\mbox{\hyperlink{classclick_1_1types_1_1_file}{00754}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_file}{File}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00755}00755\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Declares\ a\ parameter\ to\ be\ a\ file\ for\ reading\ or\ writing.\ \ The\ file}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00756}00756\ \textcolor{stringliteral}{\ \ \ \ is\ automatically\ closed\ once\ the\ context\ tears\ down\ (after\ the\ command}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00757}00757\ \textcolor{stringliteral}{\ \ \ \ finished\ working).}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00758}00758\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00759}00759\ \textcolor{stringliteral}{\ \ \ \ Files\ can\ be\ opened\ for\ reading\ or\ writing.\ \ The\ special\ value\ \`{}\`{}-\/\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00760}00760\ \textcolor{stringliteral}{\ \ \ \ indicates\ stdin\ or\ stdout\ depending\ on\ the\ mode.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00761}00761\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00762}00762\ \textcolor{stringliteral}{\ \ \ \ By\ default,\ the\ file\ is\ opened\ for\ reading\ text\ data,\ but\ it\ can\ also\ be}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00763}00763\ \textcolor{stringliteral}{\ \ \ \ opened\ in\ binary\ mode\ or\ for\ writing.\ \ The\ encoding\ parameter\ can\ be\ used}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00764}00764\ \textcolor{stringliteral}{\ \ \ \ to\ force\ a\ specific\ encoding.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00765}00765\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00766}00766\ \textcolor{stringliteral}{\ \ \ \ The\ \`{}lazy\`{}\ flag\ controls\ if\ the\ file\ should\ be\ opened\ immediately\ or\ upon}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00767}00767\ \textcolor{stringliteral}{\ \ \ \ first\ IO.\ The\ default\ is\ to\ be\ non-\/lazy\ for\ standard\ input\ and\ output}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00768}00768\ \textcolor{stringliteral}{\ \ \ \ streams\ as\ well\ as\ files\ opened\ for\ reading,\ \`{}lazy\`{}\ otherwise.\ When\ opening\ a}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00769}00769\ \textcolor{stringliteral}{\ \ \ \ file\ lazily\ for\ reading,\ it\ is\ still\ opened\ temporarily\ for\ validation,\ but}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00770}00770\ \textcolor{stringliteral}{\ \ \ \ will\ not\ be\ held\ open\ until\ first\ IO.\ lazy\ is\ mainly\ useful\ when\ opening}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00771}00771\ \textcolor{stringliteral}{\ \ \ \ for\ writing\ to\ avoid\ creating\ the\ file\ until\ it\ is\ needed.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00772}00772\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00773}00773\ \textcolor{stringliteral}{\ \ \ \ Files\ can\ also\ be\ opened\ atomically\ in\ which\ case\ all\ writes\ go\ into\ a}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00774}00774\ \textcolor{stringliteral}{\ \ \ \ separate\ file\ in\ the\ same\ folder\ and\ upon\ completion\ the\ file\ will}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00775}00775\ \textcolor{stringliteral}{\ \ \ \ be\ moved\ over\ to\ the\ original\ location.\ \ This\ is\ useful\ if\ a\ file}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00776}00776\ \textcolor{stringliteral}{\ \ \ \ regularly\ read\ by\ other\ users\ is\ modified.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00777}00777\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00778}00778\ \textcolor{stringliteral}{\ \ \ \ See\ :ref:\`{}file-\/args\`{}\ for\ more\ information.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00779}00779\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00780}00780\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 2.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00781}00781\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Added\ the\ \`{}\`{}atomic\`{}\`{}\ parameter.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00782}00782\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00783}00783\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00784}\mbox{\hyperlink{classclick_1_1types_1_1_file_aaed24c5563e925890fd2d21a9538a16a}{00784}}\ \ \ \ \ name\ =\ \textcolor{stringliteral}{"{}filename"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00785}\mbox{\hyperlink{classclick_1_1types_1_1_file}{00785}}\ \ \ \ \ envvar\_list\_splitter:\ t.ClassVar[str]\ =\ os.path.pathsep}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00786}00786\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00787}00787\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00788}00788\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00789}00789\ \ \ \ \ \ \ \ \ mode:\ str\ =\ \textcolor{stringliteral}{"{}r"{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00790}00790\ \ \ \ \ \ \ \ \ encoding:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00791}00791\ \ \ \ \ \ \ \ \ errors:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{stringliteral}{"{}strict"{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00792}00792\ \ \ \ \ \ \ \ \ lazy:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00793}00793\ \ \ \ \ \ \ \ \ atomic:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00794}00794\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00795}\mbox{\hyperlink{classclick_1_1types_1_1_file_a6b6f9a6700bb8f3ba6983c087bffadbd}{00795}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a6b6f9a6700bb8f3ba6983c087bffadbd}{mode}}\ =\ mode}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00796}\mbox{\hyperlink{classclick_1_1types_1_1_file_a1244e630e95cc42708ce78c1f47c3fb0}{00796}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a1244e630e95cc42708ce78c1f47c3fb0}{encoding}}\ =\ encoding}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00797}\mbox{\hyperlink{classclick_1_1types_1_1_file_af5cdd2cbbc9b60fdd8ce5be1551b5d81}{00797}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_af5cdd2cbbc9b60fdd8ce5be1551b5d81}{errors}}\ =\ errors}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00798}\mbox{\hyperlink{classclick_1_1types_1_1_file_acf47d1197bd45603d65054af66a9b7fa}{00798}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_acf47d1197bd45603d65054af66a9b7fa}{lazy}}\ =\ lazy}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00799}\mbox{\hyperlink{classclick_1_1types_1_1_file_adfe34f342063bd5bd772095e87cb5637}{00799}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_adfe34f342063bd5bd772095e87cb5637}{atomic}}\ =\ atomic}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00800}00800\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00801}\mbox{\hyperlink{classclick_1_1types_1_1_file_a7a937fa6dd39a2a99d000ddc45a3392c}{00801}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_file_a7a937fa6dd39a2a99d000ddc45a3392c}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00802}00802\ \ \ \ \ \ \ \ \ info\_dict\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1_file_a7a937fa6dd39a2a99d000ddc45a3392c}{to\_info\_dict}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00803}00803\ \ \ \ \ \ \ \ \ info\_dict.update(mode=self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a6b6f9a6700bb8f3ba6983c087bffadbd}{mode}},\ encoding=self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a1244e630e95cc42708ce78c1f47c3fb0}{encoding}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00804}00804\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_dict}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00805}00805\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00806}\mbox{\hyperlink{classclick_1_1types_1_1_file_aea2175516013abc9a063596a3e5507d8}{00806}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_file_aea2175516013abc9a063596a3e5507d8}{resolve\_lazy\_flag}}(self,\ value:\ str\ |\ os.PathLike[str])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00807}00807\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_acf47d1197bd45603d65054af66a9b7fa}{lazy}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00808}00808\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_acf47d1197bd45603d65054af66a9b7fa}{lazy}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00809}00809\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.fspath(value)\ ==\ \textcolor{stringliteral}{"{}-\/"{}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00810}00810\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00811}00811\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ \textcolor{stringliteral}{"{}w"{}}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a6b6f9a6700bb8f3ba6983c087bffadbd}{mode}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00812}00812\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00813}00813\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00814}00814\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00815}\mbox{\hyperlink{classclick_1_1types_1_1_file_a1cd80f9e718b416e0c2410f575be19ed}{00815}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_file_a1cd80f9e718b416e0c2410f575be19ed}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00816}00816\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00817}00817\ \ \ \ \ \ \ \ \ value:\ str\ |\ os.PathLike[str]\ |\ t.IO[t.Any],}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00818}00818\ \ \ \ \ \ \ \ \ param:\ Parameter\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00819}00819\ \ \ \ \ \ \ \ \ ctx:\ Context\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00820}00820\ \ \ \ \ )\ -\/>\ t.IO[t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00821}00821\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \mbox{\hyperlink{namespaceclick_1_1types_a4c3c106208e0e60cd85d125f89d5ef0f}{\_is\_file\_like}}(value):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00823}00823\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00824}00824\ \ \ \ \ \ \ \ \ value\ =\ t.cast(\textcolor{stringliteral}{"{}str\ |\ os.PathLike[str]"{}},\ value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00825}00825\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00826}00826\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00827}00827\ \ \ \ \ \ \ \ \ \ \ \ \ lazy\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_aea2175516013abc9a063596a3e5507d8}{resolve\_lazy\_flag}}(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00828}00828\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00829}00829\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ lazy:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00830}00830\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lf\ =\ \mbox{\hyperlink{classclick_1_1utils_1_1_lazy_file}{LazyFile}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00831}00831\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value,\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a6b6f9a6700bb8f3ba6983c087bffadbd}{mode}},\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a1244e630e95cc42708ce78c1f47c3fb0}{encoding}},\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_af5cdd2cbbc9b60fdd8ce5be1551b5d81}{errors}},\ atomic=self.\mbox{\hyperlink{classclick_1_1types_1_1_file_adfe34f342063bd5bd772095e87cb5637}{atomic}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00832}00832\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00833}00833\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00834}00834\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ctx\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00835}00835\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx.call\_on\_close(lf.close\_intelligently)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00836}00836\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00837}00837\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t.cast(\textcolor{stringliteral}{"{}t.IO[t.Any]"{}},\ lf)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00838}00838\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00839}00839\ \ \ \ \ \ \ \ \ \ \ \ \ f,\ should\_close\ =\ open\_stream(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00840}00840\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value,\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a6b6f9a6700bb8f3ba6983c087bffadbd}{mode}},\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_a1244e630e95cc42708ce78c1f47c3fb0}{encoding}},\ self.\mbox{\hyperlink{classclick_1_1types_1_1_file_af5cdd2cbbc9b60fdd8ce5be1551b5d81}{errors}},\ atomic=self.\mbox{\hyperlink{classclick_1_1types_1_1_file_adfe34f342063bd5bd772095e87cb5637}{atomic}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00841}00841\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00842}00842\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00843}00843\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ a\ context\ is\ provided,\ we\ automatically\ close\ the\ file}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00844}00844\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ at\ the\ end\ of\ the\ context\ execution\ (or\ flush\ out).\ \ If\ a}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00845}00845\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ context\ does\ not\ exist,\ it's\ the\ caller's\ responsibility\ to}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00846}00846\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ properly\ close\ the\ file.\ \ This\ for\ instance\ happens\ when\ the}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00847}00847\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ type\ is\ used\ with\ prompts.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00848}00848\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ctx\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00849}00849\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ should\_close:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00850}00850\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx.call\_on\_close(safecall(f.close))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00851}00851\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00852}00852\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx.call\_on\_close(safecall(f.flush))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00853}00853\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00855}00855\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(f\textcolor{stringliteral}{"{}'\{format\_filename(value)\}':\ \{e.strerror\}"{}},\ param,\ ctx)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00857}00857\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00858}\mbox{\hyperlink{classclick_1_1types_1_1_file_a0832984c2075ba25da00210dffa4d4ac}{00858}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_file_a0832984c2075ba25da00210dffa4d4ac}{shell\_complete}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00859}00859\ \ \ \ \ \ \ \ \ self,\ ctx:\ Context,\ param:\ Parameter,\ incomplete:\ str}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00860}00860\ \ \ \ \ )\ -\/>\ list[CompletionItem]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00861}00861\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ a\ special\ completion\ marker\ that\ tells\ the\ completion}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00862}00862\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ system\ to\ use\ the\ shell\ to\ provide\ file\ path\ completions.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00863}00863\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00864}00864\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ ctx:\ Invocation\ context\ for\ this\ command.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00865}00865\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ param:\ The\ parameter\ that\ is\ requesting\ completion.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00866}00866\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ incomplete:\ Value\ being\ completed.\ May\ be\ empty.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00867}00867\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00868}00868\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00869}00869\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00870}00870\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceclick_1_1shell__completion}{click.shell\_completion}}\ \textcolor{keyword}{import}\ CompletionItem}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00871}00871\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00872}00872\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [\mbox{\hyperlink{classclick_1_1shell__completion_1_1_completion_item}{CompletionItem}}(incomplete,\ type=\textcolor{stringliteral}{"{}file"{}})]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00873}00873\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00874}00874\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00875}\mbox{\hyperlink{namespaceclick_1_1types_a4c3c106208e0e60cd85d125f89d5ef0f}{00875}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1types_a4c3c106208e0e60cd85d125f89d5ef0f}{\_is\_file\_like}}(value:\ t.Any)\ -\/>\ te.TypeGuard[t.IO[t.Any]]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00876}00876\ \ \ \ \ \textcolor{keywordflow}{return}\ hasattr(value,\ \textcolor{stringliteral}{"{}read"{}})\ \textcolor{keywordflow}{or}\ hasattr(value,\ \textcolor{stringliteral}{"{}write"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00877}00877\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00878}00878\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00879}\mbox{\hyperlink{classclick_1_1types_1_1_path}{00879}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_path}{Path}}(\mbox{\hyperlink{classclick_1_1types_1_1_param_type}{ParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00880}00880\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ \`{}\`{}Path\`{}\`{}\ type\ is\ similar\ to\ the\ :class:\`{}File\`{}\ type,\ but}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00881}00881\ \textcolor{stringliteral}{\ \ \ \ returns\ the\ filename\ instead\ of\ an\ open\ file.\ Various\ checks\ can\ be}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00882}00882\ \textcolor{stringliteral}{\ \ \ \ enabled\ to\ validate\ the\ type\ of\ file\ and\ permissions.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00883}00883\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00884}00884\ \textcolor{stringliteral}{\ \ \ \ :param\ exists:\ The\ file\ or\ directory\ needs\ to\ exist\ for\ the\ value\ to}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00885}00885\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ be\ valid.\ If\ this\ is\ not\ set\ to\ \`{}\`{}True\`{}\`{},\ and\ the\ file\ does\ not}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00886}00886\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ exist,\ then\ all\ further\ checks\ are\ silently\ skipped.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00887}00887\ \textcolor{stringliteral}{\ \ \ \ :param\ file\_okay:\ Allow\ a\ file\ as\ a\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00888}00888\ \textcolor{stringliteral}{\ \ \ \ :param\ dir\_okay:\ Allow\ a\ directory\ as\ a\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00889}00889\ \textcolor{stringliteral}{\ \ \ \ :param\ readable:\ if\ true,\ a\ readable\ check\ is\ performed.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00890}00890\ \textcolor{stringliteral}{\ \ \ \ :param\ writable:\ if\ true,\ a\ writable\ check\ is\ performed.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00891}00891\ \textcolor{stringliteral}{\ \ \ \ :param\ executable:\ if\ true,\ an\ executable\ check\ is\ performed.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00892}00892\ \textcolor{stringliteral}{\ \ \ \ :param\ resolve\_path:\ Make\ the\ value\ absolute\ and\ resolve\ any}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00893}00893\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ symlinks.\ A\ \`{}\`{}\string~\`{}\`{}\ is\ not\ expanded,\ as\ this\ is\ supposed\ to\ be}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00894}00894\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ done\ by\ the\ shell\ only.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00895}00895\ \textcolor{stringliteral}{\ \ \ \ :param\ allow\_dash:\ Allow\ a\ single\ dash\ as\ a\ value,\ which\ indicates}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00896}00896\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ a\ standard\ stream\ (but\ does\ not\ open\ it).\ Use}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00897}00897\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :func:\`{}\string~click.open\_file\`{}\ to\ handle\ opening\ this\ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00898}00898\ \textcolor{stringliteral}{\ \ \ \ :param\ path\_type:\ Convert\ the\ incoming\ path\ value\ to\ this\ type.\ If}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00899}00899\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}None\`{}\`{},\ keep\ Python's\ default,\ which\ is\ \`{}\`{}str\`{}\`{}.\ Useful\ to}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00900}00900\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ convert\ to\ :class:\`{}pathlib.Path\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00901}00901\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00902}00902\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 8.1}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00903}00903\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Added\ the\ \`{}\`{}executable\`{}\`{}\ parameter.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00904}00904\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00905}00905\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00906}00906\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Allow\ passing\ \`{}\`{}path\_type=pathlib.Path\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00907}00907\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00908}00908\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 6.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00909}00909\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Added\ the\ \`{}\`{}allow\_dash\`{}\`{}\ parameter.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00910}00910\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00911}00911\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00912}\mbox{\hyperlink{classclick_1_1types_1_1_path}{00912}}\ \ \ \ \ envvar\_list\_splitter:\ t.ClassVar[str]\ =\ os.path.pathsep}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00913}00913\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00914}00914\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00915}00915\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00916}00916\ \ \ \ \ \ \ \ \ exists:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00917}00917\ \ \ \ \ \ \ \ \ file\_okay:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00918}00918\ \ \ \ \ \ \ \ \ dir\_okay:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00919}00919\ \ \ \ \ \ \ \ \ writable:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00920}00920\ \ \ \ \ \ \ \ \ readable:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00921}00921\ \ \ \ \ \ \ \ \ resolve\_path:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00922}00922\ \ \ \ \ \ \ \ \ allow\_dash:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00923}00923\ \ \ \ \ \ \ \ \ path\_type:\ type[t.Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00924}00924\ \ \ \ \ \ \ \ \ executable:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00925}00925\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00926}\mbox{\hyperlink{classclick_1_1types_1_1_path_ad9a31075a87d6f301228024515dde7ad}{00926}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_ad9a31075a87d6f301228024515dde7ad}{exists}}\ =\ exists}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00927}\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{00927}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{file\_okay}}\ =\ file\_okay}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00928}\mbox{\hyperlink{classclick_1_1types_1_1_path_a0e9e9e5a48bd3966de6c6fa9b73959d7}{00928}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a0e9e9e5a48bd3966de6c6fa9b73959d7}{dir\_okay}}\ =\ dir\_okay}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00929}\mbox{\hyperlink{classclick_1_1types_1_1_path_a82c4ccca3afba2502f7dba08dd5a65f7}{00929}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a82c4ccca3afba2502f7dba08dd5a65f7}{readable}}\ =\ readable}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00930}\mbox{\hyperlink{classclick_1_1types_1_1_path_a9b4a8a2bd6b43bbd2711ee6eff9c23bd}{00930}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a9b4a8a2bd6b43bbd2711ee6eff9c23bd}{writable}}\ =\ writable}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00931}\mbox{\hyperlink{classclick_1_1types_1_1_path_a3a7e1bfc8f2aade350be11e5209fe660}{00931}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a3a7e1bfc8f2aade350be11e5209fe660}{executable}}\ =\ executable}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00932}\mbox{\hyperlink{classclick_1_1types_1_1_path_a9a79540e69ed408ba068ca2f5ecf5ae6}{00932}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a9a79540e69ed408ba068ca2f5ecf5ae6}{resolve\_path}}\ =\ resolve\_path}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00933}\mbox{\hyperlink{classclick_1_1types_1_1_path_af917dee7e04a18be6a2ad38dc0b53e94}{00933}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_af917dee7e04a18be6a2ad38dc0b53e94}{allow\_dash}}\ =\ allow\_dash}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00934}\mbox{\hyperlink{classclick_1_1types_1_1_path_a35c8c88ed7f2336677250e5ae03c09e3}{00934}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a35c8c88ed7f2336677250e5ae03c09e3}{type}}\ =\ path\_type}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00935}00935\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00936}00936\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{file\_okay}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a0e9e9e5a48bd3966de6c6fa9b73959d7}{dir\_okay}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00937}\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{00937}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}:\ str\ =\ \_(\textcolor{stringliteral}{"{}file"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00938}00938\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a0e9e9e5a48bd3966de6c6fa9b73959d7}{dir\_okay}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{file\_okay}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00939}00939\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}\ =\ \_(\textcolor{stringliteral}{"{}directory"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00940}00940\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00941}00941\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}\ =\ \_(\textcolor{stringliteral}{"{}path"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00942}00942\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00943}\mbox{\hyperlink{classclick_1_1types_1_1_path_a82af16dca327e22adcc96ea90ddee722}{00943}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_path_a82af16dca327e22adcc96ea90ddee722}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00944}00944\ \ \ \ \ \ \ \ \ info\_dict\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1_path_a82af16dca327e22adcc96ea90ddee722}{to\_info\_dict}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00945}00945\ \ \ \ \ \ \ \ \ info\_dict.update(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00946}00946\ \ \ \ \ \ \ \ \ \ \ \ \ exists=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_ad9a31075a87d6f301228024515dde7ad}{exists}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00947}00947\ \ \ \ \ \ \ \ \ \ \ \ \ file\_okay=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{file\_okay}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00948}00948\ \ \ \ \ \ \ \ \ \ \ \ \ dir\_okay=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a0e9e9e5a48bd3966de6c6fa9b73959d7}{dir\_okay}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00949}00949\ \ \ \ \ \ \ \ \ \ \ \ \ writable=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a9b4a8a2bd6b43bbd2711ee6eff9c23bd}{writable}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00950}00950\ \ \ \ \ \ \ \ \ \ \ \ \ readable=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a82c4ccca3afba2502f7dba08dd5a65f7}{readable}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00951}00951\ \ \ \ \ \ \ \ \ \ \ \ \ allow\_dash=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_af917dee7e04a18be6a2ad38dc0b53e94}{allow\_dash}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00952}00952\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00953}00953\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_dict}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00954}00954\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00955}\mbox{\hyperlink{classclick_1_1types_1_1_path_ac571b985ebd391b5016229119ae49c93}{00955}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_path_ac571b985ebd391b5016229119ae49c93}{coerce\_path\_result}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00956}00956\ \ \ \ \ \ \ \ \ self,\ value:\ str\ |\ os.PathLike[str]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00957}00957\ \ \ \ \ )\ -\/>\ str\ |\ bytes\ |\ os.PathLike[str]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00958}00958\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a35c8c88ed7f2336677250e5ae03c09e3}{type}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ isinstance(value,\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a35c8c88ed7f2336677250e5ae03c09e3}{type}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00959}00959\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a35c8c88ed7f2336677250e5ae03c09e3}{type}}\ \textcolor{keywordflow}{is}\ str:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00960}00960\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.fsdecode(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00961}00961\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a35c8c88ed7f2336677250e5ae03c09e3}{type}}\ \textcolor{keywordflow}{is}\ bytes:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00962}00962\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.fsencode(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00963}00963\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00964}00964\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t.cast(\textcolor{stringliteral}{"{}os.PathLike[str]"{}},\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a35c8c88ed7f2336677250e5ae03c09e3}{type}}(value))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00965}00965\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00966}00966\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00967}00967\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00968}\mbox{\hyperlink{classclick_1_1types_1_1_path_a4229a86074726462dd416d0fcda2939f}{00968}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_path_a4229a86074726462dd416d0fcda2939f}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00969}00969\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00970}00970\ \ \ \ \ \ \ \ \ value:\ str\ |\ os.PathLike[str],}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00971}00971\ \ \ \ \ \ \ \ \ param:\ Parameter\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00972}00972\ \ \ \ \ \ \ \ \ ctx:\ Context\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00973}00973\ \ \ \ \ )\ -\/>\ str\ |\ bytes\ |\ os.PathLike[str]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00974}00974\ \ \ \ \ \ \ \ \ rv\ =\ value}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00975}00975\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00976}00976\ \ \ \ \ \ \ \ \ is\_dash\ =\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{file\_okay}}\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_af917dee7e04a18be6a2ad38dc0b53e94}{allow\_dash}}\ \textcolor{keywordflow}{and}\ rv\ \textcolor{keywordflow}{in}\ (b\textcolor{stringliteral}{"{}-\/"{}},\ \textcolor{stringliteral}{"{}-\/"{}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00977}00977\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00978}00978\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ is\_dash:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00979}00979\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a9a79540e69ed408ba068ca2f5ecf5ae6}{resolve\_path}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00980}00980\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rv\ =\ os.path.realpath(rv)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00981}00981\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00982}00982\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00983}00983\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ st\ =\ os.stat(rv)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00984}00984\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00985}00985\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_ad9a31075a87d6f301228024515dde7ad}{exists}}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00986}00986\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_ac571b985ebd391b5016229119ae49c93}{coerce\_path\_result}}(rv)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00987}00987\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00988}00988\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{name\}\ \{filename!r\}\ does\ not\ exist."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00989}00989\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}.title(),\ filename=format\_filename(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00990}00990\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00991}00991\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00992}00992\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00993}00993\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00994}00994\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00995}00995\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{file\_okay}}\ \textcolor{keywordflow}{and}\ stat.S\_ISREG(st.st\_mode):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00996}00996\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00997}00997\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{name\}\ \{filename!r\}\ is\ a\ file."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00998}00998\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}.title(),\ filename=format\_filename(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l00999}00999\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01000}01000\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01001}01001\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01002}01002\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01003}01003\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a0e9e9e5a48bd3966de6c6fa9b73959d7}{dir\_okay}}\ \textcolor{keywordflow}{and}\ stat.S\_ISDIR(st.st\_mode):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01004}01004\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01005}01005\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{name\}\ \{filename!r\}\ is\ a\ directory."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01006}01006\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}.title(),\ filename=format\_filename(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01007}01007\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01008}01008\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01009}01009\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01010}01010\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01011}01011\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01012}01012\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a82c4ccca3afba2502f7dba08dd5a65f7}{readable}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ os.access(rv,\ os.R\_OK):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01013}01013\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01014}01014\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{name\}\ \{filename!r\}\ is\ not\ readable."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01015}01015\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}.title(),\ filename=format\_filename(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01016}01016\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01017}01017\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01018}01018\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01019}01019\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01020}01020\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01021}01021\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a9b4a8a2bd6b43bbd2711ee6eff9c23bd}{writable}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ os.access(rv,\ os.W\_OK):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01022}01022\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01023}01023\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{name\}\ \{filename!r\}\ is\ not\ writable."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01024}01024\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}.title(),\ filename=format\_filename(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01025}01025\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01026}01026\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01027}01027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01028}01028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01029}01029\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01030}01030\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a3a7e1bfc8f2aade350be11e5209fe660}{executable}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ os.access(value,\ os.X\_OK):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01031}01031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01032}01032\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_(\textcolor{stringliteral}{"{}\{name\}\ \{filename!r\}\ is\ not\ executable."{}}).format(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01033}01033\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name=self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ce48be854e74f484110852b24357c04}{name}}.title(),\ filename=format\_filename(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01034}01034\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01035}01035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01036}01036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01037}01037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01038}01038\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01039}01039\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_ac571b985ebd391b5016229119ae49c93}{coerce\_path\_result}}(rv)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01040}01040\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01041}\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ed5e48fd8116ec2ad4b1645c8a5cdb1}{01041}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_path_a6ed5e48fd8116ec2ad4b1645c8a5cdb1}{shell\_complete}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01042}01042\ \ \ \ \ \ \ \ \ self,\ ctx:\ Context,\ param:\ Parameter,\ incomplete:\ str}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01043}01043\ \ \ \ \ )\ -\/>\ list[CompletionItem]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01044}01044\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ a\ special\ completion\ marker\ that\ tells\ the\ completion}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01045}01045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ system\ to\ use\ the\ shell\ to\ provide\ path\ completions\ for\ only}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01046}01046\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ directories\ or\ any\ paths.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01047}01047\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01048}01048\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ ctx:\ Invocation\ context\ for\ this\ command.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01049}01049\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ param:\ The\ parameter\ that\ is\ requesting\ completion.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01050}01050\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ incomplete:\ Value\ being\ completed.\ May\ be\ empty.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01051}01051\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01052}01052\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ versionadded::\ 8.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01053}01053\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01054}01054\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceclick_1_1shell__completion}{click.shell\_completion}}\ \textcolor{keyword}{import}\ CompletionItem}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01055}01055\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01056}01056\ \ \ \ \ \ \ \ \ type\ =\ \textcolor{stringliteral}{"{}dir"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a0e9e9e5a48bd3966de6c6fa9b73959d7}{dir\_okay}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_path_a49ba797ab04fa2df02c67fe36d16dfa8}{file\_okay}}\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}file"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01057}01057\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [\mbox{\hyperlink{classclick_1_1shell__completion_1_1_completion_item}{CompletionItem}}(incomplete,\ type=type)]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01058}01058\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01059}01059\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01060}\mbox{\hyperlink{classclick_1_1types_1_1_tuple}{01060}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_tuple}{Tuple}}(\mbox{\hyperlink{classclick_1_1types_1_1_composite_param_type}{CompositeParamType}}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01061}01061\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ default\ behavior\ of\ Click\ is\ to\ apply\ a\ type\ on\ a\ value\ directly.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01062}01062\ \textcolor{stringliteral}{\ \ \ \ This\ works\ well\ in\ most\ cases,\ except\ for\ when\ \`{}nargs\`{}\ is\ set\ to\ a\ fixed}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01063}01063\ \textcolor{stringliteral}{\ \ \ \ count\ and\ different\ types\ should\ be\ used\ for\ different\ items.\ \ In\ this}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01064}01064\ \textcolor{stringliteral}{\ \ \ \ case\ the\ :class:\`{}Tuple\`{}\ type\ can\ be\ used.\ \ This\ type\ can\ only\ be\ used}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01065}01065\ \textcolor{stringliteral}{\ \ \ \ if\ \`{}nargs\`{}\ is\ set\ to\ a\ fixed\ number.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01066}01066\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01067}01067\ \textcolor{stringliteral}{\ \ \ \ For\ more\ information\ see\ :ref:\`{}tuple-\/type\`{}.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01068}01068\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01069}01069\ \textcolor{stringliteral}{\ \ \ \ This\ can\ be\ selected\ by\ using\ a\ Python\ tuple\ literal\ as\ a\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01070}01070\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01071}01071\ \textcolor{stringliteral}{\ \ \ \ :param\ types:\ a\ list\ of\ types\ that\ should\ be\ used\ for\ the\ tuple\ items.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01072}01072\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01073}01073\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01074}01074\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ types:\ cabc.Sequence[type[t.Any]\ |\ ParamType])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01075}\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a6a02ed696a6c63340fb35cb8780c516b}{01075}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a6a02ed696a6c63340fb35cb8780c516b}{types}}:\ cabc.Sequence[ParamType]\ =\ [\mbox{\hyperlink{namespaceclick_1_1types_ab9cc44d15e0eb6d6c7ac2772a9a5fec4}{convert\_type}}(ty)\ \textcolor{keywordflow}{for}\ ty\ \textcolor{keywordflow}{in}\ types]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01076}01076\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01077}\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a53818e537c9eb309f2a5b1137d8cff14}{01077}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a53818e537c9eb309f2a5b1137d8cff14}{to\_info\_dict}}(self)\ -\/>\ dict[str,\ t.Any]:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01078}01078\ \ \ \ \ \ \ \ \ info\_dict\ =\ super().\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a53818e537c9eb309f2a5b1137d8cff14}{to\_info\_dict}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01079}01079\ \ \ \ \ \ \ \ \ info\_dict[\textcolor{stringliteral}{"{}types"{}}]\ =\ [t.to\_info\_dict()\ \textcolor{keywordflow}{for}\ t\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a6a02ed696a6c63340fb35cb8780c516b}{types}}]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01080}01080\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_dict}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01081}01081\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01082}01082\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01083}\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a2ad52243cc9430c9b437a65e0913da32}{01083}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a2ad52243cc9430c9b437a65e0913da32}{name}}(self)\ -\/>\ str:\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01084}01084\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}<\{'\ '.join(ty.name\ for\ ty\ in\ self.types)\}>"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01085}01085\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01086}01086\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01087}\mbox{\hyperlink{classclick_1_1types_1_1_tuple_aaf9f6a275fabaa578cdce1df09ed1a3c}{01087}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_param_type_a0d5295f71efeb10a1541cea88db5d58f}{arity}}(self)\ -\/>\ int:\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01088}01088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ len(self.\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a6a02ed696a6c63340fb35cb8780c516b}{types}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01089}01089\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01090}\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a16c63980f72bf711d25e13e4b05b116e}{01090}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a16c63980f72bf711d25e13e4b05b116e}{convert}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01091}01091\ \ \ \ \ \ \ \ \ self,\ value:\ t.Any,\ param:\ Parameter\ |\ \textcolor{keywordtype}{None},\ ctx:\ Context\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01092}01092\ \ \ \ \ )\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01093}01093\ \ \ \ \ \ \ \ \ len\_type\ =\ len(self.\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a6a02ed696a6c63340fb35cb8780c516b}{types}})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01094}01094\ \ \ \ \ \ \ \ \ len\_value\ =\ len(value)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01095}01095\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01096}01096\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len\_value\ !=\ len\_type:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01097}01097\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1types_1_1_param_type_afcc2ce5b635b9f193b47cb62d7fec024}{fail}}(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01098}01098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ngettext(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01099}01099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\{len\_type\}\ values\ are\ required,\ but\ \{len\_value\}\ was\ given."{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01100}01100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\{len\_type\}\ values\ are\ required,\ but\ \{len\_value\}\ were\ given."{}},}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01101}01101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ len\_value,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01102}01102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ).format(len\_type=len\_type,\ len\_value=len\_value),}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01103}01103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ param=param,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01104}01104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx=ctx,}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01105}01105\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01106}01106\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01107}01107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tuple(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01108}01108\ \ \ \ \ \ \ \ \ \ \ \ \ ty(x,\ param,\ ctx)\ \textcolor{keywordflow}{for}\ ty,\ x\ \textcolor{keywordflow}{in}\ zip(self.\mbox{\hyperlink{classclick_1_1types_1_1_tuple_a6a02ed696a6c63340fb35cb8780c516b}{types}},\ value,\ strict=\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01109}01109\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01110}01110\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01111}01111\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01112}\mbox{\hyperlink{namespaceclick_1_1types_ab9cc44d15e0eb6d6c7ac2772a9a5fec4}{01112}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1types_ab9cc44d15e0eb6d6c7ac2772a9a5fec4}{convert\_type}}(ty:\ t.Any\ |\ \textcolor{keywordtype}{None},\ default:\ t.Any\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None})\ -\/>\ ParamType:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01113}01113\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Find\ the\ most\ appropriate\ :class:\`{}ParamType\`{}\ for\ the\ given\ Python}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01114}01114\ \textcolor{stringliteral}{\ \ \ \ type.\ If\ the\ type\ isn't\ provided,\ it\ can\ be\ inferred\ from\ a\ default}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01115}01115\ \textcolor{stringliteral}{\ \ \ \ value.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01116}01116\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01117}01117\ \ \ \ \ guessed\_type\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01118}01118\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01119}01119\ \ \ \ \ \textcolor{keywordflow}{if}\ ty\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ default\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01120}01120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(default,\ (tuple,\ list)):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01121}01121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ the\ default\ is\ empty,\ ty\ will\ remain\ None\ and\ will}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01122}01122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ return\ STRING.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01123}01123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ default:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01124}01124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ item\ =\ default[0]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01125}01125\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01126}01126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ A\ tuple\ of\ tuples\ needs\ to\ detect\ the\ inner\ types.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01127}01127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Can't\ call\ convert\ recursively\ because\ that\ would}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01128}01128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ incorrectly\ unwind\ the\ tuple\ to\ a\ single\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01129}01129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(item,\ (tuple,\ list)):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01130}01130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ty\ =\ tuple(map(type,\ item))}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01131}01131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01132}01132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ty\ =\ type(item)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01133}01133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01134}01134\ \ \ \ \ \ \ \ \ \ \ \ \ ty\ =\ type(default)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01135}01135\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01136}01136\ \ \ \ \ \ \ \ \ guessed\_type\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01137}01137\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01138}01138\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ty,\ tuple):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01139}01139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classclick_1_1types_1_1_tuple}{Tuple}}(ty)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01140}01140\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01141}01141\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ty,\ ParamType):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01142}01142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ty}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01143}01143\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01144}01144\ \ \ \ \ \textcolor{keywordflow}{if}\ ty\ \textcolor{keywordflow}{is}\ str\ \textcolor{keywordflow}{or}\ ty\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01145}01145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ STRING}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01146}01146\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01147}01147\ \ \ \ \ \textcolor{keywordflow}{if}\ ty\ \textcolor{keywordflow}{is}\ int:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01148}01148\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ INT}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01149}01149\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01150}01150\ \ \ \ \ \textcolor{keywordflow}{if}\ ty\ \textcolor{keywordflow}{is}\ float:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01151}01151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ FLOAT}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01152}01152\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01153}01153\ \ \ \ \ \textcolor{keywordflow}{if}\ ty\ \textcolor{keywordflow}{is}\ bool:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01154}01154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ BOOL}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01155}01155\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01156}01156\ \ \ \ \ \textcolor{keywordflow}{if}\ guessed\_type:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01157}01157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ STRING}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01158}01158\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01159}01159\ \ \ \ \ \textcolor{keywordflow}{if}\ \_\_debug\_\_:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01160}01160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01161}01161\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(ty,\ ParamType):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01162}01162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ AssertionError(}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01163}01163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}Attempted\ to\ use\ an\ uninstantiated\ parameter\ type\ (\{ty\})."{}}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01164}01164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01165}01165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01166}01166\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ ty\ is\ an\ instance\ (correct),\ so\ issubclass\ fails.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01167}01167\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01168}01168\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01169}01169\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classclick_1_1types_1_1_func_param_type}{FuncParamType}}(ty)}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01170}01170\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01171}01171\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01172}01172\ \textcolor{comment}{\#:\ A\ dummy\ parameter\ type\ that\ just\ does\ nothing.\ \ From\ a\ user's}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01173}01173\ \textcolor{comment}{\#:\ perspective\ this\ appears\ to\ just\ be\ the\ same\ as\ \`{}STRING`\ but}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01174}01174\ \textcolor{comment}{\#:\ internally\ no\ string\ conversion\ takes\ place\ if\ the\ input\ was\ bytes.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01175}01175\ \textcolor{comment}{\#:\ This\ is\ usually\ useful\ when\ working\ with\ file\ paths\ as\ they\ can}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01176}01176\ \textcolor{comment}{\#:\ appear\ in\ bytes\ and\ unicode.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01177}01177\ \textcolor{comment}{\#:}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01178}01178\ \textcolor{comment}{\#:\ For\ path\ related\ uses\ the\ :class:`Path`\ type\ is\ a\ better\ choice\ but}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01179}01179\ \textcolor{comment}{\#:\ there\ are\ situations\ where\ an\ unprocessed\ type\ is\ useful\ which\ is\ why}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01180}01180\ \textcolor{comment}{\#:\ it\ is\ is\ provided.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01181}01181\ \textcolor{comment}{\#:}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01182}01182\ \textcolor{comment}{\#:\ ..\ versionadded::\ 4.0}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01183}\mbox{\hyperlink{namespaceclick_1_1types_aac1bb7c9aec6a3c220805160be57f5ac}{01183}}\ UNPROCESSED\ =\ \mbox{\hyperlink{classclick_1_1types_1_1_unprocessed_param_type}{UnprocessedParamType}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01184}01184\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01185}01185\ \textcolor{comment}{\#:\ A\ unicode\ string\ parameter\ type\ which\ is\ the\ implicit\ default.\ \ This}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01186}01186\ \textcolor{comment}{\#:\ can\ also\ be\ selected\ by\ using\ \`{}\`{}str``\ as\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01187}\mbox{\hyperlink{namespaceclick_1_1types_ac26dc5485440873d7fb3d9288df2c652}{01187}}\ STRING\ =\ \mbox{\hyperlink{classclick_1_1types_1_1_string_param_type}{StringParamType}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01188}01188\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01189}01189\ \textcolor{comment}{\#:\ An\ integer\ parameter.\ \ This\ can\ also\ be\ selected\ by\ using\ \`{}\`{}int``\ as}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01190}01190\ \textcolor{comment}{\#:\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01191}\mbox{\hyperlink{namespaceclick_1_1types_ab27638b6cff159755ff9f43e53341a16}{01191}}\ INT\ =\ \mbox{\hyperlink{classclick_1_1types_1_1_int_param_type}{IntParamType}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01192}01192\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01193}01193\ \textcolor{comment}{\#:\ A\ floating\ point\ value\ parameter.\ \ This\ can\ also\ be\ selected\ by\ using}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01194}01194\ \textcolor{comment}{\#:\ \`{}\`{}float``\ as\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01195}\mbox{\hyperlink{namespaceclick_1_1types_a90ef987a7017f4554d2ed2b56f06b328}{01195}}\ FLOAT\ =\ \mbox{\hyperlink{classclick_1_1types_1_1_float_param_type}{FloatParamType}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01196}01196\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01197}01197\ \textcolor{comment}{\#:\ A\ boolean\ parameter.\ \ This\ is\ the\ default\ for\ boolean\ flags.\ \ This\ can}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01198}01198\ \textcolor{comment}{\#:\ also\ be\ selected\ by\ using\ \`{}\`{}bool``\ as\ a\ type.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01199}\mbox{\hyperlink{namespaceclick_1_1types_a9fef0ba27210388adce9f977a4660e9c}{01199}}\ BOOL\ =\ \mbox{\hyperlink{classclick_1_1types_1_1_bool_param_type}{BoolParamType}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01200}01200\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01201}01201\ \textcolor{comment}{\#:\ A\ UUID\ parameter.}}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01202}\mbox{\hyperlink{namespaceclick_1_1types_aa601eacb3caa683ab8f6264f2b78f787}{01202}}\ UUID\ =\ \mbox{\hyperlink{classclick_1_1types_1_1_u_u_i_d_parameter_type}{UUIDParameterType}}()}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01203}01203\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01204}01204\ }
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01205}\mbox{\hyperlink{classclick_1_1types_1_1_option_help_extra}{01205}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1types_1_1_option_help_extra}{OptionHelpExtra}}(t.TypedDict,\ total=\textcolor{keyword}{False}):}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01206}\mbox{\hyperlink{classclick_1_1types_1_1_option_help_extra_a6f94e61c795aa4d70811caa45b32722f}{01206}}\ \ \ \ \ envvars:\ tuple[str,\ ...]}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01207}01207\ \ \ \ \ default:\ str}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01208}01208\ \ \ \ \ range:\ str}
+\DoxyCodeLine{\Hypertarget{click_2types_8py_source_l01209}01209\ \ \ \ \ required:\ str}
+
+\end{DoxyCode}

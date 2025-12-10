@@ -1,0 +1,55 @@
+var namespacepip_1_1__internal =
+[
+    [ "build_env", "namespacepip_1_1__internal_1_1build__env.html", "namespacepip_1_1__internal_1_1build__env" ],
+    [ "cache", "namespacepip_1_1__internal_1_1cache.html", "namespacepip_1_1__internal_1_1cache" ],
+    [ "cli", "namespacepip_1_1__internal_1_1cli.html", "namespacepip_1_1__internal_1_1cli" ],
+    [ "commands", "namespacepip_1_1__internal_1_1commands.html", "namespacepip_1_1__internal_1_1commands" ],
+    [ "configuration", "namespacepip_1_1__internal_1_1configuration.html", "namespacepip_1_1__internal_1_1configuration" ],
+    [ "distributions", "namespacepip_1_1__internal_1_1distributions.html", "namespacepip_1_1__internal_1_1distributions" ],
+    [ "exceptions", "namespacepip_1_1__internal_1_1exceptions.html", "namespacepip_1_1__internal_1_1exceptions" ],
+    [ "index", "namespacepip_1_1__internal_1_1index.html", "namespacepip_1_1__internal_1_1index" ],
+    [ "locations", "namespacepip_1_1__internal_1_1locations.html", "namespacepip_1_1__internal_1_1locations" ],
+    [ "main", "namespacepip_1_1__internal_1_1main.html", [
+      [ "main", "namespacepip_1_1__internal_1_1main.html#a086cec167dedbde822c5f21a66fc7046", null ],
+      [ "main", "namespacepip_1_1__internal_1_1main.html#ada7786e962a5700affafec71a907e696", null ]
+    ] ],
+    [ "metadata", "namespacepip_1_1__internal_1_1metadata.html", "namespacepip_1_1__internal_1_1metadata" ],
+    [ "models", "namespacepip_1_1__internal_1_1models.html", "namespacepip_1_1__internal_1_1models" ],
+    [ "network", "namespacepip_1_1__internal_1_1network.html", "namespacepip_1_1__internal_1_1network" ],
+    [ "operations", "namespacepip_1_1__internal_1_1operations.html", "namespacepip_1_1__internal_1_1operations" ],
+    [ "pyproject", "namespacepip_1_1__internal_1_1pyproject.html", [
+      [ "_is_list_of_str", "namespacepip_1_1__internal_1_1pyproject.html#a2dafaacd317d5736dabf2b82a8018843", null ],
+      [ "load_pyproject_toml", "namespacepip_1_1__internal_1_1pyproject.html#a5bcf5b570bf3cbaf684b5db3fd03aa6d", null ],
+      [ "load_pyproject_toml", "namespacepip_1_1__internal_1_1pyproject.html#a9d7e5ff214ec04fd9ac912b146e53516", null ],
+      [ "make_pyproject_path", "namespacepip_1_1__internal_1_1pyproject.html#aeb36ba4a48728ef5f59e939a1f787b9c", null ],
+      [ "BuildSystemDetails", "namespacepip_1_1__internal_1_1pyproject.html#a274d06001ee00ebc1024f50fe1cc1d05", null ]
+    ] ],
+    [ "req", "namespacepip_1_1__internal_1_1req.html", "namespacepip_1_1__internal_1_1req" ],
+    [ "resolution", "namespacepip_1_1__internal_1_1resolution.html", "namespacepip_1_1__internal_1_1resolution" ],
+    [ "self_outdated_check", "namespacepip_1_1__internal_1_1self__outdated__check.html", "namespacepip_1_1__internal_1_1self__outdated__check" ],
+    [ "utils", "namespacepip_1_1__internal_1_1utils.html", "namespacepip_1_1__internal_1_1utils" ],
+    [ "vcs", "namespacepip_1_1__internal_1_1vcs.html", "namespacepip_1_1__internal_1_1vcs" ],
+    [ "wheel_builder", "namespacepip_1_1__internal_1_1wheel__builder.html", [
+      [ "_build_one", "namespacepip_1_1__internal_1_1wheel__builder.html#ad7066706344486ddaae2818c99870637", null ],
+      [ "_build_one", "namespacepip_1_1__internal_1_1wheel__builder.html#a9b494a9d381fe963e38b4c575f0839d2", null ],
+      [ "_build_one_inside_env", "namespacepip_1_1__internal_1_1wheel__builder.html#a9b357aa7fae30699be297b08b05537dd", null ],
+      [ "_build_one_inside_env", "namespacepip_1_1__internal_1_1wheel__builder.html#a115d6168bd9f1b535eb93ff2c3e75ce5", null ],
+      [ "_clean_one_legacy", "namespacepip_1_1__internal_1_1wheel__builder.html#a00a1d5e0c5c39881fab743158a3959ac", null ],
+      [ "_clean_one_legacy", "namespacepip_1_1__internal_1_1wheel__builder.html#a6b58a58bff6620a5a982137fe5820ce3", null ],
+      [ "_contains_egg_info", "namespacepip_1_1__internal_1_1wheel__builder.html#a7f322dab33683100a519e2487ffe2622", null ],
+      [ "_get_cache_dir", "namespacepip_1_1__internal_1_1wheel__builder.html#af133e5c1fbb4fcfecff5df892bcf6c64", null ],
+      [ "_should_build", "namespacepip_1_1__internal_1_1wheel__builder.html#ae7d75cc5ab4270fcf966cd55972c041a", null ],
+      [ "_should_build", "namespacepip_1_1__internal_1_1wheel__builder.html#a102c2d4c88efbc9e62ef43f7d310b6e5", null ],
+      [ "_should_cache", "namespacepip_1_1__internal_1_1wheel__builder.html#a0c0a95c4587e6a91cfeb038ffc3013c5", null ],
+      [ "_verify_one", "namespacepip_1_1__internal_1_1wheel__builder.html#ae53a78a105549c15fad98693d145e27f", null ],
+      [ "build", "namespacepip_1_1__internal_1_1wheel__builder.html#a4463ec86fc47d1a51a9a543304e9613b", null ],
+      [ "build", "namespacepip_1_1__internal_1_1wheel__builder.html#ae67eaf7a96b623da5920bf08cb5851dc", null ],
+      [ "should_build_for_install_command", "namespacepip_1_1__internal_1_1wheel__builder.html#a61116e67af984013fb6d7c3ad03634d4", null ],
+      [ "should_build_for_wheel_command", "namespacepip_1_1__internal_1_1wheel__builder.html#a5c9a3c0c4284f4c9239be20a98cd90a3", null ],
+      [ "_egg_info_re", "namespacepip_1_1__internal_1_1wheel__builder.html#a6eda6c4baed2364813bdf9c3e7317720", null ],
+      [ "BuildResult", "namespacepip_1_1__internal_1_1wheel__builder.html#ad8206fa8e5856a00e6283c148f53bfa6", null ],
+      [ "logger", "namespacepip_1_1__internal_1_1wheel__builder.html#a84898e3516b9c46fa75845a249fc5200", null ]
+    ] ],
+    [ "main", "namespacepip_1_1__internal.html#af91660d4449ac82eccafdd890d0754ba", null ],
+    [ "main", "namespacepip_1_1__internal.html#a262e2883ad86aa3148d72250dfd57921", null ]
+];

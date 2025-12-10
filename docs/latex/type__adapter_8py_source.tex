@@ -1,0 +1,801 @@
+\doxysection{type\+\_\+adapter.\+py}
+\hypertarget{type__adapter_8py_source}{}\label{type__adapter_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/type\_adapter.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/type\_adapter.py}}
+\mbox{\hyperlink{type__adapter_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1type__adapter}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Type\ adapter\ specification."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations\ \textcolor{keyword}{as}\ \_annotations}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00005}00005\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00006}00006\ \textcolor{keyword}{import}\ types}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00007}00007\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Callable,\ Iterable}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00008}00008\ \textcolor{keyword}{from}\ dataclasses\ \textcolor{keyword}{import}\ is\_dataclass}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00009}00009\ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ FrameType}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00010}00010\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00011}00011\ \ \ \ \ Any,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00012}00012\ \ \ \ \ Generic,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00013}00013\ \ \ \ \ Literal,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00014}00014\ \ \ \ \ TypeVar,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00015}00015\ \ \ \ \ cast,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00016}00016\ \ \ \ \ final,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00017}00017\ \ \ \ \ overload,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00018}00018\ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00020}00020\ \textcolor{keyword}{from}\ pydantic\_core\ \textcolor{keyword}{import}\ CoreSchema,\ SchemaSerializer,\ SchemaValidator,\ Some}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00021}00021\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ ParamSpec,\ is\_typeddict}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00023}00023\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1errors}{pydantic.errors}}\ \textcolor{keyword}{import}\ PydanticUserError}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00024}00024\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1main}{pydantic.main}}\ \textcolor{keyword}{import}\ BaseModel,\ IncEx}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00026}00026\ \textcolor{keyword}{from}\ .\_internal\ \textcolor{keyword}{import}\ \_config,\ \_generate\_schema,\ \_mock\_val\_ser,\ \_namespace\_utils,\ \_repr,\ \_typing\_extra,\ \_utils}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00027}00027\ \textcolor{keyword}{from}\ .config\ \textcolor{keyword}{import}\ ConfigDict,\ ExtraValues}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00028}00028\ \textcolor{keyword}{from}\ .errors\ \textcolor{keyword}{import}\ PydanticUndefinedAnnotation}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00029}00029\ \textcolor{keyword}{from}\ .json\_schema\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00030}00030\ \ \ \ \ DEFAULT\_REF\_TEMPLATE,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00031}00031\ \ \ \ \ GenerateJsonSchema,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00032}00032\ \ \ \ \ JsonSchemaKeyT,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00033}00033\ \ \ \ \ JsonSchemaMode,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00034}00034\ \ \ \ \ JsonSchemaValue,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00035}00035\ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00036}00036\ \textcolor{keyword}{from}\ .plugin.\_schema\_validator\ \textcolor{keyword}{import}\ PluggableSchemaValidator,\ create\_schema\_validator}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00038}\mbox{\hyperlink{namespacepydantic_1_1type__adapter_a863692c7dc2dacec2a9f9c54558691a0}{00038}}\ T\ =\ TypeVar(\textcolor{stringliteral}{'T'})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00039}\mbox{\hyperlink{namespacepydantic_1_1type__adapter_ab80bf3af4de375aa415e2ef1889a6d74}{00039}}\ R\ =\ TypeVar(\textcolor{stringliteral}{'R'})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00040}\mbox{\hyperlink{namespacepydantic_1_1type__adapter_a13bca9a8d2bca77605818b77f2bb8447}{00040}}\ P\ =\ \mbox{\hyperlink{classtyping__extensions_1_1_param_spec}{ParamSpec}}(\textcolor{stringliteral}{'P'})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00041}\mbox{\hyperlink{namespacepydantic_1_1type__adapter_a68a2950d0730dd5c0aabb6edf4f963d5}{00041}}\ TypeAdapterT\ =\ TypeVar(\textcolor{stringliteral}{'TypeAdapterT'},\ bound=\textcolor{stringliteral}{'TypeAdapter'})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00044}\mbox{\hyperlink{namespacepydantic_1_1type__adapter_a1cd46267890357f138dfc86b9e82a6b7}{00044}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1type__adapter_a1cd46267890357f138dfc86b9e82a6b7}{\_getattr\_no\_parents}}(obj:\ Any,\ attribute:\ str)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00045}00045\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Returns\ the\ attribute\ value\ without\ attempting\ to\ look\ up\ attributes\ from\ parent\ types."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00046}00046\ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(obj,\ \textcolor{stringliteral}{'\_\_dict\_\_'}):}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ obj.\_\_dict\_\_[attribute]}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00052}00052\ \ \ \ \ slots\ =\ getattr(obj,\ \textcolor{stringliteral}{'\_\_slots\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00053}00053\ \ \ \ \ \textcolor{keywordflow}{if}\ slots\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ attribute\ \textcolor{keywordflow}{in}\ slots:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(obj,\ attribute)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00055}00055\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ AttributeError(attribute)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00059}\mbox{\hyperlink{namespacepydantic_1_1type__adapter_a6261f891b20235c35bbf2f12369ad6c5}{00059}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1type__adapter_a6261f891b20235c35bbf2f12369ad6c5}{\_type\_has\_config}}(type\_:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00060}00060\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Returns\ whether\ the\ type\ has\ config."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00061}00061\ \ \ \ \ type\_\ =\ \_typing\_extra.annotated\_type(type\_)\ \textcolor{keywordflow}{or}\ type\_}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00062}00062\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ issubclass(type\_,\ BaseModel)\ \textcolor{keywordflow}{or}\ is\_dataclass(type\_)\ \textcolor{keywordflow}{or}\ is\_typeddict(type\_)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ type\ is\ not\ a\ class}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00069}00069\ \textcolor{preprocessor}{@final}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00070}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter}{00070}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter}{TypeAdapter}}(Generic[T]):}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00071}00071\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}!!!\ abstract\ "{}Usage\ Documentation"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ [\`{}TypeAdapter\`{}](../concepts/type\_adapter.md)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00073}00073\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00074}00074\ \textcolor{stringliteral}{\ \ \ \ Type\ adapters\ provide\ a\ flexible\ way\ to\ perform\ validation\ and\ serialization\ based\ on\ a\ Python\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00075}00075\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00076}00076\ \textcolor{stringliteral}{\ \ \ \ A\ \`{}TypeAdapter\`{}\ instance\ exposes\ some\ of\ the\ functionality\ from\ \`{}BaseModel\`{}\ instance\ methods}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00077}00077\ \textcolor{stringliteral}{\ \ \ \ for\ types\ that\ do\ not\ have\ such\ methods\ (such\ as\ dataclasses,\ primitive\ types,\ and\ more).}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00078}00078\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ **Note:**\ \`{}TypeAdapter\`{}\ instances\ are\ not\ types,\ and\ cannot\ be\ used\ as\ type\ annotations\ for\ fields.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00080}00080\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ type:\ The\ type\ associated\ with\ the\ \`{}TypeAdapter\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ config:\ Configuration\ for\ the\ \`{}TypeAdapter\`{},\ should\ be\ a\ dictionary\ conforming\ to}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ [\`{}ConfigDict\`{}][pydantic.config.ConfigDict].}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00085}00085\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ !!!\ note}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ You\ cannot\ provide\ a\ configuration\ when\ instantiating\ a\ \`{}TypeAdapter\`{}\ if\ the\ type\ you're\ using}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ has\ its\ own\ config\ that\ cannot\ be\ overridden\ (ex:\ \`{}BaseModel\`{},\ \`{}TypedDict\`{},\ and\ \`{}dataclass\`{}).\ A}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\`{}type-\/adapter-\/config-\/unused\`{}](../errors/usage\_errors.md\#type-\/adapter-\/config-\/unused)\ error\ will}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ be\ raised\ in\ this\ case.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \_parent\_depth:\ Depth\ at\ which\ to\ search\ for\ the\ [parent\ frame][frame-\/objects].\ This\ frame\ is\ used\ when}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ resolving\ forward\ annotations\ during\ schema\ building,\ by\ looking\ for\ the\ globals\ and\ locals\ of\ this}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ frame.\ Defaults\ to\ 2,\ which\ will\ result\ in\ the\ frame\ where\ the\ \`{}TypeAdapter\`{}\ was\ instantiated.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00094}00094\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ !!!\ note}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ This\ parameter\ is\ named\ with\ an\ underscore\ to\ suggest\ its\ private\ nature\ and\ discourage\ use.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ It\ may\ be\ deprecated\ in\ a\ minor\ version,\ so\ we\ only\ recommend\ using\ it\ if\ you're\ comfortable}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ with\ potential\ change\ in\ behavior/support.\ It's\ default\ value\ is\ 2\ because\ internally,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ the\ \`{}TypeAdapter\`{}\ class\ makes\ another\ call\ to\ fetch\ the\ frame.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ module:\ The\ module\ that\ passes\ to\ plugin\ if\ provided.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00101}00101\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ core\_schema:\ The\ core\ schema\ for\ the\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ validator:\ The\ schema\ validator\ for\ the\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ serializer:\ The\ schema\ serializer\ for\ the\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ pydantic\_complete:\ Whether\ the\ core\ schema\ for\ the\ type\ is\ successfully\ built.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00107}00107\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ ???\ tip\ "{}Compatibility\ with\ \`{}mypy\`{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Depending\ on\ the\ type\ used,\ \`{}mypy\`{}\ might\ raise\ an\ error\ when\ instantiating\ a\ \`{}TypeAdapter\`{}.\ As\ a\ workaround,\ you\ can\ explicitly}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ annotate\ your\ variable:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00111}00111\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}py}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ from\ typing\ import\ Union}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00114}00114\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00115}00115\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ from\ pydantic\ import\ TypeAdapter}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00116}00116\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00117}00117\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ta:\ TypeAdapter[Union[str,\ int]]\ =\ TypeAdapter(Union[str,\ int])\ \ \#\ type:\ ignore[arg-\/type]}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00119}00119\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ ???\ info\ "{}Namespace\ management\ nuances\ and\ implementation\ details"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00121}00121\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Here,\ we\ collect\ some\ notes\ on\ namespace\ management,\ and\ subtle\ differences\ from\ \`{}BaseModel\`{}:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00123}00123\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}BaseModel\`{}\ uses\ its\ own\ \`{}\_\_module\_\_\`{}\ to\ find\ out\ where\ it\ was\ defined}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00125}00125\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ then\ looks\ for\ symbols\ to\ resolve\ forward\ references\ in\ those\ globals.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00126}00126\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ On\ the\ other\ hand,\ \`{}TypeAdapter\`{}\ can\ be\ initialized\ with\ arbitrary\ objects,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00127}00127\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ which\ may\ not\ be\ types\ and\ thus\ do\ not\ have\ a\ \`{}\_\_module\_\_\`{}\ available.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ So\ instead\ we\ look\ at\ the\ globals\ in\ our\ parent\ stack\ frame.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00129}00129\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00130}00130\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ It\ is\ expected\ that\ the\ \`{}ns\_resolver\`{}\ passed\ to\ this\ function\ will\ have\ the\ correct}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00131}00131\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ namespace\ for\ the\ type\ we're\ adapting.\ See\ the\ source\ code\ for\ \`{}TypeAdapter.\_\_init\_\_\`{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00132}00132\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ \`{}TypeAdapter.rebuild\`{}\ for\ various\ ways\ to\ construct\ this\ namespace.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00133}00133\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00134}00134\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ works\ for\ the\ case\ where\ this\ function\ is\ called\ in\ a\ module\ that}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00135}00135\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ has\ the\ target\ of\ forward\ references\ in\ its\ scope,\ but}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00136}00136\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ does\ not\ always\ work\ for\ more\ complex\ cases.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00137}00137\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00138}00138\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ For\ example,\ take\ the\ following:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00139}00139\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00140}00140\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}python\ \{title="{}a.py"{}\}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ IntList\ =\ list[int]}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ OuterDict\ =\ dict[str,\ 'IntList']}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00143}00143\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00144}00144\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00145}00145\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ title="{}b.py"{}\}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00146}00146\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ from\ a\ import\ OuterDict}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00147}00147\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00148}00148\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ from\ pydantic\ import\ TypeAdapter}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00149}00149\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ IntList\ =\ int\ \ \#\ replaces\ the\ symbol\ the\ forward\ reference\ is\ looking\ for}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ v\ =\ TypeAdapter(OuterDict)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ v(\{'x':\ 1\})\ \ \#\ should\ fail\ but\ doesn't}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00153}00153\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00154}00154\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ \`{}OuterDict\`{}\ were\ a\ \`{}BaseModel\`{},\ this\ would\ work\ because\ it\ would\ resolve}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00156}00156\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ forward\ reference\ within\ the\ \`{}a.py\`{}\ namespace.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00157}00157\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ But\ \`{}TypeAdapter(OuterDict)\`{}\ can't\ determine\ what\ module\ \`{}OuterDict\`{}\ came\ from.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00158}00158\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ In\ other\ words,\ the\ assumption\ that\ \_all\_\ forward\ references\ exist\ in\ the}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00160}00160\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ module\ we\ are\ being\ called\ from\ is\ not\ technically\ always\ true.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Although\ most\ of\ the\ time\ it\ is\ and\ it\ works\ fine\ for\ recursive\ models\ and\ such,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00162}00162\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}BaseModel\`{}'s\ behavior\ isn't\ perfect\ either\ and\ \_can\_\ break\ in\ similar\ ways,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00163}00163\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ so\ there\ is\ no\ right\ or\ wrong\ between\ the\ two.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00164}00164\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00165}00165\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ But\ at\ the\ very\ least\ this\ behavior\ is\ \_subtly\_\ different\ from\ \`{}BaseModel\`{}'s.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00166}00166\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00168}00168\ \ \ \ \ core\_schema:\ CoreSchema}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00169}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{00169}}\ \ \ \ \ validator:\ SchemaValidator\ |\ PluggableSchemaValidator}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00170}00170\ \ \ \ \ serializer:\ SchemaSerializer}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00171}00171\ \ \ \ \ pydantic\_complete:\ bool}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00173}00173\ \ \ \ \ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00174}00174\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ type:\ type[T],}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ config:\ ConfigDict\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \_parent\_depth:\ int\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ module:\ str\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00181}00181\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:\ ...}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00183}00183\ \ \ \ \ \textcolor{comment}{\#\ This\ second\ overload\ is\ for\ unsupported\ special\ forms\ (such\ as\ Annotated,\ Union,\ etc.)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00184}00184\ \ \ \ \ \textcolor{comment}{\#\ Currently\ there\ is\ no\ way\ to\ type\ this\ correctly}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00185}00185\ \ \ \ \ \textcolor{comment}{\#\ See\ https://github.com/python/typing/pull/1618}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00186}00186\ \ \ \ \ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00187}00187\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ type:\ Any,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ config:\ ConfigDict\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \_parent\_depth:\ int\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ module:\ str\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00194}00194\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:\ ...}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00196}00196\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ type:\ Any,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ config:\ ConfigDict\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \_parent\_depth:\ int\ =\ 2,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ module:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00203}00203\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \mbox{\hyperlink{namespacepydantic_1_1type__adapter_a6261f891b20235c35bbf2f12369ad6c5}{\_type\_has\_config}}(type)\ \textcolor{keywordflow}{and}\ config\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Cannot\ use\ \`{}config`\ when\ the\ type\ is\ a\ BaseModel,\ dataclass\ or\ TypedDict.'}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\ These\ types\ can\ have\ their\ own\ config\ and\ setting\ the\ config\ via\ the\ \`{}config`'}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\ parameter\ to\ TypeAdapter\ will\ not\ override\ it,\ thus\ the\ \`{}config`\ you\ passed\ to'}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\ TypeAdapter\ becomes\ meaningless,\ which\ is\ probably\ not\ what\ you\ want.'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'type-\/adapter-\/config-\/unused'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00213}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{00213}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}}\ =\ type}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00214}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a6bedc7ff292489543716c5c4e190aa1e}{00214}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a6bedc7ff292489543716c5c4e190aa1e}{\_config}}\ =\ config}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00215}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a862c28566b0bfad381bf7e20bf3c6f15}{00215}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a862c28566b0bfad381bf7e20bf3c6f15}{\_parent\_depth}}\ =\ \_parent\_depth}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00216}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a9dd0cbcf0fbf0961247a0ba9ae59b432}{00216}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a9dd0cbcf0fbf0961247a0ba9ae59b432}{pydantic\_complete}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ parent\_frame\ =\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3023cae15cf7c47eee311bd89368f230}{\_fetch\_parent\_frame}}()}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(type,\ types.FunctionType):}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Special\ case\ functions,\ which\ are\ *not*\ pushed\ to\ the\ \`{}NsResolver`\ stack\ and\ without\ this\ special\ case}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ would\ only\ have\ access\ to\ the\ parent\ namespace\ where\ the\ \`{}TypeAdapter`\ was\ instantiated\ (if\ the\ function\ is\ defined}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ in\ another\ module,\ we\ need\ to\ look\ at\ that\ module's\ globals).}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ parent\_frame\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}f\_locals`\ is\ the\ namespace\ where\ the\ type\ adapter\ was\ instantiated\ (\string~\ to\ \`{}f\_globals`\ if\ at\ the\ module\ level):}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parent\_ns\ =\ parent\_frame.f\_locals}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parent\_ns\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ globalns,\ localns\ =\ \_namespace\_utils.ns\_for\_function(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ type,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parent\_namespace=parent\_ns,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ parent\_namespace\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ parent\_frame\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ globalns\ =\ parent\_frame.f\_globals}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Do\ not\ provide\ a\ local\ ns\ if\ the\ type\ adapter\ happens\ to\ be\ instantiated\ at\ the\ module\ level:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ localns\ =\ parent\_frame.f\_locals\ \textcolor{keywordflow}{if}\ parent\_frame.f\_locals\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ globalns\ \textcolor{keywordflow}{else}\ \{\}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ globalns\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ localns\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ parent\_namespace\ =\ localns}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00243}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_ac8481171d000a2d6aa24ca39319c7093}{00243}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_ac8481171d000a2d6aa24ca39319c7093}{\_module\_name}}\ =\ module\ \textcolor{keywordflow}{or}\ cast(str,\ globalns.get(\textcolor{stringliteral}{'\_\_name\_\_'},\ \textcolor{stringliteral}{''}))}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a81e0a31e986e18dc9a7bd3f394521e4f}{\_init\_core\_attrs}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ ns\_resolver=\mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver}{\_namespace\_utils.NsResolver}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ namespaces\_tuple=\mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_namespaces_tuple}{\_namespace\_utils.NamespacesTuple}}(locals=localns,\ globals=globalns),}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parent\_namespace=parent\_namespace,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ force=\textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00252}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3023cae15cf7c47eee311bd89368f230}{00252}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3023cae15cf7c47eee311bd89368f230}{\_fetch\_parent\_frame}}(self)\ -\/>\ FrameType\ |\ None:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ frame\ =\ sys.\_getframe(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a862c28566b0bfad381bf7e20bf3c6f15}{\_parent\_depth}})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ frame.f\_globals.get(\textcolor{stringliteral}{'\_\_name\_\_'})\ ==\ \textcolor{stringliteral}{'typing'}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Because\ \`{}TypeAdapter`\ is\ generic,\ explicitly\ parametrizing\ the\ class\ results}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ in\ a\ \`{}typing.\_GenericAlias`\ instance,\ which\ proxies\ instantiation\ calls\ to\ the}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ "{}real"{}\ \`{}TypeAdapter`\ class\ and\ thus\ adding\ an\ extra\ frame\ to\ the\ call.\ To\ avoid}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ pulling\ anything\ from\ the\ \`{}typing`\ module,\ use\ the\ correct\ frame\ (the\ one\ before):}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ frame.f\_back}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ frame}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00263}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a81e0a31e986e18dc9a7bd3f394521e4f}{00263}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a81e0a31e986e18dc9a7bd3f394521e4f}{\_init\_core\_attrs}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ self,\ ns\_resolver:\ \_namespace\_utils.NsResolver,\ force:\ bool,\ raise\_errors:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00265}00265\ \ \ \ \ )\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Initialize\ the\ core\ schema,\ validator,\ and\ serializer\ for\ the\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00267}00267\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00268}00268\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00269}00269\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ns\_resolver:\ The\ namespace\ resolver\ to\ use\ when\ building\ the\ core\ schema\ for\ the\ adapted\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00270}00270\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ force:\ Whether\ to\ force\ the\ construction\ of\ the\ core\ schema,\ validator,\ and\ serializer.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00271}00271\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ If\ \`{}force\`{}\ is\ set\ to\ \`{}False\`{}\ and\ \`{}\_defer\_build\`{}\ is\ \`{}True\`{},\ the\ core\ schema,\ validator,\ and\ serializer\ will\ be\ set\ to\ mocks.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00272}00272\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ raise\_errors:\ Whether\ to\ raise\ errors\ if\ initializing\ any\ of\ the\ core\ attrs\ fails.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00273}00273\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00274}00274\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00275}00275\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \`{}True\`{}\ if\ the\ core\ schema,\ validator,\ and\ serializer\ were\ successfully\ initialized,\ otherwise\ \`{}False\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00276}00276\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00277}00277\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Raises:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00278}00278\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ PydanticUndefinedAnnotation:\ If\ \`{}PydanticUndefinedAnnotation\`{}\ occurs\ in\`{}\_\_get\_pydantic\_core\_schema\_\_\`{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00279}00279\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ and\ \`{}raise\_errors=True\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00280}00280\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00281}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a40e1dcb028e132b6cc1403732c308365}{00281}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ force\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a40e1dcb028e132b6cc1403732c308365}{\_defer\_build}}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \_mock\_val\_ser.set\_type\_adapter\_mocks(self)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a9dd0cbcf0fbf0961247a0ba9ae59b432}{pydantic\_complete}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00287}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{00287}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}}\ =\ \mbox{\hyperlink{namespacepydantic_1_1type__adapter_a1cd46267890357f138dfc86b9e82a6b7}{\_getattr\_no\_parents}}(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}},\ \textcolor{stringliteral}{'\_\_pydantic\_core\_schema\_\_'})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{validator}}\ =\ \mbox{\hyperlink{namespacepydantic_1_1type__adapter_a1cd46267890357f138dfc86b9e82a6b7}{\_getattr\_no\_parents}}(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}},\ \textcolor{stringliteral}{'\_\_pydantic\_validator\_\_'})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00289}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a8e7a71c29e7009570da9c4651b6aaf46}{00289}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a8e7a71c29e7009570da9c4651b6aaf46}{serializer}}\ =\ \mbox{\hyperlink{namespacepydantic_1_1type__adapter_a1cd46267890357f138dfc86b9e82a6b7}{\_getattr\_no\_parents}}(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}},\ \textcolor{stringliteral}{'\_\_pydantic\_serializer\_\_'})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TODO:\ we\ don't\ go\ through\ the\ rebuild\ logic\ here\ directly\ because\ we\ don't\ want}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ repeat\ all\ of\ the\ namespace\ fetching\ logic\ that\ we've\ already\ done}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ so\ we\ simply\ skip\ to\ the\ block\ below\ that\ does\ the\ actual\ schema\ generation}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}},\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{\_mock\_val\_ser.MockCoreSchema}})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ isinstance(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{validator}},\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{\_mock\_val\_ser.MockValSer}})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ isinstance(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a8e7a71c29e7009570da9c4651b6aaf46}{serializer}},\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{\_mock\_val\_ser.MockValSer}})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ AttributeError()}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ config\_wrapper\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__config_1_1_config_wrapper}{\_config.ConfigWrapper}}(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a6bedc7ff292489543716c5c4e190aa1e}{\_config}})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ schema\_generator\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__generate__schema_1_1_generate_schema}{\_generate\_schema.GenerateSchema}}(config\_wrapper,\ ns\_resolver=ns\_resolver)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ core\_schema\ =\ schema\_generator.generate\_schema(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ PydanticUndefinedAnnotation:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ raise\_errors:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_mock\_val\_ser.set\_type\_adapter\_mocks(self)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00312}00312\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}}\ =\ schema\_generator.clean\_schema(core\_schema)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__generate__schema_1_1_invalid_schema_error}{\_generate\_schema.InvalidSchemaError}}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_mock\_val\_ser.set\_type\_adapter\_mocks(self)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ core\_config\ =\ config\_wrapper.core\_config(\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{validator}}\ =\ create\_schema\_validator(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ schema=self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ schema\_type=self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ schema\_type\_module=self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_ac8481171d000a2d6aa24ca39319c7093}{\_module\_name}},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ schema\_type\_name=str(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}}),}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ schema\_kind=\textcolor{stringliteral}{'TypeAdapter'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ config=core\_config,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00328}00328\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plugin\_settings=config\_wrapper.plugin\_settings,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a8e7a71c29e7009570da9c4651b6aaf46}{serializer}}\ =\ SchemaSerializer(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}},\ core\_config)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a9dd0cbcf0fbf0961247a0ba9ae59b432}{pydantic\_complete}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00335}00335\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00336}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_afe69ff9d31f78e7d1b3a82fdacee6004}{00336}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a40e1dcb028e132b6cc1403732c308365}{\_defer\_build}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ config\ =\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a6bedc7ff292489543716c5c4e190aa1e}{\_config}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a6bedc7ff292489543716c5c4e190aa1e}{\_config}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3f2897b7eaaf7a0e6053df3db965ca7e}{\_model\_config}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ config:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ config.get(\textcolor{stringliteral}{'defer\_build'})\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00342}00342\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00343}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3f2897b7eaaf7a0e6053df3db965ca7e}{00343}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3f2897b7eaaf7a0e6053df3db965ca7e}{\_model\_config}}(self)\ -\/>\ ConfigDict\ |\ None:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ type\_:\ Any\ =\ \_typing\_extra.annotated\_type(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}})\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a3b7b82202410cf803b34d2fdd76dae7e}{\_type}}\ \ \textcolor{comment}{\#\ Eg\ FastAPI\ heavily\ uses\ Annotated}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \_utils.lenient\_issubclass(type\_,\ BaseModel):}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_.model\_config}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(type\_,\ \textcolor{stringliteral}{'\_\_pydantic\_config\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00349}00349\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{'TypeAdapter(\{\_repr.display\_as\_type(self.\_type)\})'}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00352}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a0ef7c459a79892de1bc584e57e2a85eb}{00352}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a0ef7c459a79892de1bc584e57e2a85eb}{rebuild}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ force:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ raise\_errors:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \_parent\_namespace\_depth:\ int\ =\ 2,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \_types\_namespace:\ \_namespace\_utils.MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00359}00359\ \ \ \ \ )\ -\/>\ bool\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Try\ to\ rebuild\ the\ pydantic-\/core\ schema\ for\ the\ adapter's\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00361}00361\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00362}00362\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ may\ be\ necessary\ when\ one\ of\ the\ annotations\ is\ a\ ForwardRef\ which\ could\ not\ be\ resolved\ during}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00363}00363\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ initial\ attempt\ to\ build\ the\ schema,\ and\ automatic\ rebuilding\ fails.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00364}00364\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00365}00365\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00366}00366\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ force:\ Whether\ to\ force\ the\ rebuilding\ of\ the\ type\ adapter's\ schema,\ defaults\ to\ \`{}False\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00367}00367\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ raise\_errors:\ Whether\ to\ raise\ errors,\ defaults\ to\ \`{}True\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00368}00368\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_parent\_namespace\_depth:\ Depth\ at\ which\ to\ search\ for\ the\ [parent\ frame][frame-\/objects].\ This}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00369}00369\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ frame\ is\ used\ when\ resolving\ forward\ annotations\ during\ schema\ rebuilding,\ by\ looking\ for}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00370}00370\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ the\ locals\ of\ this\ frame.\ Defaults\ to\ 2,\ which\ will\ result\ in\ the\ frame\ where\ the\ method}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00371}00371\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ was\ called.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00372}00372\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_types\_namespace:\ An\ explicit\ types\ namespace\ to\ use,\ instead\ of\ using\ the\ local\ namespace}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00373}00373\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ from\ the\ parent\ frame.\ Defaults\ to\ \`{}None\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00374}00374\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00375}00375\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00376}00376\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Returns\ \`{}None\`{}\ if\ the\ schema\ is\ already\ "{}complete"{}\ and\ rebuilding\ was\ not\ required.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00377}00377\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ If\ rebuilding\ \_was\_\ required,\ returns\ \`{}True\`{}\ if\ rebuilding\ was\ successful,\ otherwise\ \`{}False\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00378}00378\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ force\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a9dd0cbcf0fbf0961247a0ba9ae59b432}{pydantic\_complete}}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \_types\_namespace\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ rebuild\_ns\ =\ \_types\_namespace}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ \_parent\_namespace\_depth\ >\ 0:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ rebuild\_ns\ =\ \_typing\_extra.parent\_frame\_namespace(parent\_depth=\_parent\_namespace\_depth,\ force=\textcolor{keyword}{True})\ \textcolor{keywordflow}{or}\ \{\}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00386}00386\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ rebuild\_ns\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00388}00388\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ have\ to\ manually\ fetch\ globals\ here\ because\ there's\ no\ type\ on\ the\ stack\ of\ the\ NsResolver}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ so\ we\ skip\ the\ globalns\ =\ get\_module\_ns\_of(typ)\ call\ that\ would\ normally\ happen}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ globalns\ =\ sys.\_getframe(max(\_parent\_namespace\_depth\ -\/\ 1,\ 1)).f\_globals}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ ns\_resolver\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver}{\_namespace\_utils.NsResolver}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ namespaces\_tuple=\mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_namespaces_tuple}{\_namespace\_utils.NamespacesTuple}}(locals=rebuild\_ns,\ globals=globalns),}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ parent\_namespace=rebuild\_ns,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a81e0a31e986e18dc9a7bd3f394521e4f}{\_init\_core\_attrs}}(ns\_resolver=ns\_resolver,\ force=\textcolor{keyword}{True},\ raise\_errors=raise\_errors)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00398}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_adfd1f143b35aeeebebf634df21933add}{00398}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_adfd1f143b35aeeebebf634df21933add}{validate\_python}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ object:\ Any,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00403}00403\ \ \ \ \ \ \ \ \ strict:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00404}00404\ \ \ \ \ \ \ \ \ extra:\ ExtraValues\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ from\_attributes:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ context:\ Any\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ experimental\_allow\_partial:\ bool\ |\ Literal[\textcolor{stringliteral}{'off'},\ \textcolor{stringliteral}{'on'},\ \textcolor{stringliteral}{'trailing-\/strings'}]\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00408}00408\ \ \ \ \ \ \ \ \ by\_alias:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ by\_name:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00410}00410\ \ \ \ \ )\ -\/>\ T:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Validate\ a\ Python\ object\ against\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00412}00412\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00413}00413\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00414}00414\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ object:\ The\ Python\ object\ to\ validate\ against\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00415}00415\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ strict:\ Whether\ to\ strictly\ check\ types.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00416}00416\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ extra:\ Whether\ to\ ignore,\ allow,\ or\ forbid\ extra\ data\ during\ model\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00417}00417\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ See\ the\ [\`{}extra\`{}\ configuration\ value][pydantic.ConfigDict.extra]\ for\ details.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00418}00418\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ from\_attributes:\ Whether\ to\ extract\ data\ from\ object\ attributes.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00419}00419\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ context:\ Additional\ context\ to\ pass\ to\ the\ validator.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00420}00420\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ experimental\_allow\_partial:\ **Experimental**\ whether\ to\ enable}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00421}00421\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [partial\ validation](../concepts/experimental.md\#partial-\/validation),\ e.g.\ to\ process\ streams.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00422}00422\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ False\ /\ 'off':\ Default\ behavior,\ no\ partial\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00423}00423\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ True\ /\ 'on':\ Enable\ partial\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00424}00424\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ 'trailing-\/strings':\ Enable\ partial\ validation\ and\ allow\ trailing\ strings\ in\ the\ input.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00425}00425\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_alias:\ Whether\ to\ use\ the\ field's\ alias\ when\ validating\ against\ the\ provided\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00426}00426\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_name:\ Whether\ to\ use\ the\ field's\ name\ when\ validating\ against\ the\ provided\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00427}00427\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00428}00428\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ !!!\ note}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00429}00429\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ When\ using\ \`{}TypeAdapter\`{}\ with\ a\ Pydantic\ \`{}dataclass\`{},\ the\ use\ of\ the\ \`{}from\_attributes\`{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00430}00430\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ argument\ is\ not\ supported.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00431}00431\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00432}00432\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00433}00433\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ validated\ object.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00434}00434\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00435}00435\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ by\_alias\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}\ \textcolor{keywordflow}{and}\ by\_name\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'At\ least\ one\ of\ \`{}by\_alias`\ or\ \`{}by\_name`\ must\ be\ set\ to\ True.'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'validate-\/by-\/alias-\/and-\/name-\/false'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00440}00440\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{validator}}.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_adfd1f143b35aeeebebf634df21933add}{validate\_python}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ object,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ strict=strict,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ extra=extra,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ from\_attributes=from\_attributes,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ context=context,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ allow\_partial=experimental\_allow\_partial,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ by\_name=by\_name,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00451}00451\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00452}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aeab39d23e3e88277b8e979220867f86a}{00452}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aeab39d23e3e88277b8e979220867f86a}{validate\_json}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00453}00453\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ data:\ str\ |\ bytes\ |\ bytearray,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00456}00456\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ strict:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ extra:\ ExtraValues\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00459}00459\ \ \ \ \ \ \ \ \ context:\ Any\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ experimental\_allow\_partial:\ bool\ |\ Literal[\textcolor{stringliteral}{'off'},\ \textcolor{stringliteral}{'on'},\ \textcolor{stringliteral}{'trailing-\/strings'}]\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ by\_alias:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ by\_name:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00463}00463\ \ \ \ \ )\ -\/>\ T:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00464}00464\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}!!!\ abstract\ "{}Usage\ Documentation"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00465}00465\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ [JSON\ Parsing](../concepts/json.md\#json-\/parsing)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00466}00466\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00467}00467\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Validate\ a\ JSON\ string\ or\ bytes\ against\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00468}00468\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00469}00469\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00470}00470\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ data:\ The\ JSON\ data\ to\ validate\ against\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00471}00471\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ strict:\ Whether\ to\ strictly\ check\ types.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00472}00472\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ extra:\ Whether\ to\ ignore,\ allow,\ or\ forbid\ extra\ data\ during\ model\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00473}00473\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ See\ the\ [\`{}extra\`{}\ configuration\ value][pydantic.ConfigDict.extra]\ for\ details.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00474}00474\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ context:\ Additional\ context\ to\ use\ during\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00475}00475\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ experimental\_allow\_partial:\ **Experimental**\ whether\ to\ enable}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00476}00476\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [partial\ validation](../concepts/experimental.md\#partial-\/validation),\ e.g.\ to\ process\ streams.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00477}00477\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ False\ /\ 'off':\ Default\ behavior,\ no\ partial\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00478}00478\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ True\ /\ 'on':\ Enable\ partial\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00479}00479\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ 'trailing-\/strings':\ Enable\ partial\ validation\ and\ allow\ trailing\ strings\ in\ the\ input.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00480}00480\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_alias:\ Whether\ to\ use\ the\ field's\ alias\ when\ validating\ against\ the\ provided\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00481}00481\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_name:\ Whether\ to\ use\ the\ field's\ name\ when\ validating\ against\ the\ provided\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00482}00482\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00483}00483\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00484}00484\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ validated\ object.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00485}00485\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ by\_alias\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}\ \textcolor{keywordflow}{and}\ by\_name\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'At\ least\ one\ of\ \`{}by\_alias`\ or\ \`{}by\_name`\ must\ be\ set\ to\ True.'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'validate-\/by-\/alias-\/and-\/name-\/false'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00491}00491\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{validator}}.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aeab39d23e3e88277b8e979220867f86a}{validate\_json}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ data,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ strict=strict,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ extra=extra,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ context=context,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ \ \ \ \ allow\_partial=experimental\_allow\_partial,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ by\_name=by\_name,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00501}00501\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00502}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_af0d144c8155f2d415d868e4f84961361}{00502}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_af0d144c8155f2d415d868e4f84961361}{validate\_strings}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00503}00503\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ obj:\ Any,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ strict:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ extra:\ ExtraValues\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ context:\ Any\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ experimental\_allow\_partial:\ bool\ |\ Literal[\textcolor{stringliteral}{'off'},\ \textcolor{stringliteral}{'on'},\ \textcolor{stringliteral}{'trailing-\/strings'}]\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ by\_alias:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ by\_name:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00513}00513\ \ \ \ \ )\ -\/>\ T:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00514}00514\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Validate\ object\ contains\ string\ data\ against\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00515}00515\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00516}00516\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00517}00517\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ obj:\ The\ object\ contains\ string\ data\ to\ validate.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00518}00518\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ strict:\ Whether\ to\ strictly\ check\ types.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00519}00519\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ extra:\ Whether\ to\ ignore,\ allow,\ or\ forbid\ extra\ data\ during\ model\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00520}00520\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ See\ the\ [\`{}extra\`{}\ configuration\ value][pydantic.ConfigDict.extra]\ for\ details.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00521}00521\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ context:\ Additional\ context\ to\ use\ during\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00522}00522\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ experimental\_allow\_partial:\ **Experimental**\ whether\ to\ enable}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00523}00523\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [partial\ validation](../concepts/experimental.md\#partial-\/validation),\ e.g.\ to\ process\ streams.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00524}00524\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ False\ /\ 'off':\ Default\ behavior,\ no\ partial\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00525}00525\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ True\ /\ 'on':\ Enable\ partial\ validation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00526}00526\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ 'trailing-\/strings':\ Enable\ partial\ validation\ and\ allow\ trailing\ strings\ in\ the\ input.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00527}00527\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_alias:\ Whether\ to\ use\ the\ field's\ alias\ when\ validating\ against\ the\ provided\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00528}00528\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_name:\ Whether\ to\ use\ the\ field's\ name\ when\ validating\ against\ the\ provided\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00529}00529\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00530}00530\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00531}00531\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ validated\ object.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00532}00532\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ by\_alias\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}\ \textcolor{keywordflow}{and}\ by\_name\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'At\ least\ one\ of\ \`{}by\_alias`\ or\ \`{}by\_name`\ must\ be\ set\ to\ True.'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00536}00536\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'validate-\/by-\/alias-\/and-\/name-\/false'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00537}00537\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00538}00538\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00539}00539\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{validator}}.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_af0d144c8155f2d415d868e4f84961361}{validate\_strings}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ obj,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ \ \ \ \ strict=strict,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ extra=extra,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ context=context,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ allow\_partial=experimental\_allow\_partial,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00546}00546\ \ \ \ \ \ \ \ \ \ \ \ \ by\_name=by\_name,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00547}00547\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00548}00548\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00549}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a67bfa39f3ba18e1ac8656301b217ba18}{00549}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a67bfa39f3ba18e1ac8656301b217ba18}{get\_default\_value}}(self,\ *,\ strict:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},\ context:\ Any\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None})\ -\/>\ Some[T]\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00550}00550\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ default\ value\ for\ the\ wrapped\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00551}00551\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00552}00552\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00553}00553\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ strict:\ Whether\ to\ strictly\ check\ types.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00554}00554\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ context:\ Additional\ context\ to\ pass\ to\ the\ validator.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00555}00555\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00556}00556\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00557}00557\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ default\ value\ wrapped\ in\ a\ \`{}Some\`{}\ if\ there\ is\ one\ or\ None\ if\ not.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00558}00558\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00559}00559\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a55b196f39add757ba438d54a51c653d5}{validator}}.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a67bfa39f3ba18e1ac8656301b217ba18}{get\_default\_value}}(strict=strict,\ context=context)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00560}00560\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00561}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa5ea6bc5a5bb2d80acc9a62c1f117a70}{00561}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa5ea6bc5a5bb2d80acc9a62c1f117a70}{dump\_python}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00562}00562\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00563}00563\ \ \ \ \ \ \ \ \ instance:\ T,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00566}00566\ \ \ \ \ \ \ \ \ mode:\ Literal[\textcolor{stringliteral}{'json'},\ \textcolor{stringliteral}{'python'}]\ =\ \textcolor{stringliteral}{'python'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ include:\ IncEx\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00568}00568\ \ \ \ \ \ \ \ \ exclude:\ IncEx\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00569}00569\ \ \ \ \ \ \ \ \ by\_alias:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00570}00570\ \ \ \ \ \ \ \ \ exclude\_unset:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00571}00571\ \ \ \ \ \ \ \ \ exclude\_defaults:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00572}00572\ \ \ \ \ \ \ \ \ exclude\_none:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ exclude\_computed\_fields:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00574}00574\ \ \ \ \ \ \ \ \ round\_trip:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00575}00575\ \ \ \ \ \ \ \ \ warnings:\ bool\ |\ Literal[\textcolor{stringliteral}{'none'},\ \textcolor{stringliteral}{'warn'},\ \textcolor{stringliteral}{'error'}]\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00576}00576\ \ \ \ \ \ \ \ \ fallback:\ Callable[[Any],\ Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00577}00577\ \ \ \ \ \ \ \ \ serialize\_as\_any:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00578}00578\ \ \ \ \ \ \ \ \ context:\ Any\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00579}00579\ \ \ \ \ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00580}00580\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Dump\ an\ instance\ of\ the\ adapted\ type\ to\ a\ Python\ object.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00581}00581\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00582}00582\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00583}00583\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ instance:\ The\ Python\ object\ to\ serialize.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00584}00584\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ mode:\ The\ output\ format.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00585}00585\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ include:\ Fields\ to\ include\ in\ the\ output.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00586}00586\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude:\ Fields\ to\ exclude\ from\ the\ output.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00587}00587\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_alias:\ Whether\ to\ use\ alias\ names\ for\ field\ names.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00588}00588\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_unset:\ Whether\ to\ exclude\ unset\ fields.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00589}00589\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_defaults:\ Whether\ to\ exclude\ fields\ with\ default\ values.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00590}00590\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_none:\ Whether\ to\ exclude\ fields\ with\ None\ values.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00591}00591\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_computed\_fields:\ Whether\ to\ exclude\ computed\ fields.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00592}00592\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ While\ this\ can\ be\ useful\ for\ round-\/tripping,\ it\ is\ usually\ recommended\ to\ use\ the\ dedicated}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00593}00593\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \`{}round\_trip\`{}\ parameter\ instead.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00594}00594\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ round\_trip:\ Whether\ to\ output\ the\ serialized\ data\ in\ a\ way\ that\ is\ compatible\ with\ deserialization.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00595}00595\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ warnings:\ How\ to\ handle\ serialization\ errors.\ False/"{}none"{}\ ignores\ them,\ True/"{}warn"{}\ logs\ errors,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00596}00596\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}error"{}\ raises\ a\ [\`{}PydanticSerializationError\`{}][pydantic\_core.PydanticSerializationError].}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00597}00597\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ fallback:\ A\ function\ to\ call\ when\ an\ unknown\ value\ is\ encountered.\ If\ not\ provided,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00598}00598\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a\ [\`{}PydanticSerializationError\`{}][pydantic\_core.PydanticSerializationError]\ error\ is\ raised.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00599}00599\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ serialize\_as\_any:\ Whether\ to\ serialize\ fields\ with\ duck-\/typing\ serialization\ behavior.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00600}00600\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ context:\ Additional\ context\ to\ pass\ to\ the\ serializer.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00601}00601\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00602}00602\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00603}00603\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ serialized\ object.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00604}00604\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00605}00605\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a8e7a71c29e7009570da9c4651b6aaf46}{serializer}}.to\_python(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00606}00606\ \ \ \ \ \ \ \ \ \ \ \ \ instance,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00607}00607\ \ \ \ \ \ \ \ \ \ \ \ \ mode=mode,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00608}00608\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00609}00609\ \ \ \ \ \ \ \ \ \ \ \ \ include=include,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00610}00610\ \ \ \ \ \ \ \ \ \ \ \ \ exclude=exclude,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00611}00611\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_unset=exclude\_unset,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00612}00612\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_defaults=exclude\_defaults,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00613}00613\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_none=exclude\_none,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00614}00614\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_computed\_fields=exclude\_computed\_fields,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ round\_trip=round\_trip,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00616}00616\ \ \ \ \ \ \ \ \ \ \ \ \ warnings=warnings,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ fallback=fallback,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00618}00618\ \ \ \ \ \ \ \ \ \ \ \ \ serialize\_as\_any=serialize\_as\_any,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ context=context,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00620}00620\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00621}00621\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00622}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_ae5766316e398ed589fb0db1a5c939d19}{00622}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_ae5766316e398ed589fb0db1a5c939d19}{dump\_json}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00623}00623\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00624}00624\ \ \ \ \ \ \ \ \ instance:\ T,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00625}00625\ \ \ \ \ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00626}00626\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00627}00627\ \ \ \ \ \ \ \ \ indent:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00628}00628\ \ \ \ \ \ \ \ \ ensure\_ascii:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00629}00629\ \ \ \ \ \ \ \ \ include:\ IncEx\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00630}00630\ \ \ \ \ \ \ \ \ exclude:\ IncEx\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00631}00631\ \ \ \ \ \ \ \ \ by\_alias:\ bool\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00632}00632\ \ \ \ \ \ \ \ \ exclude\_unset:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00633}00633\ \ \ \ \ \ \ \ \ exclude\_defaults:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00634}00634\ \ \ \ \ \ \ \ \ exclude\_none:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00635}00635\ \ \ \ \ \ \ \ \ exclude\_computed\_fields:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00636}00636\ \ \ \ \ \ \ \ \ round\_trip:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00637}00637\ \ \ \ \ \ \ \ \ warnings:\ bool\ |\ Literal[\textcolor{stringliteral}{'none'},\ \textcolor{stringliteral}{'warn'},\ \textcolor{stringliteral}{'error'}]\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00638}00638\ \ \ \ \ \ \ \ \ fallback:\ Callable[[Any],\ Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00639}00639\ \ \ \ \ \ \ \ \ serialize\_as\_any:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ context:\ Any\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00641}00641\ \ \ \ \ )\ -\/>\ bytes:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00642}00642\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}!!!\ abstract\ "{}Usage\ Documentation"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00643}00643\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ [JSON\ Serialization](../concepts/json.md\#json-\/serialization)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00644}00644\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00645}00645\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Serialize\ an\ instance\ of\ the\ adapted\ type\ to\ JSON.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00646}00646\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00647}00647\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00648}00648\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ instance:\ The\ instance\ to\ be\ serialized.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00649}00649\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ indent:\ Number\ of\ spaces\ for\ JSON\ indentation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00650}00650\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ensure\_ascii:\ If\ \`{}True\`{},\ the\ output\ is\ guaranteed\ to\ have\ all\ incoming\ non-\/ASCII\ characters\ escaped.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00651}00651\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ If\ \`{}False\`{}\ (the\ default),\ these\ characters\ will\ be\ output\ as-\/is.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00652}00652\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ include:\ Fields\ to\ include.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00653}00653\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude:\ Fields\ to\ exclude.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00654}00654\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_alias:\ Whether\ to\ use\ alias\ names\ for\ field\ names.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00655}00655\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_unset:\ Whether\ to\ exclude\ unset\ fields.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00656}00656\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_defaults:\ Whether\ to\ exclude\ fields\ with\ default\ values.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00657}00657\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_none:\ Whether\ to\ exclude\ fields\ with\ a\ value\ of\ \`{}None\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00658}00658\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ exclude\_computed\_fields:\ Whether\ to\ exclude\ computed\ fields.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00659}00659\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ While\ this\ can\ be\ useful\ for\ round-\/tripping,\ it\ is\ usually\ recommended\ to\ use\ the\ dedicated}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00660}00660\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \`{}round\_trip\`{}\ parameter\ instead.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00661}00661\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ round\_trip:\ Whether\ to\ serialize\ and\ deserialize\ the\ instance\ to\ ensure\ round-\/tripping.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00662}00662\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ warnings:\ How\ to\ handle\ serialization\ errors.\ False/"{}none"{}\ ignores\ them,\ True/"{}warn"{}\ logs\ errors,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00663}00663\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}error"{}\ raises\ a\ [\`{}PydanticSerializationError\`{}][pydantic\_core.PydanticSerializationError].}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00664}00664\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ fallback:\ A\ function\ to\ call\ when\ an\ unknown\ value\ is\ encountered.\ If\ not\ provided,}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00665}00665\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a\ [\`{}PydanticSerializationError\`{}][pydantic\_core.PydanticSerializationError]\ error\ is\ raised.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00666}00666\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ serialize\_as\_any:\ Whether\ to\ serialize\ fields\ with\ duck-\/typing\ serialization\ behavior.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00667}00667\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ context:\ Additional\ context\ to\ pass\ to\ the\ serializer.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00668}00668\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00669}00669\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00670}00670\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ JSON\ representation\ of\ the\ given\ instance\ as\ bytes.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00671}00671\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00672}00672\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a8e7a71c29e7009570da9c4651b6aaf46}{serializer}}.to\_json(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00673}00673\ \ \ \ \ \ \ \ \ \ \ \ \ instance,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00674}00674\ \ \ \ \ \ \ \ \ \ \ \ \ indent=indent,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00675}00675\ \ \ \ \ \ \ \ \ \ \ \ \ ensure\_ascii=ensure\_ascii,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00676}00676\ \ \ \ \ \ \ \ \ \ \ \ \ include=include,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00677}00677\ \ \ \ \ \ \ \ \ \ \ \ \ exclude=exclude,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00678}00678\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00679}00679\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_unset=exclude\_unset,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00680}00680\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_defaults=exclude\_defaults,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00681}00681\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_none=exclude\_none,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00682}00682\ \ \ \ \ \ \ \ \ \ \ \ \ exclude\_computed\_fields=exclude\_computed\_fields,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00683}00683\ \ \ \ \ \ \ \ \ \ \ \ \ round\_trip=round\_trip,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00684}00684\ \ \ \ \ \ \ \ \ \ \ \ \ warnings=warnings,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00685}00685\ \ \ \ \ \ \ \ \ \ \ \ \ fallback=fallback,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00686}00686\ \ \ \ \ \ \ \ \ \ \ \ \ serialize\_as\_any=serialize\_as\_any,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00687}00687\ \ \ \ \ \ \ \ \ \ \ \ \ context=context,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00688}00688\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00689}00689\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00690}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_ab5eee6603b5393b307ad2d9b9829b762}{00690}}\ \ \ \ \ \textcolor{keyword}{def\ }json\_schema(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00691}00691\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00692}00692\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00693}00693\ \ \ \ \ \ \ \ \ by\_alias:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00694}00694\ \ \ \ \ \ \ \ \ ref\_template:\ str\ =\ DEFAULT\_REF\_TEMPLATE,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00695}00695\ \ \ \ \ \ \ \ \ union\_format:\ Literal[\textcolor{stringliteral}{'any\_of'},\ \textcolor{stringliteral}{'primitive\_type\_array'}]\ =\ \textcolor{stringliteral}{'any\_of'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00696}00696\ \ \ \ \ \ \ \ \ schema\_generator:\ type[GenerateJsonSchema]\ =\ GenerateJsonSchema,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00697}00697\ \ \ \ \ \ \ \ \ mode:\ JsonSchemaMode\ =\ \textcolor{stringliteral}{'validation'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00698}00698\ \ \ \ \ )\ -\/>\ dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00699}00699\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Generate\ a\ JSON\ schema\ for\ the\ adapted\ type.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00700}00700\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00701}00701\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00702}00702\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_alias:\ Whether\ to\ use\ alias\ names\ for\ field\ names.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00703}00703\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ref\_template:\ The\ format\ string\ used\ for\ generating\ \$ref\ strings.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00704}00704\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ union\_format:\ The\ format\ to\ use\ when\ combining\ schemas\ from\ unions\ together.\ Can\ be\ one\ of:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00705}00705\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00706}00706\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \`{}'any\_of'\`{}:\ Use\ the\ [\`{}anyOf\`{}](https://json-\/schema.org/understanding-\/json-\/schema/reference/combining\#anyOf)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00707}00707\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ keyword\ to\ combine\ schemas\ (the\ default).}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00708}00708\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \`{}'primitive\_type\_array'\`{}:\ Use\ the\ [\`{}type\`{}](https://json-\/schema.org/understanding-\/json-\/schema/reference/type)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00709}00709\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ keyword\ as\ an\ array\ of\ strings,\ containing\ each\ type\ of\ the\ combination.\ If\ any\ of\ the\ schemas\ is\ not\ a\ primitive}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00710}00710\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ type\ (\`{}string\`{},\ \`{}boolean\`{},\ \`{}null\`{},\ \`{}integer\`{}\ or\ \`{}number\`{})\ or\ contains\ constraints/metadata,\ falls\ back\ to}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00711}00711\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \`{}any\_of\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00712}00712\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ schema\_generator:\ To\ override\ the\ logic\ used\ to\ generate\ the\ JSON\ schema,\ as\ a\ subclass\ of}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00713}00713\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \`{}GenerateJsonSchema\`{}\ with\ your\ desired\ modifications}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00714}00714\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ mode:\ The\ mode\ in\ which\ to\ generate\ the\ schema.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00715}00715\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ schema\_generator:\ The\ generator\ class\ used\ for\ creating\ the\ schema.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00716}00716\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ mode:\ The\ mode\ to\ use\ for\ schema\ generation.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00717}00717\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00718}00718\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00719}00719\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ JSON\ schema\ for\ the\ model\ as\ a\ dictionary.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00720}00720\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00721}00721\ \ \ \ \ \ \ \ \ schema\_generator\_instance\ =\ schema\_generator(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00722}00722\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,\ ref\_template=ref\_template,\ union\_format=union\_format}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00723}00723\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00724}00724\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}},\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{\_mock\_val\_ser.MockCoreSchema}}):}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00725}00725\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}}.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a0ef7c459a79892de1bc584e57e2a85eb}{rebuild}}()}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00726}00726\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keywordflow}{not}\ isinstance(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}},\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{\_mock\_val\_ser.MockCoreSchema}}),\ \textcolor{stringliteral}{'this\ is\ a\ bug!\ please\ report\ it'}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00727}00727\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ schema\_generator\_instance.generate(self.\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_aa7b8394a1a927e8baab8b5a0746597cc}{core\_schema}},\ mode=mode)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00728}00728\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00729}00729\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00730}\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a076b111bb0edfcb903a9e98deb565c41}{00730}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1type__adapter_1_1_type_adapter_a076b111bb0edfcb903a9e98deb565c41}{json\_schemas}}(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00731}00731\ \ \ \ \ \ \ \ \ inputs:\ Iterable[tuple[JsonSchemaKeyT,\ JsonSchemaMode,\ TypeAdapter[Any]]],}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00732}00732\ \ \ \ \ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00733}00733\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00734}00734\ \ \ \ \ \ \ \ \ by\_alias:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00735}00735\ \ \ \ \ \ \ \ \ title:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00736}00736\ \ \ \ \ \ \ \ \ description:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00737}00737\ \ \ \ \ \ \ \ \ ref\_template:\ str\ =\ DEFAULT\_REF\_TEMPLATE,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00738}00738\ \ \ \ \ \ \ \ \ union\_format:\ Literal[\textcolor{stringliteral}{'any\_of'},\ \textcolor{stringliteral}{'primitive\_type\_array'}]\ =\ \textcolor{stringliteral}{'any\_of'},}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00739}00739\ \ \ \ \ \ \ \ \ schema\_generator:\ type[GenerateJsonSchema]\ =\ GenerateJsonSchema,}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00740}00740\ \ \ \ \ )\ -\/>\ tuple[dict[tuple[JsonSchemaKeyT,\ JsonSchemaMode],\ JsonSchemaValue],\ JsonSchemaValue]:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00741}00741\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Generate\ a\ JSON\ schema\ including\ definitions\ from\ multiple\ type\ adapters.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00742}00742\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00743}00743\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00744}00744\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ inputs:\ Inputs\ to\ schema\ generation.\ The\ first\ two\ items\ will\ form\ the\ keys\ of\ the\ (first)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00745}00745\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\ mapping;\ the\ type\ adapters\ will\ provide\ the\ core\ schemas\ that\ get\ converted\ into}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00746}00746\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ definitions\ in\ the\ output\ JSON\ schema.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00747}00747\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ by\_alias:\ Whether\ to\ use\ alias\ names.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00748}00748\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ title:\ The\ title\ for\ the\ schema.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00749}00749\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ description:\ The\ description\ for\ the\ schema.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00750}00750\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ref\_template:\ The\ format\ string\ used\ for\ generating\ \$ref\ strings.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00751}00751\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ union\_format:\ The\ format\ to\ use\ when\ combining\ schemas\ from\ unions\ together.\ Can\ be\ one\ of:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00752}00752\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00753}00753\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \`{}'any\_of'\`{}:\ Use\ the\ [\`{}anyOf\`{}](https://json-\/schema.org/understanding-\/json-\/schema/reference/combining\#anyOf)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00754}00754\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ keyword\ to\ combine\ schemas\ (the\ default).}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00755}00755\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ \`{}'primitive\_type\_array'\`{}:\ Use\ the\ [\`{}type\`{}](https://json-\/schema.org/understanding-\/json-\/schema/reference/type)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00756}00756\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ keyword\ as\ an\ array\ of\ strings,\ containing\ each\ type\ of\ the\ combination.\ If\ any\ of\ the\ schemas\ is\ not\ a\ primitive}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00757}00757\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ type\ (\`{}string\`{},\ \`{}boolean\`{},\ \`{}null\`{},\ \`{}integer\`{}\ or\ \`{}number\`{})\ or\ contains\ constraints/metadata,\ falls\ back\ to}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00758}00758\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \`{}any\_of\`{}.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00759}00759\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ schema\_generator:\ The\ generator\ class\ used\ for\ creating\ the\ schema.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00760}00760\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00761}00761\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00762}00762\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ A\ tuple\ where:}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00763}00763\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00764}00764\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ first\ element\ is\ a\ dictionary\ whose\ keys\ are\ tuples\ of\ JSON\ schema\ key\ type\ and\ JSON\ mode,\ and}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00765}00765\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ whose\ values\ are\ the\ JSON\ schema\ corresponding\ to\ that\ pair\ of\ inputs.\ (These\ schemas\ may\ have}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00766}00766\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ JsonRef\ references\ to\ definitions\ that\ are\ defined\ in\ the\ second\ returned\ element.)}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00767}00767\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ The\ second\ element\ is\ a\ JSON\ schema\ containing\ all\ definitions\ referenced\ in\ the\ first\ returned}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00768}00768\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ element,\ along\ with\ the\ optional\ title\ and\ description\ keys.}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00769}00769\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00770}00770\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00771}00771\ \ \ \ \ \ \ \ \ schema\_generator\_instance\ =\ schema\_generator(}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00772}00772\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,\ ref\_template=ref\_template,\ union\_format=union\_format}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00773}00773\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00774}00774\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00775}00775\ \ \ \ \ \ \ \ \ inputs\_\ =\ []}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00776}00776\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key,\ mode,\ adapter\ \textcolor{keywordflow}{in}\ inputs:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00777}00777\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ the\ same\ pattern\ we\ follow\ for\ model\ json\ schemas\ -\/\ we\ attempt\ a\ core\ schema\ rebuild\ if\ we\ detect\ a\ mock}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00778}00778\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(adapter.core\_schema,\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{\_mock\_val\_ser.MockCoreSchema}}):}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00779}00779\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ adapter.core\_schema.rebuild()}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00780}00780\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keywordflow}{not}\ isinstance(adapter.core\_schema,\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{\_mock\_val\_ser.MockCoreSchema}}),\ (}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00781}00781\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'this\ is\ a\ bug!\ please\ report\ it'}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00782}00782\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00783}00783\ \ \ \ \ \ \ \ \ \ \ \ \ inputs\_.append((key,\ mode,\ adapter.core\_schema))}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00784}00784\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00785}00785\ \ \ \ \ \ \ \ \ json\_schemas\_map,\ definitions\ =\ schema\_generator\_instance.generate\_definitions(inputs\_)}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00786}00786\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00787}00787\ \ \ \ \ \ \ \ \ json\_schema:\ dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00788}00788\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ definitions:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00789}00789\ \ \ \ \ \ \ \ \ \ \ \ \ json\_schema[\textcolor{stringliteral}{'\$defs'}]\ =\ definitions}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00790}00790\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ title:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00791}00791\ \ \ \ \ \ \ \ \ \ \ \ \ json\_schema[\textcolor{stringliteral}{'title'}]\ =\ title}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00792}00792\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ description:}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00793}00793\ \ \ \ \ \ \ \ \ \ \ \ \ json\_schema[\textcolor{stringliteral}{'description'}]\ =\ description}
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00794}00794\ }
+\DoxyCodeLine{\Hypertarget{type__adapter_8py_source_l00795}00795\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ json\_schemas\_map,\ json\_schema}
+
+\end{DoxyCode}

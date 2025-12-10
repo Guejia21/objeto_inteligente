@@ -1,0 +1,234 @@
+\doxysection{\+\_\+mock\+\_\+val\+\_\+ser.\+py}
+\hypertarget{__mock__val__ser_8py_source}{}\label{__mock__val__ser_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_mock\_val\_ser.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_mock\_val\_ser.py}}
+\mbox{\hyperlink{__mock__val__ser_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Iterator,\ Mapping}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00004}00004\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ Callable,\ Generic,\ Literal,\ TypeVar,\ Union}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00006}00006\ \textcolor{keyword}{from}\ pydantic\_core\ \textcolor{keyword}{import}\ CoreSchema,\ SchemaSerializer,\ SchemaValidator}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00008}00008\ \textcolor{keyword}{from}\ ..errors\ \textcolor{keyword}{import}\ PydanticErrorCodes,\ PydanticUserError}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00009}00009\ \textcolor{keyword}{from}\ ..plugin.\_schema\_validator\ \textcolor{keyword}{import}\ PluggableSchemaValidator}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00011}00011\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00012}00012\ \ \ \ \ \textcolor{keyword}{from}\ ..dataclasses\ \textcolor{keyword}{import}\ PydanticDataclass}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00013}00013\ \ \ \ \ \textcolor{keyword}{from}\ ..main\ \textcolor{keyword}{import}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00014}00014\ \ \ \ \ \textcolor{keyword}{from}\ ..type\_adapter\ \textcolor{keyword}{import}\ TypeAdapter}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00017}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_a8904901c93d0632ad94aa319ad1d98bc}{00017}}\ ValSer\ =\ TypeVar(\textcolor{stringliteral}{'ValSer'},\ bound=Union[SchemaValidator,\ PluggableSchemaValidator,\ SchemaSerializer])}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00018}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_a13c5c7ceaa496e057627737698618885}{00018}}\ T\ =\ TypeVar(\textcolor{stringliteral}{'T'})}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00021}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{00021}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{MockCoreSchema}}(Mapping[str,\ Any]):}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00022}00022\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Mocker\ for\ \`{}pydantic\_core.CoreSchema\`{}\ which\ optionally\ attempts\ to}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ rebuild\ the\ thing\ it's\ mocking\ when\ one\ of\ its\ methods\ is\ accessed\ and\ raises\ an\ error\ if\ that\ fails.}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00026}00026\ \ \ \ \ \_\_slots\_\_\ =\ \textcolor{stringliteral}{'\_error\_message'},\ \textcolor{stringliteral}{'\_code'},\ \textcolor{stringliteral}{'\_attempt\_rebuild'},\ \textcolor{stringliteral}{'\_built\_memo'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00028}00028\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ error\_message:\ str,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ code:\ PydanticErrorCodes,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ attempt\_rebuild:\ Callable[[],\ CoreSchema\ |\ \textcolor{keywordtype}{None}]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00034}00034\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00035}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_aff14c3c8e1ad1af0bd52cdf2acf6d8dc}{00035}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_aff14c3c8e1ad1af0bd52cdf2acf6d8dc}{\_error\_message}}\ =\ error\_message}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00036}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ab1e5fe4439fed16c3b284a2a0d509173}{00036}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ab1e5fe4439fed16c3b284a2a0d509173}{\_code}}:\ PydanticErrorCodes\ =\ code}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00037}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ae1929dba9df179eeb6c9a7c14bef7b98}{00037}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ae1929dba9df179eeb6c9a7c14bef7b98}{\_attempt\_rebuild}}\ =\ attempt\_rebuild}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00038}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a1432b573970a4374435b3bb2501eff40}{00038}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a1432b573970a4374435b3bb2501eff40}{\_built\_memo}}:\ CoreSchema\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00040}00040\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getitem\_\_(self,\ key:\ str)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a5ba5ba0ff511492a2ca2ccf67d8d823a}{\_get\_built}}().\_\_getitem\_\_(key)}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00043}00043\ \ \ \ \ \textcolor{keyword}{def\ }\_\_len\_\_(self)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a5ba5ba0ff511492a2ca2ccf67d8d823a}{\_get\_built}}().\_\_len\_\_()}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00046}00046\ \ \ \ \ \textcolor{keyword}{def\ }\_\_iter\_\_(self)\ -\/>\ Iterator[str]:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a5ba5ba0ff511492a2ca2ccf67d8d823a}{\_get\_built}}().\_\_iter\_\_()}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00049}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a5ba5ba0ff511492a2ca2ccf67d8d823a}{00049}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a5ba5ba0ff511492a2ca2ccf67d8d823a}{\_get\_built}}(self)\ -\/>\ CoreSchema:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a1432b573970a4374435b3bb2501eff40}{\_built\_memo}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a1432b573970a4374435b3bb2501eff40}{\_built\_memo}}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ae1929dba9df179eeb6c9a7c14bef7b98}{\_attempt\_rebuild}}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ schema\ =\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ae1929dba9df179eeb6c9a7c14bef7b98}{\_attempt\_rebuild}}()}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ schema\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a1432b573970a4374435b3bb2501eff40}{\_built\_memo}}\ =\ schema}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ schema}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_aff14c3c8e1ad1af0bd52cdf2acf6d8dc}{\_error\_message}},\ code=self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ab1e5fe4439fed16c3b284a2a0d509173}{\_code}})}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00060}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a75466ae83569fb9e81e3f7a93adf331a}{00060}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a75466ae83569fb9e81e3f7a93adf331a}{rebuild}}(self)\ -\/>\ CoreSchema\ |\ None:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_a1432b573970a4374435b3bb2501eff40}{\_built\_memo}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ae1929dba9df179eeb6c9a7c14bef7b98}{\_attempt\_rebuild}}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ schema\ =\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ae1929dba9df179eeb6c9a7c14bef7b98}{\_attempt\_rebuild}}()}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ schema\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ schema}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_aff14c3c8e1ad1af0bd52cdf2acf6d8dc}{\_error\_message}},\ code=self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema_ab1e5fe4439fed16c3b284a2a0d509173}{\_code}})}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00071}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{00071}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{MockValSer}}(Generic[ValSer]):}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00072}00072\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Mocker\ for\ \`{}pydantic\_core.SchemaValidator\`{}\ or\ \`{}pydantic\_core.SchemaSerializer\`{}\ which\ optionally\ attempts\ to}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ rebuild\ the\ thing\ it's\ mocking\ when\ one\ of\ its\ methods\ is\ accessed\ and\ raises\ an\ error\ if\ that\ fails.}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00074}00074\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00076}00076\ \ \ \ \ \_\_slots\_\_\ =\ \textcolor{stringliteral}{'\_error\_message'},\ \textcolor{stringliteral}{'\_code'},\ \textcolor{stringliteral}{'\_val\_or\_ser'},\ \textcolor{stringliteral}{'\_attempt\_rebuild'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00078}00078\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ error\_message:\ str,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ code:\ PydanticErrorCodes,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ val\_or\_ser:\ Literal[\textcolor{stringliteral}{'validator'},\ \textcolor{stringliteral}{'serializer'}],}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ attempt\_rebuild:\ Callable[[],\ ValSer\ |\ \textcolor{keywordtype}{None}]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00085}00085\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00086}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ae9337f9d81f0431f3d3c834916f71e59}{00086}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ae9337f9d81f0431f3d3c834916f71e59}{\_error\_message}}\ =\ error\_message}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00087}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ae03b5be1107bca31bb90d9866d86c2bd}{00087}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ae03b5be1107bca31bb90d9866d86c2bd}{\_val\_or\_ser}}\ =\ SchemaValidator\ \textcolor{keywordflow}{if}\ val\_or\_ser\ ==\ \textcolor{stringliteral}{'validator'}\ \textcolor{keywordflow}{else}\ SchemaSerializer}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00088}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ac925cb85a19f390e36b91eab19a25067}{00088}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ac925cb85a19f390e36b91eab19a25067}{\_code}}:\ PydanticErrorCodes\ =\ code}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00089}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_a84756217ac79c2ccca361351758fa6bd}{00089}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_a84756217ac79c2ccca361351758fa6bd}{\_attempt\_rebuild}}\ =\ attempt\_rebuild}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00091}00091\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getattr\_\_(self,\ item:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \_\_tracebackhide\_\_\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_a84756217ac79c2ccca361351758fa6bd}{\_attempt\_rebuild}}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ val\_ser\ =\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_a84756217ac79c2ccca361351758fa6bd}{\_attempt\_rebuild}}()}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ val\_ser\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(val\_ser,\ item)}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ raise\ an\ AttributeError\ if\ \`{}item`\ doesn't\ exist}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ getattr(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ae03b5be1107bca31bb90d9866d86c2bd}{\_val\_or\_ser}},\ item)}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ae9337f9d81f0431f3d3c834916f71e59}{\_error\_message}},\ code=self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ac925cb85a19f390e36b91eab19a25067}{\_code}})}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00102}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_aa0f990a895abf99378414e3588d7ca11}{00102}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_aa0f990a895abf99378414e3588d7ca11}{rebuild}}(self)\ -\/>\ ValSer\ |\ None:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_a84756217ac79c2ccca361351758fa6bd}{\_attempt\_rebuild}}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ val\_ser\ =\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_a84756217ac79c2ccca361351758fa6bd}{\_attempt\_rebuild}}()}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ val\_ser\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ val\_ser}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ae9337f9d81f0431f3d3c834916f71e59}{\_error\_message}},\ code=self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser_ac925cb85a19f390e36b91eab19a25067}{\_code}})}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00112}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_ab9304fc2a6b474b21e624376851223cc}{00112}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_ab9304fc2a6b474b21e624376851223cc}{set\_type\_adapter\_mocks}}(adapter:\ TypeAdapter)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00113}00113\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Set\ \`{}core\_schema\`{},\ \`{}validator\`{}\ and\ \`{}serializer\`{}\ to\ mock\ core\ types\ on\ a\ type\ adapter\ instance.}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00114}00114\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00115}00115\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00116}00116\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ adapter:\ The\ type\ adapter\ instance\ to\ set\ the\ mocks\ on}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00117}00117\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00118}00118\ \ \ \ \ type\_repr\ =\ str(adapter.\_type)}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00119}00119\ \ \ \ \ undefined\_type\_error\_message\ =\ (}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\`{}TypeAdapter[\{type\_repr\}]`\ is\ not\ fully\ defined;\ you\ should\ define\ \`{}\{type\_repr\}`\ and\ all\ referenced\ types,'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\ then\ call\ \`{}.rebuild()`\ on\ the\ instance.'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00122}00122\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00124}00124\ \ \ \ \ \textcolor{keyword}{def\ }attempt\_rebuild\_fn(attr\_fn:\ Callable[[TypeAdapter],\ T])\ -\/>\ Callable[[],\ T\ |\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }handler()\ -\/>\ T\ |\ None:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ adapter.rebuild(raise\_errors=\textcolor{keyword}{False},\ \_parent\_namespace\_depth=5)\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ attr\_fn(adapter)}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ handler}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00132}00132\ \ \ \ \ adapter.core\_schema\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{MockCoreSchema}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ ta:\ ta.core\_schema),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00136}00136\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00137}00137\ \ \ \ \ adapter.validator\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{MockValSer}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ val\_or\_ser=\textcolor{stringliteral}{'validator'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ ta:\ ta.validator),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00142}00142\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00143}00143\ \ \ \ \ adapter.serializer\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{MockValSer}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ val\_or\_ser=\textcolor{stringliteral}{'serializer'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ ta:\ ta.serializer),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00148}00148\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00151}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_a3d51d455ba58c5f8fc9fd1140f455780}{00151}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_a3d51d455ba58c5f8fc9fd1140f455780}{set\_model\_mocks}}(cls:\ type[BaseModel],\ undefined\_name:\ str\ =\ \textcolor{stringliteral}{'all\ referenced\ types'})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00152}00152\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Set\ \`{}\_\_pydantic\_core\_schema\_\_\`{},\ \`{}\_\_pydantic\_validator\_\_\`{}\ and\ \`{}\_\_pydantic\_serializer\_\_\`{}\ to\ mock\ core\ types\ on\ a\ model.}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00153}00153\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00154}00154\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls:\ The\ model\ class\ to\ set\ the\ mocks\ on}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00156}00156\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ undefined\_name:\ Name\ of\ the\ undefined\ thing,\ used\ in\ error\ messages}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00157}00157\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00158}00158\ \ \ \ \ undefined\_type\_error\_message\ =\ (}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\`{}\{cls.\_\_name\_\_\}`\ is\ not\ fully\ defined;\ you\ should\ define\ \{undefined\_name\},'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\ then\ call\ \`{}\{cls.\_\_name\_\_\}.model\_rebuild()`.'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00161}00161\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00163}00163\ \ \ \ \ \textcolor{keyword}{def\ }attempt\_rebuild\_fn(attr\_fn:\ Callable[[type[BaseModel]],\ T])\ -\/>\ Callable[[],\ T\ |\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }handler()\ -\/>\ T\ |\ None:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ cls.model\_rebuild(raise\_errors=\textcolor{keyword}{False},\ \_parent\_namespace\_depth=5)\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ attr\_fn(cls)}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ handler}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00171}00171\ \ \ \ \ cls.\_\_pydantic\_core\_schema\_\_\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{MockCoreSchema}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ c:\ c.\_\_pydantic\_core\_schema\_\_),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00175}00175\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00176}00176\ \ \ \ \ cls.\_\_pydantic\_validator\_\_\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{MockValSer}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ val\_or\_ser=\textcolor{stringliteral}{'validator'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ c:\ c.\_\_pydantic\_validator\_\_),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00181}00181\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00182}00182\ \ \ \ \ cls.\_\_pydantic\_serializer\_\_\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{MockValSer}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ val\_or\_ser=\textcolor{stringliteral}{'serializer'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ c:\ c.\_\_pydantic\_serializer\_\_),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00187}00187\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00190}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_a45590eedab2eafce483e46c3c2939d1f}{00190}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__mock__val__ser_a45590eedab2eafce483e46c3c2939d1f}{set\_dataclass\_mocks}}(cls:\ type[PydanticDataclass],\ undefined\_name:\ str\ =\ \textcolor{stringliteral}{'all\ referenced\ types'})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00191}00191\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Set\ \`{}\_\_pydantic\_validator\_\_\`{}\ and\ \`{}\_\_pydantic\_serializer\_\_\`{}\ to\ \`{}MockValSer\`{}s\ on\ a\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00192}00192\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00193}00193\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00194}00194\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls:\ The\ model\ class\ to\ set\ the\ mocks\ on}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00195}00195\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ undefined\_name:\ Name\ of\ the\ undefined\ thing,\ used\ in\ error\ messages}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00196}00196\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00197}00197\ \ \ \ \ \textcolor{keyword}{from}\ ..dataclasses\ \textcolor{keyword}{import}\ rebuild\_dataclass}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00199}00199\ \ \ \ \ undefined\_type\_error\_message\ =\ (}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\`{}\{cls.\_\_name\_\_\}`\ is\ not\ fully\ defined;\ you\ should\ define\ \{undefined\_name\},'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\ then\ call\ \`{}pydantic.dataclasses.rebuild\_dataclass(\{cls.\_\_name\_\_\})`.'}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00202}00202\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00204}00204\ \ \ \ \ \textcolor{keyword}{def\ }attempt\_rebuild\_fn(attr\_fn:\ Callable[[type[PydanticDataclass]],\ T])\ -\/>\ Callable[[],\ T\ |\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }handler()\ -\/>\ T\ |\ None:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ rebuild\_dataclass(cls,\ raise\_errors=\textcolor{keyword}{False},\ \_parent\_namespace\_depth=5)\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ attr\_fn(cls)}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ handler}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00212}00212\ \ \ \ \ cls.\_\_pydantic\_core\_schema\_\_\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_core_schema}{MockCoreSchema}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ c:\ c.\_\_pydantic\_core\_schema\_\_),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00216}00216\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00217}00217\ \ \ \ \ cls.\_\_pydantic\_validator\_\_\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{MockValSer}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ val\_or\_ser=\textcolor{stringliteral}{'validator'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ c:\ c.\_\_pydantic\_validator\_\_),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00222}00222\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00223}00223\ \ \ \ \ cls.\_\_pydantic\_serializer\_\_\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__mock__val__ser_1_1_mock_val_ser}{MockValSer}}(\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ undefined\_type\_error\_message,}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'class-\/not-\/fully-\/defined'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ val\_or\_ser=\textcolor{stringliteral}{'serializer'},}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ attempt\_rebuild=attempt\_rebuild\_fn(\textcolor{keyword}{lambda}\ c:\ c.\_\_pydantic\_serializer\_\_),}
+\DoxyCodeLine{\Hypertarget{__mock__val__ser_8py_source_l00228}00228\ \ \ \ \ )}
+
+\end{DoxyCode}

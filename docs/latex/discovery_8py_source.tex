@@ -1,0 +1,606 @@
+\doxysection{discovery.\+py}
+\hypertarget{discovery_8py_source}{}\label{discovery_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/discovery.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/discovery.py}}
+\mbox{\hyperlink{discovery_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1discovery}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Automatic\ discovery\ of\ Python\ modules\ and\ packages\ (for\ inclusion\ in\ the}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00002}00002\ \textcolor{stringliteral}{distribution)\ and\ other\ config\ values.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00003}00003\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00004}00004\ \textcolor{stringliteral}{For\ the\ purposes\ of\ this\ module,\ the\ following\ nomenclature\ is\ used:}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00005}00005\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00006}00006\ \textcolor{stringliteral}{-\/\ "{}src-\/layout"{}:\ a\ directory\ representing\ a\ Python\ project\ that\ contains\ a\ "{}src"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00007}00007\ \textcolor{stringliteral}{\ \ folder.\ Everything\ under\ the\ "{}src"{}\ folder\ is\ meant\ to\ be\ included\ in\ the}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00008}00008\ \textcolor{stringliteral}{\ \ distribution\ when\ packaging\ the\ project.\ Example::}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00009}00009\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00010}00010\ \textcolor{stringliteral}{\ \ \ \ .}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00011}00011\ \textcolor{stringliteral}{\ \ \ \ ├──\ tox.ini}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00012}00012\ \textcolor{stringliteral}{\ \ \ \ ├──\ pyproject.toml}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00013}00013\ \textcolor{stringliteral}{\ \ \ \ └──\ src/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00014}00014\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ └──\ mypkg/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00015}00015\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ├──\ \_\_init\_\_.py}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00016}00016\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ├──\ mymodule.py}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00017}00017\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ └──\ my\_data\_file.txt}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00018}00018\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00019}00019\ \textcolor{stringliteral}{-\/\ "{}flat-\/layout"{}:\ a\ Python\ project\ that\ does\ not\ use\ "{}src-\/layout"{}\ but\ instead}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00020}00020\ \textcolor{stringliteral}{\ \ have\ a\ directory\ under\ the\ project\ root\ for\ each\ package::}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00021}00021\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ .}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ ├──\ tox.ini}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ ├──\ pyproject.toml}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ └──\ mypkg/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ├──\ \_\_init\_\_.py}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ├──\ mymodule.py}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ └──\ my\_data\_file.txt}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00029}00029\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00030}00030\ \textcolor{stringliteral}{-\/\ "{}single-\/module"{}:\ a\ project\ that\ contains\ a\ single\ Python\ script\ direct\ under}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00031}00031\ \textcolor{stringliteral}{\ \ the\ project\ root\ (no\ directory\ used)::}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00032}00032\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00033}00033\ \textcolor{stringliteral}{\ \ \ \ .}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00034}00034\ \textcolor{stringliteral}{\ \ \ \ ├──\ tox.ini}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00035}00035\ \textcolor{stringliteral}{\ \ \ \ ├──\ pyproject.toml}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00036}00036\ \textcolor{stringliteral}{\ \ \ \ └──\ mymodule.py}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00037}00037\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00038}00038\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00040}00040\ \textcolor{keyword}{import}\ itertools}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00041}00041\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00042}00042\ \textcolor{keyword}{from}\ fnmatch\ \textcolor{keyword}{import}\ fnmatchcase}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00043}00043\ \textcolor{keyword}{from}\ glob\ \textcolor{keyword}{import}\ glob}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00044}00044\ \textcolor{keyword}{from}\ pathlib\ \textcolor{keyword}{import}\ Path}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00045}00045\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00046}00046\ \ \ \ \ TYPE\_CHECKING,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00047}00047\ \ \ \ \ Callable,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00048}00048\ \ \ \ \ Dict,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00049}00049\ \ \ \ \ Iterable,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00050}00050\ \ \ \ \ Iterator,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00051}00051\ \ \ \ \ List,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00052}00052\ \ \ \ \ Mapping,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00053}00053\ \ \ \ \ Optional,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00054}00054\ \ \ \ \ Tuple,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00055}00055\ \ \ \ \ Union}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00056}00056\ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00058}00058\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespace__distutils__hack_1_1override}{\_distutils\_hack.override}}\ \ \textcolor{comment}{\#\ noqa:\ F401}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00060}00060\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00061}00061\ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ convert\_path}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00063}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a92aada6a95defc0b8dd7e821f1e5c526}{00063}}\ \_Path\ =\ Union[str,\ os.PathLike]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00064}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a327c211419cd988571abaaae143d5ddf}{00064}}\ \_Filter\ =\ Callable[[str],\ bool]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00065}\mbox{\hyperlink{namespacesetuptools_1_1discovery_ae67c422b67fd0d775f3f0a24143a3c25}{00065}}\ StrIter\ =\ Iterator[str]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00067}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a8ce1f228a832d9afef9405c06c1f43f3}{00067}}\ chain\_iter\ =\ itertools.chain.from\_iterable}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00069}00069\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00070}00070\ \ \ \ \ \textcolor{keyword}{from}\ setuptools\ \textcolor{keyword}{import}\ Distribution\ \ \textcolor{comment}{\#\ noqa}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00072}00072\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00073}\mbox{\hyperlink{namespacesetuptools_1_1discovery_aa9dde2cf41a3b808839e54f19b4f9683}{00073}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1discovery_aa9dde2cf41a3b808839e54f19b4f9683}{\_valid\_name}}(path:\ \_Path)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00074}00074\ \ \ \ \ \textcolor{comment}{\#\ Ignore\ invalid\ names\ that\ cannot\ be\ imported\ directly}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00075}00075\ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.basename(path).isidentifier()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00078}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder}{00078}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder}{\_Finder}}:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00079}00079\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Base\ class\ that\ exposes\ functionality\ for\ module/package\ finders"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00081}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a05a7fafc1a52aee181f297d7ee179043}{00081}}\ \ \ \ \ ALWAYS\_EXCLUDE:\ Tuple[str,\ ...]\ =\ ()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00082}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a7d851175b924b489911b0697866d804d}{00082}}\ \ \ \ \ DEFAULT\_EXCLUDE:\ Tuple[str,\ ...]\ =\ ()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00084}00084\ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00085}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_accbb7b62e3da27ff52f50e8f1db9c84f}{00085}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_accbb7b62e3da27ff52f50e8f1db9c84f}{find}}(}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ cls,}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ where:\ \_Path\ =\ \textcolor{stringliteral}{'.'},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ exclude:\ Iterable[str]\ =\ (),}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ include:\ Iterable[str]\ =\ (\textcolor{stringliteral}{'*'},)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00090}00090\ \ \ \ \ )\ -\/>\ List[str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ a\ list\ of\ all\ Python\ items\ (packages\ or\ modules,\ depending\ on}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ finder\ implementation)\ found\ within\ directory\ 'where'.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00093}00093\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'where'\ is\ the\ root\ directory\ which\ will\ be\ searched.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ It\ should\ be\ supplied\ as\ a\ "{}cross-\/platform"{}\ (i.e.\ URL-\/style)\ path;}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ it\ will\ be\ converted\ to\ the\ appropriate\ local\ path\ syntax.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00097}00097\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'exclude'\ is\ a\ sequence\ of\ names\ to\ exclude;\ '*'\ can\ be\ used}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ as\ a\ wildcard\ in\ the\ names.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ When\ finding\ packages,\ 'foo.*'\ will\ exclude\ all\ subpackages\ of\ 'foo'}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ (but\ not\ 'foo'\ itself).}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00102}00102\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'include'\ is\ a\ sequence\ of\ names\ to\ include.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ it's\ specified,\ only\ the\ named\ items\ will\ be\ included.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ it's\ not\ specified,\ all\ found\ items\ will\ be\ included.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'include'\ can\ contain\ shell\ style\ wildcard\ patterns\ just\ like}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'exclude'.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ exclude\ =\ exclude\ \textcolor{keywordflow}{or}\ cls.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a7d851175b924b489911b0697866d804d}{DEFAULT\_EXCLUDE}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ list(}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ cls.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_ad9b3f16e871a214f51147e6c8abb7a7b}{\_find\_iter}}(}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_a88d3013aac4d5258c5379d90a4fac663}{convert\_path}}(str(where)),}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cls.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a3a357c101fd2e561d3eb4c66ab755e43}{\_build\_filter}}(*cls.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a05a7fafc1a52aee181f297d7ee179043}{ALWAYS\_EXCLUDE}},\ *exclude),}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cls.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a3a357c101fd2e561d3eb4c66ab755e43}{\_build\_filter}}(*include),}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00119}00119\ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00120}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_ad9b3f16e871a214f51147e6c8abb7a7b}{00120}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_ad9b3f16e871a214f51147e6c8abb7a7b}{\_find\_iter}}(cls,\ where:\ \_Path,\ exclude:\ \_Filter,\ include:\ \_Filter)\ -\/>\ StrIter:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00123}00123\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00124}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a3a357c101fd2e561d3eb4c66ab755e43}{00124}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder_a3a357c101fd2e561d3eb4c66ab755e43}{\_build\_filter}}(*patterns:\ str)\ -\/>\ \_Filter:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00126}00126\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Given\ a\ list\ of\ patterns,\ return\ a\ callable\ that\ will\ be\ true\ only\ if}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00127}00127\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ input\ matches\ at\ least\ one\ of\ the\ patterns.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{lambda}\ name:\ any(fnmatchcase(name,\ pat)\ \textcolor{keywordflow}{for}\ pat\ \textcolor{keywordflow}{in}\ patterns)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00132}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder}{00132}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder}{PackageFinder}}(\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder}{\_Finder}}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00133}00133\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00134}00134\ \textcolor{stringliteral}{\ \ \ \ Generate\ a\ list\ of\ all\ Python\ packages\ found\ within\ a\ directory}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00135}00135\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00137}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder}{00137}}\ \ \ \ \ ALWAYS\_EXCLUDE\ =\ (\textcolor{stringliteral}{"{}ez\_setup"{}},\ \textcolor{stringliteral}{"{}*\_\_pycache\_\_"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00139}00139\ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00140}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder_a7b7005f6eac4d034e29c4559598ab8d7}{00140}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder_a7b7005f6eac4d034e29c4559598ab8d7}{\_find\_iter}}(cls,\ where:\ \_Path,\ exclude:\ \_Filter,\ include:\ \_Filter)\ -\/>\ StrIter:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ All\ the\ packages\ found\ in\ 'where'\ that\ pass\ the\ 'include'\ filter,\ but}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00143}00143\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ not\ the\ 'exclude'\ filter.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00144}00144\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ root,\ dirs,\ files\ \textcolor{keywordflow}{in}\ os.walk(str(where),\ followlinks=\textcolor{keyword}{True}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Copy\ dirs\ to\ iterate\ over\ it,\ then\ empty\ dirs.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ all\_dirs\ =\ dirs[:]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ dirs[:]\ =\ []}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ dir\ \textcolor{keywordflow}{in}\ all\_dirs:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ full\_path\ =\ os.path.join(root,\ dir)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rel\_path\ =\ os.path.relpath(full\_path,\ where)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ package\ =\ rel\_path.replace(os.path.sep,\ \textcolor{stringliteral}{'.'})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Skip\ directory\ trees\ that\ are\ not\ valid\ packages}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'.'}\ \textcolor{keywordflow}{in}\ dir\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ cls.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder_a605893a277bc4fa129b5396aeca88108}{\_looks\_like\_package}}(full\_path,\ package):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Should\ this\ package\ be\ included?}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ include(package)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ exclude(package):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ package}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Keep\ searching\ subdirectories,\ as\ there\ may\ be\ more\ packages}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ down\ there,\ even\ if\ the\ parent\ was\ excluded.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dirs.append(dir)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00167}00167\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00168}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder_a605893a277bc4fa129b5396aeca88108}{00168}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder_a605893a277bc4fa129b5396aeca88108}{\_looks\_like\_package}}(path:\ \_Path,\ \_package\_name:\ str)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Does\ a\ directory\ look\ like\ a\ package?"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.isfile(os.path.join(path,\ \textcolor{stringliteral}{'\_\_init\_\_.py'}))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00173}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_p_e_p420_package_finder}{00173}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_p_e_p420_package_finder}{PEP420PackageFinder}}(\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_package_finder}{PackageFinder}}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00174}00174\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00175}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_p_e_p420_package_finder_ad9e1c0594eb9754def87d69d9c9ad859}{00175}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_p_e_p420_package_finder_ad9e1c0594eb9754def87d69d9c9ad859}{\_looks\_like\_package}}(\_path:\ \_Path,\ \_package\_name:\ str)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00178}00178\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00179}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_module_finder}{00179}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_module_finder}{ModuleFinder}}(\mbox{\hyperlink{classsetuptools_1_1discovery_1_1___finder}{\_Finder}}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00180}00180\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Find\ isolated\ Python\ modules.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ This\ function\ will\ **not**\ recurse\ subdirectories.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00184}00184\ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00185}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_module_finder_aa399f5ad9d34a8a66a9980dbddd3c4c9}{00185}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_module_finder_aa399f5ad9d34a8a66a9980dbddd3c4c9}{\_find\_iter}}(cls,\ where:\ \_Path,\ exclude:\ \_Filter,\ include:\ \_Filter)\ -\/>\ StrIter:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ file\ \textcolor{keywordflow}{in}\ glob(os.path.join(where,\ \textcolor{stringliteral}{"{}*.py"{}})):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ module,\ \_ext\ =\ os.path.splitext(os.path.basename(file))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ cls.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_module_finder_ace6f417ddfe2ed3781f651410f2b1e60}{\_looks\_like\_module}}(module):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ include(module)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ exclude(module):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ module}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00195}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_module_finder_ace6f417ddfe2ed3781f651410f2b1e60}{00195}}\ \ \ \ \ \_looks\_like\_module\ =\ staticmethod(\_valid\_name)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00198}00198\ \textcolor{comment}{\#\ We\ have\ to\ be\ extra\ careful\ in\ the\ case\ of\ flat\ layout\ to\ not\ include\ files}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00199}00199\ \textcolor{comment}{\#\ and\ directories\ not\ meant\ for\ distribution\ (e.g.\ tool-\/related)}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00202}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_package_finder}{00202}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_package_finder}{FlatLayoutPackageFinder}}(\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_p_e_p420_package_finder}{PEP420PackageFinder}}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00203}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_package_finder_a877a76eb240e9cd3f0918601265c789f}{00203}}\ \ \ \ \ \_EXCLUDE\ =\ (}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}ci"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}bin"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}doc"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}docs"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}documentation"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}manpages"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}news"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}changelog"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}test"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tests"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}unit\_test"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}unit\_tests"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}example"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}examples"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}scripts"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tools"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}util"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}utils"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}python"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}build"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}dist"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}venv"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}env"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}requirements"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/-\/-\/-\/\ Task\ runners\ /\ Build\ tools\ -\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tasks"{}},\ \ \textcolor{comment}{\#\ invoke}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}fabfile"{}},\ \ \textcolor{comment}{\#\ fabric}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}site\_scons"{}},\ \ \textcolor{comment}{\#\ SCons}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/-\/-\/-\/\ Other\ tools\ -\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}benchmark"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}benchmarks"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}exercise"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}exercises"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/-\/-\/-\/\ Hidden\ directories/Private\ packages\ -\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}[.\_]*"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00239}00239\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00240}00240\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00241}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_package_finder}{00241}}\ \ \ \ \ DEFAULT\_EXCLUDE\ =\ tuple(\mbox{\hyperlink{namespacesetuptools_1_1discovery_a8ce1f228a832d9afef9405c06c1f43f3}{chain\_iter}}((p,\ f\textcolor{stringliteral}{"{}\{p\}.*"{}})\ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ \_EXCLUDE))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00242}00242\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Reserved\ package\ names"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00244}00244\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00245}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_package_finder_a22fbc40de43e8b59037a563173348b19}{00245}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_package_finder_a22fbc40de43e8b59037a563173348b19}{\_looks\_like\_package}}(\_path:\ \_Path,\ package\_name:\ str)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ names\ =\ package\_name.split(\textcolor{stringliteral}{'.'})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Consider\ PEP\ 561}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ root\_pkg\_is\_valid\ =\ names[0].isidentifier()\ \textcolor{keywordflow}{or}\ names[0].endswith(\textcolor{stringliteral}{"{}-\/stubs"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ root\_pkg\_is\_valid\ \textcolor{keywordflow}{and}\ all(name.isidentifier()\ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ names[1:])}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00252}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_module_finder}{00252}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_module_finder}{FlatLayoutModuleFinder}}(\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_module_finder}{ModuleFinder}}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00253}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_flat_layout_module_finder}{00253}}\ \ \ \ \ DEFAULT\_EXCLUDE\ =\ (}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}setup"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}conftest"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}test"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tests"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}example"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}examples"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}build"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/-\/-\/-\/\ Task\ runners\ -\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}toxfile"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}noxfile"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}pavement"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}dodo"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tasks"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}fabfile"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/-\/-\/-\/\ Other\ tools\ -\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}[Ss][Cc]onstruct"{}},\ \ \textcolor{comment}{\#\ SCons}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}conanfile"{}},\ \ \textcolor{comment}{\#\ Connan:\ C/C++\ build\ tool}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}manage"{}},\ \ \textcolor{comment}{\#\ Django}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}benchmark"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}benchmarks"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}exercise"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}exercises"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/-\/-\/-\/\ Hidden\ files/Private\ modules\ -\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}[.\_]*"{}},}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00278}00278\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00279}00279\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Reserved\ top-\/level\ module\ names"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00280}00280\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00282}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a0a750a2b895076785e978aaee27bec04}{00282}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1discovery_a0a750a2b895076785e978aaee27bec04}{\_find\_packages\_within}}(root\_pkg:\ str,\ pkg\_dir:\ \_Path)\ -\/>\ List[str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00283}00283\ \ \ \ \ nested\ =\ PEP420PackageFinder.find(pkg\_dir)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00284}00284\ \ \ \ \ \textcolor{keywordflow}{return}\ [root\_pkg]\ +\ [\textcolor{stringliteral}{"{}."{}}.join((root\_pkg,\ n))\ \textcolor{keywordflow}{for}\ n\ \textcolor{keywordflow}{in}\ nested]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00286}00286\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00287}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery}{00287}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery}{ConfigDiscovery}}:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00288}00288\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Fill-\/in\ metadata\ and\ options\ that\ can\ be\ automatically\ derived}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00289}00289\ \textcolor{stringliteral}{\ \ \ \ (from\ other\ metadata/options,\ the\ file\ system\ or\ conventions)}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00290}00290\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00292}00292\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ distribution:\ \textcolor{stringliteral}{"{}Distribution"{}}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00293}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{00293}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}\ =\ distribution}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00294}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_aa7b24f4b1ca3bee9e196e4faccf4beda}{00294}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_aa7b24f4b1ca3bee9e196e4faccf4beda}{\_called}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00295}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a84978c1ab8be6be3dfcdedefff3cd64a}{00295}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a84978c1ab8be6be3dfcdedefff3cd64a}{\_disabled}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00296}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_ac483bc24f53c303c5db54deef27b6079}{00296}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_ac483bc24f53c303c5db54deef27b6079}{\_skip\_ext\_modules}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00297}00297\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00298}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a0858862c0e387d5f08d6bcd096ffb5b6}{00298}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a0858862c0e387d5f08d6bcd096ffb5b6}{\_disable}}(self):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Internal\ API\ to\ disable\ automatic\ discovery"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a84978c1ab8be6be3dfcdedefff3cd64a}{\_disabled}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00302}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a3bbae3b934e779c8f097f9fc58e3efb7}{00302}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a3bbae3b934e779c8f097f9fc58e3efb7}{\_ignore\_ext\_modules}}(self):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Internal\ API\ to\ disregard\ ext\_modules.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00304}00304\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00305}00305\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Normally\ auto-\/discovery\ would\ not\ be\ triggered\ if\ \`{}\`{}ext\_modules\`{}\`{}\ are\ set}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00306}00306\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ (this\ is\ done\ for\ backward\ compatibility\ with\ existing\ packages\ relying\ on}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00307}00307\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}setup.py\`{}\`{}\ or\ \`{}\`{}setup.cfg\`{}\`{}).\ However,\ \`{}\`{}setuptools\`{}\`{}\ can\ call\ this\ function}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00308}00308\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ to\ ignore\ given\ \`{}\`{}ext\_modules\`{}\`{}\ and\ proceed\ with\ the\ auto-\/discovery\ if}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00309}00309\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}packages\`{}\`{}\ and\ \`{}\`{}py\_modules\`{}\`{}\ are\ not\ given\ (e.g.\ when\ using\ pyproject.toml}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00310}00310\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ metadata).}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00311}00311\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_ac483bc24f53c303c5db54deef27b6079}{\_skip\_ext\_modules}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00314}00314\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00315}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4e8030d0499e80f74c24d8a2d62bb554}{00315}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4e8030d0499e80f74c24d8a2d62bb554}{\_root\_dir}}(self)\ -\/>\ \_Path:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ The\ best\ is\ to\ wait\ until\ \`{}src\_root`\ is\ set\ in\ dist,\ before\ using\ \_root\_dir.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.src\_root\ \textcolor{keywordflow}{or}\ os.curdir}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00319}00319\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00320}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a293442efa6cdc81132385c5d42e4c22e}{00320}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a293442efa6cdc81132385c5d42e4c22e}{\_package\_dir}}(self)\ -\/>\ Dict[str,\ str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.package\_dir\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.package\_dir}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00325}00325\ \ \ \ \ \textcolor{keyword}{def\ }\_\_call\_\_(self,\ force=False,\ name=True,\ ignore\_ext\_modules=False):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Automatically\ discover\ missing\ configuration\ fields}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00327}00327\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ modifies\ the\ given\ \`{}\`{}distribution\`{}\`{}\ object\ in-\/place.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00328}00328\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00329}00329\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Note\ that\ by\ default\ this\ will\ only\ have\ an\ effect\ the\ first\ time\ the}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00330}00330\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}ConfigDiscovery\`{}\`{}\ object\ is\ called.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00331}00331\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00332}00332\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ To\ repeatedly\ invoke\ automatic\ discovery\ (e.g.\ when\ the\ project}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00333}00333\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ directory\ changes),\ please\ use\ \`{}\`{}force=True\`{}\`{}\ (or\ create\ a\ new}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00334}00334\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}ConfigDiscovery\`{}\`{}\ instance).}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00335}00335\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ force\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}\ \textcolor{keywordflow}{and}\ (self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_aa7b24f4b1ca3bee9e196e4faccf4beda}{\_called}}\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a84978c1ab8be6be3dfcdedefff3cd64a}{\_disabled}}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Avoid\ overhead\ of\ multiple\ calls}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4b8758e979e3a98ee5e5e482d998378d}{\_analyse\_package\_layout}}(ignore\_ext\_modules)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a10b2c840048049990593c08521f96ddf}{analyse\_name}}()\ \ \textcolor{comment}{\#\ depends\ on\ \`{}\`{}packages``\ and\ \`{}\`{}py\_modules``}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00343}00343\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_aa7b24f4b1ca3bee9e196e4faccf4beda}{\_called}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00345}00345\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00346}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a1cc853387f67946e2e181226858be217}{00346}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a1cc853387f67946e2e181226858be217}{\_explicitly\_specified}}(self,\ ignore\_ext\_modules:\ bool)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}\`{}\`{}True\`{}\`{}\ if\ the\ user\ has\ specified\ some\ form\ of\ package/module\ listing"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ ignore\_ext\_modules\ =\ ignore\_ext\_modules\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_ac483bc24f53c303c5db54deef27b6079}{\_skip\_ext\_modules}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ ext\_modules\ =\ \textcolor{keywordflow}{not}\ (self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.ext\_modules\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{or}\ ignore\_ext\_modules)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.packages\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.py\_modules\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ ext\_modules}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ hasattr(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}},\ \textcolor{stringliteral}{"{}configuration"{}})\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.configuration}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \string^\ Some\ projects\ use\ numpy.distutils.misc\_util.Configuration}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00358}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4b8758e979e3a98ee5e5e482d998378d}{00358}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4b8758e979e3a98ee5e5e482d998378d}{\_analyse\_package\_layout}}(self,\ ignore\_ext\_modules:\ bool)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a1cc853387f67946e2e181226858be217}{\_explicitly\_specified}}(ignore\_ext\_modules):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ backward\ compatibility,\ just\ try\ to\ find\ modules/packages}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ when\ nothing\ is\ given}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00363}00363\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ log.debug(}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}No\ \`{}packages`\ or\ \`{}py\_modules`\ configuration,\ performing\ "{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}automatic\ discovery."{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_aacf217112551b6ca50fa9082d83e409d}{\_analyse\_explicit\_layout}}()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_acd7819284451e0d790e976d8388dbb70}{\_analyse\_src\_layout}}()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ flat-\/layout\ is\ the\ trickiest\ for\ discovery\ so\ it\ should\ be\ last}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a3d94f6ff7539d3fb63b9023e0f78dccc}{\_analyse\_flat\_layout}}()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00375}00375\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00376}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_aacf217112551b6ca50fa9082d83e409d}{00376}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_aacf217112551b6ca50fa9082d83e409d}{\_analyse\_explicit\_layout}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ user\ can\ explicitly\ give\ a\ package\ layout\ via\ \`{}\`{}package\_dir\`{}\`{}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ package\_dir\ =\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a293442efa6cdc81132385c5d42e4c22e}{\_package\_dir}}.copy()\ \ \textcolor{comment}{\#\ don't\ modify\ directly}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ package\_dir.pop(\textcolor{stringliteral}{"{}"{}},\ \textcolor{keywordtype}{None})\ \ \textcolor{comment}{\#\ This\ falls\ under\ the\ "{}src-\/layout"{}\ umbrella}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ root\_dir\ =\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4e8030d0499e80f74c24d8a2d62bb554}{\_root\_dir}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ package\_dir:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00384}00384\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}\`{}explicit-\/layout`\ detected\ -\/-\/\ analysing\ \{package\_dir\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00386}00386\ \ \ \ \ \ \ \ \ pkgs\ =\ \mbox{\hyperlink{namespacesetuptools_1_1discovery_a8ce1f228a832d9afef9405c06c1f43f3}{chain\_iter}}(}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1discovery_a0a750a2b895076785e978aaee27bec04}{\_find\_packages\_within}}(pkg,\ os.path.join(root\_dir,\ parent\_dir))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ pkg,\ parent\_dir\ \textcolor{keywordflow}{in}\ package\_dir.items()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.packages\ =\ list(pkgs)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}discovered\ packages\ -\/-\/\ \{self.dist.packages\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00393}00393\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00394}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_acd7819284451e0d790e976d8388dbb70}{00394}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_acd7819284451e0d790e976d8388dbb70}{\_analyse\_src\_layout}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Try\ to\ find\ all\ packages\ or\ modules\ under\ the\ \`{}\`{}src\`{}\`{}\ directory}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00396}00396\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ (or\ anything\ pointed\ by\ \`{}\`{}package\_dir["{}"{}]\`{}\`{}).}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00397}00397\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00398}00398\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ "{}src-\/layout"{}\ is\ relatively\ safe\ for\ automatic\ discovery.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00399}00399\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ We\ assume\ that\ everything\ within\ is\ meant\ to\ be\ included\ in\ the}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00400}00400\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ distribution.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00401}00401\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00402}00402\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ \`{}\`{}package\_dir["{}"{}]\`{}\`{}\ is\ not\ given,\ but\ the\ \`{}\`{}src\`{}\`{}\ directory\ exists,}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00403}00403\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ this\ function\ will\ set\ \`{}\`{}package\_dir["{}"{}]\ =\ "{}src"{}\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00404}00404\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ package\_dir\ =\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a293442efa6cdc81132385c5d42e4c22e}{\_package\_dir}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ src\_dir\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4e8030d0499e80f74c24d8a2d62bb554}{\_root\_dir}},\ package\_dir.get(\textcolor{stringliteral}{"{}"{}},\ \textcolor{stringliteral}{"{}src"{}}))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.isdir(src\_dir):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00409}00409\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00410}00410\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}\`{}src-\/layout`\ detected\ -\/-\/\ analysing\ \{src\_dir\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ package\_dir.setdefault(\textcolor{stringliteral}{"{}"{}},\ os.path.basename(src\_dir))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00412}00412\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.package\_dir\ =\ package\_dir\ \ \textcolor{comment}{\#\ persist\ eventual\ modifications}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00413}00413\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.packages\ =\ PEP420PackageFinder.find(src\_dir)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00414}00414\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.py\_modules\ =\ ModuleFinder.find(src\_dir)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00415}00415\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}discovered\ packages\ -\/-\/\ \{self.dist.packages\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00416}00416\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}discovered\ py\_modules\ -\/-\/\ \{self.dist.py\_modules\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00419}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a3d94f6ff7539d3fb63b9023e0f78dccc}{00419}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a3d94f6ff7539d3fb63b9023e0f78dccc}{\_analyse\_flat\_layout}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Try\ to\ find\ all\ packages\ and\ modules\ under\ the\ project\ root.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00421}00421\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00422}00422\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Since\ the\ \`{}\`{}flat-\/layout\`{}\`{}\ is\ more\ dangerous\ in\ terms\ of\ accidentally\ including}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00423}00423\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ extra\ files/directories,\ this\ function\ is\ more\ conservative\ and\ will\ raise\ an}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00424}00424\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ error\ if\ multiple\ packages\ or\ modules\ are\ found.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00425}00425\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00426}00426\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ assumes\ that\ multi-\/package\ dists\ are\ uncommon\ and\ refuse\ to\ support\ that}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00427}00427\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ use\ case\ in\ order\ to\ be\ able\ to\ prevent\ unintended\ errors.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00428}00428\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00429}00429\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}\`{}flat-\/layout`\ detected\ -\/-\/\ analysing\ \{self.\_root\_dir\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00430}00430\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_af4fa78b426eca610c57995eea046c649}{\_analyse\_flat\_packages}}()\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_af3cd9b9366edf2ef04d3bbc7a0e18016}{\_analyse\_flat\_modules}}()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00432}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_af4fa78b426eca610c57995eea046c649}{00432}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_af4fa78b426eca610c57995eea046c649}{\_analyse\_flat\_packages}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00433}00433\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.packages\ =\ FlatLayoutPackageFinder.find(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4e8030d0499e80f74c24d8a2d62bb554}{\_root\_dir}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00434}00434\ \ \ \ \ \ \ \ \ top\_level\ =\ \mbox{\hyperlink{namespacesetuptools_1_1discovery_a500e6a32d38299828de25766b59df3fa}{remove\_nested\_packages}}(\mbox{\hyperlink{namespacesetuptools_1_1discovery_a78a1d502fc05dfd5cd477f8c5d194219}{remove\_stubs}}(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.packages))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00435}00435\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}discovered\ packages\ -\/-\/\ \{self.dist.packages\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00436}00436\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a9d7670d5979502cde15b2f2b1b57832b}{\_ensure\_no\_accidental\_inclusion}}(top\_level,\ \textcolor{stringliteral}{"{}packages"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bool(top\_level)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00438}00438\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00439}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_af3cd9b9366edf2ef04d3bbc7a0e18016}{00439}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_af3cd9b9366edf2ef04d3bbc7a0e18016}{\_analyse\_flat\_modules}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00440}00440\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.py\_modules\ =\ FlatLayoutModuleFinder.find(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4e8030d0499e80f74c24d8a2d62bb554}{\_root\_dir}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}discovered\ py\_modules\ -\/-\/\ \{self.dist.py\_modules\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a9d7670d5979502cde15b2f2b1b57832b}{\_ensure\_no\_accidental\_inclusion}}(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.py\_modules,\ \textcolor{stringliteral}{"{}modules"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bool(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.py\_modules)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00444}00444\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00445}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a9d7670d5979502cde15b2f2b1b57832b}{00445}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a9d7670d5979502cde15b2f2b1b57832b}{\_ensure\_no\_accidental\_inclusion}}(self,\ detected:\ List[str],\ kind:\ str):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(detected)\ >\ 1:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ cleandoc}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00448}00448\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1errors}{setuptools.errors}}\ \textcolor{keyword}{import}\ PackageDiscoveryError}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ msg\ =\ f\textcolor{stringliteral}{"{}"{}"{}Multiple\ top-\/level\ \{kind\}\ discovered\ in\ a\ flat-\/layout:\ \{detected\}.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00452}00452\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00453}00453\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ To\ avoid\ accidental\ inclusion\ of\ unwanted\ files\ or\ directories,}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00454}00454\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ setuptools\ will\ not\ proceed\ with\ this\ build.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00455}00455\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00456}00456\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ If\ you\ are\ trying\ to\ create\ a\ single\ distribution\ with\ multiple\ \{kind\}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00457}00457\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ on\ purpose,\ you\ should\ not\ rely\ on\ automatic\ discovery.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00458}00458\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Instead,\ consider\ the\ following\ options:}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00459}00459\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00460}00460\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 1.\ set\ up\ custom\ discovery\ (\`{}find\`{}\ directive\ with\ \`{}include\`{}\ or\ \`{}exclude\`{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00461}00461\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 2.\ use\ a\ \`{}src-\/layout\`{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00462}00462\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ 3.\ explicitly\ set\ \`{}py\_modules\`{}\ or\ \`{}packages\`{}\ with\ a\ list\ of\ names}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00463}00463\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00464}00464\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ To\ find\ more\ information,\ look\ for\ "{}package\ discovery"{}\ on\ setuptools\ docs.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00465}00465\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PackageDiscoveryError(cleandoc(msg))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00467}00467\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00468}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a10b2c840048049990593c08521f96ddf}{00468}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a10b2c840048049990593c08521f96ddf}{analyse\_name}}(self):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ packages/modules\ are\ the\ essential\ contribution\ of\ the\ author.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00470}00470\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Therefore\ the\ name\ of\ the\ distribution\ can\ be\ derived\ from\ them.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00471}00471\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.metadata.name\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.name:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ get\_name()\ is\ not\ reliable\ (can\ return\ "{}UNKNOWN"{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00475}00475\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}No\ \`{}name`\ configuration,\ performing\ automatic\ discovery"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00477}00477\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ name\ =\ (}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a60002d71bc2308ab73a0ec179c656ba7}{\_find\_name\_single\_package\_or\_module}}()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_acbb6e4f5019c74569b6de711747917a8}{\_find\_name\_from\_packages}}()}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.metadata.name\ =\ name}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00484}00484\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00485}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a60002d71bc2308ab73a0ec179c656ba7}{00485}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a60002d71bc2308ab73a0ec179c656ba7}{\_find\_name\_single\_package\_or\_module}}(self)\ -\/>\ Optional[str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Exactly\ one\ module\ or\ package"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'packages'},\ \textcolor{stringliteral}{'py\_modules'}):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ items\ =\ getattr(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}},\ field,\ \textcolor{keywordtype}{None})\ \textcolor{keywordflow}{or}\ []}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ items\ \textcolor{keywordflow}{and}\ len(items)\ ==\ 1:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}Single\ module/package\ detected,\ name:\ \{items[0]\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ items[0]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00492}00492\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00494}00494\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00495}\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_acbb6e4f5019c74569b6de711747917a8}{00495}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_acbb6e4f5019c74569b6de711747917a8}{\_find\_name\_from\_packages}}(self)\ -\/>\ Optional[str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Try\ to\ find\ the\ root\ package\ that\ is\ not\ a\ PEP\ 420\ namespace"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.packages:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00499}00499\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ packages\ =\ \mbox{\hyperlink{namespacesetuptools_1_1discovery_a78a1d502fc05dfd5cd477f8c5d194219}{remove\_stubs}}(sorted(self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.packages,\ key=len))}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00501}00501\ \ \ \ \ \ \ \ \ package\_dir\ =\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a34ab7b9f1e33ad8fda84def636a5b5bb}{dist}}.package\_dir\ \textcolor{keywordflow}{or}\ \{\}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00502}00502\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00503}00503\ \ \ \ \ \ \ \ \ parent\_pkg\ =\ \mbox{\hyperlink{namespacesetuptools_1_1discovery_a2eb025148180ffaa7b6292bfc4f2cbd3}{find\_parent\_package}}(packages,\ package\_dir,\ self.\mbox{\hyperlink{classsetuptools_1_1discovery_1_1_config_discovery_a4e8030d0499e80f74c24d8a2d62bb554}{\_root\_dir}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ parent\_pkg:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(f\textcolor{stringliteral}{"{}Common\ parent\ package\ detected,\ name:\ \{parent\_pkg\}"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ parent\_pkg}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00507}00507\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ log.warn(\textcolor{stringliteral}{"{}No\ parent\ package\ detected,\ impossible\ to\ derive\ \`{}name`"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00510}00510\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00511}00511\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00512}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a500e6a32d38299828de25766b59df3fa}{00512}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1discovery_a500e6a32d38299828de25766b59df3fa}{remove\_nested\_packages}}(packages:\ List[str])\ -\/>\ List[str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00513}00513\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Remove\ nested\ packages\ from\ a\ list\ of\ packages.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00514}00514\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00515}00515\ \textcolor{stringliteral}{\ \ \ \ >>>\ remove\_nested\_packages(["{}a"{},\ "{}a.b1"{},\ "{}a.b2"{},\ "{}a.b1.c1"{}])}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00516}00516\ \textcolor{stringliteral}{\ \ \ \ ['a']}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00517}00517\ \textcolor{stringliteral}{\ \ \ \ >>>\ remove\_nested\_packages(["{}a"{},\ "{}b"{},\ "{}c.d"{},\ "{}c.d.e.f"{},\ "{}g.h"{},\ "{}a.a1"{}])}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00518}00518\ \textcolor{stringliteral}{\ \ \ \ ['a',\ 'b',\ 'c.d',\ 'g.h']}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00519}00519\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00520}00520\ \ \ \ \ pkgs\ =\ sorted(packages,\ key=len)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00521}00521\ \ \ \ \ top\_level\ =\ pkgs[:]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00522}00522\ \ \ \ \ size\ =\ len(pkgs)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00523}00523\ \ \ \ \ \textcolor{keywordflow}{for}\ i,\ name\ \textcolor{keywordflow}{in}\ enumerate(reversed(pkgs)):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ any(name.startswith(f\textcolor{stringliteral}{"{}\{other\}."{}})\ \textcolor{keywordflow}{for}\ other\ \textcolor{keywordflow}{in}\ top\_level):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ \ \ \ \ top\_level.pop(size\ -\/\ i\ -\/\ 1)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00526}00526\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00527}00527\ \ \ \ \ \textcolor{keywordflow}{return}\ top\_level}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00528}00528\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00529}00529\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00530}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a78a1d502fc05dfd5cd477f8c5d194219}{00530}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1discovery_a78a1d502fc05dfd5cd477f8c5d194219}{remove\_stubs}}(packages:\ List[str])\ -\/>\ List[str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00531}00531\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Remove\ type\ stubs\ (:pep:\`{}561\`{})\ from\ a\ list\ of\ packages.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00532}00532\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00533}00533\ \textcolor{stringliteral}{\ \ \ \ >>>\ remove\_stubs(["{}a"{},\ "{}a.b"{},\ "{}a-\/stubs"{},\ "{}a-\/stubs.b.c"{},\ "{}b"{},\ "{}c-\/stubs"{}])}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00534}00534\ \textcolor{stringliteral}{\ \ \ \ ['a',\ 'a.b',\ 'b']}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00535}00535\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00536}00536\ \ \ \ \ \textcolor{keywordflow}{return}\ [pkg\ \textcolor{keywordflow}{for}\ pkg\ \textcolor{keywordflow}{in}\ packages\ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ pkg.split(\textcolor{stringliteral}{"{}."{}})[0].endswith(\textcolor{stringliteral}{"{}-\/stubs"{}})]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00537}00537\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00538}00538\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00539}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a2eb025148180ffaa7b6292bfc4f2cbd3}{00539}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1discovery_a2eb025148180ffaa7b6292bfc4f2cbd3}{find\_parent\_package}}(}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00540}00540\ \ \ \ \ packages:\ List[str],\ package\_dir:\ Mapping[str,\ str],\ root\_dir:\ \_Path}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00541}00541\ )\ -\/>\ Optional[str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00542}00542\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Find\ the\ parent\ package\ that\ is\ not\ a\ namespace."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00543}00543\ \ \ \ \ packages\ =\ sorted(packages,\ key=len)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00544}00544\ \ \ \ \ common\_ancestors\ =\ []}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00545}00545\ \ \ \ \ \textcolor{keywordflow}{for}\ i,\ name\ \textcolor{keywordflow}{in}\ enumerate(packages):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00546}00546\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ all(n.startswith(f\textcolor{stringliteral}{"{}\{name\}."{}})\ \textcolor{keywordflow}{for}\ n\ \textcolor{keywordflow}{in}\ packages[i+1:]):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Since\ packages\ are\ sorted\ by\ length,\ this\ condition\ is\ able}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ find\ a\ list\ of\ all\ common\ ancestors.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ When\ there\ is\ divergence\ (e.g.\ multiple\ root\ packages)}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ list\ will\ be\ empty}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00552}00552\ \ \ \ \ \ \ \ \ common\_ancestors.append(name)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00553}00553\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00554}00554\ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ common\_ancestors:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00555}00555\ \ \ \ \ \ \ \ \ pkg\_path\ =\ \mbox{\hyperlink{namespacesetuptools_1_1discovery_a52e46849bcb908d5904687698991d2dd}{find\_package\_path}}(name,\ package\_dir,\ root\_dir)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00556}00556\ \ \ \ \ \ \ \ \ init\ =\ os.path.join(pkg\_path,\ \textcolor{stringliteral}{"{}\_\_init\_\_.py"{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00557}00557\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isfile(init):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ name}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00559}00559\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00560}00560\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00561}00561\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00562}00562\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00563}\mbox{\hyperlink{namespacesetuptools_1_1discovery_a52e46849bcb908d5904687698991d2dd}{00563}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1discovery_a52e46849bcb908d5904687698991d2dd}{find\_package\_path}}(}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00564}00564\ \ \ \ \ name:\ str,\ package\_dir:\ Mapping[str,\ str],\ root\_dir:\ \_Path}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00565}00565\ )\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00566}00566\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Given\ a\ package\ name,\ return\ the\ path\ where\ it\ should\ be\ found\ on}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00567}00567\ \textcolor{stringliteral}{\ \ \ \ disk,\ considering\ the\ \`{}\`{}package\_dir\`{}\`{}\ option.}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00568}00568\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00569}00569\ \textcolor{stringliteral}{\ \ \ \ >>>\ path\ =\ find\_package\_path("{}my.pkg"{},\ \{"{}"{}:\ "{}root/is/nested"{}\},\ "{}."{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00570}00570\ \textcolor{stringliteral}{\ \ \ \ >>>\ path.replace(os.sep,\ "{}/"{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00571}00571\ \textcolor{stringliteral}{\ \ \ \ './root/is/nested/my/pkg'}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00572}00572\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00573}00573\ \textcolor{stringliteral}{\ \ \ \ >>>\ path\ =\ find\_package\_path("{}my.pkg"{},\ \{"{}my"{}:\ "{}root/is/nested"{}\},\ "{}."{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00574}00574\ \textcolor{stringliteral}{\ \ \ \ >>>\ path.replace(os.sep,\ "{}/"{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00575}00575\ \textcolor{stringliteral}{\ \ \ \ './root/is/nested/pkg'}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00576}00576\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00577}00577\ \textcolor{stringliteral}{\ \ \ \ >>>\ path\ =\ find\_package\_path("{}my.pkg"{},\ \{"{}my.pkg"{}:\ "{}root/is/nested"{}\},\ "{}."{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00578}00578\ \textcolor{stringliteral}{\ \ \ \ >>>\ path.replace(os.sep,\ "{}/"{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00579}00579\ \textcolor{stringliteral}{\ \ \ \ './root/is/nested'}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00580}00580\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00581}00581\ \textcolor{stringliteral}{\ \ \ \ >>>\ path\ =\ find\_package\_path("{}other.pkg"{},\ \{"{}my.pkg"{}:\ "{}root/is/nested"{}\},\ "{}."{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00582}00582\ \textcolor{stringliteral}{\ \ \ \ >>>\ path.replace(os.sep,\ "{}/"{})}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00583}00583\ \textcolor{stringliteral}{\ \ \ \ './other/pkg'}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00584}00584\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00585}00585\ \ \ \ \ parts\ =\ name.split(\textcolor{stringliteral}{"{}."{}})}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00586}00586\ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ range(len(parts),\ 0,\ -\/1):}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00587}00587\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Look\ backwards,\ the\ most\ specific\ package\_dir\ first}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00588}00588\ \ \ \ \ \ \ \ \ partial\_name\ =\ \textcolor{stringliteral}{"{}."{}}.join(parts[:i])}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00589}00589\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ partial\_name\ \textcolor{keywordflow}{in}\ package\_dir:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00590}00590\ \ \ \ \ \ \ \ \ \ \ \ \ parent\ =\ package\_dir[partial\_name]}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.join(root\_dir,\ parent,\ *parts[i:])}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00592}00592\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00593}00593\ \ \ \ \ parent\ =\ package\_dir.get(\textcolor{stringliteral}{"{}"{}})\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00594}00594\ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.join(root\_dir,\ *parent.split(\textcolor{stringliteral}{"{}/"{}}),\ *parts)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00595}00595\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00596}00596\ }
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00597}\mbox{\hyperlink{namespacesetuptools_1_1discovery_ac569c7d830d346f6bbeb2625bf506920}{00597}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1discovery_ac569c7d830d346f6bbeb2625bf506920}{construct\_package\_dir}}(packages:\ List[str],\ package\_path:\ \_Path)\ -\/>\ Dict[str,\ str]:}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00598}00598\ \ \ \ \ parent\_pkgs\ =\ \mbox{\hyperlink{namespacesetuptools_1_1discovery_a500e6a32d38299828de25766b59df3fa}{remove\_nested\_packages}}(packages)}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00599}00599\ \ \ \ \ prefix\ =\ Path(package\_path).parts}
+\DoxyCodeLine{\Hypertarget{discovery_8py_source_l00600}00600\ \ \ \ \ \textcolor{keywordflow}{return}\ \{pkg:\ \textcolor{stringliteral}{"{}/"{}}.join([*prefix,\ *pkg.split(\textcolor{stringliteral}{"{}."{}})])\ \textcolor{keywordflow}{for}\ pkg\ \textcolor{keywordflow}{in}\ parent\_pkgs\}}
+
+\end{DoxyCode}

@@ -1,3 +1,27 @@
+"""
+    @file consultas.py
+    @brief Controlador REST para consultas sobre la ontología.
+    @details
+    Proporciona endpoints para:
+    - Consultar propiedades del objeto inteligente (id, title, estado, etc.)
+    - Consultar y gestionar reglas ECA (Event-Condition-Action)
+    - Consultar propiedades del perfil de usuario
+    - Verificar contratos entre objetos
+    
+    Routers:
+    - ontologia_router (prefix=/ontology/consultas): consultas de objeto
+    - ontologia_usuario_router (prefix=/ontology/consultas_usuario): consultas de usuario
+    
+    @note Las consultas pueden ser costosas si requieren razonamiento OWL.
+          Considerar cache y asyncio.to_thread() para operaciones bloqueantes.
+    
+    @author Sistema Objeto Inteligente
+    @version 1.0
+    @date 2025-01-10
+    
+    @see ConsultasService Para lógica de negocio
+    @see ConsultasOntologiaUsuarioService Para consultas de usuario
+"""
 
 from fastapi.responses import JSONResponse
 from application.consultas_service import ConsultasOntologiaUsuarioService, ConsultasService
@@ -7,10 +31,20 @@ from deps import get_consultas_pu_service, get_consultas_pu_service, get_consult
 from application.dtos import ECAStateListDTO
 
 ontologia_router = APIRouter(prefix="/ontology/consultas", tags=["Consultas de Base de conocimiento"])
-""" Endpoints para consultas sobre la ontología del objeto inteligente."""
+"""@var ontologia_router Router para consultas sobre ontología del objeto inteligente."""
 @ontologia_router.get("/consultar_active", response_model=bool)
 async def consultar_active(service: ConsultasService = Depends(get_consultas_service)) -> bool:
-    """Endpoint para consultar si el objeto inteligente está activo."""
+    """
+        @brief Verifica que la ontología instanciada esté activa.
+        
+        @param service Instancia del servicio de consultas (inyectada).
+        
+        @return bool True si ontología está activa, False si no.
+        
+        @exception RuntimeError Si hay error al verificar.
+        
+        @see ConsultasService.consultarOntoActiva()
+    """
     try:
         return service.consultarOntoActiva()
     except Exception as e:
@@ -101,15 +135,32 @@ async def consultar_service_state(service: ConsultasService = Depends(get_consul
         raise HTTPException(status_code=404, detail=str(e))
 @ontologia_router.patch("/set_eca_state")
 async def set_eca_state(valorNuevo: str, nombreECA: str, service: ConsultasService = Depends(get_consultas_service)):
-    """Endpoint para actualizar el estado de una ECA."""
-    # Para actualizar correctamente el estado del eca debe enviarse el nombre del eca+nombre del usuario
+    """
+        @brief Actualiza el estado de una regla ECA específica.
+        
+        @param valorNuevo Nuevo valor de estado para la ECA.
+        @param nombreECA Nombre/identificador de la ECA.
+        @param service Servicio de consultas.
+        
+        @return JSONResponse con resultado de la actualización.
+        
+        @note Requiere nombre del ECA y opcionalmente nombre de usuario para validación.
+    """
     try:
         return service.setEcaState(valorNuevo, nombreECA)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 @ontologia_router.get("/listar_ecas", response_model=list)
 async def listar_ecas(service: ConsultasService = Depends(get_consultas_service)) -> list:
-    """Endpoint para listar las ECAs definidas en la ontología."""
+    """
+        @brief Lista todas las reglas ECAs definidas en la ontología.
+        
+        @param service Servicio de consultas.
+        
+        @return Lista de ECAs con sus propiedades.
+        
+        @exception HTTPException Si hay error en consulta SPARQL.
+    """
     try:
         return service.listarECAs()
     except Exception as e:

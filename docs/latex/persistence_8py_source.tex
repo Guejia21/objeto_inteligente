@@ -1,0 +1,45 @@
+\doxysection{persistence.\+py}
+\hypertarget{persistence_8py_source}{}\label{persistence_8py_source}\index{micro\_gestion\_objetos/app/infraestructure/persistence.py@{micro\_gestion\_objetos/app/infraestructure/persistence.py}}
+\mbox{\hyperlink{persistence_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00001}\mbox{\hyperlink{namespacepersistence}{00001}}\ }
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00002}00002\ \textcolor{keyword}{from}\ infraestructure.IRepository\ \textcolor{keyword}{import}\ IRepository}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00003}00003\ \textcolor{keyword}{from}\ infraestructure.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00004}00004\ \textcolor{keyword}{import}\ json}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00005}00005\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00006}00006\ \textcolor{keyword}{from}\ pathlib\ \textcolor{keyword}{import}\ Path}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00007}00007\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00009}\mbox{\hyperlink{classpersistence_1_1_persistence}{00009}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpersistence_1_1_persistence}{Persistence}}(IRepository):}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00010}\mbox{\hyperlink{classpersistence_1_1_persistence_adb6d0444a93009b44f6b1c315149bb73}{00010}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpersistence_1_1_persistence_adb6d0444a93009b44f6b1c315149bb73}{save\_object\_metadata}}(self,\ metadata:\ dict):\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00011}00011\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00012}00012\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Asegurar\ que\ el\ directorio\ destino\ exista}}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00013}00013\ \ \ \ \ \ \ \ \ \ \ \ \ metadata\_path\ =\ Path(settings.METADATA\_PATH)}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00014}00014\ \ \ \ \ \ \ \ \ \ \ \ \ metadata\_path.parent.mkdir(parents=\textcolor{keyword}{True},\ exist\_ok=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ open(metadata\_path,\ \textcolor{stringliteral}{"{}w"{}},\ encoding=\textcolor{stringliteral}{"{}utf-\/8"{}})\ \textcolor{keyword}{as}\ file:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00016}00016\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ json.dump(metadata,\ file,\ ensure\_ascii=\textcolor{keyword}{False},\ indent=2)}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Metadatos\ del\ objeto\ guardados\ correctamente."{}})}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ al\ guardar\ los\ metadatos\ del\ objeto:\ \%s"{}},\ e)}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00022}\mbox{\hyperlink{classpersistence_1_1_persistence_a11482d39ce6b6e9f4c4ebae65a281fe1}{00022}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpersistence_1_1_persistence_a11482d39ce6b6e9f4c4ebae65a281fe1}{get\_object\_metadata}}(self)\ -\/>\ dict:\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ open(settings.METADATA\_PATH,\ \textcolor{stringliteral}{"{}r"{}},\ encoding=\textcolor{stringliteral}{"{}utf-\/8"{}})\ \textcolor{keyword}{as}\ file:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ metadata\ =\ json.load(file)}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Metadatos\ del\ objeto\ obtenidos\ correctamente."{}})}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ metadata}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ al\ obtener\ los\ metadatos\ del\ objeto:\ \%s"{}},\ e)}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00031}\mbox{\hyperlink{classpersistence_1_1_persistence_a51f2aba06c1f2081d41fd803d40950d7}{00031}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpersistence_1_1_persistence_a51f2aba06c1f2081d41fd803d40950d7}{is\_object\_metadata\_exists}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Path(settings.METADATA\_PATH).exists()}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ FileNotFoundError:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ logger.warning(\textcolor{stringliteral}{"{}El\ archivo\ de\ metadatos\ no\ existe."{}})}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ al\ verificar\ la\ existencia\ de\ los\ metadatos\ del\ objeto:\ \%s"{}},\ e)}
+\DoxyCodeLine{\Hypertarget{persistence_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+
+\end{DoxyCode}

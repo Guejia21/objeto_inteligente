@@ -1,0 +1,26 @@
+var sandbox_8py =
+[
+    [ "setuptools.sandbox.UnpickleableException", "classsetuptools_1_1sandbox_1_1_unpickleable_exception.html", "classsetuptools_1_1sandbox_1_1_unpickleable_exception" ],
+    [ "setuptools.sandbox.ExceptionSaver", "classsetuptools_1_1sandbox_1_1_exception_saver.html", "classsetuptools_1_1sandbox_1_1_exception_saver" ],
+    [ "setuptools.sandbox.AbstractSandbox", "classsetuptools_1_1sandbox_1_1_abstract_sandbox.html", "classsetuptools_1_1sandbox_1_1_abstract_sandbox" ],
+    [ "setuptools.sandbox.DirectorySandbox", "classsetuptools_1_1sandbox_1_1_directory_sandbox.html", "classsetuptools_1_1sandbox_1_1_directory_sandbox" ],
+    [ "setuptools.sandbox.SandboxViolation", "classsetuptools_1_1sandbox_1_1_sandbox_violation.html", "classsetuptools_1_1sandbox_1_1_sandbox_violation" ],
+    [ "setuptools.sandbox._clear_modules", "namespacesetuptools_1_1sandbox.html#a643f2aae05bdb3af1a073416aa4436e4", null ],
+    [ "setuptools.sandbox._execfile", "namespacesetuptools_1_1sandbox.html#a6d08b124d7fc3752504cea663fb8c233", null ],
+    [ "setuptools.sandbox._needs_hiding", "namespacesetuptools_1_1sandbox.html#a3e3f4d25efb1d719550e5d80d1f5e16b", null ],
+    [ "setuptools.sandbox.hide_setuptools", "namespacesetuptools_1_1sandbox.html#a579ab6c2031e94770efe338681e83bd7", null ],
+    [ "setuptools.sandbox.override_temp", "namespacesetuptools_1_1sandbox.html#a6f51ebddfe81ff65264f49b215961f47", null ],
+    [ "setuptools.sandbox.pushd", "namespacesetuptools_1_1sandbox.html#a08a2a439e9ca37133fe9382e30b1ea40", null ],
+    [ "setuptools.sandbox.run_setup", "namespacesetuptools_1_1sandbox.html#a964522b9141f1d217f4c117aae1a409f", null ],
+    [ "setuptools.sandbox.save_argv", "namespacesetuptools_1_1sandbox.html#a90b846a7925c83d8f9ce1749286849ea", null ],
+    [ "setuptools.sandbox.save_modules", "namespacesetuptools_1_1sandbox.html#a9df46ce1bd17dbce065c7e11dc46d010", null ],
+    [ "setuptools.sandbox.save_path", "namespacesetuptools_1_1sandbox.html#ad158dc58681bf5b4f0d4ecf3eb55370e", null ],
+    [ "setuptools.sandbox.save_pkg_resources_state", "namespacesetuptools_1_1sandbox.html#a2c716f0ba46e678dd85be72db41c4e14", null ],
+    [ "setuptools.sandbox.setup_context", "namespacesetuptools_1_1sandbox.html#a8e87463f0039530f6b3b039c58ec09da", null ],
+    [ "setuptools.sandbox._EXCEPTIONS", "namespacesetuptools_1_1sandbox.html#aa68adb36abe8accb61bfff7f33e49462", null ],
+    [ "setuptools.sandbox._file", "namespacesetuptools_1_1sandbox.html#a606d2df05a9166bff220807da3b98823", null ],
+    [ "setuptools.sandbox._MODULES_TO_HIDE", "namespacesetuptools_1_1sandbox.html#ac97e22be742d4ea8e38a68abd51c0410", null ],
+    [ "setuptools.sandbox._open", "namespacesetuptools_1_1sandbox.html#a616fa17a666518a02267233ecdc9df33", null ],
+    [ "setuptools.sandbox._os", "namespacesetuptools_1_1sandbox.html#a99f75779e14f881f51f4c38d4a586167", null ],
+    [ "setuptools.sandbox.WRITE_FLAGS", "namespacesetuptools_1_1sandbox.html#ae2d3c0e479bb79bd56a7f884d5a5826b", null ]
+];

@@ -1,0 +1,383 @@
+\doxysection{\+\_\+apply\+\_\+pyprojecttoml.\+py}
+\hypertarget{__apply__pyprojecttoml_8py_source}{}\label{__apply__pyprojecttoml_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/config/\_apply\_pyprojecttoml.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/config/\_apply\_pyprojecttoml.py}}
+\mbox{\hyperlink{__apply__pyprojecttoml_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Translation\ layer\ between\ pyproject\ config\ and\ setuptools\ distribution\ and}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00002}00002\ \textcolor{stringliteral}{metadata\ objects.}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00003}00003\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00004}00004\ \textcolor{stringliteral}{The\ distribution\ and\ metadata\ objects\ are\ modeled\ after\ (an\ old\ version\ of)}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00005}00005\ \textcolor{stringliteral}{core\ metadata,\ therefore\ configs\ in\ the\ format\ specified\ for\ \`{}\`{}pyproject.toml\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00006}00006\ \textcolor{stringliteral}{need\ to\ be\ processed\ before\ being\ applied.}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00007}00007\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00008}00008\ \textcolor{stringliteral}{**PRIVATE\ MODULE**:\ API\ reserved\ for\ setuptools\ internal\ usage\ only.}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00009}00009\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00010}00010\ \textcolor{keyword}{import}\ logging}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00011}00011\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00012}00012\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00013}00013\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Mapping}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00014}00014\ \textcolor{keyword}{from}\ email.headerregistry\ \textcolor{keyword}{import}\ Address}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00015}00015\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ partial,\ reduce}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00016}00016\ \textcolor{keyword}{from}\ itertools\ \textcolor{keyword}{import}\ chain}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00017}00017\ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ MappingProxyType}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00018}00018\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ (TYPE\_CHECKING,\ Any,\ Callable,\ Dict,\ List,\ Optional,\ Set,\ Tuple,}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Type,\ Union)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00021}00021\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1__deprecation__warning}{setuptools.\_deprecation\_warning}}\ \textcolor{keyword}{import}\ SetuptoolsDeprecationWarning}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00023}00023\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00024}00024\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1__importlib}{setuptools.\_importlib}}\ \textcolor{keyword}{import}\ metadata\ \ \textcolor{comment}{\#\ noqa}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00025}00025\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1dist}{setuptools.dist}}\ \textcolor{keyword}{import}\ Distribution\ \ \textcolor{comment}{\#\ noqa}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00027}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a984baa47dc3988b9f80d46ecc0c17d56}{00027}}\ EMPTY:\ Mapping\ =\ MappingProxyType(\{\})\ \ \textcolor{comment}{\#\ Immutable\ dict-\/like}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00028}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a601604f49159abe7c35bc1f1c99ab3b3}{00028}}\ \_Path\ =\ Union[os.PathLike,\ str]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00029}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a4a51b7e7b2f2055bd631ba6955d9645b}{00029}}\ \_DictOrStr\ =\ Union[dict,\ str]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00030}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a89961dc136ec29d4ddc8343e0015c0c3}{00030}}\ \_CorrespFn\ =\ Callable[[\textcolor{stringliteral}{"{}Distribution"{}},\ Any,\ \_Path],\ \textcolor{keywordtype}{None}]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00031}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a7fa82ce0b5c34047b0832e808afa4ee3}{00031}}\ \_Correspondence\ =\ Union[str,\ \_CorrespFn]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00033}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_afc319448a144c4356c5b7c265341d787}{00033}}\ \_logger\ =\ logging.getLogger(\_\_name\_\_)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00036}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a5c8e45f88a0f6f91f4c4d7f40f112065}{00036}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a5c8e45f88a0f6f91f4c4d7f40f112065}{apply}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ config:\ dict,\ filename:\ \_Path)\ -\/>\ \textcolor{stringliteral}{"{}Distribution"{}}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00037}00037\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Apply\ configuration\ dict\ read\ with\ :func:\`{}read\_configuration\`{}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00039}00039\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ config:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dist\ \ \textcolor{comment}{\#\ short-\/circuit\ unrelated\ pyproject.toml\ file}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00042}00042\ \ \ \ \ root\_dir\ =\ os.path.dirname(filename)\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}."{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00044}00044\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a14254cb2a1c3c85a6e949d666f470c7f}{\_apply\_project\_table}}(dist,\ config,\ root\_dir)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00045}00045\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af071d41036eac63137f92869ad0ba93b}{\_apply\_tool\_table}}(dist,\ config,\ filename)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00047}00047\ \ \ \ \ current\_directory\ =\ os.getcwd()}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00048}00048\ \ \ \ \ os.chdir(root\_dir)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00049}00049\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ dist.\_finalize\_requires()}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ dist.\_finalize\_license\_files()}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ os.chdir(current\_directory)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00055}00055\ \ \ \ \ \textcolor{keywordflow}{return}\ dist}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00058}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a14254cb2a1c3c85a6e949d666f470c7f}{00058}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a14254cb2a1c3c85a6e949d666f470c7f}{\_apply\_project\_table}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ config:\ dict,\ root\_dir:\ \_Path):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00059}00059\ \ \ \ \ project\_table\ =\ config.get(\textcolor{stringliteral}{"{}project"{}},\ \{\}).copy()}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00060}00060\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ project\_table:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \ \textcolor{comment}{\#\ short-\/circuit}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00063}00063\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ac02684d0b10fa1b2184a26d06d3bab7a}{\_handle\_missing\_dynamic}}(dist,\ project\_table)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00064}00064\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ace77ea7dbe5dfa8f126524ef6c09eb75}{\_unify\_entry\_points}}(project\_table)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00066}00066\ \ \ \ \ \textcolor{keywordflow}{for}\ field,\ value\ \textcolor{keywordflow}{in}\ project\_table.items():}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ norm\_key\ =\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{json\_compatible\_key}}(field)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ corresp\ =\ PYPROJECT\_CORRESPONDENCE.get(norm\_key,\ norm\_key)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ callable(corresp):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ corresp(dist,\ value,\ root\_dir)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ corresp,\ value)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00075}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af071d41036eac63137f92869ad0ba93b}{00075}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af071d41036eac63137f92869ad0ba93b}{\_apply\_tool\_table}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ config:\ dict,\ filename:\ \_Path):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00076}00076\ \ \ \ \ tool\_table\ =\ config.get(\textcolor{stringliteral}{"{}tool"{}},\ \{\}).get(\textcolor{stringliteral}{"{}setuptools"{}},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00077}00077\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ tool\_table:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \ \textcolor{comment}{\#\ short-\/circuit}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{for}\ field,\ value\ \textcolor{keywordflow}{in}\ tool\_table.items():}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ norm\_key\ =\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{json\_compatible\_key}}(field)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ norm\_key\ \textcolor{keywordflow}{in}\ TOOL\_TABLE\_DEPRECATIONS:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ suggestion\ =\ TOOL\_TABLE\_DEPRECATIONS[norm\_key]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ msg\ =\ f\textcolor{stringliteral}{"{}The\ parameter\ \`{}\{norm\_key\}`\ is\ deprecated,\ \{suggestion\}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ warnings.warn(msg,\ SetuptoolsDeprecationWarning)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ norm\_key\ =\ TOOL\_TABLE\_RENAMES.get(norm\_key,\ norm\_key)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ norm\_key,\ value)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00091}00091\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a014fa3c0b38884f2ece063ff046bda24}{\_copy\_command\_options}}(config,\ dist,\ filename)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00094}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ac02684d0b10fa1b2184a26d06d3bab7a}{00094}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ac02684d0b10fa1b2184a26d06d3bab7a}{\_handle\_missing\_dynamic}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ project\_table:\ dict):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00095}00095\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Be\ temporarily\ forgiving\ with\ \`{}\`{}dynamic\`{}\`{}\ fields\ not\ listed\ in\ \`{}\`{}dynamic\`{}\`{}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00096}00096\ \ \ \ \ \textcolor{comment}{\#\ TODO:\ Set\ fields\ back\ to\ \`{}None`\ once\ the\ feature\ stabilizes}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00097}00097\ \ \ \ \ dynamic\ =\ set(project\_table.get(\textcolor{stringliteral}{"{}dynamic"{}},\ []))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00098}00098\ \ \ \ \ \textcolor{keywordflow}{for}\ field,\ getter\ \textcolor{keywordflow}{in}\ \_PREVIOUSLY\_DEFINED.items():}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (field\ \textcolor{keywordflow}{in}\ project\_table\ \textcolor{keywordflow}{or}\ field\ \textcolor{keywordflow}{in}\ dynamic):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ getter(dist)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ msg\ =\ \_WouldIgnoreField.message(field,\ value)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ warnings.warn(msg,\ \_WouldIgnoreField)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00106}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{00106}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{json\_compatible\_key}}(key:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00107}00107\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}As\ defined\ in\ :pep:\`{}566\#json-\/compatible-\/metadata\`{}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00108}00108\ \ \ \ \ \textcolor{keywordflow}{return}\ key.lower().replace(\textcolor{stringliteral}{"{}-\/"{}},\ \textcolor{stringliteral}{"{}\_"{}})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00111}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{00111}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ field:\ str,\ value:\ Any):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00112}00112\ \ \ \ \ setter\ =\ getattr(dist.metadata,\ f\textcolor{stringliteral}{"{}set\_\{field\}"{}},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00113}00113\ \ \ \ \ \textcolor{keywordflow}{if}\ setter:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ setter(value)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{elif}\ hasattr(dist.metadata,\ field)\ \textcolor{keywordflow}{or}\ field\ \textcolor{keywordflow}{in}\ SETUPTOOLS\_PATCHES:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ setattr(dist.metadata,\ field,\ value)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00117}00117\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ setattr(dist,\ field,\ value)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00121}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a45125b14f632989350a176c1ba69e54c}{00121}}\ \_CONTENT\_TYPES\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00122}00122\ \ \ \ \ \textcolor{stringliteral}{"{}.md"{}}:\ \textcolor{stringliteral}{"{}text/markdown"{}},}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00123}00123\ \ \ \ \ \textcolor{stringliteral}{"{}.rst"{}}:\ \textcolor{stringliteral}{"{}text/x-\/rst"{}},}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00124}00124\ \ \ \ \ \textcolor{stringliteral}{"{}.txt"{}}:\ \textcolor{stringliteral}{"{}text/plain"{}},}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00125}00125\ \}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00128}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ad9f96f1453ad894e313a1dd966994a89}{00128}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ad9f96f1453ad894e313a1dd966994a89}{\_guess\_content\_type}}(file:\ str)\ -\/>\ Optional[str]:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00129}00129\ \ \ \ \ \_,\ ext\ =\ os.path.splitext(file.lower())}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00130}00130\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ ext:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{if}\ ext\ \textcolor{keywordflow}{in}\ \_CONTENT\_TYPES:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_CONTENT\_TYPES[ext]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00136}00136\ \ \ \ \ valid\ =\ \textcolor{stringliteral}{"{},\ "{}}.join(f\textcolor{stringliteral}{"{}\{k\}\ (\{v\})"{}}\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ \_CONTENT\_TYPES.items())}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00137}00137\ \ \ \ \ msg\ =\ f\textcolor{stringliteral}{"{}only\ the\ following\ file\ extensions\ are\ recognized:\ \{valid\}."{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00138}00138\ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(f\textcolor{stringliteral}{"{}Undefined\ content\ type\ for\ \{file\},\ \{msg\}"{}})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00141}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af0a43f29f6d561a67c5660b286d61df6}{00141}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af0a43f29f6d561a67c5660b286d61df6}{\_long\_description}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ val:\ \_DictOrStr,\ root\_dir:\ \_Path):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00142}00142\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1config}{setuptools.config}}\ \textcolor{keyword}{import}\ expand}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00144}00144\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(val,\ str):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ text\ =\ expand.read\_files(val,\ root\_dir)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ ctype\ =\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ad9f96f1453ad894e313a1dd966994a89}{\_guess\_content\_type}}(val)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00147}00147\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ text\ =\ val.get(\textcolor{stringliteral}{"{}text"{}})\ \textcolor{keywordflow}{or}\ expand.read\_files(val.get(\textcolor{stringliteral}{"{}file"{}},\ []),\ root\_dir)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ ctype\ =\ val[\textcolor{stringliteral}{"{}content-\/type"{}}]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00151}00151\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}long\_description"{}},\ text)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00152}00152\ \ \ \ \ \textcolor{keywordflow}{if}\ ctype:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}long\_description\_content\_type"{}},\ ctype)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00156}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ac7653575ee9c1374f12c01737ee83045}{00156}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ac7653575ee9c1374f12c01737ee83045}{\_license}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ val:\ dict,\ root\_dir:\ \_Path):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00157}00157\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1config}{setuptools.config}}\ \textcolor{keyword}{import}\ expand}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00159}00159\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}file"{}}\ \textcolor{keywordflow}{in}\ val:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}license"{}},\ expand.read\_files([val[\textcolor{stringliteral}{"{}file"{}}]],\ root\_dir))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00161}00161\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}license"{}},\ val[\textcolor{stringliteral}{"{}text"{}}])}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00165}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a6d92a454c7213cf2c19f1a1c94337fec}{00165}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a6d92a454c7213cf2c19f1a1c94337fec}{\_people}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ val:\ List[dict],\ \_root\_dir:\ \_Path,\ kind:\ str):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00166}00166\ \ \ \ \ field\ =\ []}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00167}00167\ \ \ \ \ email\_field\ =\ []}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00168}00168\ \ \ \ \ \textcolor{keywordflow}{for}\ person\ \textcolor{keywordflow}{in}\ val:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}name"{}}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ person:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ email\_field.append(person[\textcolor{stringliteral}{"{}email"{}}])}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ \textcolor{stringliteral}{"{}email"{}}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ person:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ field.append(person[\textcolor{stringliteral}{"{}name"{}}])}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ addr\ =\ Address(display\_name=person[\textcolor{stringliteral}{"{}name"{}}],\ addr\_spec=person[\textcolor{stringliteral}{"{}email"{}}])}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ email\_field.append(str(addr))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00177}00177\ \ \ \ \ \textcolor{keywordflow}{if}\ field:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ kind,\ \textcolor{stringliteral}{"{},\ "{}}.join(field))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{if}\ email\_field:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ f\textcolor{stringliteral}{"{}\{kind\}\_email"{}},\ \textcolor{stringliteral}{"{},\ "{}}.join(email\_field))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00183}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a7993efaa44e1910fbd6dd2809583f368}{00183}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a7993efaa44e1910fbd6dd2809583f368}{\_project\_urls}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ val:\ dict,\ \_root\_dir):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00184}00184\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}project\_urls"{}},\ val)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00187}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a4b37535ef11dba1e1f2b0566fc657b32}{00187}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a4b37535ef11dba1e1f2b0566fc657b32}{\_python\_requires}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ val:\ dict,\ \_root\_dir):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00188}00188\ \ \ \ \ \textcolor{keyword}{from}\ setuptools.extern.packaging.specifiers\ \textcolor{keyword}{import}\ SpecifierSet}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00190}00190\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}python\_requires"{}},\ SpecifierSet(val))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00193}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a03677c7259f2eff5b16b9e996cd3d906}{00193}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a03677c7259f2eff5b16b9e996cd3d906}{\_dependencies}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ val:\ list,\ \_root\_dir):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00194}00194\ \ \ \ \ \textcolor{keywordflow}{if}\ getattr(dist,\ \textcolor{stringliteral}{"{}install\_requires"{}},\ []):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ msg\ =\ \textcolor{stringliteral}{"{}\`{}install\_requires`\ overwritten\ in\ \`{}pyproject.toml`\ (dependencies)"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ warnings.warn(msg)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00197}00197\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}install\_requires"{}},\ val)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00200}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a83c2212516e5a2ca177dca4a7ee6ca36}{00200}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a83c2212516e5a2ca177dca4a7ee6ca36}{\_optional\_dependencies}}(dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ val:\ dict,\ \_root\_dir):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00201}00201\ \ \ \ \ existing\ =\ getattr(dist,\ \textcolor{stringliteral}{"{}extras\_require"{}},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00202}00202\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aec306699ba131e82d6299864111d0d9a}{\_set\_config}}(dist,\ \textcolor{stringliteral}{"{}extras\_require"{}},\ \{**existing,\ **val\})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00205}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ace77ea7dbe5dfa8f126524ef6c09eb75}{00205}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_ace77ea7dbe5dfa8f126524ef6c09eb75}{\_unify\_entry\_points}}(project\_table:\ dict):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00206}00206\ \ \ \ \ project\ =\ project\_table}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00207}00207\ \ \ \ \ entry\_points\ =\ project.pop(\textcolor{stringliteral}{"{}entry-\/points"{}},\ project.pop(\textcolor{stringliteral}{"{}entry\_points"{}},\ \{\}))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00208}00208\ \ \ \ \ renaming\ =\ \{\textcolor{stringliteral}{"{}scripts"{}}:\ \textcolor{stringliteral}{"{}console\_scripts"{}},\ \textcolor{stringliteral}{"{}gui\_scripts"{}}:\ \textcolor{stringliteral}{"{}gui\_scripts"{}}\}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00209}00209\ \ \ \ \ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ list(project.items()):\ \ \textcolor{comment}{\#\ eager\ to\ allow\ modifications}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ norm\_key\ =\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{json\_compatible\_key}}(key)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ norm\_key\ \textcolor{keywordflow}{in}\ renaming\ \textcolor{keywordflow}{and}\ value:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ entry\_points[renaming[norm\_key]]\ =\ project.pop(key)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00214}00214\ \ \ \ \ \textcolor{keywordflow}{if}\ entry\_points:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ project[\textcolor{stringliteral}{"{}entry-\/points"{}}]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ name:\ [f\textcolor{stringliteral}{"{}\{k\}\ =\ \{v\}"{}}\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ group.items()]}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ group\ \textcolor{keywordflow}{in}\ entry\_points.items()}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00221}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a014fa3c0b38884f2ece063ff046bda24}{00221}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a014fa3c0b38884f2ece063ff046bda24}{\_copy\_command\_options}}(pyproject:\ dict,\ dist:\ \textcolor{stringliteral}{"{}Distribution"{}},\ filename:\ \_Path):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00222}00222\ \ \ \ \ tool\_table\ =\ pyproject.get(\textcolor{stringliteral}{"{}tool"{}},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00223}00223\ \ \ \ \ cmdclass\ =\ tool\_table.get(\textcolor{stringliteral}{"{}setuptools"{}},\ \{\}).get(\textcolor{stringliteral}{"{}cmdclass"{}},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00224}00224\ \ \ \ \ valid\_options\ =\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a80db5adc35060b2b45d2d1ea7487f6d8}{\_valid\_command\_options}}(cmdclass)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00226}00226\ \ \ \ \ cmd\_opts\ =\ dist.command\_options}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00227}00227\ \ \ \ \ \textcolor{keywordflow}{for}\ cmd,\ config\ \textcolor{keywordflow}{in}\ pyproject.get(\textcolor{stringliteral}{"{}tool"{}},\ \{\}).get(\textcolor{stringliteral}{"{}distutils"{}},\ \{\}).items():}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ cmd\ =\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{json\_compatible\_key}}(cmd)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ valid\ =\ valid\_options.get(cmd,\ set())}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ cmd\_opts.setdefault(cmd,\ \{\})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ config.items():}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ key\ =\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{json\_compatible\_key}}(key)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ cmd\_opts[cmd][key]\ =\ (str(filename),\ value)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ key\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ valid:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ To\ avoid\ removing\ options\ that\ are\ specified\ dynamically\ we}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ just\ log\ a\ warn...}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_logger.warning(f\textcolor{stringliteral}{"{}Command\ option\ \{cmd\}.\{key\}\ is\ not\ defined"{}})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00240}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a80db5adc35060b2b45d2d1ea7487f6d8}{00240}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a80db5adc35060b2b45d2d1ea7487f6d8}{\_valid\_command\_options}}(cmdclass:\ Mapping\ =\ EMPTY)\ -\/>\ Dict[str,\ Set[str]]:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00241}00241\ \ \ \ \ \textcolor{keyword}{from}\ ..\_importlib\ \textcolor{keyword}{import}\ metadata}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00242}00242\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1dist}{setuptools.dist}}\ \textcolor{keyword}{import}\ Distribution}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00244}00244\ \ \ \ \ valid\_options\ =\ \{\textcolor{stringliteral}{"{}global"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a6fd77399abf96c6904ea44f88d0ec20b}{\_normalise\_cmd\_options}}(Distribution.global\_options)\}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00246}00246\ \ \ \ \ unloaded\_entry\_points\ =\ metadata.entry\_points(group=\textcolor{stringliteral}{'distutils.commands'})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00247}00247\ \ \ \ \ loaded\_entry\_points\ =\ (\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a26b75d6702dd58928c38817edf2e606c}{\_load\_ep}}(ep)\ \textcolor{keywordflow}{for}\ ep\ \textcolor{keywordflow}{in}\ unloaded\_entry\_points)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00248}00248\ \ \ \ \ entry\_points\ =\ (ep\ \textcolor{keywordflow}{for}\ ep\ \textcolor{keywordflow}{in}\ loaded\_entry\_points\ \textcolor{keywordflow}{if}\ ep)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{for}\ cmd,\ cmd\_class\ \textcolor{keywordflow}{in}\ chain(entry\_points,\ cmdclass.items()):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ opts\ =\ valid\_options.get(cmd,\ set())}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ opts\ =\ opts\ |\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a6fd77399abf96c6904ea44f88d0ec20b}{\_normalise\_cmd\_options}}(getattr(cmd\_class,\ \textcolor{stringliteral}{"{}user\_options"{}},\ []))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ valid\_options[cmd]\ =\ opts}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00253}00253\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00254}00254\ \ \ \ \ \textcolor{keywordflow}{return}\ valid\_options}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00257}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a26b75d6702dd58928c38817edf2e606c}{00257}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a26b75d6702dd58928c38817edf2e606c}{\_load\_ep}}(ep:\ \textcolor{stringliteral}{"{}metadata.EntryPoint"{}})\ -\/>\ Optional[Tuple[str,\ Type]]:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00258}00258\ \ \ \ \ \textcolor{comment}{\#\ Ignore\ all\ the\ errors}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00259}00259\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (ep.name,\ ep.load())}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00261}00261\ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ ex:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ msg\ =\ f\textcolor{stringliteral}{"{}\{ex.\_\_class\_\_.\_\_name\_\_\}\ while\ trying\ to\ load\ entry-\/point\ \{ep.name\}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \_logger.warning(f\textcolor{stringliteral}{"{}\{msg\}:\ \{ex\}"{}})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00267}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a97857c539b025a49f2bdb9085bd557b4}{00267}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a97857c539b025a49f2bdb9085bd557b4}{\_normalise\_cmd\_option\_key}}(name:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8421ad6a8a22ff2356c5a30aa10f97a4}{json\_compatible\_key}}(name).strip(\textcolor{stringliteral}{"{}\_="{}})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00269}00269\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00271}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a6fd77399abf96c6904ea44f88d0ec20b}{00271}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a6fd77399abf96c6904ea44f88d0ec20b}{\_normalise\_cmd\_options}}(desc:\ List[Tuple[str,\ Optional[str],\ str]])\ -\/>\ Set[str]:}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00272}00272\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a97857c539b025a49f2bdb9085bd557b4}{\_normalise\_cmd\_option\_key}}(fancy\_option[0])\ \textcolor{keywordflow}{for}\ fancy\_option\ \textcolor{keywordflow}{in}\ desc\}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00275}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{00275}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(attr):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00276}00276\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00277}00277\ \textcolor{stringliteral}{\ \ \ \ Similar\ to\ \`{}\`{}operator.attrgetter\`{}\`{}\ but\ returns\ None\ if\ \`{}\`{}attr\`{}\`{}\ is\ not\ found}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00278}00278\ \textcolor{stringliteral}{\ \ \ \ >>>\ from\ types\ import\ SimpleNamespace}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00279}00279\ \textcolor{stringliteral}{\ \ \ \ >>>\ obj\ =\ SimpleNamespace(a=42,\ b=SimpleNamespace(c=13))}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00280}00280\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_attrgetter("{}a"{})(obj)}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00281}00281\ \textcolor{stringliteral}{\ \ \ \ 42}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00282}00282\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_attrgetter("{}b.c"{})(obj)}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00283}00283\ \textcolor{stringliteral}{\ \ \ \ 13}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00284}00284\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_attrgetter("{}d"{})(obj)\ is\ None}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00285}00285\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00286}00286\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00287}00287\ \ \ \ \ \textcolor{keywordflow}{return}\ partial(reduce,\ \textcolor{keyword}{lambda}\ acc,\ x:\ getattr(acc,\ x,\ \textcolor{keywordtype}{None}),\ attr.split(\textcolor{stringliteral}{"{}."{}}))}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00290}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af4f843365cc267d11b258a931ce478a4}{00290}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af4f843365cc267d11b258a931ce478a4}{\_some\_attrgetter}}(*items):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00291}00291\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00292}00292\ \textcolor{stringliteral}{\ \ \ \ Return\ the\ first\ "{}truth-\/y"{}\ attribute\ or\ None}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00293}00293\ \textcolor{stringliteral}{\ \ \ \ >>>\ from\ types\ import\ SimpleNamespace}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00294}00294\ \textcolor{stringliteral}{\ \ \ \ >>>\ obj\ =\ SimpleNamespace(a=42,\ b=SimpleNamespace(c=13))}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00295}00295\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_some\_attrgetter("{}d"{},\ "{}a"{},\ "{}b.c"{})(obj)}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00296}00296\ \textcolor{stringliteral}{\ \ \ \ 42}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00297}00297\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_some\_attrgetter("{}d"{},\ "{}e"{},\ "{}b.c"{},\ "{}a"{})(obj)}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00298}00298\ \textcolor{stringliteral}{\ \ \ \ 13}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00299}00299\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_some\_attrgetter("{}d"{},\ "{}e"{},\ "{}f"{})(obj)\ is\ None}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00300}00300\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00301}00301\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00302}00302\ \ \ \ \ \textcolor{keyword}{def\ }\_acessor(obj):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ values\ =\ (\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(i)(obj)\ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ items)}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ next((i\ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ values\ \textcolor{keywordflow}{if}\ i\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}),\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00305}00305\ \ \ \ \ \textcolor{keywordflow}{return}\ \_acessor}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00308}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a4a48616f56c3d5458938815b3df015cc}{00308}}\ PYPROJECT\_CORRESPONDENCE:\ Dict[str,\ \_Correspondence]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00309}00309\ \ \ \ \ \textcolor{stringliteral}{"{}readme"{}}:\ \_long\_description,}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00310}00310\ \ \ \ \ \textcolor{stringliteral}{"{}license"{}}:\ \_license,}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00311}00311\ \ \ \ \ \textcolor{stringliteral}{"{}authors"{}}:\ partial(\_people,\ kind=\textcolor{stringliteral}{"{}author"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00312}00312\ \ \ \ \ \textcolor{stringliteral}{"{}maintainers"{}}:\ partial(\_people,\ kind=\textcolor{stringliteral}{"{}maintainer"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00313}00313\ \ \ \ \ \textcolor{stringliteral}{"{}urls"{}}:\ \_project\_urls,}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00314}00314\ \ \ \ \ \textcolor{stringliteral}{"{}dependencies"{}}:\ \_dependencies,}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00315}00315\ \ \ \ \ \textcolor{stringliteral}{"{}optional\_dependencies"{}}:\ \_optional\_dependencies,}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00316}00316\ \ \ \ \ \textcolor{stringliteral}{"{}requires\_python"{}}:\ \_python\_requires,}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00317}00317\ \}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00319}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a1b96aeec00dcfcf0bfc1e32108dab6b0}{00319}}\ TOOL\_TABLE\_RENAMES\ =\ \{\textcolor{stringliteral}{"{}script\_files"{}}:\ \textcolor{stringliteral}{"{}scripts"{}}\}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00320}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_aad9d18820c818063c89637ffb782bde3}{00320}}\ TOOL\_TABLE\_DEPRECATIONS\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00321}00321\ \ \ \ \ \textcolor{stringliteral}{"{}namespace\_packages"{}}:\ \textcolor{stringliteral}{"{}consider\ using\ implicit\ namespaces\ instead\ (PEP\ 420)."{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00322}00322\ \}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00323}00323\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00324}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a0af07e8d20223fa3608bbaaf89d19126}{00324}}\ SETUPTOOLS\_PATCHES\ =\ \{\textcolor{stringliteral}{"{}long\_description\_content\_type"{}},\ \textcolor{stringliteral}{"{}project\_urls"{}},}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}provides\_extras"{}},\ \textcolor{stringliteral}{"{}license\_file"{}},\ \textcolor{stringliteral}{"{}license\_files"{}}\}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00327}\mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a1795b40936f8bec9f8d4bc28883cb12f}{00327}}\ \_PREVIOUSLY\_DEFINED\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00328}00328\ \ \ \ \ \textcolor{stringliteral}{"{}name"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.name"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00329}00329\ \ \ \ \ \textcolor{stringliteral}{"{}version"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.version"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00330}00330\ \ \ \ \ \textcolor{stringliteral}{"{}description"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.description"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00331}00331\ \ \ \ \ \textcolor{stringliteral}{"{}readme"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.long\_description"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00332}00332\ \ \ \ \ \textcolor{stringliteral}{"{}requires-\/python"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af4f843365cc267d11b258a931ce478a4}{\_some\_attrgetter}}(\textcolor{stringliteral}{"{}python\_requires"{}},\ \textcolor{stringliteral}{"{}metadata.python\_requires"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00333}00333\ \ \ \ \ \textcolor{stringliteral}{"{}license"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.license"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00334}00334\ \ \ \ \ \textcolor{stringliteral}{"{}authors"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af4f843365cc267d11b258a931ce478a4}{\_some\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.author"{}},\ \textcolor{stringliteral}{"{}metadata.author\_email"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00335}00335\ \ \ \ \ \textcolor{stringliteral}{"{}maintainers"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af4f843365cc267d11b258a931ce478a4}{\_some\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.maintainer"{}},\ \textcolor{stringliteral}{"{}metadata.maintainer\_email"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00336}00336\ \ \ \ \ \textcolor{stringliteral}{"{}keywords"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.keywords"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00337}00337\ \ \ \ \ \textcolor{stringliteral}{"{}classifiers"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.classifiers"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00338}00338\ \ \ \ \ \textcolor{stringliteral}{"{}urls"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}metadata.project\_urls"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00339}00339\ \ \ \ \ \textcolor{stringliteral}{"{}entry-\/points"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_a8d6df5780ae889953326e96ce5d31aa6}{\_attrgetter}}(\textcolor{stringliteral}{"{}entry\_points"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00340}00340\ \ \ \ \ \textcolor{stringliteral}{"{}dependencies"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af4f843365cc267d11b258a931ce478a4}{\_some\_attrgetter}}(\textcolor{stringliteral}{"{}\_orig\_install\_requires"{}},\ \textcolor{stringliteral}{"{}install\_requires"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00341}00341\ \ \ \ \ \textcolor{stringliteral}{"{}optional-\/dependencies"{}}:\ \mbox{\hyperlink{namespacesetuptools_1_1config_1_1__apply__pyprojecttoml_af4f843365cc267d11b258a931ce478a4}{\_some\_attrgetter}}(\textcolor{stringliteral}{"{}\_orig\_extras\_require"{}},\ \textcolor{stringliteral}{"{}extras\_require"{}}),}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00342}00342\ \}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00343}00343\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00344}00344\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00345}\mbox{\hyperlink{classsetuptools_1_1config_1_1__apply__pyprojecttoml_1_1___would_ignore_field}{00345}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1config_1_1__apply__pyprojecttoml_1_1___would_ignore_field}{\_WouldIgnoreField}}(UserWarning):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00346}00346\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Inform\ users\ that\ \`{}\`{}pyproject.toml\`{}\`{}\ would\ overwrite\ previous\ metadata."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00348}\mbox{\hyperlink{classsetuptools_1_1config_1_1__apply__pyprojecttoml_1_1___would_ignore_field_aa35d0b34776f1177434b7c5470768382}{00348}}\ \ \ \ \ MESSAGE\ =\ \textcolor{stringliteral}{"{}"{}"{}\(\backslash\)}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00349}00349\ \textcolor{stringliteral}{\ \ \ \ \{field!r\}\ defined\ outside\ of\ \`{}pyproject.toml\`{}\ would\ be\ ignored.}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00350}00350\ \textcolor{stringliteral}{\ \ \ \ !!\(\backslash\)n\(\backslash\)n}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00351}00351\ \textcolor{stringliteral}{\ \ \ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00352}00352\ \textcolor{stringliteral}{\ \ \ \ \#\ configuration\ would\ be\ ignored/result\ in\ error\ due\ to\ \`{}pyproject.toml\`{}\ \#}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00353}00353\ \textcolor{stringliteral}{\ \ \ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00354}00354\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00355}00355\ \textcolor{stringliteral}{\ \ \ \ The\ following\ seems\ to\ be\ defined\ outside\ of\ \`{}pyproject.toml\`{}:}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00356}00356\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00357}00357\ \textcolor{stringliteral}{\ \ \ \ \`{}\{field\}\ =\ \{value!r\}\`{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00358}00358\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00359}00359\ \textcolor{stringliteral}{\ \ \ \ According\ to\ the\ spec\ (see\ the\ link\ below),\ however,\ setuptools\ CANNOT}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00360}00360\ \textcolor{stringliteral}{\ \ \ \ consider\ this\ value\ unless\ \{field!r\}\ is\ listed\ as\ \`{}dynamic\`{}.}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00361}00361\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00362}00362\ \textcolor{stringliteral}{\ \ \ \ https://packaging.python.org/en/latest/specifications/declaring-\/project-\/metadata/}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00363}00363\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00364}00364\ \textcolor{stringliteral}{\ \ \ \ For\ the\ time\ being,\ \`{}setuptools\`{}\ will\ still\ consider\ the\ given\ value\ (as\ a}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00365}00365\ \textcolor{stringliteral}{\ \ \ \ **transitional**\ measure),\ but\ please\ note\ that\ future\ releases\ of\ setuptools\ will}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00366}00366\ \textcolor{stringliteral}{\ \ \ \ follow\ strictly\ the\ standard.}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00367}00367\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00368}00368\ \textcolor{stringliteral}{\ \ \ \ To\ prevent\ this\ warning,\ you\ can\ list\ \{field!r\}\ under\ \`{}dynamic\`{}\ or\ alternatively}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00369}00369\ \textcolor{stringliteral}{\ \ \ \ remove\ the\ \`{}[project]\`{}\ table\ from\ your\ file\ and\ rely\ entirely\ on\ other\ means\ of}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00370}00370\ \textcolor{stringliteral}{\ \ \ \ configuration.}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00371}00371\ \textcolor{stringliteral}{\ \ \ \ \(\backslash\)n\(\backslash\)n!!}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00372}00372\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00374}00374\ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00375}\mbox{\hyperlink{classsetuptools_1_1config_1_1__apply__pyprojecttoml_1_1___would_ignore_field_a13c1153a032ef35111d6472bbb22dcca}{00375}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1config_1_1__apply__pyprojecttoml_1_1___would_ignore_field_a13c1153a032ef35111d6472bbb22dcca}{message}}(cls,\ field,\ value):}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ cleandoc}
+\DoxyCodeLine{\Hypertarget{__apply__pyprojecttoml_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cleandoc(cls.\mbox{\hyperlink{classsetuptools_1_1config_1_1__apply__pyprojecttoml_1_1___would_ignore_field_aa35d0b34776f1177434b7c5470768382}{MESSAGE}}.format(field=field,\ value=value))}
+
+\end{DoxyCode}

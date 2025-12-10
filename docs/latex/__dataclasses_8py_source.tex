@@ -1,0 +1,321 @@
+\doxysection{\+\_\+dataclasses.\+py}
+\hypertarget{__dataclasses_8py_source}{}\label{__dataclasses_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_dataclasses.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_dataclasses.py}}
+\mbox{\hyperlink{__dataclasses_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Private\ logic\ for\ creating\ pydantic\ dataclasses."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations\ \textcolor{keyword}{as}\ \_annotations}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00005}00005\ \textcolor{keyword}{import}\ copy}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00006}00006\ \textcolor{keyword}{import}\ dataclasses}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00007}00007\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00008}00008\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Generator}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00010}00010\ \textcolor{keyword}{from}\ contextlib\ \textcolor{keyword}{import}\ contextmanager}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00011}00011\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ partial}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00012}00012\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ ClassVar,\ Protocol,\ cast}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00014}00014\ \textcolor{keyword}{from}\ pydantic\_core\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00015}00015\ \ \ \ \ ArgsKwargs,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00016}00016\ \ \ \ \ SchemaSerializer,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00017}00017\ \ \ \ \ SchemaValidator,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00018}00018\ \ \ \ \ core\_schema,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00019}00019\ )}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00020}00020\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ TypeAlias,\ TypeIs}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00022}00022\ \textcolor{keyword}{from}\ ..errors\ \textcolor{keyword}{import}\ PydanticUndefinedAnnotation}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00023}00023\ \textcolor{keyword}{from}\ ..fields\ \textcolor{keyword}{import}\ FieldInfo}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00024}00024\ \textcolor{keyword}{from}\ ..plugin.\_schema\_validator\ \textcolor{keyword}{import}\ PluggableSchemaValidator,\ create\_schema\_validator}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00025}00025\ \textcolor{keyword}{from}\ ..warnings\ \textcolor{keyword}{import}\ PydanticDeprecatedSince20}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00026}00026\ \textcolor{keyword}{from}\ .\ \textcolor{keyword}{import}\ \_config,\ \_decorators}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00027}00027\ \textcolor{keyword}{from}\ .\_fields\ \textcolor{keyword}{import}\ collect\_dataclass\_fields}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00028}00028\ \textcolor{keyword}{from}\ .\_generate\_schema\ \textcolor{keyword}{import}\ GenerateSchema,\ InvalidSchemaError}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00029}00029\ \textcolor{keyword}{from}\ .\_generics\ \textcolor{keyword}{import}\ get\_standard\_typevars\_map}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00030}00030\ \textcolor{keyword}{from}\ .\_mock\_val\_ser\ \textcolor{keyword}{import}\ set\_dataclass\_mocks}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00031}00031\ \textcolor{keyword}{from}\ .\_namespace\_utils\ \textcolor{keyword}{import}\ NsResolver}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00032}00032\ \textcolor{keyword}{from}\ .\_signature\ \textcolor{keyword}{import}\ generate\_pydantic\_signature}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00033}00033\ \textcolor{keyword}{from}\ .\_utils\ \textcolor{keyword}{import}\ LazyClassAttribute}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00035}00035\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00036}00036\ \ \ \ \ \textcolor{keyword}{from}\ \_typeshed\ \textcolor{keyword}{import}\ DataclassInstance\ \textcolor{keyword}{as}\ StandardDataclass}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00038}00038\ \ \ \ \ \textcolor{keyword}{from}\ ..config\ \textcolor{keyword}{import}\ ConfigDict}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00040}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__dataclasses_1_1_pydantic_dataclass}{00040}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__dataclasses_1_1_pydantic_dataclass}{PydanticDataclass}}(StandardDataclass,\ \mbox{\hyperlink{classpydantic_1_1deprecated_1_1parse_1_1_protocol}{Protocol}}):}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ protocol\ containing\ attributes\ only\ available\ once\ a\ class\ has\ been\ decorated\ as\ a\ Pydantic\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00042}00042\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_\_pydantic\_config\_\_:\ Pydantic-\/specific\ configuration\ settings\ for\ the\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_\_pydantic\_complete\_\_:\ Whether\ dataclass\ building\ is\ completed,\ or\ if\ there\ are\ still\ undefined\ fields.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_\_pydantic\_core\_schema\_\_:\ The\ pydantic-\/core\ schema\ used\ to\ build\ the\ SchemaValidator\ and\ SchemaSerializer.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_\_pydantic\_decorators\_\_:\ Metadata\ containing\ the\ decorators\ defined\ on\ the\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_\_pydantic\_fields\_\_:\ Metadata\ about\ the\ fields\ defined\ on\ the\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_\_pydantic\_serializer\_\_:\ The\ pydantic-\/core\ SchemaSerializer\ used\ to\ dump\ instances\ of\ the\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \_\_pydantic\_validator\_\_:\ The\ pydantic-\/core\ SchemaValidator\ used\ to\ validate\ instances\ of\ the\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \_\_pydantic\_config\_\_:\ ClassVar[ConfigDict]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \_\_pydantic\_complete\_\_:\ ClassVar[bool]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \_\_pydantic\_core\_schema\_\_:\ ClassVar[core\_schema.CoreSchema]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \_\_pydantic\_decorators\_\_:\ ClassVar[\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos}{\_decorators.DecoratorInfos}}]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \_\_pydantic\_fields\_\_:\ ClassVar[dict[str,\ FieldInfo]]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \_\_pydantic\_serializer\_\_:\ ClassVar[SchemaSerializer]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \_\_pydantic\_validator\_\_:\ ClassVar[SchemaValidator\ |\ PluggableSchemaValidator]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_pydantic\_fields\_complete\_\_(cls)\ -\/>\ bool:\ ...}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00065}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_a77eed25ad21231d8c11cbad890b97af3}{00065}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_a77eed25ad21231d8c11cbad890b97af3}{set\_dataclass\_fields}}(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00066}00066\ \ \ \ \ cls:\ type[StandardDataclass],}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00067}00067\ \ \ \ \ config\_wrapper:\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__config_1_1_config_wrapper}{\_config.ConfigWrapper}},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00068}00068\ \ \ \ \ ns\_resolver:\ NsResolver\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00069}00069\ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00070}00070\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Collect\ and\ set\ \`{}cls.\_\_pydantic\_fields\_\_\`{}.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00071}00071\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls:\ The\ class.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00074}00074\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ config\_wrapper:\ The\ config\ wrapper\ instance.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00075}00075\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ns\_resolver:\ Namespace\ resolver\ to\ use\ when\ getting\ dataclass\ annotations.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00076}00076\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00077}00077\ \ \ \ \ typevars\_map\ =\ get\_standard\_typevars\_map(cls)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00078}00078\ \ \ \ \ fields\ =\ collect\_dataclass\_fields(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ cls,\ ns\_resolver=ns\_resolver,\ typevars\_map=typevars\_map,\ config\_wrapper=config\_wrapper}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00080}00080\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00082}00082\ \ \ \ \ cls.\_\_pydantic\_fields\_\_\ =\ fields\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00085}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_a266847a42d1b54567f4b4359c9fb26ed}{00085}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_a266847a42d1b54567f4b4359c9fb26ed}{complete\_dataclass}}(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00086}00086\ \ \ \ \ cls:\ type[Any],}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00087}00087\ \ \ \ \ config\_wrapper:\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__config_1_1_config_wrapper}{\_config.ConfigWrapper}},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00088}00088\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00089}00089\ \ \ \ \ raise\_errors:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00090}00090\ \ \ \ \ ns\_resolver:\ NsResolver\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00091}00091\ \ \ \ \ \_force\_build:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00092}00092\ )\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00093}00093\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Finish\ building\ a\ pydantic\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00094}00094\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ This\ logic\ is\ called\ on\ a\ class\ which\ has\ already\ been\ wrapped\ in\ \`{}dataclasses.dataclass()\`{}.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00096}00096\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ This\ is\ somewhat\ analogous\ to\ \`{}pydantic.\_internal.\_model\_construction.complete\_model\_class\`{}.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00098}00098\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls:\ The\ class.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ config\_wrapper:\ The\ config\ wrapper\ instance.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ raise\_errors:\ Whether\ to\ raise\ errors,\ defaults\ to\ \`{}True\`{}.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ns\_resolver:\ The\ namespace\ resolver\ instance\ to\ use\ when\ collecting\ dataclass\ fields}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ and\ during\ schema\ building.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \_force\_build:\ Whether\ to\ force\ building\ the\ dataclass,\ no\ matter\ if}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ [\`{}defer\_build\`{}][pydantic.config.ConfigDict.defer\_build]\ is\ set.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00107}00107\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}True\`{}\ if\ building\ a\ pydantic\ dataclass\ is\ successfully\ completed,\ \`{}False\`{}\ otherwise.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00110}00110\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ Raises:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ PydanticUndefinedAnnotation:\ If\ \`{}raise\_error\`{}\ is\ \`{}True\`{}\ and\ there\ is\ an\ undefined\ annotations.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00114}00114\ \ \ \ \ original\_init\ =\ cls.\_\_init\_\_}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00116}00116\ \ \ \ \ \textcolor{comment}{\#\ dataclass.\_\_init\_\_\ must\ be\ defined\ here\ so\ its\ \`{}\_\_qualname\_\_`\ can\ be\ changed\ since\ functions\ can't\ be\ copied,}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00117}00117\ \ \ \ \ \textcolor{comment}{\#\ and\ so\ that\ the\ mock\ validator\ is\ used\ if\ building\ was\ deferred:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00118}00118\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(\_\_dataclass\_self\_\_:\ PydanticDataclass,\ *args:\ Any,\ **kwargs:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \_\_tracebackhide\_\_\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ s\ =\ \_\_dataclass\_self\_\_}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ s.\_\_pydantic\_validator\_\_.validate\_python(ArgsKwargs(args,\ kwargs),\ self\_instance=s)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00123}00123\ \ \ \ \ \_\_init\_\_.\_\_qualname\_\_\ =\ f\textcolor{stringliteral}{'\{cls.\_\_qualname\_\_\}.\_\_init\_\_'}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00125}00125\ \ \ \ \ cls.\_\_init\_\_\ =\ \_\_init\_\_\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00126}00126\ \ \ \ \ cls.\_\_pydantic\_config\_\_\ =\ config\_wrapper.config\_dict\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00128}00128\ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_a77eed25ad21231d8c11cbad890b97af3}{set\_dataclass\_fields}}(cls,\ config\_wrapper=config\_wrapper,\ ns\_resolver=ns\_resolver)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00130}00130\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ \_force\_build\ \textcolor{keywordflow}{and}\ config\_wrapper.defer\_build:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ set\_dataclass\_mocks(cls)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00134}00134\ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(cls,\ \textcolor{stringliteral}{'\_\_post\_init\_post\_parse\_\_'}):}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ warnings.warn(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Support\ for\ \`{}\_\_post\_init\_post\_parse\_\_`\ has\ been\ dropped,\ the\ method\ will\ not\ be\ called'},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ PydanticDeprecatedSince20,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00140}00140\ \ \ \ \ typevars\_map\ =\ get\_standard\_typevars\_map(cls)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00141}00141\ \ \ \ \ gen\_schema\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__generate__schema_1_1_generate_schema}{GenerateSchema}}(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ config\_wrapper,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ ns\_resolver=ns\_resolver,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ typevars\_map=typevars\_map,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00145}00145\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00147}00147\ \ \ \ \ \textcolor{comment}{\#\ set\ \_\_signature\_\_\ attr\ only\ for\ the\ class,\ but\ not\ for\ its\ instances}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00148}00148\ \ \ \ \ \textcolor{comment}{\#\ (because\ instances\ can\ define\ \`{}\_\_call\_\_`,\ and\ \`{}inspect.signature`\ shouldn't}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00149}00149\ \ \ \ \ \textcolor{comment}{\#\ use\ the\ \`{}\_\_signature\_\_`\ attribute\ and\ instead\ generate\ from\ \`{}\_\_call\_\_`).}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00150}00150\ \ \ \ \ cls.\_\_signature\_\_\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__utils_1_1_lazy_class_attribute}{LazyClassAttribute}}(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\_\_signature\_\_'},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ partial(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ generate\_pydantic\_signature,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ It's\ important\ that\ we\ reference\ the\ \`{}original\_init`\ here,}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ as\ it\ is\ the\ one\ synthesized\ by\ the\ stdlib\ \`{}dataclass`\ module:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ init=original\_init,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ fields=cls.\_\_pydantic\_fields\_\_,\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ validate\_by\_name=config\_wrapper.validate\_by\_name,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ extra=config\_wrapper.extra,}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ is\_dataclass=\textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00162}00162\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00164}00164\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ schema\ =\ gen\_schema.generate\_schema(cls)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00166}00166\ \ \ \ \ \textcolor{keywordflow}{except}\ PydanticUndefinedAnnotation\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ raise\_errors:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ set\_dataclass\_mocks(cls,\ f\textcolor{stringliteral}{'\`{}\{e.name\}`'})}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00172}00172\ \ \ \ \ core\_config\ =\ config\_wrapper.core\_config(title=cls.\_\_name\_\_)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00174}00174\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ schema\ =\ gen\_schema.clean\_schema(schema)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00176}00176\ \ \ \ \ \textcolor{keywordflow}{except}\ InvalidSchemaError:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ set\_dataclass\_mocks(cls)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00180}00180\ \ \ \ \ \textcolor{comment}{\#\ We\ are\ about\ to\ set\ all\ the\ remaining\ required\ properties\ expected\ for\ this\ cast;}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00181}00181\ \ \ \ \ \textcolor{comment}{\#\ \_\_pydantic\_decorators\_\_\ and\ \_\_pydantic\_fields\_\_\ should\ already\ be\ set}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00182}00182\ \ \ \ \ cls\ =\ cast(\textcolor{stringliteral}{'type[PydanticDataclass]'},\ cls)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00184}00184\ \ \ \ \ cls.\_\_pydantic\_core\_schema\_\_\ =\ schema}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00185}00185\ \ \ \ \ cls.\_\_pydantic\_validator\_\_\ =\ create\_schema\_validator(}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ schema,\ cls,\ cls.\_\_module\_\_,\ cls.\_\_qualname\_\_,\ \textcolor{stringliteral}{'dataclass'},\ core\_config,\ config\_wrapper.plugin\_settings}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00187}00187\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00188}00188\ \ \ \ \ cls.\_\_pydantic\_serializer\_\_\ =\ SchemaSerializer(schema,\ core\_config)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00189}00189\ \ \ \ \ cls.\_\_pydantic\_complete\_\_\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00190}00190\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00193}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_abe60dd98b99019ccb86633f79fe59bcf}{00193}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_abe60dd98b99019ccb86633f79fe59bcf}{is\_stdlib\_dataclass}}(cls:\ type[Any],\ /)\ -\/>\ TypeIs[type[StandardDataclass]]:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00194}00194\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Returns\ \`{}True\`{}\ if\ the\ class\ is\ a\ stdlib\ dataclass\ and\ *not*\ a\ Pydantic\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00195}00195\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00196}00196\ \textcolor{stringliteral}{\ \ \ \ Unlike\ the\ stdlib\ \`{}dataclasses.is\_dataclass()\`{}\ function,\ this\ does\ *not*\ include\ subclasses}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00197}00197\ \textcolor{stringliteral}{\ \ \ \ of\ a\ dataclass\ that\ are\ themselves\ not\ dataclasses.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00198}00198\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00199}00199\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00200}00200\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls:\ The\ class.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00201}00201\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00202}00202\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00203}00203\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}True\`{}\ if\ the\ class\ is\ a\ stdlib\ dataclass,\ \`{}False\`{}\ otherwise.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00204}00204\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{'\_\_dataclass\_fields\_\_'}\ \textcolor{keywordflow}{in}\ cls.\_\_dict\_\_\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ hasattr(cls,\ \textcolor{stringliteral}{'\_\_pydantic\_validator\_\_'})}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00208}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_ade5001444c71ee8ffa4dbfc3ee7b53e4}{00208}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_ade5001444c71ee8ffa4dbfc3ee7b53e4}{as\_dataclass\_field}}(pydantic\_field:\ FieldInfo)\ -\/>\ dataclasses.Field[Any]:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00209}00209\ \ \ \ \ field\_args:\ dict[str,\ Any]\ =\ \{\textcolor{stringliteral}{'default'}:\ pydantic\_field\}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00211}00211\ \ \ \ \ \textcolor{comment}{\#\ Needed\ because\ if\ \`{}doc`\ is\ set,\ the\ dataclass\ slots\ will\ be\ a\ dict\ (field\ name\ -\/>\ doc)\ instead\ of\ a\ tuple:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00212}00212\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 14)\ \textcolor{keywordflow}{and}\ pydantic\_field.description\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ field\_args[\textcolor{stringliteral}{'doc'}]\ =\ pydantic\_field.description}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00215}00215\ \ \ \ \ \textcolor{comment}{\#\ Needed\ as\ the\ stdlib\ dataclass\ module\ processes\ kw\_only\ in\ a\ specific\ way\ during\ class\ construction:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00216}00216\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 10)\ \textcolor{keywordflow}{and}\ pydantic\_field.kw\_only:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ field\_args[\textcolor{stringliteral}{'kw\_only'}]\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00219}00219\ \ \ \ \ \textcolor{comment}{\#\ Needed\ as\ the\ stdlib\ dataclass\ modules\ generates\ \`{}\_\_repr\_\_()`\ during\ class\ construction:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00220}00220\ \ \ \ \ \textcolor{keywordflow}{if}\ pydantic\_field.repr\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ field\_args[\textcolor{stringliteral}{'repr'}]\ =\ pydantic\_field.repr}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00223}00223\ \ \ \ \ \textcolor{keywordflow}{return}\ dataclasses.field(**field\_args)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00226}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_a0bbfc838259f236ad6761daa81835363}{00226}}\ DcFields:\ TypeAlias\ =\ dict[str,\ dataclasses.Field[Any]]}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00229}00229\ \textcolor{preprocessor}{@contextmanager}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00230}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_aba47473eb4d2b0ab0a942e0cc308dc2e}{00230}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__dataclasses_aba47473eb4d2b0ab0a942e0cc308dc2e}{patch\_base\_fields}}(cls:\ type[Any])\ -\/>\ Generator[\textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00231}00231\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Temporarily\ patch\ the\ stdlib\ dataclasses\ bases\ of\ \`{}cls\`{}\ if\ the\ Pydantic\ \`{}Field()\`{}\ function\ is\ used.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00232}00232\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00233}00233\ \textcolor{stringliteral}{\ \ \ \ When\ creating\ a\ Pydantic\ dataclass,\ it\ is\ possible\ to\ inherit\ from\ stdlib\ dataclasses,\ where}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00234}00234\ \textcolor{stringliteral}{\ \ \ \ the\ Pydantic\ \`{}Field()\`{}\ function\ is\ used.\ To\ create\ this\ Pydantic\ dataclass,\ we\ first\ apply}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00235}00235\ \textcolor{stringliteral}{\ \ \ \ the\ stdlib\ \`{}@dataclass\`{}\ decorator\ on\ it.\ During\ the\ construction\ of\ the\ stdlib\ dataclass,}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00236}00236\ \textcolor{stringliteral}{\ \ \ \ the\ \`{}kw\_only\`{}\ and\ \`{}repr\`{}\ field\ arguments\ need\ to\ be\ understood\ by\ the\ stdlib\ *during*\ the}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00237}00237\ \textcolor{stringliteral}{\ \ \ \ dataclass\ construction.\ To\ do\ so,\ we\ temporarily\ patch\ the\ fields\ dictionary\ of\ the\ affected}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00238}00238\ \textcolor{stringliteral}{\ \ \ \ bases.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00239}00239\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00240}00240\ \textcolor{stringliteral}{\ \ \ \ For\ instance,\ with\ the\ following\ example:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00241}00241\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00242}00242\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00243}00243\ \textcolor{stringliteral}{\ \ \ \ import\ dataclasses\ as\ stdlib\_dc}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00244}00244\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00245}00245\ \textcolor{stringliteral}{\ \ \ \ import\ pydantic}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00246}00246\ \textcolor{stringliteral}{\ \ \ \ import\ pydantic.dataclasses\ as\ pydantic\_dc}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00247}00247\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00248}00248\ \textcolor{stringliteral}{\ \ \ \ @stdlib\_dc.dataclass}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00249}00249\ \textcolor{stringliteral}{\ \ \ \ class\ A:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00250}00250\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ a:\ int\ =\ pydantic.Field(repr=False)}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00251}00251\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00252}00252\ \textcolor{stringliteral}{\ \ \ \ \#\ Notice\ that\ the\ \`{}repr\`{}\ attribute\ of\ the\ dataclass\ field\ is\ \`{}True\`{}:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00253}00253\ \textcolor{stringliteral}{\ \ \ \ A.\_\_dataclass\_fields\_\_['a']}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00254}00254\ \textcolor{stringliteral}{\ \ \ \ \#>\ dataclass.Field(default=FieldInfo(repr=False),\ repr=True,\ ...)}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00255}00255\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00256}00256\ \textcolor{stringliteral}{\ \ \ \ @pydantic\_dc.dataclass}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00257}00257\ \textcolor{stringliteral}{\ \ \ \ class\ B(A):}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00258}00258\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ b:\ int\ =\ pydantic.Field(repr=False)}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00259}00259\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00260}00260\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00261}00261\ \textcolor{stringliteral}{\ \ \ \ When\ passing\ \`{}B\`{}\ to\ the\ stdlib\ \`{}@dataclass\`{}\ decorator,\ it\ will\ look\ for\ fields\ in\ the\ parent\ classes}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00262}00262\ \textcolor{stringliteral}{\ \ \ \ and\ reuse\ them\ directly.\ When\ this\ context\ manager\ is\ active,\ \`{}A\`{}\ will\ be\ temporarily\ patched\ to\ be}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00263}00263\ \textcolor{stringliteral}{\ \ \ \ equivalent\ to:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00264}00264\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00265}00265\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00266}00266\ \textcolor{stringliteral}{\ \ \ \ @stdlib\_dc.dataclass}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00267}00267\ \textcolor{stringliteral}{\ \ \ \ class\ A:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00268}00268\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ a:\ int\ =\ stdlib\_dc.field(default=Field(repr=False),\ repr=False)}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00269}00269\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00270}00270\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00271}00271\ \textcolor{stringliteral}{\ \ \ \ !!!\ note}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00272}00272\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ is\ only\ applied\ to\ the\ bases\ of\ \`{}cls\`{},\ and\ not\ \`{}cls\`{}\ itself.\ The\ reason\ is\ that\ the\ Pydantic}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00273}00273\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ dataclass\ decorator\ "{}owns"{}\ \`{}cls\`{}\ (in\ the\ previous\ example,\ \`{}B\`{}).\ As\ such,\ we\ instead\ modify\ the\ fields}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00274}00274\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ directly\ (in\ the\ previous\ example,\ we\ simply\ do\ \`{}setattr(B,\ 'b',\ as\_dataclass\_field(pydantic\_field))\`{}).}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00275}00275\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00276}00276\ \textcolor{stringliteral}{\ \ \ \ !!!\ note}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00277}00277\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ approach\ is\ far\ from\ ideal,\ and\ can\ probably\ be\ the\ source\ of\ unwanted\ side\ effects/race\ conditions.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00278}00278\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ previous\ implemented\ approach\ was\ mutating\ the\ \`{}\_\_annotations\_\_\`{}\ dict\ of\ \`{}cls\`{},\ which\ is\ no\ longer\ a}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00279}00279\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ safe\ operation\ in\ Python\ 3.14+,\ and\ resulted\ in\ unexpected\ behavior\ with\ field\ ordering\ anyway.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00280}00280\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00281}00281\ \ \ \ \ \textcolor{comment}{\#\ A\ list\ of\ two-\/tuples,\ the\ first\ element\ being\ a\ reference\ to\ the}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00282}00282\ \ \ \ \ \textcolor{comment}{\#\ dataclass\ fields\ dictionary,\ the\ second\ element\ being\ a\ mapping\ between}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00283}00283\ \ \ \ \ \textcolor{comment}{\#\ the\ field\ names\ that\ were\ modified,\ and\ their\ original\ \`{}Field`:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00284}00284\ \ \ \ \ original\_fields\_list:\ list[tuple[DcFields,\ DcFields]]\ =\ []}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00286}00286\ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ cls.\_\_mro\_\_[1:]:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ dc\_fields:\ dict[str,\ dataclasses.Field[Any]]\ =\ base.\_\_dict\_\_.get(\textcolor{stringliteral}{'\_\_dataclass\_fields\_\_'},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ dc\_fields\_with\_pydantic\_field\_defaults\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ field\_name:\ field}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\_name,\ field\ \textcolor{keywordflow}{in}\ dc\_fields.items()}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(field.default,\ FieldInfo)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Only\ do\ the\ patching\ if\ one\ of\ the\ affected\ attributes\ is\ set:}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ (field.default.description\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{or}\ field.default.kw\_only\ \textcolor{keywordflow}{or}\ field.default.repr\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ dc\_fields\_with\_pydantic\_field\_defaults:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ original\_fields\_list.append((dc\_fields,\ dc\_fields\_with\_pydantic\_field\_defaults))}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\_name,\ field\ \textcolor{keywordflow}{in}\ dc\_fields\_with\_pydantic\_field\_defaults.items():}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ default\ =\ cast(FieldInfo,\ field.default)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}dataclasses.Field`\ isn't\ documented\ as\ working\ with\ \`{}copy.copy()`.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ It\ is\ a\ class\ with\ \`{}\_\_slots\_\_`,\ so\ should\ work\ (and\ we\ hope\ for\ the\ best):}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_dc\_field\ =\ copy.copy(field)}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ base\ fields,\ no\ need\ to\ set\ \`{}doc`\ from\ \`{}FieldInfo.description`,\ this\ is\ only\ relevant}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ for\ the\ class\ under\ construction\ and\ handled\ in\ \`{}as\_dataclass\_field()`.}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 10)\ \textcolor{keywordflow}{and}\ default.kw\_only:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_dc\_field.kw\_only\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ default.repr\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_dc\_field.repr\ =\ default.repr}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dc\_fields[field\_name]\ =\ new\_dc\_field}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00310}00310\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00312}00312\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ fields,\ original\_fields\ \textcolor{keywordflow}{in}\ original\_fields\_list:}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\_name,\ original\_field\ \textcolor{keywordflow}{in}\ original\_fields.items():}
+\DoxyCodeLine{\Hypertarget{__dataclasses_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[field\_name]\ =\ original\_field}
+
+\end{DoxyCode}

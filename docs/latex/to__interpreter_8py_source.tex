@@ -1,0 +1,245 @@
+\doxysection{to\+\_\+interpreter.\+py}
+\hypertarget{to__interpreter_8py_source}{}\label{to__interpreter_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/to\_interpreter.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/to\_interpreter.py}}
+\mbox{\hyperlink{to__interpreter_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00001}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00003}00003\ \textcolor{keyword}{import}\ atexit}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00004}00004\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00005}00005\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00006}00006\ \textcolor{keyword}{from}\ collections\ \textcolor{keyword}{import}\ deque}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00007}00007\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Callable}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00008}00008\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any,\ Final,\ TypeVar}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00010}00010\ \textcolor{keyword}{from}\ .\ \textcolor{keyword}{import}\ current\_time,\ to\_thread}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00011}00011\ \textcolor{keyword}{from}\ .\_core.\_exceptions\ \textcolor{keyword}{import}\ BrokenWorkerInterpreter}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00012}00012\ \textcolor{keyword}{from}\ .\_core.\_synchronization\ \textcolor{keyword}{import}\ CapacityLimiter}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00013}00013\ \textcolor{keyword}{from}\ .lowlevel\ \textcolor{keyword}{import}\ RunVar}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00015}00015\ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 11):}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00016}00016\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TypeVarTuple,\ Unpack}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00017}00017\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00018}00018\ \ \ \ \ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ TypeVarTuple,\ Unpack}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00020}00020\ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 14):}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00021}00021\ \ \ \ \ \textcolor{keyword}{from}\ concurrent.interpreters\ \textcolor{keyword}{import}\ ExecutionFailed,\ create}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00023}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_aa1679d8842f1b599de37505eef980c62}{00023}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_aa1679d8842f1b599de37505eef980c62}{\_interp\_call}}(func:\ Callable[...,\ Any],\ args:\ tuple[Any,\ ...]):}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ retval\ =\ func(*args)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ BaseException\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ exc,\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ retval,\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00031}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker}{00031}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker}{Worker}}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00032}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_ad6a96b992da76b484a66d1780746fc03}{00032}}\ \ \ \ \ \ \ \ \ last\_used:\ float\ =\ 0}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00035}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_abaffed283542abab5e3e040e52b9215c}{00035}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_abaffed283542abab5e3e040e52b9215c}{\_interpreter}}\ =\ create()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00037}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_af57f50c3b6a5a8a00824018afad52e83}{00037}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_af57f50c3b6a5a8a00824018afad52e83}{destroy}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_abaffed283542abab5e3e040e52b9215c}{\_interpreter}}.close()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00040}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a55368c4507a3cd86765560826e81a17f}{00040}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a55368c4507a3cd86765560826e81a17f}{call}}(}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ func:\ Callable[...,\ T\_Retval],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ args:\ tuple[Any,\ ...],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ )\ -\/>\ T\_Retval:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res,\ is\_exception\ =\ self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_abaffed283542abab5e3e040e52b9215c}{\_interpreter}}.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a55368c4507a3cd86765560826e81a17f}{call}}(\_interp\_call,\ func,\ args)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ExecutionFailed\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classanyio_1_1__core_1_1__exceptions_1_1_broken_worker_interpreter}{BrokenWorkerInterpreter}}(exc.excinfo)\ \textcolor{keyword}{from}\ exc}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_exception:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ res}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00054}00054\ \textcolor{keywordflow}{elif}\ sys.version\_info\ >=\ (3,\ 13):}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00055}00055\ \ \ \ \ \textcolor{keyword}{import}\ \_interpqueues}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00056}00056\ \ \ \ \ \textcolor{keyword}{import}\ \_interpreters}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00058}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_a9f34879d24d1128941d2ef00fe4d0779}{00058}}\ \ \ \ \ UNBOUND:\ Final\ =\ 2\ \ \textcolor{comment}{\#\ I\ have\ no\ clue\ how\ this\ works,\ but\ it\ was\ used\ in\ the\ stdlib}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00059}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ab189327397f2ce1d3a2f304467f70319}{00059}}\ \ \ \ \ FMT\_UNPICKLED:\ Final\ =\ 0}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00060}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ad65d66d3814ebc6515fc609ff2ff757b}{00060}}\ \ \ \ \ FMT\_PICKLED:\ Final\ =\ 1}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00061}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_a5249e0765f911388a014f8b7198f4cba}{00061}}\ \ \ \ \ QUEUE\_PICKLE\_ARGS:\ Final\ =\ (FMT\_PICKLED,\ UNBOUND)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00062}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_acb48fe31ea4eed53d60b158b0e6f1a87}{00062}}\ \ \ \ \ QUEUE\_UNPICKLE\_ARGS:\ Final\ =\ (FMT\_UNPICKLED,\ UNBOUND)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00064}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_aeed5fbe69626c1a8c19832297d32dd57}{00064}}\ \ \ \ \ \_run\_func\ =\ compile(}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00066}00066\ \textcolor{stringliteral}{import\ \_interpqueues}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00067}00067\ \textcolor{stringliteral}{from\ \_interpreters\ import\ NotShareableError}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00068}00068\ \textcolor{stringliteral}{from\ pickle\ import\ loads,\ dumps,\ HIGHEST\_PROTOCOL}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00069}00069\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00070}00070\ \textcolor{stringliteral}{QUEUE\_PICKLE\_ARGS\ =\ (1,\ 2)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00071}00071\ \textcolor{stringliteral}{QUEUE\_UNPICKLE\_ARGS\ =\ (0,\ 2)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00072}00072\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00073}00073\ \textcolor{stringliteral}{item\ =\ \_interpqueues.get(queue\_id)[0]}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00074}00074\ \textcolor{stringliteral}{try:}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00075}00075\ \textcolor{stringliteral}{\ \ \ \ func,\ args\ =\ loads(item)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00076}00076\ \textcolor{stringliteral}{\ \ \ \ retval\ =\ func(*args)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00077}00077\ \textcolor{stringliteral}{except\ BaseException\ as\ exc:}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ is\_exception\ =\ True}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ retval\ =\ exc}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00080}00080\ \textcolor{stringliteral}{else:}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ is\_exception\ =\ False}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00082}00082\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00083}00083\ \textcolor{stringliteral}{try:}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ \_interpqueues.put(queue\_id,\ (retval,\ is\_exception),\ *QUEUE\_UNPICKLE\_ARGS)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00085}00085\ \textcolor{stringliteral}{except\ NotShareableError:}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ retval\ =\ dumps(retval,\ HIGHEST\_PROTOCOL)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ \_interpqueues.put(queue\_id,\ (retval,\ is\_exception),\ *QUEUE\_PICKLE\_ARGS)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}},}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}<string>"{}},}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}exec"{}},}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00091}00091\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00093}00093\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker}{Worker}}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ last\_used:\ float\ =\ 0}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00097}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a4b3ac3821a774d7195ca25eddc4c5bf1}{00097}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a4b3ac3821a774d7195ca25eddc4c5bf1}{\_interpreter\_id}}\ =\ \_interpreters.create()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00098}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a3e10630d8a055732209849dd1c37c48c}{00098}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a3e10630d8a055732209849dd1c37c48c}{\_queue\_id}}\ =\ \_interpqueues.create(1,\ *QUEUE\_UNPICKLE\_ARGS)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \_interpreters.set\_\_\_main\_\_\_attrs(}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a4b3ac3821a774d7195ca25eddc4c5bf1}{\_interpreter\_id}},\ \{\textcolor{stringliteral}{"{}queue\_id"{}}:\ self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a3e10630d8a055732209849dd1c37c48c}{\_queue\_id}}\}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00103}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_af57f50c3b6a5a8a00824018afad52e83}{00103}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_af57f50c3b6a5a8a00824018afad52e83}{destroy}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \_interpqueues.destroy(self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a3e10630d8a055732209849dd1c37c48c}{\_queue\_id}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \_interpreters.destroy(self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a4b3ac3821a774d7195ca25eddc4c5bf1}{\_interpreter\_id}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00107}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a55368c4507a3cd86765560826e81a17f}{00107}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a55368c4507a3cd86765560826e81a17f}{call}}(}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ func:\ Callable[...,\ T\_Retval],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ args:\ tuple[Any,\ ...],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ )\ -\/>\ T\_Retval:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ pickle}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ item\ =\ pickle.dumps((func,\ args),\ pickle.HIGHEST\_PROTOCOL)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \_interpqueues.put(self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a3e10630d8a055732209849dd1c37c48c}{\_queue\_id}},\ item,\ *QUEUE\_PICKLE\_ARGS)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ exc\_info\ =\ \_interpreters.exec(self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a4b3ac3821a774d7195ca25eddc4c5bf1}{\_interpreter\_id}},\ \_run\_func)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ exc\_info:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classanyio_1_1__core_1_1__exceptions_1_1_broken_worker_interpreter}{BrokenWorkerInterpreter}}(exc\_info)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ res\ =\ \_interpqueues.get(self.\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a3e10630d8a055732209849dd1c37c48c}{\_queue\_id}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ (res,\ is\_exception),\ fmt\ =\ res[:2]}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fmt\ ==\ FMT\_PICKLED:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res\ =\ pickle.loads(res)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_exception:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ res}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00129}00129\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00131}00131\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker}{Worker}}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ last\_used:\ float\ =\ 0}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{"{}subinterpreters\ require\ at\ least\ Python\ 3.13"{}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00137}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a55368c4507a3cd86765560826e81a17f}{00137}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_a55368c4507a3cd86765560826e81a17f}{call}}(}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ func:\ Callable[...,\ T\_Retval],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ args:\ tuple[Any,\ ...],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ )\ -\/>\ T\_Retval:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00144}\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_af57f50c3b6a5a8a00824018afad52e83}{00144}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker_af57f50c3b6a5a8a00824018afad52e83}{destroy}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00148}00148\ DEFAULT\_CPU\_COUNT:\ Final\ =\ 8\ \ \textcolor{comment}{\#\ this\ is\ just\ an\ arbitrarily\ selected\ value}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00149}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ad2fa4decd5f3cdf503aad610475828ff}{00149}}\ MAX\_WORKER\_IDLE\_TIME\ =\ (}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00150}00150\ \ \ \ \ 30\ \ \textcolor{comment}{\#\ seconds\ a\ subinterpreter\ can\ be\ idle\ before\ becoming\ eligible\ for\ pruning}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00151}00151\ )}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00153}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_a32adfacaaedc62a0a479eb396950cb54}{00153}}\ T\_Retval\ =\ TypeVar(\textcolor{stringliteral}{"{}T\_Retval"{}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00154}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ac41bb580f84290b3557ec6ee077fbcf5}{00154}}\ PosArgsT\ =\ \mbox{\hyperlink{classtyping__extensions_1_1_type_var_tuple}{TypeVarTuple}}(\textcolor{stringliteral}{"{}PosArgsT"{}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00156}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_a08cf1860750ad3adfb2092cc439e1495}{00156}}\ \_idle\_workers\ =\ RunVar[deque[Worker]](\textcolor{stringliteral}{"{}\_available\_workers"{}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00157}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_a4140a2f04ed30f6c277608b5dab126c0}{00157}}\ \_default\_interpreter\_limiter\ =\ RunVar[CapacityLimiter](\textcolor{stringliteral}{"{}\_default\_interpreter\_limiter"{}})}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00159}00159\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00160}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ad5b79dfeef34671fd15eee333f1d2e0f}{00160}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ad5b79dfeef34671fd15eee333f1d2e0f}{\_stop\_workers}}(workers:\ deque[Worker])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00161}00161\ \ \ \ \ \textcolor{keywordflow}{for}\ worker\ \textcolor{keywordflow}{in}\ workers:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ worker.destroy()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00164}00164\ \ \ \ \ workers.clear()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00167}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_a5b6aab58f5b4489cdefed4a648310669}{00167}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_a5b6aab58f5b4489cdefed4a648310669}{run\_sync}}(}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00168}00168\ \ \ \ \ func:\ Callable[[Unpack[PosArgsT]],\ T\_Retval],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00169}00169\ \ \ \ \ *args:\ Unpack[PosArgsT],}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00170}00170\ \ \ \ \ limiter:\ CapacityLimiter\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00171}00171\ )\ -\/>\ T\_Retval:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00172}00172\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ Call\ the\ given\ function\ with\ the\ given\ arguments\ in\ a\ subinterpreter.}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00174}00174\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00175}00175\ \textcolor{stringliteral}{\ \ \ \ ..\ warning::\ On\ Python\ 3.13,\ the\ :mod:\`{}concurrent.interpreters\`{}\ module\ was\ not\ yet}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00176}00176\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ available,\ so\ the\ code\ path\ for\ that\ Python\ version\ relies\ on\ an\ undocumented,}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00177}00177\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ private\ API.\ As\ such,\ it\ is\ recommended\ to\ not\ rely\ on\ this\ function\ for\ anything}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00178}00178\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mission-\/critical\ on\ Python\ 3.13.}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00179}00179\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00180}00180\ \textcolor{stringliteral}{\ \ \ \ :param\ func:\ a\ callable}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ :param\ args:\ the\ positional\ arguments\ for\ the\ callable}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ :param\ limiter:\ capacity\ limiter\ to\ use\ to\ limit\ the\ total\ number\ of\ subinterpreters}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00183}00183\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ running\ (if\ omitted,\ the\ default\ limiter\ is\ used)}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00184}00184\ \textcolor{stringliteral}{\ \ \ \ :return:\ the\ result\ of\ the\ call}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00185}00185\ \textcolor{stringliteral}{\ \ \ \ :raises\ BrokenWorkerInterpreter:\ if\ there's\ an\ internal\ error\ in\ a\ subinterpreter}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00186}00186\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00187}00187\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00188}00188\ \ \ \ \ \textcolor{keywordflow}{if}\ limiter\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ limiter\ =\ \mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ac867e9b8eb9e3bf48888163dcfc9bab1}{current\_default\_interpreter\_limiter}}()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00191}00191\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ idle\_workers\ =\ \_idle\_workers.get()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00193}00193\ \ \ \ \ \textcolor{keywordflow}{except}\ LookupError:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ idle\_workers\ =\ deque()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \_idle\_workers.set(idle\_workers)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ atexit.register(\_stop\_workers,\ idle\_workers)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00198}00198\ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ limiter:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ worker\ =\ idle\_workers.pop()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ IndexError:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ worker\ =\ \mbox{\hyperlink{classanyio_1_1to__interpreter_1_1_worker}{Worker}}()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00204}00204\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ await\ to\_thread.run\_sync(}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ worker.call,}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ func,}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ args,}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ limiter=limiter,}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00211}00211\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Prune\ workers\ that\ have\ been\ idle\ for\ too\ long}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ now\ =\ current\_time()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ idle\_workers:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ now\ -\/\ idle\_workers[0].last\_used\ <=\ MAX\_WORKER\_IDLE\_TIME:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ await\ to\_thread.run\_sync(idle\_workers.popleft().destroy,\ limiter=limiter)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ worker.last\_used\ =\ current\_time()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ idle\_workers.append(worker)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00222}00222\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00224}\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ac867e9b8eb9e3bf48888163dcfc9bab1}{00224}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1to__interpreter_ac867e9b8eb9e3bf48888163dcfc9bab1}{current\_default\_interpreter\_limiter}}()\ -\/>\ CapacityLimiter:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00225}00225\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00226}00226\ \textcolor{stringliteral}{\ \ \ \ Return\ the\ capacity\ limiter\ used\ by\ default\ to\ limit\ the\ number\ of\ concurrently}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00227}00227\ \textcolor{stringliteral}{\ \ \ \ running\ subinterpreters.}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00228}00228\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00229}00229\ \textcolor{stringliteral}{\ \ \ \ Defaults\ to\ the\ number\ of\ CPU\ cores.}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00230}00230\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00231}00231\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ capacity\ limiter\ object}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00232}00232\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00233}00233\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00234}00234\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_default\_interpreter\_limiter.get()}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00236}00236\ \ \ \ \ \textcolor{keywordflow}{except}\ LookupError:}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ limiter\ =\ \mbox{\hyperlink{classanyio_1_1__core_1_1__synchronization_1_1_capacity_limiter}{CapacityLimiter}}(os.cpu\_count()\ \textcolor{keywordflow}{or}\ DEFAULT\_CPU\_COUNT)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \_default\_interpreter\_limiter.set(limiter)}
+\DoxyCodeLine{\Hypertarget{to__interpreter_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ limiter}
+
+\end{DoxyCode}

@@ -1,0 +1,620 @@
+\doxysection{typing.\+py}
+\hypertarget{v1_2typing_8py_source}{}\label{v1_2typing_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/typing.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/typing.py}}
+\mbox{\hyperlink{v1_2typing_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing}{00001}}\ \textcolor{keyword}{import}\ functools}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00002}00002\ \textcolor{keyword}{import}\ operator}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00003}00003\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00004}00004\ \textcolor{keyword}{import}\ typing}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00005}00005\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Callable}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00006}00006\ \textcolor{keyword}{from}\ os\ \textcolor{keyword}{import}\ PathLike}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00007}00007\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ (\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00008}00008\ \ \ \ \ TYPE\_CHECKING,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00009}00009\ \ \ \ \ AbstractSet,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00010}00010\ \ \ \ \ Any,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00011}00011\ \ \ \ \ Callable\ \textcolor{keyword}{as}\ TypingCallable,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00012}00012\ \ \ \ \ ClassVar,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00013}00013\ \ \ \ \ Dict,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00014}00014\ \ \ \ \ ForwardRef,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00015}00015\ \ \ \ \ Generator,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00016}00016\ \ \ \ \ Iterable,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00017}00017\ \ \ \ \ List,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00018}00018\ \ \ \ \ Mapping,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00019}00019\ \ \ \ \ NewType,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00020}00020\ \ \ \ \ Optional,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00021}00021\ \ \ \ \ Sequence,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00022}00022\ \ \ \ \ Set,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00023}00023\ \ \ \ \ Tuple,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00024}00024\ \ \ \ \ Type,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00025}00025\ \ \ \ \ TypeVar,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00026}00026\ \ \ \ \ Union,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00027}00027\ \ \ \ \ \_eval\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00028}00028\ \ \ \ \ cast,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00029}00029\ \ \ \ \ get\_type\_hints,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00030}00030\ )}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00032}00032\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00033}00033\ \ \ \ \ Annotated,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00034}00034\ \ \ \ \ Final,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00035}00035\ \ \ \ \ Literal,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00036}00036\ \ \ \ \ NotRequired\ \textcolor{keyword}{as}\ TypedDictNotRequired,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00037}00037\ \ \ \ \ Required\ \textcolor{keyword}{as}\ TypedDictRequired,}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00038}00038\ )}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00040}00040\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00041}00041\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ \_TypingBase\ \textcolor{keyword}{as}\ typing\_base\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00042}00042\ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00043}00043\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ \_Final\ \textcolor{keyword}{as}\ typing\_base\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00045}00045\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00046}00046\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ GenericAlias\ \textcolor{keyword}{as}\ TypingGenericAlias\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00047}00047\ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00048}00048\ \ \ \ \ \textcolor{comment}{\#\ python\ <\ 3.9\ does\ not\ have\ GenericAlias\ (list[int],\ tuple[str,\ ...]\ and\ so\ on)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00049}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_acc6821776e2fa8f34175db31ed059a67}{00049}}\ \ \ \ \ TypingGenericAlias\ =\ ()}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00051}00051\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00052}00052\ \ \ \ \ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ UnionType\ \textcolor{keyword}{as}\ TypesUnionType\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00053}00053\ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00054}00054\ \ \ \ \ \textcolor{comment}{\#\ python\ <\ 3.10\ does\ not\ have\ UnionType\ (str\ |\ int,\ byte\ |\ bool\ and\ so\ on)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00055}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a95efa47a07d3ee1d6986360a1eddd82e}{00055}}\ \ \ \ \ TypesUnionType\ =\ ()}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00058}00058\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 9):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00060}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a806b7aab882b4af01306f61523d559af}{00060}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a806b7aab882b4af01306f61523d559af}{evaluate\_forwardref}}(type\_:\ ForwardRef,\ globalns:\ Any,\ localns:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_.\_evaluate(globalns,\ localns)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00063}00063\ \textcolor{keywordflow}{elif}\ sys.version\_info\ <\ (3,\ 12,\ 4):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00065}00065\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a806b7aab882b4af01306f61523d559af}{evaluate\_forwardref}}(type\_:\ ForwardRef,\ globalns:\ Any,\ localns:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Even\ though\ it\ is\ the\ right\ signature\ for\ python\ 3.9,\ mypy\ complains\ with}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}error:\ Too\ many\ arguments\ for\ "{}\_evaluate"{}\ of\ "{}ForwardRef"{}`\ hence\ the\ cast...}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Python\ 3.13/3.12.4+\ made\ \`{}recursive\_guard`\ a\ kwarg,\ so\ name\ it\ explicitly\ to\ avoid:}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TypeError:\ ForwardRef.\_evaluate()\ missing\ 1\ required\ keyword-\/only\ argument:\ 'recursive\_guard'}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cast(Any,\ type\_).\_evaluate(globalns,\ localns,\ recursive\_guard=set())}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00072}00072\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00074}00074\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a806b7aab882b4af01306f61523d559af}{evaluate\_forwardref}}(type\_:\ ForwardRef,\ globalns:\ Any,\ localns:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Pydantic\ 1.x\ will\ not\ support\ PEP\ 695\ syntax,\ but\ provide\ \`{}type\_params`\ to\ avoid}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ warnings:}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cast(Any,\ type\_).\_evaluate(globalns,\ localns,\ type\_params=(),\ recursive\_guard=set())}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00080}00080\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 9):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00081}00081\ \ \ \ \ \textcolor{comment}{\#\ Ensure\ we\ always\ get\ all\ the\ whole\ \`{}Annotated`\ hint,\ not\ just\ the\ annotated\ type.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00082}00082\ \ \ \ \ \textcolor{comment}{\#\ For\ 3.7\ to\ 3.8,\ \`{}get\_type\_hints`\ doesn't\ recognize\ \`{}typing\_extensions.Annotated`,}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00083}00083\ \ \ \ \ \textcolor{comment}{\#\ so\ it\ already\ returns\ the\ full\ annotation}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00084}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aaa6424aca9fe56945d0fccc4348d9f64}{00084}}\ \ \ \ \ get\_all\_type\_hints\ =\ get\_type\_hints}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00086}00086\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00088}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a1570b09155889e931852c67b5ebbd580}{00088}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aaa6424aca9fe56945d0fccc4348d9f64}{get\_all\_type\_hints}}(obj:\ Any,\ globalns:\ Any\ =\ \textcolor{keywordtype}{None},\ localns:\ Any\ =\ \textcolor{keywordtype}{None})\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ get\_type\_hints(obj,\ globalns,\ localns,\ include\_extras=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00092}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a6b9e845411b45214bfca8baf8b777f77}{00092}}\ \_T\ =\ TypeVar(\textcolor{stringliteral}{'\_T'})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00094}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aa83893a9490bf56b938c28fb11fc806e}{00094}}\ AnyCallable\ =\ TypingCallable[...,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00095}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a83c795cca2d658d4fc2e766fe82815e2}{00095}}\ NoArgAnyCallable\ =\ TypingCallable[[],\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00097}00097\ \textcolor{comment}{\#\ workaround\ for\ https://github.com/python/mypy/issues/9496}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00098}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a2a7e5df24e7a6196ca43348a9cdeab2e}{00098}}\ AnyArgTCallable\ =\ TypingCallable[...,\ \_T]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00101}00101\ \textcolor{comment}{\#\ Annotated[...]\ is\ implemented\ by\ returning\ an\ instance\ of\ one\ of\ these\ classes,\ depending\ on}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00102}00102\ \textcolor{comment}{\#\ python/typing\_extensions\ version.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00103}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a69465585c9b825df4568d0749e3d05a3}{00103}}\ AnnotatedTypeNames\ =\ \{\textcolor{stringliteral}{'AnnotatedMeta'},\ \textcolor{stringliteral}{'\_AnnotatedAlias'}\}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00106}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_ab73b6c34eabd8c60ce9ea71e3dc3a637}{00106}}\ LITERAL\_TYPES:\ Set[Any]\ =\ \{Literal\}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00107}00107\ \textcolor{keywordflow}{if}\ hasattr(typing,\ \textcolor{stringliteral}{'Literal'}):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00108}00108\ \ \ \ \ LITERAL\_TYPES.add(typing.Literal)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00111}00111\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 8):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00113}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{00113}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(t:\ Type[Any])\ -\/>\ Optional[Type[Any]]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type(t).\_\_name\_\_\ \textcolor{keywordflow}{in}\ AnnotatedTypeNames:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ weirdly\ this\ is\ a\ runtime\ requirement,\ as\ well\ as\ for\ mypy}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cast(Type[Any],\ Annotated)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(t,\ \textcolor{stringliteral}{'\_\_origin\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00119}00119\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00120}00120\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ get\_origin\ \textcolor{keyword}{as}\ \_typing\_get\_origin}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00122}00122\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(tp:\ Type[Any])\ -\/>\ Optional[Type[Any]]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ We\ can't\ directly\ use\ \`{}typing.get\_origin\`{}\ since\ we\ need\ a\ fallback\ to\ support}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00125}00125\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ custom\ generic\ classes\ like\ \`{}ConstrainedList\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00126}00126\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ It\ should\ be\ useless\ once\ https://github.com/cython/cython/issues/3537\ is}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00127}00127\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ solved\ and\ https://github.com/pydantic/pydantic/pull/1753\ is\ merged.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type(tp).\_\_name\_\_\ \textcolor{keywordflow}{in}\ AnnotatedTypeNames:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cast(Type[Any],\ Annotated)\ \ \textcolor{comment}{\#\ mypy\ complains\ about\ \_SpecialForm}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_typing\_get\_origin(tp)\ \textcolor{keywordflow}{or}\ getattr(tp,\ \textcolor{stringliteral}{'\_\_origin\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00134}00134\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 8):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00135}00135\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ \_GenericAlias}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00137}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{00137}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{get\_args}}(t:\ Type[Any])\ -\/>\ Tuple[Any,\ ...]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Compatibility\ version\ of\ get\_args\ for\ python\ 3.7.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00139}00139\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00140}00140\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Mostly\ compatible\ with\ the\ python\ 3.8\ \`{}typing\`{}\ module\ version}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ able\ to\ handle\ almost\ all\ use\ cases.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type(t).\_\_name\_\_\ \textcolor{keywordflow}{in}\ AnnotatedTypeNames:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t.\_\_args\_\_\ +\ t.\_\_metadata\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(t,\ \_GenericAlias):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ res\ =\ t.\_\_args\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ t.\_\_origin\_\_\ \textcolor{keywordflow}{is}\ Callable\ \textcolor{keywordflow}{and}\ res\ \textcolor{keywordflow}{and}\ res[0]\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ Ellipsis:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res\ =\ (list(res[:-\/1]),\ res[-\/1])}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(t,\ \textcolor{stringliteral}{'\_\_args\_\_'},\ ())}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00152}00152\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00153}00153\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ get\_args\ \textcolor{keyword}{as}\ \_typing\_get\_args}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00155}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_accdb5700f873219d93db5f2a0f45ad59}{00155}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_accdb5700f873219d93db5f2a0f45ad59}{\_generic\_get\_args}}(tp:\ Type[Any])\ -\/>\ Tuple[Any,\ ...]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00157}00157\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ In\ python\ 3.9,\ \`{}typing.Dict\`{},\ \`{}typing.List\`{},\ ...}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ do\ have\ an\ empty\ \`{}\_\_args\_\_\`{}\ by\ default\ (instead\ of\ the\ generic\ \string~T\ for\ example).}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ In\ order\ to\ still\ support\ \`{}Dict\`{}\ for\ example\ and\ consider\ it\ as\ \`{}Dict[Any,\ Any]\`{},}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00160}00160\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ we\ retrieve\ the\ \`{}\_nparams\`{}\ value\ that\ tells\ us\ how\ many\ parameters\ it\ needs.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(tp,\ \textcolor{stringliteral}{'\_nparams'}):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (Any,)\ *\ tp.\_nparams}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Special\ case\ for\ \`{}tuple[()]`,\ which\ used\ to\ return\ ((),)\ with\ \`{}typing.Tuple`}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ in\ python\ 3.10-\/\ but\ now\ returns\ ()\ for\ \`{}tuple`\ and\ \`{}Tuple`.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ will\ probably\ be\ clarified\ in\ pydantic\ v2}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ tp\ ==\ Tuple[()]\ \textcolor{keywordflow}{or}\ sys.version\_info\ >=\ (3,\ 9)\ \textcolor{keywordflow}{and}\ tp\ ==\ tuple[()]:\ \ \textcolor{comment}{\#\ type:\ ignore[misc]}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ((),)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ there\ is\ a\ TypeError\ when\ compiled\ with\ cython}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ()}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00175}00175\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{get\_args}}(tp:\ Type[Any])\ -\/>\ Tuple[Any,\ ...]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ type\ arguments\ with\ all\ substitutions\ performed.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00177}00177\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00178}00178\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ For\ unions,\ basic\ simplifications\ used\ by\ Union\ constructor\ are\ performed.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00179}00179\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Examples::}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00180}00180\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ get\_args(Dict[str,\ int])\ ==\ (str,\ int)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ get\_args(int)\ ==\ ()}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ get\_args(Union[int,\ Union[T,\ int],\ str][int])\ ==\ (int,\ str)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00183}00183\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ get\_args(Union[int,\ Tuple[T,\ int]][str])\ ==\ (int,\ Tuple[str,\ int])}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00184}00184\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ get\_args(Callable[[],\ T][int])\ ==\ ([],\ int)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00185}00185\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type(tp).\_\_name\_\_\ \textcolor{keywordflow}{in}\ AnnotatedTypeNames:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp.\_\_args\_\_\ +\ tp.\_\_metadata\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ fallback\ is\ needed\ for\ the\ same\ reasons\ as\ \`{}get\_origin`\ (see\ above)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_typing\_get\_args(tp)\ \textcolor{keywordflow}{or}\ getattr(tp,\ \textcolor{stringliteral}{'\_\_args\_\_'},\ ())\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_accdb5700f873219d93db5f2a0f45ad59}{\_generic\_get\_args}}(tp)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00192}00192\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 9):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00194}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a682a510e42d9ae8559796908dcd30ebc}{00194}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a682a510e42d9ae8559796908dcd30ebc}{convert\_generics}}(tp:\ Type[Any])\ -\/>\ Type[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Python\ 3.9\ and\ older\ only\ supports\ generics\ from\ \`{}typing\`{}\ module.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00196}00196\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ They\ convert\ strings\ to\ ForwardRef\ automatically.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00197}00197\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00198}00198\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Examples::}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00199}00199\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ typing.List['Hero']\ ==\ typing.List[ForwardRef('Hero')]}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00200}00200\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00203}00203\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00205}00205\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a682a510e42d9ae8559796908dcd30ebc}{convert\_generics}}(tp:\ Type[Any])\ -\/>\ Type[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00207}00207\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Recursively\ searches\ for\ \`{}str\`{}\ type\ hints\ and\ replaces\ them\ with\ ForwardRef.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00208}00208\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00209}00209\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Examples::}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00210}00210\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ convert\_generics(list['Hero'])\ ==\ list[ForwardRef('Hero')]}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00211}00211\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ convert\_generics(dict['Hero',\ 'Team'])\ ==\ dict[ForwardRef('Hero'),\ ForwardRef('Team')]}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00212}00212\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ convert\_generics(typing.Dict['Hero',\ 'Team'])\ ==\ typing.Dict[ForwardRef('Hero'),\ ForwardRef('Team')]}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00213}00213\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ convert\_generics(list[str\ |\ 'Hero']\ |\ int)\ ==\ list[str\ |\ ForwardRef('Hero')]\ |\ int}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00214}00214\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ origin\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(tp)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ origin\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ hasattr(tp,\ \textcolor{stringliteral}{'\_\_args\_\_'}):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ args\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{get\_args}}(tp)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ typing.Annotated\ needs\ special\ treatment}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ origin\ \textcolor{keywordflow}{is}\ Annotated:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Annotated[(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a682a510e42d9ae8559796908dcd30ebc}{convert\_generics}}(args[0]),\ *args[1:])]\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ recursively\ replace\ \`{}str`\ instances\ inside\ of\ \`{}GenericAlias`\ with\ \`{}ForwardRef(arg)`}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ converted\ =\ tuple(}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ ForwardRef(arg)\ \textcolor{keywordflow}{if}\ isinstance(arg,\ str)\ \textcolor{keywordflow}{and}\ isinstance(tp,\ TypingGenericAlias)\ \textcolor{keywordflow}{else}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a682a510e42d9ae8559796908dcd30ebc}{convert\_generics}}(arg)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ args}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ converted\ ==\ args:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(tp,\ TypingGenericAlias):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_acc6821776e2fa8f34175db31ed059a67}{TypingGenericAlias}}(origin,\ converted)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(tp,\ TypesUnionType):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ recreate\ types.UnionType\ (PEP604,\ Python\ >=\ 3.10)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ functools.reduce(operator.or\_,\ converted)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setattr(tp,\ \textcolor{stringliteral}{'\_\_args\_\_'},\ converted)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00246}00246\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 10):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00247}00247\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00248}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af868db3c1e068507af32b28d70e26738}{00248}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af868db3c1e068507af32b28d70e26738}{is\_union}}(tp:\ Optional[Type[Any]])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp\ \textcolor{keywordflow}{is}\ Union}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00250}00250\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00251}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af2f5594520c40ac0abdeeab0c2854883}{00251}}\ \ \ \ \ WithArgsTypes\ =\ (TypingGenericAlias,)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00252}00252\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00253}00253\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00254}00254\ \ \ \ \ \textcolor{keyword}{import}\ types}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00255}00255\ \ \ \ \ \textcolor{keyword}{import}\ typing}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00257}00257\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af868db3c1e068507af32b28d70e26738}{is\_union}}(tp:\ Optional[Type[Any]])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp\ \textcolor{keywordflow}{is}\ Union\ \textcolor{keywordflow}{or}\ tp\ \textcolor{keywordflow}{is}\ types.UnionType\ \ \textcolor{comment}{\#\ noqa:\ E721}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00259}00259\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00260}00260\ \ \ \ \ WithArgsTypes\ =\ (typing.\_GenericAlias,\ types.GenericAlias,\ types.UnionType)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00263}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a22ae094369342aaa0cdf02a09ed21ebd}{00263}}\ StrPath\ =\ Union[str,\ PathLike]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00266}00266\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00267}00267\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1fields}{pydantic.v1.fields}}\ \textcolor{keyword}{import}\ ModelField}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00268}00268\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00269}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a1ad71a34996c8b1482b7d0a3d1b224fc}{00269}}\ \ \ \ \ TupleGenerator\ =\ Generator[Tuple[str,\ Any],\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00270}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a1e77d7272ddfedcf78cc7e4606dcd753}{00270}}\ \ \ \ \ DictStrAny\ =\ Dict[str,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00271}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a6010d94859669d8f4bda33534133efcd}{00271}}\ \ \ \ \ DictAny\ =\ Dict[Any,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00272}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a3d8ad8bf705ae5ffab1347e5e81b7fad}{00272}}\ \ \ \ \ SetStr\ =\ Set[str]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00273}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_ae19b1a5afe4d7974255a2d7d1d1b262b}{00273}}\ \ \ \ \ ListStr\ =\ List[str]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00274}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0883a524fdf6523fdc51f693dffad5f9}{00274}}\ \ \ \ \ IntStr\ =\ Union[int,\ str]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00275}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_afc03f1de97254c9b06452d5a57bed29a}{00275}}\ \ \ \ \ AbstractSetIntStr\ =\ AbstractSet[IntStr]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00276}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af89ab702a0787a2cff0ce2b4a2a1cd3e}{00276}}\ \ \ \ \ DictIntStrAny\ =\ Dict[IntStr,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00277}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7cda995d0902bf3a791ff1fc56d879db}{00277}}\ \ \ \ \ MappingIntStrAny\ =\ Mapping[IntStr,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00278}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a1b0738db5cc2628eed177794c056a38e}{00278}}\ \ \ \ \ CallableGenerator\ =\ Generator[AnyCallable,\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00279}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a4fbd1151323233e79ff6172db59e9e9c}{00279}}\ \ \ \ \ ReprArgs\ =\ Sequence[Tuple[Optional[str],\ Any]]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00280}00280\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00281}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_afaea4c5a882e84210fcdc9610e2e838f}{00281}}\ \ \ \ \ MYPY\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00282}00282\ \ \ \ \ \textcolor{keywordflow}{if}\ MYPY:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00283}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a4874f297d391d2bd078cb365ee7a2c91}{00283}}\ \ \ \ \ \ \ \ \ AnyClassMethod\ =\ classmethod[Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00284}00284\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ classmethod[TargetType,\ CallableParamSpecType,\ CallableReturnType]}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ AnyClassMethod\ =\ classmethod[Any,\ Any,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00288}00288\ \_\_all\_\_\ =\ (}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00289}00289\ \ \ \ \ \textcolor{stringliteral}{'AnyCallable'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00290}00290\ \ \ \ \ \textcolor{stringliteral}{'NoArgAnyCallable'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00291}00291\ \ \ \ \ \textcolor{stringliteral}{'NoneType'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00292}00292\ \ \ \ \ \textcolor{stringliteral}{'is\_none\_type'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00293}00293\ \ \ \ \ \textcolor{stringliteral}{'display\_as\_type'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00294}00294\ \ \ \ \ \textcolor{stringliteral}{'resolve\_annotations'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00295}00295\ \ \ \ \ \textcolor{stringliteral}{'is\_callable\_type'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00296}00296\ \ \ \ \ \textcolor{stringliteral}{'is\_literal\_type'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00297}00297\ \ \ \ \ \textcolor{stringliteral}{'all\_literal\_values'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00298}00298\ \ \ \ \ \textcolor{stringliteral}{'is\_namedtuple'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00299}00299\ \ \ \ \ \textcolor{stringliteral}{'is\_typeddict'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00300}00300\ \ \ \ \ \textcolor{stringliteral}{'is\_typeddict\_special'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00301}00301\ \ \ \ \ \textcolor{stringliteral}{'is\_new\_type'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00302}00302\ \ \ \ \ \textcolor{stringliteral}{'new\_type\_supertype'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00303}00303\ \ \ \ \ \textcolor{stringliteral}{'is\_classvar'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00304}00304\ \ \ \ \ \textcolor{stringliteral}{'is\_finalvar'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00305}00305\ \ \ \ \ \textcolor{stringliteral}{'update\_field\_forward\_refs'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00306}00306\ \ \ \ \ \textcolor{stringliteral}{'update\_model\_forward\_refs'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00307}00307\ \ \ \ \ \textcolor{stringliteral}{'TupleGenerator'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00308}00308\ \ \ \ \ \textcolor{stringliteral}{'DictStrAny'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00309}00309\ \ \ \ \ \textcolor{stringliteral}{'DictAny'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00310}00310\ \ \ \ \ \textcolor{stringliteral}{'SetStr'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00311}00311\ \ \ \ \ \textcolor{stringliteral}{'ListStr'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00312}00312\ \ \ \ \ \textcolor{stringliteral}{'IntStr'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00313}00313\ \ \ \ \ \textcolor{stringliteral}{'AbstractSetIntStr'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00314}00314\ \ \ \ \ \textcolor{stringliteral}{'DictIntStrAny'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00315}00315\ \ \ \ \ \textcolor{stringliteral}{'CallableGenerator'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00316}00316\ \ \ \ \ \textcolor{stringliteral}{'ReprArgs'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00317}00317\ \ \ \ \ \textcolor{stringliteral}{'AnyClassMethod'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00318}00318\ \ \ \ \ \textcolor{stringliteral}{'CallableGenerator'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00319}00319\ \ \ \ \ \textcolor{stringliteral}{'WithArgsTypes'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00320}00320\ \ \ \ \ \textcolor{stringliteral}{'get\_args'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00321}00321\ \ \ \ \ \textcolor{stringliteral}{'get\_origin'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00322}00322\ \ \ \ \ \textcolor{stringliteral}{'get\_sub\_types'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00323}00323\ \ \ \ \ \textcolor{stringliteral}{'typing\_base'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00324}00324\ \ \ \ \ \textcolor{stringliteral}{'get\_all\_type\_hints'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00325}00325\ \ \ \ \ \textcolor{stringliteral}{'is\_union'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00326}00326\ \ \ \ \ \textcolor{stringliteral}{'StrPath'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00327}00327\ \ \ \ \ \textcolor{stringliteral}{'MappingIntStrAny'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00328}00328\ )}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00329}00329\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00330}00330\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00331}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a68c8770c342a92224bd1f311e02b2e7f}{00331}}\ NoneType\ =\ None.\_\_class\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00333}00333\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00334}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a3c0efcbd9f23355c0df14156ab0517fc}{00334}}\ NONE\_TYPES:\ Tuple[Any,\ Any,\ Any]\ =\ (\textcolor{keywordtype}{None},\ NoneType,\ Literal[\textcolor{keywordtype}{None}])}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00336}00336\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00337}00337\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 8):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00338}00338\ \ \ \ \ \textcolor{comment}{\#\ Even\ though\ this\ implementation\ is\ slower,\ we\ need\ it\ for\ python\ 3.7:}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00339}00339\ \ \ \ \ \textcolor{comment}{\#\ In\ python\ 3.7\ "{}Literal"{}\ is\ not\ a\ builtin\ type\ and\ uses\ a\ different}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00340}00340\ \ \ \ \ \textcolor{comment}{\#\ mechanism.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00341}00341\ \ \ \ \ \textcolor{comment}{\#\ for\ this\ reason\ \`{}Literal[None]\ is\ Literal[None]`\ evaluates\ to\ \`{}False`,}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00342}00342\ \ \ \ \ \textcolor{comment}{\#\ breaking\ the\ faster\ implementation\ used\ for\ the\ other\ python\ versions.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00343}00343\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00344}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a8ffc8b9a7ba9617fa8a75fa10ea5582f}{00344}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a8ffc8b9a7ba9617fa8a75fa10ea5582f}{is\_none\_type}}(type\_:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_\ \textcolor{keywordflow}{in}\ NONE\_TYPES}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00347}00347\ \textcolor{keywordflow}{elif}\ sys.version\_info[:2]\ ==\ (3,\ 8):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00349}00349\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a8ffc8b9a7ba9617fa8a75fa10ea5582f}{is\_none\_type}}(type\_:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ none\_type\ \textcolor{keywordflow}{in}\ NONE\_TYPES:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type\_\ \textcolor{keywordflow}{is}\ none\_type:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ With\ python\ 3.8,\ specifically\ 3.8.10,\ Literal\ "{}is"{}\ check\ sare\ very\ flakey}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ can\ change\ on\ very\ subtle\ changes\ like\ use\ of\ types\ in\ other\ modules,}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ hopefully\ this\ check\ avoids\ that\ issue.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a64098318fc3913feeb3578a0f4ac1214}{is\_literal\_type}}(type\_):\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a79bd0ce9a362403d003cc5907f55c725}{all\_literal\_values}}(type\_)\ ==\ (\textcolor{keywordtype}{None},)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00360}00360\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00362}00362\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a8ffc8b9a7ba9617fa8a75fa10ea5582f}{is\_none\_type}}(type\_:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_\ \textcolor{keywordflow}{in}\ NONE\_TYPES}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00365}00365\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00366}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_afaa582bc5801eb8e8550f003cdc0172b}{00366}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_afaa582bc5801eb8e8550f003cdc0172b}{display\_as\_type}}(v:\ Type[Any])\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00367}00367\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(v,\ typing\_base)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ isinstance(v,\ WithArgsTypes)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ isinstance(v,\ type):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ v\ =\ v.\_\_class\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00369}00369\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00370}00370\ \ \ \ \ \textcolor{keywordflow}{if}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af868db3c1e068507af32b28d70e26738}{is\_union}}(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(v)):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{'Union[\{"{},\ "{}.join(map(display\_as\_type,\ get\_args(v)))\}]'}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00372}00372\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00373}00373\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(v,\ WithArgsTypes):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Generic\ alias\ are\ constructs\ like\ \`{}list[int]`}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(v).replace(\textcolor{stringliteral}{'typing.'},\ \textcolor{stringliteral}{''})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00377}00377\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00379}00379\ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ happens\ with\ typing\ objects}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(v).replace(\textcolor{stringliteral}{'typing.'},\ \textcolor{stringliteral}{''})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00384}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a95217737783e6c2ea9ec20e63334c563}{00384}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a95217737783e6c2ea9ec20e63334c563}{resolve\_annotations}}(raw\_annotations:\ Dict[str,\ Type[Any]],\ module\_name:\ Optional[str])\ -\/>\ Dict[str,\ Type[Any]]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00385}00385\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00386}00386\ \textcolor{stringliteral}{\ \ \ \ Partially\ taken\ from\ typing.get\_type\_hints.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00387}00387\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00388}00388\ \textcolor{stringliteral}{\ \ \ \ Resolve\ string\ or\ ForwardRef\ annotations\ into\ type\ objects\ if\ possible.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00389}00389\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00390}00390\ \ \ \ \ base\_globals:\ Optional[Dict[str,\ Any]]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00391}00391\ \ \ \ \ \textcolor{keywordflow}{if}\ module\_name:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ module\ =\ sys.modules[module\_name]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ happens\ occasionally,\ see\ https://github.com/pydantic/pydantic/issues/2363}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ base\_globals\ =\ module.\_\_dict\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00400}00400\ \ \ \ \ annotations\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00401}00401\ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ raw\_annotations.items():}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ str):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (3,\ 10)\ >\ sys.version\_info\ >=\ (3,\ 9,\ 8)\ \textcolor{keywordflow}{or}\ sys.version\_info\ >=\ (3,\ 10,\ 1):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ ForwardRef(value,\ is\_argument=\textcolor{keyword}{False},\ is\_class=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ ForwardRef(value,\ is\_argument=\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 13):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \_eval\_type(value,\ base\_globals,\ \textcolor{keywordtype}{None},\ type\_params=())}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \_eval\_type(value,\ base\_globals,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00412}00412\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ NameError:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ this\ is\ ok,\ it\ can\ be\ fixed\ with\ update\_forward\_refs}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00415}00415\ \ \ \ \ \ \ \ \ annotations[name]\ =\ value}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00416}00416\ \ \ \ \ \textcolor{keywordflow}{return}\ annotations}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00417}00417\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00419}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a50c19713d9d213a1562f977a6cc8dc37}{00419}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a50c19713d9d213a1562f977a6cc8dc37}{is\_callable\_type}}(type\_:\ Type[Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00420}00420\ \ \ \ \ \textcolor{keywordflow}{return}\ type\_\ \textcolor{keywordflow}{is}\ Callable\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(type\_)\ \textcolor{keywordflow}{is}\ Callable}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00421}00421\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00422}00422\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00423}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a64098318fc3913feeb3578a0f4ac1214}{00423}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a64098318fc3913feeb3578a0f4ac1214}{is\_literal\_type}}(type\_:\ Type[Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00424}00424\ \ \ \ \ \textcolor{keywordflow}{return}\ Literal\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(type\_)\ \textcolor{keywordflow}{in}\ LITERAL\_TYPES}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00426}00426\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00427}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0aeec617d667f0ec4c088b1c1befeef7}{00427}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0aeec617d667f0ec4c088b1c1befeef7}{literal\_values}}(type\_:\ Type[Any])\ -\/>\ Tuple[Any,\ ...]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00428}00428\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{get\_args}}(type\_)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00430}00430\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00431}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a79bd0ce9a362403d003cc5907f55c725}{00431}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a79bd0ce9a362403d003cc5907f55c725}{all\_literal\_values}}(type\_:\ Type[Any])\ -\/>\ Tuple[Any,\ ...]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00432}00432\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00433}00433\ \textcolor{stringliteral}{\ \ \ \ This\ method\ is\ used\ to\ retrieve\ all\ Literal\ values\ as}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00434}00434\ \textcolor{stringliteral}{\ \ \ \ Literal\ can\ be\ used\ recursively\ (see\ https://www.python.org/dev/peps/pep-\/0586)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00435}00435\ \textcolor{stringliteral}{\ \ \ \ e.g.\ \`{}Literal[Literal[Literal[1,\ 2,\ 3],\ "{}foo"{}],\ 5,\ None]\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00436}00436\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00437}00437\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a64098318fc3913feeb3578a0f4ac1214}{is\_literal\_type}}(type\_):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (type\_,)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00439}00439\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00440}00440\ \ \ \ \ values\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0aeec617d667f0ec4c088b1c1befeef7}{literal\_values}}(type\_)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00441}00441\ \ \ \ \ \textcolor{keywordflow}{return}\ tuple(x\ \textcolor{keywordflow}{for}\ value\ \textcolor{keywordflow}{in}\ values\ \textcolor{keywordflow}{for}\ x\ \textcolor{keywordflow}{in}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a79bd0ce9a362403d003cc5907f55c725}{all\_literal\_values}}(value))}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00443}00443\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00444}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a76fd2fc97b2784d1f999eba011019706}{00444}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a76fd2fc97b2784d1f999eba011019706}{is\_namedtuple}}(type\_:\ Type[Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00445}00445\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00446}00446\ \textcolor{stringliteral}{\ \ \ \ Check\ if\ a\ given\ class\ is\ a\ named\ tuple.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00447}00447\ \textcolor{stringliteral}{\ \ \ \ It\ can\ be\ either\ a\ \`{}typing.NamedTuple\`{}\ or\ \`{}collections.namedtuple\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00448}00448\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00449}00449\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1utils}{pydantic.v1.utils}}\ \textcolor{keyword}{import}\ lenient\_issubclass}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00451}00451\ \ \ \ \ \textcolor{keywordflow}{return}\ lenient\_issubclass(type\_,\ tuple)\ \textcolor{keywordflow}{and}\ hasattr(type\_,\ \textcolor{stringliteral}{'\_fields'})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00452}00452\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00453}00453\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00454}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_ae5ba0efb9f937f1b2fb3170f5e2629d8}{00454}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_ae5ba0efb9f937f1b2fb3170f5e2629d8}{is\_typeddict}}(type\_:\ Type[Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00455}00455\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00456}00456\ \textcolor{stringliteral}{\ \ \ \ Check\ if\ a\ given\ class\ is\ a\ typed\ dict\ (from\ \`{}typing\`{}\ or\ \`{}typing\_extensions\`{})}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00457}00457\ \textcolor{stringliteral}{\ \ \ \ In\ 3.10,\ there\ will\ be\ a\ public\ method\ (https://docs.python.org/3.10/library/typing.html\#typing.is\_typeddict)}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00458}00458\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00459}00459\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1utils}{pydantic.v1.utils}}\ \textcolor{keyword}{import}\ lenient\_issubclass}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00460}00460\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00461}00461\ \ \ \ \ \textcolor{keywordflow}{return}\ lenient\_issubclass(type\_,\ dict)\ \textcolor{keywordflow}{and}\ hasattr(type\_,\ \textcolor{stringliteral}{'\_\_total\_\_'})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00463}00463\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00464}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af4de42ecef3e0228fa279e551bd0ad88}{00464}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af4de42ecef3e0228fa279e551bd0ad88}{\_check\_typeddict\_special}}(type\_:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00465}00465\ \ \ \ \ \textcolor{keywordflow}{return}\ type\_\ \textcolor{keywordflow}{is}\ TypedDictRequired\ \textcolor{keywordflow}{or}\ type\_\ \textcolor{keywordflow}{is}\ TypedDictNotRequired}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00466}00466\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00467}00467\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00468}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a42eaa7ac2c93e39f4fb6fbeb044a0f06}{00468}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a42eaa7ac2c93e39f4fb6fbeb044a0f06}{is\_typeddict\_special}}(type\_:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00469}00469\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00470}00470\ \textcolor{stringliteral}{\ \ \ \ Check\ if\ type\ is\ a\ TypedDict\ special\ form\ (Required\ or\ NotRequired).}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00471}00471\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00472}00472\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af4de42ecef3e0228fa279e551bd0ad88}{\_check\_typeddict\_special}}(type\_)\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af4de42ecef3e0228fa279e551bd0ad88}{\_check\_typeddict\_special}}(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(type\_))}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00473}00473\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00474}00474\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00475}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a537922fec008881cc09f294f5266a2fe}{00475}}\ test\_type\ =\ NewType(\textcolor{stringliteral}{'test\_type'},\ str)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00476}00476\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00477}00477\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00478}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a72de824bf61e1ab06a4b95f3839494e3}{00478}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a72de824bf61e1ab06a4b95f3839494e3}{is\_new\_type}}(type\_:\ Type[Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00479}00479\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00480}00480\ \textcolor{stringliteral}{\ \ \ \ Check\ whether\ type\_\ was\ created\ using\ typing.NewType}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00481}00481\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00482}00482\ \ \ \ \ \textcolor{keywordflow}{return}\ isinstance(type\_,\ test\_type.\_\_class\_\_)\ \textcolor{keywordflow}{and}\ hasattr(type\_,\ \textcolor{stringliteral}{'\_\_supertype\_\_'})\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00483}00483\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00484}00484\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00485}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a1d74b04d9941254e8e01e63f1a086286}{00485}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a1d74b04d9941254e8e01e63f1a086286}{new\_type\_supertype}}(type\_:\ Type[Any])\ -\/>\ Type[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00486}00486\ \ \ \ \ \textcolor{keywordflow}{while}\ hasattr(type\_,\ \textcolor{stringliteral}{'\_\_supertype\_\_'}):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ type\_\ =\ type\_.\_\_supertype\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00488}00488\ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00489}00489\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00490}00490\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00491}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_abfceed890f1f8417c4ff465926b7134e}{00491}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_abfceed890f1f8417c4ff465926b7134e}{\_check\_classvar}}(v:\ Optional[Type[Any]])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00492}00492\ \ \ \ \ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00494}00494\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00495}00495\ \ \ \ \ \textcolor{keywordflow}{return}\ v.\_\_class\_\_\ ==\ ClassVar.\_\_class\_\_\ \textcolor{keywordflow}{and}\ getattr(v,\ \textcolor{stringliteral}{'\_name'},\ \textcolor{keywordtype}{None})\ ==\ \textcolor{stringliteral}{'ClassVar'}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00496}00496\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00497}00497\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00498}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0e326d1f65eefbbb64082a75fc886b4f}{00498}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0e326d1f65eefbbb64082a75fc886b4f}{\_check\_finalvar}}(v:\ Optional[Type[Any]])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00499}00499\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00500}00500\ \textcolor{stringliteral}{\ \ \ \ Check\ if\ a\ given\ type\ is\ a\ \`{}typing.Final\`{}\ type.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00501}00501\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00502}00502\ \ \ \ \ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00503}00503\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00504}00504\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00505}00505\ \ \ \ \ \textcolor{keywordflow}{return}\ v.\_\_class\_\_\ ==\ Final.\_\_class\_\_\ \textcolor{keywordflow}{and}\ (sys.version\_info\ <\ (3,\ 8)\ \textcolor{keywordflow}{or}\ getattr(v,\ \textcolor{stringliteral}{'\_name'},\ \textcolor{keywordtype}{None})\ ==\ \textcolor{stringliteral}{'Final'})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00506}00506\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00507}00507\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00508}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_ad44959ad7517ae978db1e5f107f05c2d}{00508}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_ad44959ad7517ae978db1e5f107f05c2d}{is\_classvar}}(ann\_type:\ Type[Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00509}00509\ \ \ \ \ \textcolor{keywordflow}{if}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_abfceed890f1f8417c4ff465926b7134e}{\_check\_classvar}}(ann\_type)\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_abfceed890f1f8417c4ff465926b7134e}{\_check\_classvar}}(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(ann\_type)):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00511}00511\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00512}00512\ \ \ \ \ \textcolor{comment}{\#\ this\ is\ an\ ugly\ workaround\ for\ class\ vars\ that\ contain\ forward\ references\ and\ are\ therefore\ themselves}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00513}00513\ \ \ \ \ \textcolor{comment}{\#\ forward\ references,\ see\ \#3679}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00514}00514\ \ \ \ \ \textcolor{keywordflow}{if}\ ann\_type.\_\_class\_\_\ ==\ ForwardRef\ \textcolor{keywordflow}{and}\ ann\_type.\_\_forward\_arg\_\_.startswith(\textcolor{stringliteral}{'ClassVar['}):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00516}00516\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00517}00517\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00518}00518\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00519}00519\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00520}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aa3119fc17ff9a426c8f33b2b9b886f92}{00520}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aa3119fc17ff9a426c8f33b2b9b886f92}{is\_finalvar}}(ann\_type:\ Type[Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00521}00521\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0e326d1f65eefbbb64082a75fc886b4f}{\_check\_finalvar}}(ann\_type)\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0e326d1f65eefbbb64082a75fc886b4f}{\_check\_finalvar}}(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(ann\_type))}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00522}00522\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00523}00523\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00524}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af01eb116b387629c0491b3d7bcaeb365}{00524}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af01eb116b387629c0491b3d7bcaeb365}{update\_field\_forward\_refs}}(field:\ \textcolor{stringliteral}{'ModelField'},\ globalns:\ Any,\ localns:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00525}00525\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00526}00526\ \textcolor{stringliteral}{\ \ \ \ Try\ to\ update\ ForwardRefs\ on\ fields\ based\ on\ this\ ModelField,\ globalns\ and\ localns.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00527}00527\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00528}00528\ \ \ \ \ prepare\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00529}00529\ \ \ \ \ \textcolor{keywordflow}{if}\ field.type\_.\_\_class\_\_\ ==\ ForwardRef:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ prepare\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ field.type\_\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a806b7aab882b4af01306f61523d559af}{evaluate\_forwardref}}(field.type\_,\ globalns,\ localns\ \textcolor{keywordflow}{or}\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00532}00532\ \ \ \ \ \textcolor{keywordflow}{if}\ field.outer\_type\_.\_\_class\_\_\ ==\ ForwardRef:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ prepare\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ field.outer\_type\_\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a806b7aab882b4af01306f61523d559af}{evaluate\_forwardref}}(field.outer\_type\_,\ globalns,\ localns\ \textcolor{keywordflow}{or}\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00535}00535\ \ \ \ \ \textcolor{keywordflow}{if}\ prepare:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00536}00536\ \ \ \ \ \ \ \ \ field.prepare()}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00537}00537\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00538}00538\ \ \ \ \ \textcolor{keywordflow}{if}\ field.sub\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00539}00539\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sub\_f\ \textcolor{keywordflow}{in}\ field.sub\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af01eb116b387629c0491b3d7bcaeb365}{update\_field\_forward\_refs}}(sub\_f,\ globalns=globalns,\ localns=localns)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00541}00541\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00542}00542\ \ \ \ \ \textcolor{keywordflow}{if}\ field.discriminator\_key\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ field.prepare\_discriminated\_union\_sub\_fields()}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00544}00544\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00545}00545\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00546}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a5590e8b8dca2d2de9c78850d088bdc4f}{00546}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a5590e8b8dca2d2de9c78850d088bdc4f}{update\_model\_forward\_refs}}(}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00547}00547\ \ \ \ \ model:\ Type[Any],}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00548}00548\ \ \ \ \ fields:\ Iterable[\textcolor{stringliteral}{'ModelField'}],}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00549}00549\ \ \ \ \ json\_encoders:\ Dict[Union[Type[Any],\ str,\ ForwardRef],\ AnyCallable],}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00550}00550\ \ \ \ \ localns:\ \textcolor{stringliteral}{'DictStrAny'},}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00551}00551\ \ \ \ \ exc\_to\_suppress:\ Tuple[Type[BaseException],\ ...]\ =\ (),}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00552}00552\ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00553}00553\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00554}00554\ \textcolor{stringliteral}{\ \ \ \ Try\ to\ update\ model\ fields\ ForwardRefs\ based\ on\ model\ and\ localns.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00555}00555\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00556}00556\ \ \ \ \ \textcolor{keywordflow}{if}\ model.\_\_module\_\_\ \textcolor{keywordflow}{in}\ sys.modules:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00557}00557\ \ \ \ \ \ \ \ \ globalns\ =\ sys.modules[model.\_\_module\_\_].\_\_dict\_\_.copy()}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00558}00558\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00559}00559\ \ \ \ \ \ \ \ \ globalns\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00560}00560\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00561}00561\ \ \ \ \ globalns.setdefault(model.\_\_name\_\_,\ model)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00562}00562\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00563}00563\ \ \ \ \ \textcolor{keywordflow}{for}\ f\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af01eb116b387629c0491b3d7bcaeb365}{update\_field\_forward\_refs}}(f,\ globalns=globalns,\ localns=localns)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00566}00566\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ exc\_to\_suppress:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00568}00568\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00569}00569\ \ \ \ \ \textcolor{keywordflow}{for}\ key\ \textcolor{keywordflow}{in}\ set(json\_encoders.keys()):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00570}00570\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(key,\ str):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00571}00571\ \ \ \ \ \ \ \ \ \ \ \ \ fr:\ ForwardRef\ =\ ForwardRef(key)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00572}00572\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(key,\ ForwardRef):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ \ \ \ \ fr\ =\ key}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00574}00574\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00575}00575\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00576}00576\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00577}00577\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ new\_key\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a806b7aab882b4af01306f61523d559af}{evaluate\_forwardref}}(fr,\ globalns,\ localns\ \textcolor{keywordflow}{or}\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00579}00579\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ exc\_to\_suppress:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00581}00581\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ json\_encoders[new\_key]\ =\ json\_encoders.pop(key)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00583}00583\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00584}00584\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00585}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a5da22f64608affd62ac736c3fdfc65d5}{00585}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a5da22f64608affd62ac736c3fdfc65d5}{get\_class}}(type\_:\ Type[Any])\ -\/>\ Union[\textcolor{keywordtype}{None},\ bool,\ Type[Any]]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00586}00586\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00587}00587\ \textcolor{stringliteral}{\ \ \ \ Tries\ to\ get\ the\ class\ of\ a\ Type[T]\ annotation.\ Returns\ True\ if\ Type\ is\ used}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00588}00588\ \textcolor{stringliteral}{\ \ \ \ without\ brackets.\ Otherwise\ returns\ None.}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00589}00589\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00590}00590\ \ \ \ \ \textcolor{keywordflow}{if}\ type\_\ \textcolor{keywordflow}{is}\ type:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00591}00591\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00592}00592\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00593}00593\ \ \ \ \ \textcolor{keywordflow}{if}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(type\_)\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00594}00594\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00595}00595\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00596}00596\ \ \ \ \ args\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{get\_args}}(type\_)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00597}00597\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ args\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ isinstance(args[0],\ type):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00598}00598\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00599}00599\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00600}00600\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ args[0]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00601}00601\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00602}00602\ }
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00603}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aa4940cda31fd7c7657c87a1b9cfa4f3b}{00603}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aa4940cda31fd7c7657c87a1b9cfa4f3b}{get\_sub\_types}}(tp:\ Any)\ -\/>\ List[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00604}00604\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00605}00605\ \textcolor{stringliteral}{\ \ \ \ Return\ all\ the\ types\ that\ are\ allowed\ by\ type\ \`{}tp\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00606}00606\ \textcolor{stringliteral}{\ \ \ \ \`{}tp\`{}\ can\ be\ a\ \`{}Union\`{}\ of\ allowed\ types\ or\ an\ \`{}Annotated\`{}\ type}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00607}00607\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00608}00608\ \ \ \ \ origin\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a0a055398ff449feca995740441398000}{get\_origin}}(tp)}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00609}00609\ \ \ \ \ \textcolor{keywordflow}{if}\ origin\ \textcolor{keywordflow}{is}\ Annotated:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00610}00610\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aa4940cda31fd7c7657c87a1b9cfa4f3b}{get\_sub\_types}}(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{get\_args}}(tp)[0])}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00611}00611\ \ \ \ \ \textcolor{keywordflow}{elif}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_af868db3c1e068507af32b28d70e26738}{is\_union}}(origin):}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00612}00612\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [x\ \textcolor{keywordflow}{for}\ t\ \textcolor{keywordflow}{in}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_a7ad4381cc6a038dc06f6bfd51bee9067}{get\_args}}(tp)\ \textcolor{keywordflow}{for}\ x\ \textcolor{keywordflow}{in}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing_aa4940cda31fd7c7657c87a1b9cfa4f3b}{get\_sub\_types}}(t)]}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00613}00613\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2typing_8py_source_l00614}00614\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [tp]}
+
+\end{DoxyCode}

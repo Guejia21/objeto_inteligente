@@ -1,0 +1,290 @@
+\doxysection{decorator.\+py}
+\hypertarget{deprecated_2decorator_8py_source}{}\label{deprecated_2decorator_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/deprecated/decorator.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/deprecated/decorator.py}}
+\mbox{\hyperlink{deprecated_2decorator_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator}{00001}}\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00002}00002\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Mapping}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00003}00003\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ wraps}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00004}00004\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ Callable,\ Optional,\ TypeVar,\ Union,\ overload}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00006}00006\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ deprecated}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00008}00008\ \textcolor{keyword}{from}\ ..\_internal\ \textcolor{keyword}{import}\ \_config,\ \_typing\_extra}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00009}00009\ \textcolor{keyword}{from}\ ..alias\_generators\ \textcolor{keyword}{import}\ to\_pascal}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00010}00010\ \textcolor{keyword}{from}\ ..errors\ \textcolor{keyword}{import}\ PydanticUserError}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00011}00011\ \textcolor{keyword}{from}\ ..functional\_validators\ \textcolor{keyword}{import}\ field\_validator}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00012}00012\ \textcolor{keyword}{from}\ ..main\ \textcolor{keyword}{import}\ BaseModel,\ create\_model}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00013}00013\ \textcolor{keyword}{from}\ ..warnings\ \textcolor{keyword}{import}\ PydanticDeprecatedSince20}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00015}00015\ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00016}00016\ \ \ \ \ \textcolor{comment}{\#\ See\ PyCharm\ issues\ https://youtrack.jetbrains.com/issue/PY-\/21915}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00017}00017\ \ \ \ \ \textcolor{comment}{\#\ and\ https://youtrack.jetbrains.com/issue/PY-\/51428}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00018}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_aff9c408569d06e7d03c727bd93bddd48}{00018}}\ \ \ \ \ DeprecationWarning\ =\ PydanticDeprecatedSince20}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00020}00020\ \_\_all\_\_\ =\ (\textcolor{stringliteral}{'validate\_arguments'},)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00022}00022\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00023}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_a73b303e0174cbb2116a0f1ed93e3f191}{00023}}\ \ \ \ \ AnyCallable\ =\ Callable[...,\ Any]}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00025}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_ad3489f84e16f456e28c96cc592a37369}{00025}}\ \ \ \ \ AnyCallableT\ =\ TypeVar(\textcolor{stringliteral}{'AnyCallableT'},\ bound=AnyCallable)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00026}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_a9c3ae3f6d438a47dab0c8475364968c4}{00026}}\ \ \ \ \ ConfigType\ =\ Union[\textcolor{keywordtype}{None},\ type[Any],\ dict[str,\ Any]]}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00029}00029\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00030}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_ac51eb9c60c88ecc523ec704bddf42030}{00030}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_ac51eb9c60c88ecc523ec704bddf42030}{validate\_arguments}}(}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00031}00031\ \ \ \ \ func:\ None\ =\ \textcolor{keywordtype}{None},\ *,\ config:\ \textcolor{stringliteral}{'ConfigType'}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00032}00032\ )\ -\/>\ Callable[[\textcolor{stringliteral}{'AnyCallableT'}],\ \textcolor{stringliteral}{'AnyCallableT'}]:\ ...}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00035}00035\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00036}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_ae2172b490e00e6e65680f30b02836f8c}{00036}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_ac51eb9c60c88ecc523ec704bddf42030}{validate\_arguments}}(func:\ \textcolor{stringliteral}{'AnyCallableT'})\ -\/>\ \textcolor{stringliteral}{'AnyCallableT'}:\ ...}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00039}00039\ \textcolor{preprocessor}{@deprecated}(}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00040}00040\ \ \ \ \ \textcolor{stringliteral}{'The\ \`{}validate\_arguments`\ method\ is\ deprecated;\ use\ \`{}validate\_call`\ instead.'},}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00041}00041\ \ \ \ \ category=\textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00042}00042\ )}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00043}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_a4d896de8d6df12a1b9373a108492dba3}{00043}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_ac51eb9c60c88ecc523ec704bddf42030}{validate\_arguments}}(func:\ Optional[\textcolor{stringliteral}{'AnyCallableT'}]\ =\ \textcolor{keywordtype}{None},\ *,\ config:\ \textcolor{stringliteral}{'ConfigType'}\ =\ \textcolor{keywordtype}{None})\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00044}00044\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Decorator\ to\ validate\ the\ arguments\ passed\ to\ a\ function."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00045}00045\ \ \ \ \ warnings.warn(}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'The\ \`{}validate\_arguments`\ method\ is\ deprecated;\ use\ \`{}validate\_call`\ instead.'},}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ PydanticDeprecatedSince20,}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ stacklevel=2,}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00049}00049\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00051}00051\ \ \ \ \ \textcolor{keyword}{def\ }validate(\_func:\ \textcolor{stringliteral}{'AnyCallable'})\ -\/>\ \textcolor{stringliteral}{'AnyCallable'}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ vd\ =\ \mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function}{ValidatedFunction}}(\_func,\ config)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@wraps(\_func)}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }wrapper\_function(*args:\ Any,\ **kwargs:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ vd.call(*args,\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ wrapper\_function.vd\ =\ vd\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ wrapper\_function.validate\ =\ vd.init\_model\_instance\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ wrapper\_function.raw\_function\ =\ vd.raw\_function\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ wrapper\_function.model\ =\ vd.model\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ wrapper\_function}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{if}\ func:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ validate(func)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00066}00066\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ validate}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00070}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_a7eeee9f396e0ad03723758e2103b553c}{00070}}\ ALT\_V\_ARGS\ =\ \textcolor{stringliteral}{'v\_\_args'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00071}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_a8e05d1195e463ae0356844329bd89d27}{00071}}\ ALT\_V\_KWARGS\ =\ \textcolor{stringliteral}{'v\_\_kwargs'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00072}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_a8654bbae1ab4417f28219938c5fd4809}{00072}}\ V\_POSITIONAL\_ONLY\_NAME\ =\ \textcolor{stringliteral}{'v\_\_positional\_only'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00073}\mbox{\hyperlink{namespacepydantic_1_1deprecated_1_1decorator_a42b1a711fdb052be20097e81ab12d3f8}{00073}}\ V\_DUPLICATE\_KWARGS\ =\ \textcolor{stringliteral}{'v\_\_duplicate\_kwargs'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00076}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function}{00076}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function}{ValidatedFunction}}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00077}00077\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ function:\ \textcolor{stringliteral}{'AnyCallable'},\ config:\ \textcolor{stringliteral}{'ConfigType'}):}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ Parameter,\ signature}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ parameters:\ Mapping[str,\ Parameter]\ =\ signature(function).parameters}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ parameters.keys()\ \&\ \{ALT\_V\_ARGS,\ ALT\_V\_KWARGS,\ V\_POSITIONAL\_ONLY\_NAME,\ V\_DUPLICATE\_KWARGS\}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'"{}\{ALT\_V\_ARGS\}"{},\ "{}\{ALT\_V\_KWARGS\}"{},\ "{}\{V\_POSITIONAL\_ONLY\_NAME\}"{}\ and\ "{}\{V\_DUPLICATE\_KWARGS\}"{}\ '}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'are\ not\ permitted\ as\ argument\ names\ when\ using\ the\ "{}\{validate\_arguments.\_\_name\_\_\}"{}\ decorator'},}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00089}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a72d1947d86cf86eceb1b68418ec60dd7}{00089}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a72d1947d86cf86eceb1b68418ec60dd7}{raw\_function}}\ =\ function}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00090}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a208119f43d903f1bcde5a959b8dcd43b}{00090}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a208119f43d903f1bcde5a959b8dcd43b}{arg\_mapping}}:\ dict[int,\ str]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00091}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a19548562d5bcf7527971aa291fe3b91a}{00091}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a19548562d5bcf7527971aa291fe3b91a}{positional\_only\_args}}:\ set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00092}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{00092}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}\ =\ \textcolor{stringliteral}{'args'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00093}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{00093}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}}\ =\ \textcolor{stringliteral}{'kwargs'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ type\_hints\ =\ \_typing\_extra.get\_type\_hints(function,\ include\_extras=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ takes\_args\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ takes\_kwargs\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ fields:\ dict[str,\ tuple[Any,\ Any]]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i,\ (name,\ p)\ \textcolor{keywordflow}{in}\ enumerate(parameters.items()):}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ p.annotation\ \textcolor{keywordflow}{is}\ p.empty:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ annotation\ =\ Any}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ annotation\ =\ type\_hints[name]}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ default\ =\ ...\ \textcolor{keywordflow}{if}\ p.default\ \textcolor{keywordflow}{is}\ p.empty\ \textcolor{keywordflow}{else}\ p.default}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ p.kind\ ==\ Parameter.POSITIONAL\_ONLY:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a208119f43d903f1bcde5a959b8dcd43b}{arg\_mapping}}[i]\ =\ name}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[name]\ =\ annotation,\ default}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[V\_POSITIONAL\_ONLY\_NAME]\ =\ list[str],\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a19548562d5bcf7527971aa291fe3b91a}{positional\_only\_args}}.add(name)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ p.kind\ ==\ Parameter.POSITIONAL\_OR\_KEYWORD:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a208119f43d903f1bcde5a959b8dcd43b}{arg\_mapping}}[i]\ =\ name}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[name]\ =\ annotation,\ default}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[V\_DUPLICATE\_KWARGS]\ =\ list[str],\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ p.kind\ ==\ Parameter.KEYWORD\_ONLY:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[name]\ =\ annotation,\ default}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ p.kind\ ==\ Parameter.VAR\_POSITIONAL:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}\ =\ name}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[name]\ =\ tuple[annotation,\ ...],\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ takes\_args\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ p.kind\ ==\ Parameter.VAR\_KEYWORD,\ p.kind}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}}\ =\ name}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fields[name]\ =\ dict[str,\ annotation],\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ takes\_kwargs\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ these\ checks\ avoid\ a\ clash\ between\ "{}args"{}\ and\ a\ field\ with\ that\ name}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ takes\_args\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}\ =\ ALT\_V\_ARGS}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ same\ with\ "{}kwargs"{}}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ takes\_kwargs\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}}\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}}\ =\ ALT\_V\_KWARGS}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ takes\_args:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ add\ the\ field\ so\ validation\ below\ can\ raise\ the\ correct\ exception}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ fields[self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}]\ =\ list[Any],\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ takes\_kwargs:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ same\ with\ kwargs}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ fields[self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}}]\ =\ dict[Any,\ Any],\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_ab21c286176daeb5b7f7e3b621f42d584}{create\_model}}(fields,\ takes\_args,\ takes\_kwargs,\ config)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00145}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a1505bb37be74bfcf68bc71a85b8da0f2}{00145}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a1505bb37be74bfcf68bc71a85b8da0f2}{init\_model\_instance}}(self,\ *args:\ Any,\ **kwargs:\ Any)\ -\/>\ BaseModel:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ values\ =\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0a3fa354beb71becf6979adaa38ef6ee}{build\_values}}(args,\ kwargs)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0f831b8c0a95dc1f7db0c04230896799}{model}}(**values)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00149}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_af28cd624831edda37d8ea4f6f03c0c71}{00149}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_af28cd624831edda37d8ea4f6f03c0c71}{call}}(self,\ *args:\ Any,\ **kwargs:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ m\ =\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a1505bb37be74bfcf68bc71a85b8da0f2}{init\_model\_instance}}(*args,\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_af0046af8c667aa49cd309bf90353379d}{execute}}(m)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00153}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0a3fa354beb71becf6979adaa38ef6ee}{00153}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0a3fa354beb71becf6979adaa38ef6ee}{build\_values}}(self,\ args:\ tuple[Any,\ ...],\ kwargs:\ dict[str,\ Any])\ -\/>\ dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ values:\ dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ args:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ arg\_iter\ =\ enumerate(args)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i,\ a\ =\ next(arg\_iter)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ StopIteration:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arg\_name\ =\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a208119f43d903f1bcde5a959b8dcd43b}{arg\_mapping}}.get(i)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ arg\_name\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ values[arg\_name]\ =\ a}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ values[self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}]\ =\ [a]\ +\ [a\ \textcolor{keywordflow}{for}\ \_,\ a\ \textcolor{keywordflow}{in}\ arg\_iter]}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ var\_kwargs:\ dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ wrong\_positional\_args\ =\ []}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ duplicate\_kwargs\ =\ []}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ fields\_alias\ =\ [}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ field.alias}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ field\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0f831b8c0a95dc1f7db0c04230896799}{model}}.\_\_pydantic\_fields\_\_.items()}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ (self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}},\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ non\_var\_fields\ =\ set(self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0f831b8c0a95dc1f7db0c04230896799}{model}}.\_\_pydantic\_fields\_\_)\ -\/\ \{self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}},\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}}\}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ kwargs.items():}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ k\ \textcolor{keywordflow}{in}\ non\_var\_fields\ \textcolor{keywordflow}{or}\ k\ \textcolor{keywordflow}{in}\ fields\_alias:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ k\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a19548562d5bcf7527971aa291fe3b91a}{positional\_only\_args}}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ wrong\_positional\_args.append(k)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ k\ \textcolor{keywordflow}{in}\ values:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ duplicate\_kwargs.append(k)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ values[k]\ =\ v}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var\_kwargs[k]\ =\ v}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ var\_kwargs:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ values[self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}}]\ =\ var\_kwargs}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ wrong\_positional\_args:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ values[V\_POSITIONAL\_ONLY\_NAME]\ =\ wrong\_positional\_args}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ duplicate\_kwargs:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ values[V\_DUPLICATE\_KWARGS]\ =\ duplicate\_kwargs}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ values}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00196}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_af0046af8c667aa49cd309bf90353379d}{00196}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_af0046af8c667aa49cd309bf90353379d}{execute}}(self,\ m:\ BaseModel)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ d\ =\ \{}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ k:\ v}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ m.\_\_dict\_\_.items()}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ k\ \textcolor{keywordflow}{in}\ m.\_\_pydantic\_fields\_set\_\_\ \textcolor{keywordflow}{or}\ m.\_\_pydantic\_fields\_\_[k].default\_factory}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ var\_kwargs\ =\ d.pop(self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a48743562b9c3e9591d9078a7880bdfb5}{v\_kwargs\_name}},\ \{\})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}\ \textcolor{keywordflow}{in}\ d:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ args\_:\ list[Any]\ =\ []}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ in\_kwargs\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ kwargs\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ d.items():}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ in\_kwargs:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ kwargs[name]\ =\ value}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ name\ ==\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a7a59bb84a7616b347eef53b5dcac0e74}{v\_args\_name}}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ args\_\ +=\ value}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\_kwargs\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ args\_.append(value)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a72d1947d86cf86eceb1b68418ec60dd7}{raw\_function}}(*args\_,\ **kwargs,\ **var\_kwargs)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a19548562d5bcf7527971aa291fe3b91a}{positional\_only\_args}}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ args\_\ =\ []}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ kwargs\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ d.items():}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a19548562d5bcf7527971aa291fe3b91a}{positional\_only\_args}}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ args\_.append(value)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ kwargs[name]\ =\ value}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a72d1947d86cf86eceb1b68418ec60dd7}{raw\_function}}(*args\_,\ **kwargs,\ **var\_kwargs)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a72d1947d86cf86eceb1b68418ec60dd7}{raw\_function}}(**d,\ **var\_kwargs)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00228}00228\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00229}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_ab21c286176daeb5b7f7e3b621f42d584}{00229}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_ab21c286176daeb5b7f7e3b621f42d584}{create\_model}}(self,\ fields:\ dict[str,\ Any],\ takes\_args:\ bool,\ takes\_kwargs:\ bool,\ config:\ \textcolor{stringliteral}{'ConfigType'})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ pos\_args\ =\ len(self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a208119f43d903f1bcde5a959b8dcd43b}{arg\_mapping}})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ config\_wrapper\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__config_1_1_config_wrapper}{\_config.ConfigWrapper}}(config)}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00233}00233\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ config\_wrapper.alias\_generator:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Setting\ the\ "{}alias\_generator"{}\ property\ on\ custom\ Config\ for\ '}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'@validate\_arguments\ is\ not\ yet\ supported,\ please\ remove.'},}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ config\_wrapper.extra\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ config\_wrapper.config\_dict[\textcolor{stringliteral}{'extra'}]\ =\ \textcolor{stringliteral}{'forbid'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }DecoratorBaseModel(\mbox{\hyperlink{classpydantic_1_1main_1_1_base_model}{BaseModel}}):}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@field\_validator(self.v\_args\_name,\ check\_fields=False)}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }check\_args(cls,\ v:\ Optional[list[Any]])\ -\/>\ Optional[list[Any]]:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ takes\_args\ \textcolor{keywordflow}{or}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00249}00249\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'\{pos\_args\}\ positional\ arguments\ expected\ but\ \{pos\_args\ +\ len(v)\}\ given'})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@field\_validator(self.v\_kwargs\_name,\ check\_fields=False)}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }check\_kwargs(cls,\ v:\ Optional[dict[str,\ Any]])\ -\/>\ Optional[dict[str,\ Any]]:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ takes\_kwargs\ \textcolor{keywordflow}{or}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plural\ =\ \textcolor{stringliteral}{''}\ \textcolor{keywordflow}{if}\ len(v)\ ==\ 1\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'s'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ keys\ =\ \textcolor{stringliteral}{',\ '}.join(map(repr,\ v.keys()))}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'unexpected\ keyword\ argument\{plural\}:\ \{keys\}'})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@field\_validator(V\_POSITIONAL\_ONLY\_NAME,\ check\_fields=False)}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }check\_positional\_only(cls,\ v:\ Optional[list[str]])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plural\ =\ \textcolor{stringliteral}{''}\ \textcolor{keywordflow}{if}\ len(v)\ ==\ 1\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'s'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ keys\ =\ \textcolor{stringliteral}{',\ '}.join(map(repr,\ v))}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'positional-\/only\ argument\{plural\}\ passed\ as\ keyword\ argument\{plural\}:\ \{keys\}'})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@field\_validator(V\_DUPLICATE\_KWARGS,\ check\_fields=False)}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }check\_duplicate\_kwargs(cls,\ v:\ Optional[list[str]])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00277}00277\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plural\ =\ \textcolor{stringliteral}{''}\ \textcolor{keywordflow}{if}\ len(v)\ ==\ 1\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'s'}}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ keys\ =\ \textcolor{stringliteral}{',\ '}.join(map(repr,\ v))}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'multiple\ values\ for\ argument\{plural\}:\ \{keys\}'})}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ model\_config\ =\ config\_wrapper.config\_dict}
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{deprecated_2decorator_8py_source_l00284}\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0f831b8c0a95dc1f7db0c04230896799}{00284}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a0f831b8c0a95dc1f7db0c04230896799}{model}}\ =\ \mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_ab21c286176daeb5b7f7e3b621f42d584}{create\_model}}(to\_pascal(self.\mbox{\hyperlink{classpydantic_1_1deprecated_1_1decorator_1_1_validated_function_a72d1947d86cf86eceb1b68418ec60dd7}{raw\_function}}.\_\_name\_\_),\ \_\_base\_\_=DecoratorBaseModel,\ **fields)}
+
+\end{DoxyCode}

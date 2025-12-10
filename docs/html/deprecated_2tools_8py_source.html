@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/pydantic/deprecated/tools.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('deprecated_2tools_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">tools.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="deprecated_2tools_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1deprecated_1_1tools.html">    1</a></span><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> json</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">import</span> warnings</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">from</span> typing <span class="keyword">import</span> TYPE_CHECKING, Any, Callable, TypeVar, Union</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">from</span> typing_extensions <span class="keyword">import</span> deprecated</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">from</span> ..json_schema <span class="keyword">import</span> DEFAULT_REF_TEMPLATE, GenerateJsonSchema</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">from</span> ..type_adapter <span class="keyword">import</span> TypeAdapter</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keyword">from</span> ..warnings <span class="keyword">import</span> PydanticDeprecatedSince20</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keywordflow">if</span> <span class="keywordflow">not</span> TYPE_CHECKING:</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="comment"># See PyCharm issues https://youtrack.jetbrains.com/issue/PY-21915</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    <span class="comment"># and https://youtrack.jetbrains.com/issue/PY-51428</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1deprecated_1_1tools.html#aca3cda37695d14d29ffd7d23478aa359">   16</a></span>    DeprecationWarning = PydanticDeprecatedSince20</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>__all__ = <span class="stringliteral">&#39;parse_obj_as&#39;</span>, <span class="stringliteral">&#39;schema_of&#39;</span>, <span class="stringliteral">&#39;schema_json_of&#39;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1deprecated_1_1tools.html#a259d536b93a8ce60bde60b16f22c685e">   20</a></span>NameFactory = Union[str, Callable[[type[Any]], str]]</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1deprecated_1_1tools.html#a9c7890fb6ca229ad463a719e54aa71d3">   23</a></span>T = TypeVar(<span class="stringliteral">&#39;T&#39;</span>)</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">@deprecated</span>(</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="stringliteral">&#39;`parse_obj_as` is deprecated. Use `pydantic.TypeAdapter.validate_python` instead.&#39;</span>,</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    category=<span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>)</div>
+<div class="foldopen" id="foldopen00030" data-start="" data-end="">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1deprecated_1_1tools.html#ab3f5696b1d899a1ac28a4b057ef4ad60">   30</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1deprecated_1_1tools.html#ab3f5696b1d899a1ac28a4b057ef4ad60">parse_obj_as</a>(type_: type[T], obj: Any, type_name: NameFactory | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>) -&gt; T:</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    warnings.warn(</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="stringliteral">&#39;`parse_obj_as` is deprecated. Use `pydantic.TypeAdapter.validate_python` instead.&#39;</span>,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        category=PydanticDeprecatedSince20,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        stacklevel=2,</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    )</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keywordflow">if</span> type_name <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:  <span class="comment"># pragma: no cover</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        warnings.warn(</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>            <span class="stringliteral">&#39;The type_name parameter is deprecated. parse_obj_as no longer creates temporary models&#39;</span>,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>            DeprecationWarning,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            stacklevel=2,</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        )</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordflow">return</span> <a class="code hl_class" href="classpydantic_1_1type__adapter_1_1_type_adapter.html">TypeAdapter</a>(type_).validate_python(obj)</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">@deprecated</span>(</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="stringliteral">&#39;`schema_of` is deprecated. Use `pydantic.TypeAdapter.json_schema` instead.&#39;</span>,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    category=<span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>)</div>
+</div>
+<div class="foldopen" id="foldopen00049" data-start="" data-end="">
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1deprecated_1_1tools.html#a0cfdc7e23c8e8b9225d956b1e1383fa6">   49</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1deprecated_1_1tools.html#a0cfdc7e23c8e8b9225d956b1e1383fa6">schema_of</a>(</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    type_: Any,</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    *,</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    title: NameFactory | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    by_alias: bool = <span class="keyword">True</span>,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    ref_template: str = DEFAULT_REF_TEMPLATE,</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    schema_generator: type[GenerateJsonSchema] = GenerateJsonSchema,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>) -&gt; dict[str, Any]:</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="stringliteral">&quot;&quot;&quot;Generate a JSON schema (as dict) for the passed model or dynamically generated one.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    warnings.warn(</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="stringliteral">&#39;`schema_of` is deprecated. Use `pydantic.TypeAdapter.json_schema` instead.&#39;</span>,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        category=PydanticDeprecatedSince20,</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        stacklevel=2,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    )</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    res = <a class="code hl_class" href="classpydantic_1_1type__adapter_1_1_type_adapter.html">TypeAdapter</a>(type_).json_schema(</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        by_alias=by_alias,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        schema_generator=schema_generator,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        ref_template=ref_template,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    )</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">if</span> title <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordflow">if</span> isinstance(title, str):</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            res[<span class="stringliteral">&#39;title&#39;</span>] = title</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            warnings.warn(</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                <span class="stringliteral">&#39;Passing a callable for the `title` parameter is deprecated and no longer supported&#39;</span>,</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>                DeprecationWarning,</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                stacklevel=2,</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            )</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            res[<span class="stringliteral">&#39;title&#39;</span>] = title(type_)</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">return</span> res</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">@deprecated</span>(</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="stringliteral">&#39;`schema_json_of` is deprecated. Use `pydantic.TypeAdapter.json_schema` instead.&#39;</span>,</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    category=<span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>)</div>
+</div>
+<div class="foldopen" id="foldopen00085" data-start="" data-end="">
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1deprecated_1_1tools.html#a886589c22b5c11bc03a0aced7a87f9c1">   85</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1deprecated_1_1tools.html#a886589c22b5c11bc03a0aced7a87f9c1">schema_json_of</a>(</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    type_: Any,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    *,</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    title: NameFactory | <span class="keywordtype">None</span> = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    by_alias: bool = <span class="keyword">True</span>,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    ref_template: str = DEFAULT_REF_TEMPLATE,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    schema_generator: type[GenerateJsonSchema] = GenerateJsonSchema,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    **dumps_kwargs: Any,</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>) -&gt; str:</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="stringliteral">&quot;&quot;&quot;Generate a JSON schema (as JSON) for the passed model or dynamically generated one.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    warnings.warn(</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="stringliteral">&#39;`schema_json_of` is deprecated. Use `pydantic.TypeAdapter.json_schema` instead.&#39;</span>,</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        category=PydanticDeprecatedSince20,</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        stacklevel=2,</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    )</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordflow">return</span> json.dumps(</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <a class="code hl_function" href="namespacepydantic_1_1deprecated_1_1tools.html#a0cfdc7e23c8e8b9225d956b1e1383fa6">schema_of</a>(type_, title=title, by_alias=by_alias, ref_template=ref_template, schema_generator=schema_generator),</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        **dumps_kwargs,</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    )</div>
+</div>
+<div class="ttc" id="aclasspydantic_1_1type__adapter_1_1_type_adapter_html"><div class="ttname"><a href="classpydantic_1_1type__adapter_1_1_type_adapter.html">pydantic.type_adapter.TypeAdapter</a></div><div class="ttdoc">!</div><div class="ttdef"><b>Definition</b> <a href="type__adapter_8py_source.html#l00070">type_adapter.py:70</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1deprecated_1_1tools_html_a0cfdc7e23c8e8b9225d956b1e1383fa6"><div class="ttname"><a href="namespacepydantic_1_1deprecated_1_1tools.html#a0cfdc7e23c8e8b9225d956b1e1383fa6">pydantic.deprecated.tools.schema_of</a></div><div class="ttdeci">dict[str, Any] schema_of(Any type_, *, NameFactory|None title=None, bool by_alias=True, str ref_template=DEFAULT_REF_TEMPLATE, type[GenerateJsonSchema] schema_generator=GenerateJsonSchema)</div><div class="ttdef"><b>Definition</b> <a href="#l00049">tools.py:56</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1deprecated_1_1tools_html_a886589c22b5c11bc03a0aced7a87f9c1"><div class="ttname"><a href="namespacepydantic_1_1deprecated_1_1tools.html#a886589c22b5c11bc03a0aced7a87f9c1">pydantic.deprecated.tools.schema_json_of</a></div><div class="ttdeci">str schema_json_of(Any type_, *, NameFactory|None title=None, bool by_alias=True, str ref_template=DEFAULT_REF_TEMPLATE, type[GenerateJsonSchema] schema_generator=GenerateJsonSchema, **Any dumps_kwargs)</div><div class="ttdef"><b>Definition</b> <a href="#l00085">tools.py:93</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1deprecated_1_1tools_html_ab3f5696b1d899a1ac28a4b057ef4ad60"><div class="ttname"><a href="namespacepydantic_1_1deprecated_1_1tools.html#ab3f5696b1d899a1ac28a4b057ef4ad60">pydantic.deprecated.tools.parse_obj_as</a></div><div class="ttdeci">T parse_obj_as(type[T] type_, Any obj, NameFactory|None type_name=None)</div><div class="ttdef"><b>Definition</b> <a href="#l00030">tools.py:30</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_cff67c8c4ede01a5ffd78f35945c5bda.html">pydantic</a></li><li class="navelem"><a href="dir_23d0b2116b064693617acb849a2ea6e9.html">deprecated</a></li><li class="navelem"><a href="deprecated_2tools_8py.html">tools.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

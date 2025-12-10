@@ -1,0 +1,50 @@
+\doxysection{arguments\+\_\+schema.\+py}
+\hypertarget{arguments__schema_8py_source}{}\label{arguments__schema_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/experimental/arguments\_schema.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/experimental/arguments\_schema.py}}
+\mbox{\hyperlink{arguments__schema_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1experimental_1_1arguments__schema}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Experimental\ module\ exposing\ a\ function\ to\ generate\ a\ core\ schema\ that\ validates\ callable\ arguments."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00005}00005\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Callable}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00006}00006\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any,\ Literal}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00008}00008\ \textcolor{keyword}{from}\ pydantic\_core\ \textcolor{keyword}{import}\ CoreSchema}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00010}00010\ \textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ ConfigDict}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00011}00011\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1__internal}{pydantic.\_internal}}\ \textcolor{keyword}{import}\ \_config,\ \_generate\_schema,\ \_namespace\_utils}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00014}\mbox{\hyperlink{namespacepydantic_1_1experimental_1_1arguments__schema_adbd09c65b521145b858f4b73296f1946}{00014}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1experimental_1_1arguments__schema_adbd09c65b521145b858f4b73296f1946}{generate\_arguments\_schema}}(}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00015}00015\ \ \ \ \ func:\ Callable[...,\ Any],}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00016}00016\ \ \ \ \ schema\_type:\ Literal[\textcolor{stringliteral}{'arguments'},\ \textcolor{stringliteral}{'arguments-\/v3'}]\ =\ \textcolor{stringliteral}{'arguments-\/v3'},}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00017}00017\ \ \ \ \ parameters\_callback:\ Callable[[int,\ str,\ Any],\ Literal[\textcolor{stringliteral}{'skip'}]\ |\ \textcolor{keywordtype}{None}]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00018}00018\ \ \ \ \ config:\ ConfigDict\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00019}00019\ )\ -\/>\ CoreSchema:}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00020}00020\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Generate\ the\ schema\ for\ the\ arguments\ of\ a\ function.}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00021}00021\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ func:\ The\ function\ to\ generate\ the\ schema\ for.}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ schema\_type:\ The\ type\ of\ schema\ to\ generate.}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ parameters\_callback:\ A\ callable\ that\ will\ be\ invoked\ for\ each\ parameter.\ The\ callback}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ should\ take\ three\ required\ arguments:\ the\ index,\ the\ name\ and\ the\ type\ annotation}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ (or\ [\`{}Parameter.empty\`{}][inspect.Parameter.empty]\ if\ not\ annotated)\ of\ the\ parameter.}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ callback\ can\ optionally\ return\ \`{}'skip'\`{},\ so\ that\ the\ parameter\ gets\ excluded}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00029}00029\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ from\ the\ resulting\ schema.}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00030}00030\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ config:\ The\ configuration\ to\ use.}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00031}00031\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00032}00032\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00033}00033\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ generated\ schema.}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00034}00034\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00035}00035\ \ \ \ \ generate\_schema\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__generate__schema_1_1_generate_schema}{\_generate\_schema.GenerateSchema}}(}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__config_1_1_config_wrapper}{\_config.ConfigWrapper}}(config),}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ ns\_resolver=\mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver}{\_namespace\_utils.NsResolver}}(namespaces\_tuple=\_namespace\_utils.ns\_for\_function(func)),}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00038}00038\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00040}00040\ \ \ \ \ \textcolor{keywordflow}{if}\ schema\_type\ ==\ \textcolor{stringliteral}{'arguments'}:}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ schema\ =\ generate\_schema.\_arguments\_schema(func,\ parameters\_callback)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportArgumentType]}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00042}00042\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ schema\ =\ generate\_schema.\_arguments\_v3\_schema(func,\ parameters\_callback)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportArgumentType]}}
+\DoxyCodeLine{\Hypertarget{arguments__schema_8py_source_l00044}00044\ \ \ \ \ \textcolor{keywordflow}{return}\ generate\_schema.clean\_schema(schema)}
+
+\end{DoxyCode}

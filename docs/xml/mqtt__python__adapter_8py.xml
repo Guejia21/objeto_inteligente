@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="mqtt__python__adapter_8py" kind="file" language="Python">
+    <compoundname>mqtt_python_adapter.py</compoundname>
+    <innerclass refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter" prot="public">mqtt_python_adapter::MQTTPythonAdapter</innerclass>
+    <innernamespace refid="namespacemqtt__python__adapter">mqtt_python_adapter</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespacemqtt__python__adapter" refkind="compound"><highlight class="stringliteral">&quot;&quot;&quot;Publicación<sp/>y<sp/>suscripción<sp/>a<sp/>un<sp/>broker<sp/>MQTT<sp/>usando<sp/>las<sp/>librerias<sp/>de<sp/>python<sp/>estándar&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="2"><highlight class="stringliteral">import<sp/>paho.mqtt.client<sp/>as<sp/>mqtt</highlight></codeline>
+<codeline lineno="3"><highlight class="stringliteral">from<sp/>paho.mqtt.client<sp/>import<sp/>CallbackAPIVersion</highlight></codeline>
+<codeline lineno="4"><highlight class="stringliteral">from<sp/>broker.broker_interface<sp/>import<sp/>BrokerInterface</highlight></codeline>
+<codeline lineno="5"><highlight class="stringliteral">from<sp/>config<sp/>import<sp/>Config</highlight></codeline>
+<codeline lineno="6"><highlight class="stringliteral">import<sp/>asyncio</highlight></codeline>
+<codeline lineno="7"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="8" refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter" refkind="compound"><highlight class="stringliteral">class<sp/>MQTTPythonAdapter(BrokerInterface):</highlight></codeline>
+<codeline lineno="9"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>def<sp/>__init__(self,<sp/>client_id,<sp/>broker,<sp/>user=None,<sp/>password=None,<sp/>port=1883):</highlight></codeline>
+<codeline lineno="10" refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter_1a19c5fce29bf36739b6b62a6376a01a85" refkind="member"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client<sp/>=<sp/>mqtt.Client(client_id=client_id,<sp/>callback_api_version=CallbackAPIVersion.VERSION1)</highlight></codeline>
+<codeline lineno="11"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="12"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>def<sp/>on_connect(client,<sp/>userdata,<sp/>flags,<sp/>rc):</highlight></codeline>
+<codeline lineno="13" refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter_1aa1498a3922abc66265905daa13cd84d1" refkind="member"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.conectado<sp/>=<sp/>(rc<sp/>==<sp/>0)</highlight></codeline>
+<codeline lineno="14"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>rc<sp/>!=<sp/>0:</highlight></codeline>
+<codeline lineno="15"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(f&quot;MQTT<sp/>Conexión<sp/>fallida<sp/>(rc={rc})&quot;)</highlight></codeline>
+<codeline lineno="16"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="17"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>def<sp/>on_disconnect(client,<sp/>userdata,<sp/>rc):</highlight></codeline>
+<codeline lineno="18"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.conectado<sp/>=<sp/>False</highlight></codeline>
+<codeline lineno="19"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>rc<sp/>!=<sp/>0:</highlight></codeline>
+<codeline lineno="20"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(&quot;MQTT<sp/>Desconectado<sp/>inesperadamente&quot;)</highlight></codeline>
+<codeline lineno="21"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="22"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client.on_connect<sp/>=<sp/>on_connect</highlight></codeline>
+<codeline lineno="23"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client.on_disconnect<sp/>=<sp/>on_disconnect</highlight></codeline>
+<codeline lineno="24"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="25"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>user:</highlight></codeline>
+<codeline lineno="26"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client.username_pw_set(user,<sp/>password<sp/>or<sp/>&quot;&quot;)</highlight></codeline>
+<codeline lineno="27"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="28" refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter_1a930b3d35695e789fbfda83cec74c6a93" refkind="member"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.broker<sp/>=<sp/>broker</highlight></codeline>
+<codeline lineno="29" refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter_1adb27220ec1653b0365b335460e82a392" refkind="member"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.port<sp/>=<sp/>port</highlight></codeline>
+<codeline lineno="30"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.conectado<sp/>=<sp/>False<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="31"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="32"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>def<sp/>__conectar(self):</highlight></codeline>
+<codeline lineno="33"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="34"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client.connect(self.broker,<sp/>self.port,<sp/>60)</highlight></codeline>
+<codeline lineno="35"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client.loop_start()</highlight></codeline>
+<codeline lineno="36"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="37"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>import<sp/>time</highlight></codeline>
+<codeline lineno="38"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>timeout<sp/>=<sp/>5</highlight></codeline>
+<codeline lineno="39"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>while<sp/>not<sp/>self.conectado<sp/>and<sp/>timeout<sp/>&gt;<sp/>0:</highlight></codeline>
+<codeline lineno="40"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>time.sleep(0.5)</highlight></codeline>
+<codeline lineno="41"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>timeout<sp/>-=<sp/>0.5</highlight></codeline>
+<codeline lineno="42"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="43"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>self.conectado:</highlight></codeline>
+<codeline lineno="44"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(f&quot;MQTT<sp/>Conectado<sp/>a<sp/>{self.broker}:{self.port}&quot;)</highlight></codeline>
+<codeline lineno="45"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="46"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>except<sp/>Exception<sp/>as<sp/>e:</highlight></codeline>
+<codeline lineno="47"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(f&quot;Error<sp/>conectando<sp/>MQTT:<sp/>{e}&quot;)</highlight></codeline>
+<codeline lineno="48"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.conectado<sp/>=<sp/>False</highlight></codeline>
+<codeline lineno="49"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="50" refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter_1a8f59ca8ab3aec7b1af5eb5f118ce2acd" refkind="member"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>async<sp/>def<sp/>publicar(self,<sp/>topico,<sp/>mensaje):</highlight></codeline>
+<codeline lineno="51"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>not<sp/>self.conectado:</highlight></codeline>
+<codeline lineno="52"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.__conectar()</highlight></codeline>
+<codeline lineno="53"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="54"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>self.conectado:</highlight></codeline>
+<codeline lineno="55"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="56"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>result<sp/>=<sp/>self.client.publish(topico,<sp/>mensaje,<sp/>qos=1)</highlight></codeline>
+<codeline lineno="57"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>result.wait_for_publish(timeout=5)</highlight></codeline>
+<codeline lineno="58"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>result.rc<sp/>==<sp/>mqtt.MQTT_ERR_SUCCESS</highlight></codeline>
+<codeline lineno="59"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>except<sp/>Exception<sp/>as<sp/>e:</highlight></codeline>
+<codeline lineno="60"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(f&quot;Error<sp/>publicando:<sp/>{e}&quot;)</highlight></codeline>
+<codeline lineno="61"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>False</highlight></codeline>
+<codeline lineno="62"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>return<sp/>False</highlight></codeline>
+<codeline lineno="63"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="64" refid="classmqtt__python__adapter_1_1_m_q_t_t_python_adapter_1a9eb8bda5892d5d41f80b2ade5de2762f" refkind="member"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>async<sp/>def<sp/>suscribirse(self,<sp/>topico,<sp/>callback):</highlight></codeline>
+<codeline lineno="65"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>while<sp/>not<sp/>self.conectado:</highlight></codeline>
+<codeline lineno="66"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.__conectar()</highlight></codeline>
+<codeline lineno="67"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>not<sp/>self.conectado:</highlight></codeline>
+<codeline lineno="68"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>asyncio.sleep(1)</highlight></codeline>
+<codeline lineno="69"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="70"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>def<sp/>on_message(client,<sp/>userdata,<sp/>msg):</highlight></codeline>
+<codeline lineno="71"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>callback(msg.topic,<sp/>msg.payload.decode())</highlight></codeline>
+<codeline lineno="72"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="73"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client.on_message<sp/>=<sp/>on_message</highlight></codeline>
+<codeline lineno="74"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.client.subscribe(topico)</highlight></codeline>
+<codeline lineno="75"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(f&quot;Suscrito<sp/>a:<sp/>{topico}&quot;)</highlight></codeline>
+<codeline lineno="76"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="77"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="78"><highlight class="stringliteral">#<sp/>Broker<sp/>para<sp/>comunicación<sp/>interna<sp/>(Mosquitto)</highlight></codeline>
+<codeline lineno="79" refid="namespacemqtt__python__adapter_1aa822013cbb9f45a3d14a7ca70cf801bd" refkind="member"><highlight class="stringliteral">mosquitto_broker<sp/>=<sp/>MQTTPythonAdapter(</highlight></codeline>
+<codeline lineno="80"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>client_id=&quot;datastream_service_mosquitto&quot;,</highlight></codeline>
+<codeline lineno="81"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>broker=Config.BROKER_HOST,</highlight></codeline>
+<codeline lineno="82"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>port=Config.MQTT_PORT<sp/></highlight></codeline>
+<codeline lineno="83"><highlight class="stringliteral">)</highlight></codeline>
+<codeline lineno="84"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="85"><highlight class="stringliteral">#<sp/>Broker<sp/>para<sp/>ThingsBoard</highlight></codeline>
+<codeline lineno="86" refid="namespacemqtt__python__adapter_1a801c270f1a934448c204a76decb08034" refkind="member"><highlight class="stringliteral">tb_broker<sp/>=<sp/>MQTTPythonAdapter(</highlight></codeline>
+<codeline lineno="87"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>client_id=&quot;datastream_service_tb&quot;,</highlight></codeline>
+<codeline lineno="88"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>broker=Config.THINGSBOARD_HOST,</highlight></codeline>
+<codeline lineno="89"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>user=Config.THINGSBOARD_ACCESS_TOKEN,</highlight></codeline>
+<codeline lineno="90"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>password=&quot;&quot;,</highlight></codeline>
+<codeline lineno="91"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>port=Config.THINGSBOARD_PORT</highlight></codeline>
+<codeline lineno="92"><highlight class="stringliteral">)</highlight></codeline>
+    </programlisting>
+    <location file="microservicio_data_stream/broker/mqtt_python_adapter.py"/>
+  </compounddef>
+</doxygen>

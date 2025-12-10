@@ -1,0 +1,171 @@
+\doxysection{\+\_\+base\+\_\+connection.\+py}
+\hypertarget{__base__connection_8py_source}{}\label{__base__connection_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/urllib3/\_base\_connection.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/urllib3/\_base\_connection.py}}
+\mbox{\hyperlink{__base__connection_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00001}\mbox{\hyperlink{namespaceurllib3_1_1__base__connection}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00003}00003\ \textcolor{keyword}{import}\ typing}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00005}00005\ \textcolor{keyword}{from}\ .util.connection\ \textcolor{keyword}{import}\ \_TYPE\_SOCKET\_OPTIONS}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00006}00006\ \textcolor{keyword}{from}\ .util.timeout\ \textcolor{keyword}{import}\ \_DEFAULT\_TIMEOUT,\ \_TYPE\_TIMEOUT}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00007}00007\ \textcolor{keyword}{from}\ .util.url\ \textcolor{keyword}{import}\ Url}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00009}\mbox{\hyperlink{namespaceurllib3_1_1__base__connection_a142f3361b8e1091c73061239d66e7dc2}{00009}}\ \_TYPE\_BODY\ =\ typing.Union[bytes,\ typing.IO[typing.Any],\ typing.Iterable[bytes],\ str]}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00012}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_proxy_config}{00012}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_proxy_config}{ProxyConfig}}(typing.NamedTuple):}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00013}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_proxy_config_a644d0d1c73798c7d8cd58ae69f5add2e}{00013}}\ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00014}00014\ \ \ \ \ use\_forwarding\_for\_https:\ bool}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00015}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_proxy_config_a0de9a21e88e5215a7c3f8fdfd8e48122}{00015}}\ \ \ \ \ assert\_hostname:\ \textcolor{keywordtype}{None}\ |\ str\ |\ typing.Literal[\textcolor{keyword}{False}]}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00016}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_proxy_config_a8ada5cb2eff2bb92b84b160996231886}{00016}}\ \ \ \ \ assert\_fingerprint:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00019}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1___response_options}{00019}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1___response_options}{\_ResponseOptions}}(typing.NamedTuple):}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00020}00020\ \ \ \ \ \textcolor{comment}{\#\ TODO:\ Remove\ this\ in\ favor\ of\ a\ better}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00021}00021\ \ \ \ \ \textcolor{comment}{\#\ HTTP\ request/response\ lifecycle\ tracking.}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00022}00022\ \ \ \ \ request\_method:\ str}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00023}00023\ \ \ \ \ request\_url:\ str}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00024}00024\ \ \ \ \ preload\_content:\ bool}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00025}00025\ \ \ \ \ decode\_content:\ bool}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00026}00026\ \ \ \ \ enforce\_content\_length:\ bool}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00029}00029\ \textcolor{keywordflow}{if}\ typing.TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00030}00030\ \ \ \ \ \textcolor{keyword}{import}\ ssl}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00031}00031\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Protocol}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00033}00033\ \ \ \ \ \textcolor{keyword}{from}\ .response\ \textcolor{keyword}{import}\ BaseHTTPResponse}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00035}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection}{00035}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection}{BaseHTTPConnection}}(Protocol):}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00036}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a5144e57a80a8978c9861f82611082d83}{00036}}\ \ \ \ \ \ \ \ \ default\_port:\ typing.ClassVar[int]}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00037}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a4f8b4d0394d2f1e8f8ea9ce0b57fa87f}{00037}}\ \ \ \ \ \ \ \ \ default\_socket\_options:\ typing.ClassVar[\_TYPE\_SOCKET\_OPTIONS]}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ host:\ str}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ port:\ int}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00041}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a28bf304254d051c60693dca74ccd3e94}{00041}}\ \ \ \ \ \ \ \ \ timeout:\ \textcolor{keywordtype}{None}\ |\ (}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ float}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ )\ \ \textcolor{comment}{\#\ Instance\ doesn't\ store\ \_DEFAULT\_TIMEOUT,\ must\ be\ resolved.}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ blocksize:\ int}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00045}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_aa388976ec441df62e2cf625c0932b547}{00045}}\ \ \ \ \ \ \ \ \ source\_address:\ tuple[str,\ int]\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00046}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a87b1db66f19367ccccce31d7d764987c}{00046}}\ \ \ \ \ \ \ \ \ socket\_options:\ \_TYPE\_SOCKET\_OPTIONS\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00048}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_adcfebb9563876b804d4937c1791f1e3a}{00048}}\ \ \ \ \ \ \ \ \ proxy:\ Url\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00049}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a82898dedc523155adea52245c47fa363}{00049}}\ \ \ \ \ \ \ \ \ proxy\_config:\ ProxyConfig\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ is\_verified:\ bool}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00052}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a37fb32a5902e240cb7aaecbd035d8763}{00052}}\ \ \ \ \ \ \ \ \ proxy\_is\_verified:\ bool\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ host:\ str,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ port:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ timeout:\ \_TYPE\_TIMEOUT\ =\ \_DEFAULT\_TIMEOUT,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ source\_address:\ tuple[str,\ int]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ blocksize:\ int\ =\ 8192,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ socket\_options:\ \_TYPE\_SOCKET\_OPTIONS\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ proxy:\ Url\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ proxy\_config:\ ProxyConfig\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:\ ...}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00067}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_aac85c4ca035cd342e6aca3f3053caf5f}{00067}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_aac85c4ca035cd342e6aca3f3053caf5f}{set\_tunnel}}(}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ host:\ str,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ port:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ headers:\ typing.Mapping[str,\ str]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ scheme:\ str\ =\ \textcolor{stringliteral}{"{}http"{}},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:\ ...}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00075}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_ab82d41dc29664776d98376646dbc7e89}{00075}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_ab82d41dc29664776d98376646dbc7e89}{connect}}(self)\ -\/>\ None:\ ...}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00077}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a05e551476df88bc5fc6dff28803caffb}{00077}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a05e551476df88bc5fc6dff28803caffb}{request}}(}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ method:\ str,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ url:\ str,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ body:\ \_TYPE\_BODY\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ headers:\ typing.Mapping[str,\ str]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ We\ know\ *at\ least*\ botocore\ is\ depending\ on\ the\ order\ of\ the}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ first\ 3\ parameters\ so\ to\ be\ safe\ we\ only\ mark\ the\ later\ ones}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ as\ keyword-\/only\ to\ ensure\ we\ have\ space\ to\ extend.}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ chunked:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ preload\_content:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ decode\_content:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ enforce\_content\_length:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:\ ...}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00093}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a2e34bd98cf3bc7a6cea1c887b282b71c}{00093}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a2e34bd98cf3bc7a6cea1c887b282b71c}{getresponse}}(self)\ -\/>\ BaseHTTPResponse:\ ...}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00095}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a820e9cdf9c897fd69bd7a27bd616174e}{00095}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a820e9cdf9c897fd69bd7a27bd616174e}{close}}(self)\ -\/>\ None:\ ...}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00098}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_abcc579f750383849f1bf068ef4fefafa}{00098}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_abcc579f750383849f1bf068ef4fefafa}{is\_closed}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Whether\ the\ connection\ either\ is\ brand\ new\ or\ has\ been\ previously\ closed.}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ If\ this\ property\ is\ True\ then\ both\ \`{}\`{}is\_connected\`{}\`{}\ and\ \`{}\`{}has\_connected\_to\_proxy\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ properties\ must\ be\ False.}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00105}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a4d1e3bfead7cfd2314586aa3912b9a5f}{00105}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a4d1e3bfead7cfd2314586aa3912b9a5f}{is\_connected}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Whether\ the\ connection\ is\ actively\ connected\ to\ any\ origin\ (proxy\ or\ target)"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00109}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a8a16089789cadf420fcad7158e47ab8b}{00109}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_connection_a8a16089789cadf420fcad7158e47ab8b}{has\_connected\_to\_proxy}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Whether\ the\ connection\ has\ successfully\ connected\ to\ its\ proxy.}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ This\ returns\ False\ if\ no\ proxy\ is\ in\ use.\ Used\ to\ determine\ whether}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ errors\ are\ coming\ from\ the\ proxy\ layer\ or\ from\ tunnelling\ to\ the\ target\ origin.}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00115}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection}{00115}}\ \ \ \ \ \textcolor{keyword}{class\ }BaseHTTPSConnection(BaseHTTPConnection,\ Protocol):}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00116}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection}{00116}}\ \ \ \ \ \ \ \ \ default\_port:\ typing.ClassVar[int]}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00117}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection}{00117}}\ \ \ \ \ \ \ \ \ default\_socket\_options:\ typing.ClassVar[\_TYPE\_SOCKET\_OPTIONS]}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Certificate\ verification\ methods}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00120}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a30a290862b5743a0ac6f40e34dc9a565}{00120}}\ \ \ \ \ \ \ \ \ cert\_reqs:\ int\ |\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00121}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a312ff1e1354f1dacca2b75c16e0b7c60}{00121}}\ \ \ \ \ \ \ \ \ assert\_hostname:\ \textcolor{keywordtype}{None}\ |\ str\ |\ typing.Literal[\textcolor{keyword}{False}]}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00122}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a590dc977b3da80c1c10da19816729236}{00122}}\ \ \ \ \ \ \ \ \ assert\_fingerprint:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00123}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_af81caac65f55d1b4aedfbdc757835a72}{00123}}\ \ \ \ \ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Trusted\ CAs}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00126}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a30dc80a59b43623749b5d1eb1351ae87}{00126}}\ \ \ \ \ \ \ \ \ ca\_certs:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00127}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_aa6450901e21a265ac18a252a7cfb7d62}{00127}}\ \ \ \ \ \ \ \ \ ca\_cert\_dir:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00128}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a852442b13e8456633673ab3f8a1c1d66}{00128}}\ \ \ \ \ \ \ \ \ ca\_cert\_data:\ \textcolor{keywordtype}{None}\ |\ str\ |\ bytes}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TLS\ version}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00131}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_aba3cedd87b421c444113d8a359984e24}{00131}}\ \ \ \ \ \ \ \ \ ssl\_minimum\_version:\ int\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00132}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a3de620d0be4391277706d90af1d68261}{00132}}\ \ \ \ \ \ \ \ \ ssl\_maximum\_version:\ int\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00133}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_afb93e25e0ddeb340d65cd453e4dcbb07}{00133}}\ \ \ \ \ \ \ \ \ ssl\_version:\ int\ |\ str\ |\ \textcolor{keywordtype}{None}\ \ \textcolor{comment}{\#\ Deprecated}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Client\ certificates}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00136}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_adec55f755313dd544fcf46f8b82e1f02}{00136}}\ \ \ \ \ \ \ \ \ cert\_file:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00137}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a744ee8cbbf082d1e909394505b19e9b1}{00137}}\ \ \ \ \ \ \ \ \ key\_file:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00138}\mbox{\hyperlink{classurllib3_1_1__base__connection_1_1_base_h_t_t_p_s_connection_a020d67e37ddea89346b54a8fe40e05d7}{00138}}\ \ \ \ \ \ \ \ \ key\_password:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ host:\ str,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ port:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ timeout:\ \_TYPE\_TIMEOUT\ =\ \_DEFAULT\_TIMEOUT,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ source\_address:\ tuple[str,\ int]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ blocksize:\ int\ =\ 16384,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ socket\_options:\ \_TYPE\_SOCKET\_OPTIONS\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ proxy:\ Url\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ proxy\_config:\ ProxyConfig\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ cert\_reqs:\ int\ |\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ assert\_hostname:\ \textcolor{keywordtype}{None}\ |\ str\ |\ typing.Literal[\textcolor{keyword}{False}]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ assert\_fingerprint:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ server\_hostname:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ ca\_certs:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ ca\_cert\_dir:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ ca\_cert\_data:\ \textcolor{keywordtype}{None}\ |\ str\ |\ bytes\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ ssl\_minimum\_version:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ ssl\_maximum\_version:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ ssl\_version:\ int\ |\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},\ \ \textcolor{comment}{\#\ Deprecated}}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ cert\_file:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ key\_file:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ key\_password:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__base__connection_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:\ ...}
+
+\end{DoxyCode}

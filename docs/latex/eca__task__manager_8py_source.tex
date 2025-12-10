@@ -1,0 +1,155 @@
+\doxysection{eca\+\_\+task\+\_\+manager.\+py}
+\hypertarget{eca__task__manager_8py_source}{}\label{eca__task__manager_8py_source}\index{micro\_automatizacion\_ecas/app/domain/eca\_task\_manager.py@{micro\_automatizacion\_ecas/app/domain/eca\_task\_manager.py}}
+\mbox{\hyperlink{eca__task__manager_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00001}\mbox{\hyperlink{namespaceeca__task__manager}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Gestor\ de\ tareas\ ECA\ que\ escucha\ telemetría\ MQTT"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00002}00002\ \textcolor{keyword}{import}\ asyncio}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00003}00003\ \textcolor{keyword}{import}\ json}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00004}00004\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Dict,\ Optional}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00005}00005\ \textcolor{keyword}{from}\ domain.eca\_evaluator\ \textcolor{keyword}{import}\ ECAEvaluator}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00006}00006\ \textcolor{keyword}{from}\ infra.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00007}00007\ \textcolor{keyword}{from}\ infra.logging.ILogPanelMQTT\ \textcolor{keyword}{import}\ ILogPanelMQTT}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00008}00008\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00011}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager}{00011}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager}{ECATaskManager}}:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00012}00012\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Gestiona\ las\ tareas\ de\ monitoreo\ de\ ECAs"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00013}00013\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00014}00014\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self):}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00015}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a2c95406e57bad313e53ff5e2b1209db4}{00015}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a2c95406e57bad313e53ff5e2b1209db4}{active\_ecas}}:\ Dict[str,\ ECAEvaluator]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00016}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a55fc463d0d3bc522b34b920a15d3fa59}{00016}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a55fc463d0d3bc522b34b920a15d3fa59}{broker}}:\ Optional[ILogPanelMQTT]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00017}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_ad8c8eea81969d7450392ac0f7c4b52da}{00017}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_ad8c8eea81969d7450392ac0f7c4b52da}{telemetry\_topic}}\ =\ settings.MQTT\_TELEMETRY\_TOPIC}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00018}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_ac4b44b06d22ca357d09de5d830b6aa28}{00018}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_ac4b44b06d22ca357d09de5d830b6aa28}{is\_listening}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00019}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a559a43b1f56b709fdad74f0de403166e}{00019}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a559a43b1f56b709fdad74f0de403166e}{\_listener\_started}}\ =\ asyncio.Event()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00020}00020\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00021}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a42f4c5d1d5833c31f818803d4f4df33d}{00021}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a42f4c5d1d5833c31f818803d4f4df33d}{set\_broker}}(self,\ broker:\ ILogPanelMQTT):}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00022}00022\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Configura\ el\ broker\ MQTT\ a\ usar"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ self.broker\ =\ broker}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ logger.info("{}Broker\ MQTT\ configurado\ en\ ECATaskManager"{})}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00026}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a219157b70844e686e2bc586932989b9e}{00026}}\ \textcolor{stringliteral}{\ \ \ \ async\ def\ register\_eca(self,\ eca\_config:\ Dict)\ -\/>\ bool:}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ Registra\ un\ nuevo\ ECA\ para\ monitoreo}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ "{}"{}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ try:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ eca\_name\ =\ eca\_config.get("{}name\_eca"{},\ "{}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ user\_eca\ =\ eca\_config.get("{}user\_eca"{},\ "{}default"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ eca\_key\ =\ f"{}\{eca\_name\}\_\{user\_eca\}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ \#\ Crear\ evaluador}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ evaluator\ =\ ECAEvaluator(eca\_config)}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ self.active\_ecas[eca\_key]\ =\ evaluator}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f"{}ECA\ registrado:\ \{eca\_key\}\ (estado:\ \{evaluator.state\})"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \#\ Iniciar\ listener\ si\ es\ el\ primer\ ECA\ activo}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ if\ evaluator.state\ ==\ "{}on"{}\ and\ not\ self.is\_listening:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\_start\_telemetry\_listener()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ return\ True}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ except\ Exception\ as\ e:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f"{}Error\ registrando\ ECA:\ \{e\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ import\ traceback}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ traceback.print\_exc()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ return\ False}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00052}00052\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00053}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_aa9e1ecf6265ea66b8c53ca719853899f}{00053}}\ \ \ \ \ def\ unregister\_eca(self,\ eca\_name:\ str,\ user\_eca:\ str\ =\ "{}default"{})\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ "{}"{}"{}Elimina\ un\ ECA\ del\ monitoreo"{}"{}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ eca\_key\ =\ f"{}\{eca\_name\}\_\{user\_eca\}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ if\ eca\_key\ in\ self.active\_ecas:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ del\ self.active\_ecas[eca\_key]}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f"{}ECA\ eliminado\ del\ monitoreo:\ \{eca\_key\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ return\ True}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ return\ False}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00062}00062\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00063}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a08b74607e25c286ccd457b8ff60395f9}{00063}}\ \ \ \ \ async\ def\ update\_eca\_state(self,\ eca\_name:\ str,\ new\_state:\ str,\ user\_eca:\ str\ =\ "{}default"{}):}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ "{}"{}"{}Actualiza\ el\ estado\ (on/off)\ de\ un\ ECA\ existente"{}"{}"{}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ eca\_key\ =\ f"{}\{eca\_name\}\_\{user\_eca\}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ if\ eca\_key\ in\ self.active\_ecas.keys():}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ self.active\_ecas[eca\_key].state\ =\ new\_state}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f"{}ECA\ \{eca\_key\}\ cambió\ a\ estado:\ \{new\_state\}\ en\ gestor\ de\ tareas"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ if\ new\_state\ ==\ "{}on"{}\ and\ not\ self.is\_listening:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\_start\_telemetry\_listener()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ return\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ logger.warning(f"{}ECA\ \{eca\_key\}\ no\ encontrado\ para\ actualizar\ estado"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00075}00075\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00076}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a3a5911c830813755d29b4a60ce128a0d}{00076}}\ \ \ \ \ async\ def\ \_start\_telemetry\_listener(self):}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ "{}"{}"{}Inicia\ la\ suscripción\ al\ tópico\ de\ telemetría"{}"{}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ if\ self.is\_listening\ or\ not\ self.broker:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ logger.warning(f"{}No\ se\ puede\ iniciar\ listener:\ is\_listening=\{self.is\_listening\},\ broker=\{self.broker\ is\ not\ None\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ return}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ self.is\_listening\ =\ True}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ logger.info(f"{}Iniciando\ listener\ de\ telemetría\ en:\ \{self.telemetry\_topic\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \#\ Callback\ async\ directo\ -\/\ NO\ usar\ run\_coroutine\_threadsafe\ aquí}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ async\ def\ on\_telemetry(topic:\ str,\ message:\ str):}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ "{}"{}"{}Callback\ async\ cuando\ llega\ un\ mensaje\ de\ telemetría"{}"{}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \#logger.debug(f"{}Telemetría\ recibida\ en\ topic\ \{topic\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\_process\_telemetry\_message(message)}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ try:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.broker.suscribir(self.telemetry\_topic,\ on\_telemetry)}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ self.\_listener\_started.set()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ logger.info("{}Listener\ de\ telemetría\ iniciado\ correctamente"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ except\ Exception\ as\ e:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f"{}Error\ iniciando\ listener:\ \{e\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ self.is\_listening\ =\ False}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00098}00098\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00099}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_a55b7417c9e97c2e6f98584810520b372}{00099}}\ \ \ \ \ async\ def\ \_process\_telemetry\_message(self,\ message:\ str):}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ "{}"{}"{}Procesa\ un\ mensaje\ de\ telemetría\ y\ evalúa\ todos\ los\ ECAs\ activos"{}"{}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ try:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \#logger.debug(f"{}Procesando\ mensaje\ de\ telemetría:\ \{message\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ telemetry\ =\ json.loads(message)}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ if\ not\ self.active\_ecas:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#logger.debug("{}No\ hay\ ECAs\ activos\ para\ procesar"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ return}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ for\ eca\_key,\ evaluator\ in\ self.active\_ecas.items():}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ evaluator.state\ !=\ "{}on"{}:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ continue}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ should\_execute\ =\ evaluator.process\_telemetry(telemetry)}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expected\_action\ =\ "{}on"{}\ if\ evaluator.action\_value\ else\ "{}off"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ should\_execute:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ evaluator.last\_action\_executed\ !=\ expected\_action:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f"{}ECA\ [\{eca\_key\}]:\ Condición\ cumplida,\ ejecutando\ acción..."{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ evaluator.execute\_action()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ else:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#\ La\ condición\ ya\ no\ se\ cumple,\ revertir\ acción\ si\ fue\ ejecutada}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ evaluator.last\_action\_executed\ ==\ expected\_action:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f"{}ECA\ [\{eca\_key\}]:\ La\ condición\ dejo\ de\ cumplirse,\ revirtiendo\ acción..."{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ evaluator.execute\_inverse\_action()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ except\ json.JSONDecodeError\ as\ e:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f"{}Error\ decodificando\ telemetría:\ \{e\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ except\ Exception\ as\ e:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f"{}Error\ procesando\ telemetría:\ \{e\}"{})}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ import\ traceback}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ traceback.print\_exc()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00131}00131\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00132}\mbox{\hyperlink{classeca__task__manager_1_1_e_c_a_task_manager_ace0abf7289bfe919a7130ce9e83e40ae}{00132}}\ \ \ \ \ def\ get\_active\_ecas(self)\ -\/>\ Dict[str,\ Dict]:}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ "{}"{}"{}Retorna\ información\ de\ todos\ los\ ECAs\ activos"{}"{}"{}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ return\ \{}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ key:\ \{}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}eca\_name"{}:\ e.name,}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}eca\_state"{}:\ e.state,}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}user\_eca"{}:\ e.user\_eca,}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}event\_resource"{}:\ e.event\_resource\_id,}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}action\_resource"{}:\ e.action\_resource\_id,}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}threshold"{}:\ e.threshold\_value,}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}comparator"{}:\ e.comparator}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ for\ key,\ e\ in\ self.active\_ecas.items()}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \}\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00148}00148\ \#\ Instancia\ global}
+\DoxyCodeLine{\Hypertarget{eca__task__manager_8py_source_l00149}\mbox{\hyperlink{namespaceeca__task__manager_a282159c4c8035dc30570d5c292d500ec}{00149}}\ eca\_task\_manager\ =\ ECATaskManager()}
+
+\end{DoxyCode}

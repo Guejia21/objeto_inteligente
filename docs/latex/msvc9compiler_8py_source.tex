@@ -1,0 +1,838 @@
+\doxysection{msvc9compiler.\+py}
+\hypertarget{msvc9compiler_8py_source}{}\label{msvc9compiler_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/msvc9compiler.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/msvc9compiler.py}}
+\mbox{\hyperlink{msvc9compiler_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}distutils.msvc9compiler}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00002}00002\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00003}00003\ \textcolor{stringliteral}{Contains\ MSVCCompiler,\ an\ implementation\ of\ the\ abstract\ CCompiler\ class}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00004}00004\ \textcolor{stringliteral}{for\ the\ Microsoft\ Visual\ Studio\ 2008.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00005}00005\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00006}00006\ \textcolor{stringliteral}{The\ module\ is\ compatible\ with\ VS\ 2005\ and\ VS\ 2008.\ You\ can\ find\ legacy\ support}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00007}00007\ \textcolor{stringliteral}{for\ older\ versions\ of\ VS\ in\ distutils.msvccompiler.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00008}00008\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00010}00010\ \textcolor{comment}{\#\ Written\ by\ Perry\ Stoll}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00011}00011\ \textcolor{comment}{\#\ hacked\ by\ Robin\ Becker\ and\ Thomas\ Heller\ to\ do\ a\ better\ job\ of}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00012}00012\ \textcolor{comment}{\#\ \ \ finding\ DevStudio\ (through\ the\ registry)}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00013}00013\ \textcolor{comment}{\#\ ported\ to\ VS2005\ and\ VS\ 2008\ by\ Christian\ Heimes}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00015}00015\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00016}00016\ \textcolor{keyword}{import}\ subprocess}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00017}00017\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00018}00018\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00019}00019\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00021}00021\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00022}00022\ \ \ \ \ DistutilsExecError,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00023}00023\ \ \ \ \ DistutilsPlatformError,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00024}00024\ \ \ \ \ CompileError,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00025}00025\ \ \ \ \ LibError,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00026}00026\ \ \ \ \ LinkError,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00027}00027\ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00028}00028\ \textcolor{keyword}{from}\ distutils.ccompiler\ \textcolor{keyword}{import}\ CCompiler,\ gen\_lib\_options}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00029}00029\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00030}00030\ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ get\_platform}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00032}00032\ \textcolor{keyword}{import}\ winreg}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00034}00034\ warnings.warn(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00035}00035\ \ \ \ \ \textcolor{stringliteral}{"{}msvc9compiler\ is\ deprecated\ and\ slated\ to\ be\ removed\ "{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00036}00036\ \ \ \ \ \textcolor{stringliteral}{"{}in\ the\ future.\ Please\ discontinue\ use\ or\ file\ an\ issue\ "{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00037}00037\ \ \ \ \ \textcolor{stringliteral}{"{}with\ pypa/distutils\ describing\ your\ use\ case."{}},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00038}00038\ \ \ \ \ DeprecationWarning,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00039}00039\ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00041}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a6796e5ffe5016f456cb23827ac24d7c0}{00041}}\ RegOpenKeyEx\ =\ winreg.OpenKeyEx}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00042}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_af11fb01f580ba66f2a9546f1ff9363b2}{00042}}\ RegEnumKey\ =\ winreg.EnumKey}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00043}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a5b8a9d9b12a5d41dbd67eb6154e9e034}{00043}}\ RegEnumValue\ =\ winreg.EnumValue}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00044}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_ada7c65a5cc7110800ad286016728544b}{00044}}\ RegError\ =\ winreg.error}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00046}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_af56fa80def66c4886595b624030b72b7}{00046}}\ HKEYS\ =\ (}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00047}00047\ \ \ \ \ winreg.HKEY\_USERS,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00048}00048\ \ \ \ \ winreg.HKEY\_CURRENT\_USER,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00049}00049\ \ \ \ \ winreg.HKEY\_LOCAL\_MACHINE,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00050}00050\ \ \ \ \ winreg.HKEY\_CLASSES\_ROOT,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00051}00051\ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00053}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_acf7498575750d9f354f4604f7c00a241}{00053}}\ NATIVE\_WIN64\ =\ sys.platform\ ==\ \textcolor{stringliteral}{'win32'}\ \textcolor{keywordflow}{and}\ sys.maxsize\ >\ 2**32}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00054}00054\ \textcolor{keywordflow}{if}\ NATIVE\_WIN64:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00055}00055\ \ \ \ \ \textcolor{comment}{\#\ Visual\ C++\ is\ a\ 32-\/bit\ application,\ so\ we\ need\ to\ look\ in}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00056}00056\ \ \ \ \ \textcolor{comment}{\#\ the\ corresponding\ registry\ branch,\ if\ we're\ running\ a}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00057}00057\ \ \ \ \ \textcolor{comment}{\#\ 64-\/bit\ Python\ on\ Win64}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00058}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a04aa5b4891ee6312ade703d0dd393860}{00058}}\ \ \ \ \ VS\_BASE\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Wow6432Node\(\backslash\)Microsoft\(\backslash\)VisualStudio\(\backslash\)\%0.1f"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00059}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a8a8a230e88912d06f78e56327cee7518}{00059}}\ \ \ \ \ WINSDK\_BASE\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Wow6432Node\(\backslash\)Microsoft\(\backslash\)Microsoft\ SDKs\(\backslash\)Windows"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00060}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a2c81f0d291ec313f4e2b4d1030a01ea2}{00060}}\ \ \ \ \ NET\_BASE\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Wow6432Node\(\backslash\)Microsoft\(\backslash\).NETFramework"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00061}00061\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00062}00062\ \ \ \ \ VS\_BASE\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Microsoft\(\backslash\)VisualStudio\(\backslash\)\%0.1f"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00063}00063\ \ \ \ \ WINSDK\_BASE\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Microsoft\(\backslash\)Microsoft\ SDKs\(\backslash\)Windows"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00064}00064\ \ \ \ \ NET\_BASE\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Microsoft\(\backslash\).NETFramework"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00066}00066\ \textcolor{comment}{\#\ A\ map\ keyed\ by\ get\_platform()\ return\ values\ to\ values\ accepted\ by}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00067}00067\ \textcolor{comment}{\#\ 'vcvarsall.bat'.\ \ Note\ a\ cross-\/compile\ may\ combine\ these\ (eg,\ 'x86\_amd64'\ is}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00068}00068\ \textcolor{comment}{\#\ the\ param\ to\ cross-\/compile\ on\ x86\ targeting\ amd64.)}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00069}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a0b7234b5ee9fda57b516020fdd87ab99}{00069}}\ PLAT\_TO\_VCVARS\ =\ \{}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00070}00070\ \ \ \ \ \textcolor{stringliteral}{'win32'}:\ \textcolor{stringliteral}{'x86'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00071}00071\ \ \ \ \ \textcolor{stringliteral}{'win-\/amd64'}:\ \textcolor{stringliteral}{'amd64'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00072}00072\ \}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00075}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg}{00075}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg}{Reg}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00076}00076\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Helper\ class\ to\ read\ values\ from\ the\ registry"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00078}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a0d0a831eb84ef15c013092072e163e91}{00078}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a755e23dda075408a954b0a41c25310fd}{get\_value}}(cls,\ path,\ key):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ HKEYS:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ d\ =\ cls.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a346ae5d8708a523acf70ff06c074d208}{read\_values}}(base,\ path)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ d\ \textcolor{keywordflow}{and}\ key\ \textcolor{keywordflow}{in}\ d:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ d[key]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ KeyError(key)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00085}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a755e23dda075408a954b0a41c25310fd}{00085}}\ \ \ \ \ get\_value\ =\ classmethod(get\_value)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00087}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_ad1e690bcdcf2b81d93a95d0cc9c29daf}{00087}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a26fde2924fca32ba504cc00a04c6a357}{read\_keys}}(cls,\ base,\ key):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ list\ of\ registry\ keys."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ handle\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a6796e5ffe5016f456cb23827ac24d7c0}{RegOpenKeyEx}}(base,\ key)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ RegError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ L\ =\ []}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ i\ =\ 0}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ k\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_af11fb01f580ba66f2a9546f1ff9363b2}{RegEnumKey}}(handle,\ i)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ RegError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ L.append(k)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ L}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00104}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a26fde2924fca32ba504cc00a04c6a357}{00104}}\ \ \ \ \ read\_keys\ =\ classmethod(read\_keys)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00106}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a5baf04e3d5ed89e6f0e2ec4b25aa95e8}{00106}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a346ae5d8708a523acf70ff06c074d208}{read\_values}}(cls,\ base,\ key):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ dict\ of\ registry\ keys\ and\ values.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00108}00108\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ All\ names\ are\ converted\ to\ lowercase.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ handle\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a6796e5ffe5016f456cb23827ac24d7c0}{RegOpenKeyEx}}(base,\ key)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ RegError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ d\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ i\ =\ 0}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name,\ value,\ type\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a5b8a9d9b12a5d41dbd67eb6154e9e034}{RegEnumValue}}(handle,\ i)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ RegError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ name\ =\ name.lower()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ d[cls.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a18d4af0e23df67efe4313c889babcba7}{convert\_mbcs}}(name)]\ =\ cls.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a18d4af0e23df67efe4313c889babcba7}{convert\_mbcs}}(value)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ d}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00127}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a346ae5d8708a523acf70ff06c074d208}{00127}}\ \ \ \ \ read\_values\ =\ classmethod(read\_values)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00129}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a30c4cf447003a3a1b275234633b23de3}{00129}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a18d4af0e23df67efe4313c889babcba7}{convert\_mbcs}}(s):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ dec\ =\ getattr(s,\ \textcolor{stringliteral}{"{}decode"{}},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ dec\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ s\ =\ dec(\textcolor{stringliteral}{"{}mbcs"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ UnicodeError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ s}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00138}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_reg_a18d4af0e23df67efe4313c889babcba7}{00138}}\ \ \ \ \ convert\_mbcs\ =\ staticmethod(convert\_mbcs)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00141}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander}{00141}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander}{MacroExpander}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00142}00142\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ version):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00143}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a27db7b41df6c14872b2bb23f824b2f2d}{00143}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a27db7b41df6c14872b2bb23f824b2f2d}{macros}}\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00144}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_aa470503f0f0d295d0d6f11c9e9440d8d}{00144}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_aa470503f0f0d295d0d6f11c9e9440d8d}{vsbase}}\ =\ VS\_BASE\ \%\ version}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_ab2d101ea660c9526fbcb70f987de2380}{load\_macros}}(version)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00147}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{00147}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{set\_macro}}(self,\ macro,\ path,\ key):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a27db7b41df6c14872b2bb23f824b2f2d}{macros}}[\textcolor{stringliteral}{"{}\$(\%s)"{}}\ \%\ macro]\ =\ Reg.get\_value(path,\ key)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00150}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_ab2d101ea660c9526fbcb70f987de2380}{00150}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_ab2d101ea660c9526fbcb70f987de2380}{load\_macros}}(self,\ version):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{set\_macro}}(\textcolor{stringliteral}{"{}VCInstallDir"{}},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_aa470503f0f0d295d0d6f11c9e9440d8d}{vsbase}}\ +\ \textcolor{stringliteral}{r"{}\(\backslash\)Setup\(\backslash\)VC"{}},\ \textcolor{stringliteral}{"{}productdir"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{set\_macro}}(\textcolor{stringliteral}{"{}VSInstallDir"{}},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_aa470503f0f0d295d0d6f11c9e9440d8d}{vsbase}}\ +\ \textcolor{stringliteral}{r"{}\(\backslash\)Setup\(\backslash\)VS"{}},\ \textcolor{stringliteral}{"{}productdir"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{set\_macro}}(\textcolor{stringliteral}{"{}FrameworkDir"{}},\ NET\_BASE,\ \textcolor{stringliteral}{"{}installroot"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ version\ >=\ 8.0:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{set\_macro}}(\textcolor{stringliteral}{"{}FrameworkSDKDir"{}},\ NET\_BASE,\ \textcolor{stringliteral}{"{}sdkinstallrootv2.0"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ KeyError(\textcolor{stringliteral}{"{}sdkinstallrootv2.0"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Python\ was\ built\ with\ Visual\ Studio\ 2008;}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00162}00162\ \textcolor{stringliteral}{extensions\ must\ be\ built\ with\ a\ compiler\ than\ can\ generate\ compatible\ binaries.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00163}00163\ \textcolor{stringliteral}{Visual\ Studio\ 2008\ was\ not\ found\ on\ this\ system.\ If\ you\ have\ Cygwin\ installed,}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00164}00164\ \textcolor{stringliteral}{you\ can\ try\ compiling\ with\ MingW32,\ by\ passing\ "{}-\/c\ mingw32"{}\ to\ setup.py."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ version\ >=\ 9.0:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{set\_macro}}(\textcolor{stringliteral}{"{}FrameworkVersion"{}},\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_aa470503f0f0d295d0d6f11c9e9440d8d}{vsbase}},\ \textcolor{stringliteral}{"{}clr\ version"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a929a09cae1c4072765a7f544bc285de5}{set\_macro}}(\textcolor{stringliteral}{"{}WindowsSdkDir"{}},\ WINSDK\_BASE,\ \textcolor{stringliteral}{"{}currentinstallfolder"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ p\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Microsoft\(\backslash\)NET\ Framework\ Setup\(\backslash\)Product"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ HKEYS:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ h\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a6796e5ffe5016f456cb23827ac24d7c0}{RegOpenKeyEx}}(base,\ p)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ RegError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ key\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_af11fb01f580ba66f2a9546f1ff9363b2}{RegEnumKey}}(h,\ 0)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ d\ =\ Reg.get\_value(base,\ \textcolor{stringliteral}{r"{}\{\}\(\backslash\)\{\}"{}}.format(p,\ key))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a27db7b41df6c14872b2bb23f824b2f2d}{macros}}[\textcolor{stringliteral}{"{}\$(FrameworkVersion)"{}}]\ =\ d[\textcolor{stringliteral}{"{}version"{}}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00181}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a553fbd43b2b7eb62f39d78736fe28423}{00181}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a553fbd43b2b7eb62f39d78736fe28423}{sub}}(self,\ s):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_macro_expander_a27db7b41df6c14872b2bb23f824b2f2d}{macros}}.items():}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ s\ =\ s.replace(k,\ v)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ s}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00187}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a0a0586e766081d887a2cdc0253415752}{00187}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a0a0586e766081d887a2cdc0253415752}{get\_build\_version}}():}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00188}00188\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ the\ version\ of\ MSVC\ that\ was\ used\ to\ build\ Python.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00189}00189\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00190}00190\ \textcolor{stringliteral}{\ \ \ \ For\ Python\ 2.3\ and\ up,\ the\ version\ number\ is\ included\ in}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00191}00191\ \textcolor{stringliteral}{\ \ \ \ sys.version.\ \ For\ earlier\ versions,\ assume\ the\ compiler\ is\ MSVC\ 6.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00192}00192\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00193}00193\ \ \ \ \ prefix\ =\ \textcolor{stringliteral}{"{}MSC\ v."{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00194}00194\ \ \ \ \ i\ =\ sys.version.find(prefix)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{if}\ i\ ==\ -\/1:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 6}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00197}00197\ \ \ \ \ i\ =\ i\ +\ len(prefix)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00198}00198\ \ \ \ \ s,\ rest\ =\ sys.version[i:].split(\textcolor{stringliteral}{"{}\ "{}},\ 1)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00199}00199\ \ \ \ \ majorVersion\ =\ int(s[:-\/2])\ -\/\ 6}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00200}00200\ \ \ \ \ \textcolor{keywordflow}{if}\ majorVersion\ >=\ 13:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ v13\ was\ skipped\ and\ should\ be\ v14}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ majorVersion\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00203}00203\ \ \ \ \ minorVersion\ =\ int(s[2:3])\ /\ 10.0}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00204}00204\ \ \ \ \ \textcolor{comment}{\#\ I\ don't\ think\ paths\ are\ affected\ by\ minor\ version\ in\ version\ 6}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{if}\ majorVersion\ ==\ 6:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ minorVersion\ =\ 0}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00207}00207\ \ \ \ \ \textcolor{keywordflow}{if}\ majorVersion\ >=\ 6:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ majorVersion\ +\ minorVersion}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00209}00209\ \ \ \ \ \textcolor{comment}{\#\ else\ we\ don't\ know\ what\ version\ of\ the\ compiler\ this\ is}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00210}00210\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00213}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a8992cdad30e218adaceca9a97e49cc33}{00213}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a8992cdad30e218adaceca9a97e49cc33}{normalize\_and\_reduce\_paths}}(paths):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00214}00214\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ a\ list\ of\ normalized\ paths\ with\ duplicates\ removed.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00215}00215\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00216}00216\ \textcolor{stringliteral}{\ \ \ \ The\ current\ order\ of\ paths\ is\ maintained.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00217}00217\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00218}00218\ \ \ \ \ \textcolor{comment}{\#\ Paths\ are\ normalized\ so\ things\ like:\ \ /a\ and\ /a/\ aren't\ both\ preserved.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00219}00219\ \ \ \ \ reduced\_paths\ =\ []}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00220}00220\ \ \ \ \ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ paths:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ np\ =\ os.path.normpath(p)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX(nnorwitz):\ O(n**2),\ if\ reduced\_paths\ gets\ long\ perhaps\ use\ a\ set.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ np\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ reduced\_paths:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ reduced\_paths.append(np)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00225}00225\ \ \ \ \ \textcolor{keywordflow}{return}\ reduced\_paths}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00228}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_aeaaf34afcb8184bea18f79487c223221}{00228}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_aeaaf34afcb8184bea18f79487c223221}{removeDuplicates}}(variable):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00229}00229\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Remove\ duplicate\ values\ of\ an\ environment\ variable."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00230}00230\ \ \ \ \ oldList\ =\ variable.split(os.pathsep)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00231}00231\ \ \ \ \ newList\ =\ []}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00232}00232\ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ oldList:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ i\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ newList:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ newList.append(i)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00235}00235\ \ \ \ \ newVariable\ =\ os.pathsep.join(newList)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00236}00236\ \ \ \ \ \textcolor{keywordflow}{return}\ newVariable}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00239}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a53661f2850f37e1ebeb48be84100d94b}{00239}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a53661f2850f37e1ebeb48be84100d94b}{find\_vcvarsall}}(version):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00240}00240\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Find\ the\ vcvarsall.bat\ file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00241}00241\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00242}00242\ \textcolor{stringliteral}{\ \ \ \ At\ first\ it\ tries\ to\ find\ the\ productdir\ of\ VS\ 2008\ in\ the\ registry.\ If}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00243}00243\ \textcolor{stringliteral}{\ \ \ \ that\ fails\ it\ falls\ back\ to\ the\ VS90COMNTOOLS\ env\ var.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00244}00244\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00245}00245\ \ \ \ \ vsbase\ =\ VS\_BASE\ \%\ version}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00246}00246\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ productdir\ =\ Reg.get\_value(\textcolor{stringliteral}{r"{}\%s\(\backslash\)Setup\(\backslash\)VC"{}}\ \%\ vsbase,\ \textcolor{stringliteral}{"{}productdir"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00248}00248\ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}Unable\ to\ find\ productdir\ in\ registry"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ productdir\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00252}00252\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ productdir\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ os.path.isdir(productdir):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ toolskey\ =\ \textcolor{stringliteral}{"{}VS\%0.f0COMNTOOLS"{}}\ \%\ version}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ toolsdir\ =\ os.environ.get(toolskey,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ toolsdir\ \textcolor{keywordflow}{and}\ os.path.isdir(toolsdir):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ productdir\ =\ os.path.join(toolsdir,\ os.pardir,\ os.pardir,\ \textcolor{stringliteral}{"{}VC"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ productdir\ =\ os.path.abspath(productdir)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.isdir(productdir):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}\%s\ is\ not\ a\ valid\ directory"{}}\ \%\ productdir)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}Env\ var\ \%s\ is\ not\ set\ or\ invalid"{}}\ \%\ toolskey)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00264}00264\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ productdir:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}No\ productdir\ found"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00267}00267\ \ \ \ \ vcvarsall\ =\ os.path.join(productdir,\ \textcolor{stringliteral}{"{}vcvarsall.bat"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isfile(vcvarsall):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ vcvarsall}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00270}00270\ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}Unable\ to\ find\ vcvarsall.bat"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00271}00271\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00274}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a2f0cee951480da7387fda729b30bc209}{00274}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a2f0cee951480da7387fda729b30bc209}{query\_vcvarsall}}(version,\ arch="{}x86"{}):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00275}00275\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Launch\ vcvarsall.bat\ and\ read\ the\ settings\ from\ its\ environment"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00276}00276\ \ \ \ \ vcvarsall\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a53661f2850f37e1ebeb48be84100d94b}{find\_vcvarsall}}(version)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00277}00277\ \ \ \ \ interesting\ =\ \{\textcolor{stringliteral}{"{}include"{}},\ \textcolor{stringliteral}{"{}lib"{}},\ \textcolor{stringliteral}{"{}libpath"{}},\ \textcolor{stringliteral}{"{}path"{}}\}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00278}00278\ \ \ \ \ result\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00279}00279\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00280}00280\ \ \ \ \ \textcolor{keywordflow}{if}\ vcvarsall\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(\textcolor{stringliteral}{"{}Unable\ to\ find\ vcvarsall.bat"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00282}00282\ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}Calling\ 'vcvarsall.bat\ \%s'\ (version=\%s)"{}},\ arch,\ version)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00283}00283\ \ \ \ \ popen\ =\ subprocess.Popen(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'"{}\{\}"{}\ \{\}\ \&\ set'}.format(vcvarsall,\ arch),}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ stdout=subprocess.PIPE,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ stderr=subprocess.PIPE,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00287}00287\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00288}00288\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ stdout,\ stderr\ =\ popen.communicate()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ popen.wait()\ !=\ 0:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(stderr.decode(\textcolor{stringliteral}{"{}mbcs"{}}))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00292}00292\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ stdout\ =\ stdout.decode(\textcolor{stringliteral}{"{}mbcs"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ line\ \textcolor{keywordflow}{in}\ stdout.split(\textcolor{stringliteral}{"{}\(\backslash\)n"{}}):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ line\ =\ Reg.convert\_mbcs(line)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'='}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ line:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ line\ =\ line.strip()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ key,\ value\ =\ line.split(\textcolor{stringliteral}{'='},\ 1)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ key\ =\ key.lower()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ key\ \textcolor{keywordflow}{in}\ interesting:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value.endswith(os.pathsep):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ value[:-\/1]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result[key]\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_aeaaf34afcb8184bea18f79487c223221}{removeDuplicates}}(value)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00305}00305\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00306}00306\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ popen.stdout.close()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ popen.stderr.close()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00310}00310\ \ \ \ \ \textcolor{keywordflow}{if}\ len(result)\ !=\ len(interesting):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(str(list(result.keys())))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00312}00312\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00313}00313\ \ \ \ \ \textcolor{keywordflow}{return}\ result}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00315}00315\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00316}00316\ \textcolor{comment}{\#\ More\ globals}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00317}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_aac2c20fd89c38313646e8bab31002fbe}{00317}}\ VERSION\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a0a0586e766081d887a2cdc0253415752}{get\_build\_version}}()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00318}00318\ \textcolor{comment}{\#\ MACROS\ =\ MacroExpander(VERSION)}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00321}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{00321}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{MSVCCompiler}}(CCompiler):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00322}00322\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Concrete\ class\ that\ implements\ an\ interface\ to\ Microsoft\ Visual\ C++,}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00323}00323\ \textcolor{stringliteral}{\ \ \ \ as\ defined\ by\ the\ CCompiler\ abstract\ class."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00325}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a3b3e691e228e2e54b50cef7205effab7}{00325}}\ \ \ \ \ compiler\_type\ =\ \textcolor{stringliteral}{'msvc'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00327}00327\ \ \ \ \ \textcolor{comment}{\#\ Just\ set\ this\ so\ CCompiler's\ constructor\ doesn't\ barf.\ \ We\ currently}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00328}00328\ \ \ \ \ \textcolor{comment}{\#\ don't\ use\ the\ 'set\_executables()'\ bureaucracy\ provided\ by\ CCompiler,}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00329}00329\ \ \ \ \ \textcolor{comment}{\#\ as\ it\ really\ isn't\ necessary\ for\ this\ sort\ of\ single-\/compiler\ class.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00330}00330\ \ \ \ \ \textcolor{comment}{\#\ Would\ be\ nice\ to\ have\ a\ consistent\ interface\ with\ UnixCCompiler,}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00331}00331\ \ \ \ \ \textcolor{comment}{\#\ though,\ so\ it's\ worth\ thinking\ about.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00332}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ac511c446d79f36b7f16028a833cb04ad}{00332}}\ \ \ \ \ executables\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00333}00333\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00334}00334\ \ \ \ \ \textcolor{comment}{\#\ Private\ class\ data\ (need\ to\ distinguish\ C\ from\ C++\ source\ for\ compiler)}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00335}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a016cb84b10984afa4bda6317ebc64778}{00335}}\ \ \ \ \ \_c\_extensions\ =\ [\textcolor{stringliteral}{'.c'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00336}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ab77983dec263d11123d170f0283dac62}{00336}}\ \ \ \ \ \_cpp\_extensions\ =\ [\textcolor{stringliteral}{'.cc'},\ \textcolor{stringliteral}{'.cpp'},\ \textcolor{stringliteral}{'.cxx'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00337}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ae1cc4ebb50df131ee10a69732ba7e63e}{00337}}\ \ \ \ \ \_rc\_extensions\ =\ [\textcolor{stringliteral}{'.rc'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00338}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad7802c00e91f0ddc5d25996eb3cbd56c}{00338}}\ \ \ \ \ \_mc\_extensions\ =\ [\textcolor{stringliteral}{'.mc'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00340}00340\ \ \ \ \ \textcolor{comment}{\#\ Needed\ for\ the\ filename\ generation\ methods\ provided\ by\ the}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00341}00341\ \ \ \ \ \textcolor{comment}{\#\ base\ class,\ CCompiler.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00342}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a08fafc4bb9fd2e96519f5f053058e295}{00342}}\ \ \ \ \ src\_extensions\ =\ \_c\_extensions\ +\ \_cpp\_extensions\ +\ \_rc\_extensions\ +\ \_mc\_extensions}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00343}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_af48b98437fddf9580981d3298733d0fb}{00343}}\ \ \ \ \ res\_extension\ =\ \textcolor{stringliteral}{'.res'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00344}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a21bc598957aeb17f5df769e9e5b29002}{00344}}\ \ \ \ \ obj\_extension\ =\ \textcolor{stringliteral}{'.obj'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00345}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_aa77769860361509c6bf480625be1bdd0}{00345}}\ \ \ \ \ static\_lib\_extension\ =\ \textcolor{stringliteral}{'.lib'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00346}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_adb53fabe511761b95c19f916fc4520a5}{00346}}\ \ \ \ \ shared\_lib\_extension\ =\ \textcolor{stringliteral}{'.dll'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00347}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a3a5c3c2fdd194880f7ed85ce2d3995f5}{00347}}\ \ \ \ \ static\_lib\_format\ =\ shared\_lib\_format\ =\ \textcolor{stringliteral}{'\%s\%s'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00348}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a0b77edb153058a4eab45a6a0d4a213e3}{00348}}\ \ \ \ \ exe\_extension\ =\ \textcolor{stringliteral}{'.exe'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00349}00349\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00350}00350\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ verbose=0,\ dry\_run=0,\ force=0):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(verbose,\ dry\_run,\ force)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_version}}\ =\ VERSION}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_root}}\ =\ \textcolor{stringliteral}{r"{}Software\(\backslash\)Microsoft\(\backslash\)VisualStudio"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ self.\_\_macros\ =\ MACROS}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}}\ =\ []}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ target\ platform\ (.plat\_name\ is\ consistent\ with\ 'bdist')}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00357}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a566af5759a43d75dd7c8e28e5ca99dcd}{00357}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a566af5759a43d75dd7c8e28e5ca99dcd}{plat\_name}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_arch}}\ =\ \textcolor{keywordtype}{None}\ \ \textcolor{comment}{\#\ deprecated\ name}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00359}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad902b194a0747de0cc74ac098cd5a054}{00359}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad902b194a0747de0cc74ac098cd5a054}{initialized}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00360}00360\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00361}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a94f057de1dc9158080035d0acd89412f}{00361}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a94f057de1dc9158080035d0acd89412f}{initialize}}(self,\ plat\_name=None):\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ multi-\/init\ means\ we\ would\ need\ to\ check\ platform\ same\ each\ time...}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad902b194a0747de0cc74ac098cd5a054}{initialized}},\ \textcolor{stringliteral}{"{}don't\ init\ multiple\ times"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_version}}\ <\ 8.0:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}VC\ \%0.1f\ is\ not\ supported\ by\ this\ module"{}}\ \%\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_version}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ plat\_name\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ plat\_name\ =\ get\_platform()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ sanity\ check\ for\ platforms\ to\ prevent\ obscure\ errors\ later.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ ok\_plats\ =\ \textcolor{stringliteral}{'win32'},\ \textcolor{stringliteral}{'win-\/amd64'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ plat\_name\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ ok\_plats:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}-\/-\/plat-\/name\ must\ be\ one\ of\ \{\}"{}}.format(ok\_plats)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}DISTUTILS\_USE\_SDK"{}}\ \textcolor{keywordflow}{in}\ os.environ}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{stringliteral}{"{}MSSdk"{}}\ \textcolor{keywordflow}{in}\ os.environ}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{find\_exe}}(\textcolor{stringliteral}{"{}cl.exe"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Assume\ that\ the\ SDK\ set\ up\ everything\ alright;\ don't\ try\ to\ be}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ smarter}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00384}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a188fd4a5cb2135f7ec318948d46a6bd1}{00384}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a188fd4a5cb2135f7ec318948d46a6bd1}{cc}}\ =\ \textcolor{stringliteral}{"{}cl.exe"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00385}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a3419b57100c7fdafc1c9f7815db982d1}{00385}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a3419b57100c7fdafc1c9f7815db982d1}{linker}}\ =\ \textcolor{stringliteral}{"{}link.exe"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00386}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afeaf1580d34f456f38cddde4ab09fed5}{00386}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afeaf1580d34f456f38cddde4ab09fed5}{lib}}\ =\ \textcolor{stringliteral}{"{}lib.exe"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00387}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a253772139cffaee308b518be40af7cea}{00387}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a253772139cffaee308b518be40af7cea}{rc}}\ =\ \textcolor{stringliteral}{"{}rc.exe"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00388}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a782099abba974b7779cb5b5e690de374}{00388}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a782099abba974b7779cb5b5e690de374}{mc}}\ =\ \textcolor{stringliteral}{"{}mc.exe"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ On\ x86,\ 'vcvars32.bat\ amd64'\ creates\ an\ env\ that\ doesn't\ work;}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ cross\ compile,\ you\ use\ 'x86\_amd64'.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ On\ AMD64,\ 'vcvars32.bat\ amd64'\ is\ a\ native\ build\ env;\ to\ cross}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ compile\ use\ 'x86'\ (ie,\ it\ runs\ the\ x86\ compiler\ directly)}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ plat\_name\ ==\ get\_platform()\ \textcolor{keywordflow}{or}\ plat\_name\ ==\ \textcolor{stringliteral}{'win32'}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ native\ build\ or\ cross-\/compile\ to\ win32}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plat\_spec\ =\ PLAT\_TO\_VCVARS[plat\_name]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ cross\ compile\ from\ win32\ -\/>\ some\ 64bit}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plat\_spec\ =\ (}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PLAT\_TO\_VCVARS[get\_platform()]\ +\ \textcolor{stringliteral}{'\_'}\ +\ PLAT\_TO\_VCVARS[plat\_name]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00402}00402\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ vc\_env\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a2f0cee951480da7387fda729b30bc209}{query\_vcvarsall}}(VERSION,\ plat\_spec)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00404}00404\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}}\ =\ vc\_env[\textcolor{stringliteral}{'path'}].split(os.pathsep)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ os.environ[\textcolor{stringliteral}{'lib'}]\ =\ vc\_env[\textcolor{stringliteral}{'lib'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ os.environ[\textcolor{stringliteral}{'include'}]\ =\ vc\_env[\textcolor{stringliteral}{'include'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00408}00408\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}})\ ==\ 0:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Python\ was\ built\ with\ \%s,\ "{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00412}00412\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}and\ extensions\ need\ to\ be\ built\ with\ the\ same\ "{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}version\ of\ the\ compiler,\ but\ it\ isn't\ installed."{}}\ \%\ self.\_\_product}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00416}00416\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a188fd4a5cb2135f7ec318948d46a6bd1}{cc}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{find\_exe}}(\textcolor{stringliteral}{"{}cl.exe"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a3419b57100c7fdafc1c9f7815db982d1}{linker}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{find\_exe}}(\textcolor{stringliteral}{"{}link.exe"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afeaf1580d34f456f38cddde4ab09fed5}{lib}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{find\_exe}}(\textcolor{stringliteral}{"{}lib.exe"{}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a253772139cffaee308b518be40af7cea}{rc}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{find\_exe}}(\textcolor{stringliteral}{"{}rc.exe"{}})\ \ \textcolor{comment}{\#\ resource\ compiler}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a782099abba974b7779cb5b5e690de374}{mc}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{find\_exe}}(\textcolor{stringliteral}{"{}mc.exe"{}})\ \ \textcolor{comment}{\#\ message\ compiler}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ self.set\_path\_env\_var('lib')}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ self.set\_path\_env\_var('include')}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00423}00423\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ extend\ the\ MSVC\ path\ with\ the\ current\ path}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00425}00425\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ os.environ[\textcolor{stringliteral}{'path'}].split(\textcolor{stringliteral}{';'}):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}}.append(p)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00428}00428\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00429}00429\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00430}00430\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}}\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1msvc9compiler_a8992cdad30e218adaceca9a97e49cc33}{normalize\_and\_reduce\_paths}}(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00431}00431\ \ \ \ \ \ \ \ \ os.environ[\textcolor{stringliteral}{'path'}]\ =\ \textcolor{stringliteral}{"{};"{}}.join(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00432}00432\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00433}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a7843a1aae381de3c6406b44c1600e4a7}{00433}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a7843a1aae381de3c6406b44c1600e4a7}{preprocess\_options}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00434}00434\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_arch}}\ ==\ \textcolor{stringliteral}{"{}x86"{}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00435}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afd522c16898c1708b1e4a04865f9f524}{00435}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afd522c16898c1708b1e4a04865f9f524}{compile\_options}}\ =\ [\textcolor{stringliteral}{'/nologo'},\ \textcolor{stringliteral}{'/O2'},\ \textcolor{stringliteral}{'/MD'},\ \textcolor{stringliteral}{'/W3'},\ \textcolor{stringliteral}{'/DNDEBUG'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00436}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_abc30bf161486baa73a3d1ec6c3ac5656}{00436}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_abc30bf161486baa73a3d1ec6c3ac5656}{compile\_options\_debug}}\ =\ [}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/nologo'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/Od'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/MDd'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/W3'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/Z7'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/D\_DEBUG'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00444}00444\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Win64}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afd522c16898c1708b1e4a04865f9f524}{compile\_options}}\ =\ [\textcolor{stringliteral}{'/nologo'},\ \textcolor{stringliteral}{'/O2'},\ \textcolor{stringliteral}{'/MD'},\ \textcolor{stringliteral}{'/W3'},\ \textcolor{stringliteral}{'/GS-\/'},\ \textcolor{stringliteral}{'/DNDEBUG'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_abc30bf161486baa73a3d1ec6c3ac5656}{compile\_options\_debug}}\ =\ [}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/nologo'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/Od'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/MDd'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/W3'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/GS-\/'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/Z7'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'/D\_DEBUG'},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00457}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a60cf0f1d5c1727f22cd78e29ae3b8698}{00457}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a60cf0f1d5c1727f22cd78e29ae3b8698}{ldflags\_shared}}\ =\ [\textcolor{stringliteral}{'/DLL'},\ \textcolor{stringliteral}{'/nologo'},\ \textcolor{stringliteral}{'/INCREMENTAL:NO'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_version}}\ >=\ 7:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00459}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a6cb4be27182cccb7394698886818c4bc}{00459}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a6cb4be27182cccb7394698886818c4bc}{ldflags\_shared\_debug}}\ =\ [\textcolor{stringliteral}{'/DLL'},\ \textcolor{stringliteral}{'/nologo'},\ \textcolor{stringliteral}{'/INCREMENTAL:no'},\ \textcolor{stringliteral}{'/DEBUG'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00460}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a917094a803fbd966f59760f1bdcf45dc}{00460}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a917094a803fbd966f59760f1bdcf45dc}{ldflags\_static}}\ =\ [\textcolor{stringliteral}{'/nologo'}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00461}00461\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad902b194a0747de0cc74ac098cd5a054}{initialized}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00463}00463\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00464}00464\ \ \ \ \ \textcolor{comment}{\#\ -\/-\/\ Worker\ methods\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00465}00465\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00466}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a39cc5c2c89a083409fd8493ccc8ec93f}{00466}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a39cc5c2c89a083409fd8493ccc8ec93f}{object\_filenames}}(self,\ source\_filenames,\ strip\_dir=0,\ output\_dir=''):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Copied\ from\ ccompiler.py,\ extended\ to\ return\ .res\ as\ 'object'-\/file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ for\ .rc\ input\ file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ output\_dir\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ \ \ \ \ output\_dir\ =\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ obj\_names\ =\ []}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ src\_name\ \textcolor{keywordflow}{in}\ source\_filenames:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ (base,\ ext)\ =\ os.path.splitext(src\_name)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ base\ =\ os.path.splitdrive(base)[1]\ \ \textcolor{comment}{\#\ Chop\ off\ the\ drive}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ base\ =\ base[os.path.isabs(base)\ :]\ \ \textcolor{comment}{\#\ If\ abs,\ chop\ off\ leading\ /}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ext\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a08fafc4bb9fd2e96519f5f053058e295}{src\_extensions}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Better\ to\ raise\ an\ exception\ instead\ of\ silently\ continuing}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ later\ complain\ about\ sources\ and\ targets\ having}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ different\ lengths}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ CompileError(\textcolor{stringliteral}{"{}Don't\ know\ how\ to\ compile\ \%s"{}}\ \%\ src\_name)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ strip\_dir:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ base\ =\ os.path.basename(base)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ae1cc4ebb50df131ee10a69732ba7e63e}{\_rc\_extensions}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_names.append(os.path.join(output\_dir,\ base\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_af48b98437fddf9580981d3298733d0fb}{res\_extension}}))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad7802c00e91f0ddc5d25996eb3cbd56c}{\_mc\_extensions}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_names.append(os.path.join(output\_dir,\ base\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_af48b98437fddf9580981d3298733d0fb}{res\_extension}}))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_names.append(os.path.join(output\_dir,\ base\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a21bc598957aeb17f5df769e9e5b29002}{obj\_extension}}))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ obj\_names}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00490}00490\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00491}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_acef92f6a3e5ca1da81edac6c4eb13394}{00491}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_acef92f6a3e5ca1da81edac6c4eb13394}{compile}}(\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ sources,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00494}00494\ \ \ \ \ \ \ \ \ output\_dir=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ macros=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ include\_dirs=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ debug=0,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ extra\_preargs=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ extra\_postargs=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ depends=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00501}00501\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00502}00502\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00503}00503\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad902b194a0747de0cc74ac098cd5a054}{initialized}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a94f057de1dc9158080035d0acd89412f}{initialize}}()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ compile\_info\ =\ self.\_setup\_compile(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ output\_dir,\ macros,\ include\_dirs,\ sources,\ depends,\ extra\_postargs}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ macros,\ objects,\ extra\_postargs,\ pp\_opts,\ build\ =\ compile\_info}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ compile\_opts\ =\ extra\_preargs\ \textcolor{keywordflow}{or}\ []}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ compile\_opts.append(\textcolor{stringliteral}{'/c'})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ debug:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00513}00513\ \ \ \ \ \ \ \ \ \ \ \ \ compile\_opts.extend(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_abc30bf161486baa73a3d1ec6c3ac5656}{compile\_options\_debug}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00514}00514\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \ \ \ \ compile\_opts.extend(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afd522c16898c1708b1e4a04865f9f524}{compile\_options}})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00516}00516\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00517}00517\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ obj\ \textcolor{keywordflow}{in}\ objects:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00518}00518\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src,\ ext\ =\ build[obj]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00520}00520\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ debug:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00523}00523\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ pass\ the\ full\ pathname\ to\ MSVC\ in\ debug\ mode,}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ this\ allows\ the\ debugger\ to\ find\ the\ source\ file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ without\ asking\ the\ user\ to\ browse\ for\ it}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src\ =\ os.path.abspath(src)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00527}00527\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a016cb84b10984afa4bda6317ebc64778}{\_c\_extensions}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ input\_opt\ =\ \textcolor{stringliteral}{"{}/Tc"{}}\ +\ src}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ab77983dec263d11123d170f0283dac62}{\_cpp\_extensions}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ input\_opt\ =\ \textcolor{stringliteral}{"{}/Tp"{}}\ +\ src}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ae1cc4ebb50df131ee10a69732ba7e63e}{\_rc\_extensions}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ compile\ .RC\ to\ .RES\ file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ input\_opt\ =\ src}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\_opt\ =\ \textcolor{stringliteral}{"{}/fo"{}}\ +\ obj}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00536}00536\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00537}00537\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn([self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a253772139cffaee308b518be40af7cea}{rc}}]\ +\ pp\_opts\ +\ [output\_opt]\ +\ [input\_opt])}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00538}00538\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00539}00539\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ CompileError(msg)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00540}00540\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad7802c00e91f0ddc5d25996eb3cbd56c}{\_mc\_extensions}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Compile\ .MC\ to\ .RC\ file\ to\ .RES\ file.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ *\ '-\/h\ dir'\ specifies\ the\ directory\ for\ the}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ generated\ include\ file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ *\ '-\/r\ dir'\ specifies\ the\ target\ directory\ of\ the}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00546}00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ generated\ RC\ file\ and\ the\ binary\ message\ resource}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ it\ includes}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ now\ (since\ there\ are\ no\ options\ to\ change\ this),}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ use\ the\ source-\/directory\ for\ the\ include\ file\ and}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ build\ directory\ for\ the\ RC\ file\ and\ message}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ resources.\ This\ works\ at\ least\ for\ win32all.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00553}00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ h\_dir\ =\ os.path.dirname(src)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00554}00554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rc\_dir\ =\ os.path.dirname(obj)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00555}00555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00556}00556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ first\ compile\ .MC\ to\ .RC\ and\ .H\ file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn([self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a782099abba974b7779cb5b5e690de374}{mc}}]\ +\ [\textcolor{stringliteral}{'-\/h'},\ h\_dir,\ \textcolor{stringliteral}{'-\/r'},\ rc\_dir]\ +\ [src])}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ base,\ \_\ =\ os.path.splitext(os.path.basename(src))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00559}00559\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rc\_file\ =\ os.path.join(rc\_dir,\ base\ +\ \textcolor{stringliteral}{'.rc'})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00560}00560\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ then\ compile\ .RC\ to\ .RES\ file}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00561}00561\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn([self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a253772139cffaee308b518be40af7cea}{rc}}]\ +\ [\textcolor{stringliteral}{"{}/fo"{}}\ +\ obj]\ +\ [rc\_file])}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00562}00562\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00563}00563\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ CompileError(msg)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00566}00566\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ how\ to\ handle\ this\ file?}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ CompileError(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Don't\ know\ how\ to\ compile\ \{\}\ to\ \{\}"{}}.format(src,\ obj)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00571}00571\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00572}00572\ \ \ \ \ \ \ \ \ \ \ \ \ output\_opt\ =\ \textcolor{stringliteral}{"{}/Fo"{}}\ +\ obj}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00574}00574\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00575}00575\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a188fd4a5cb2135f7ec318948d46a6bd1}{cc}}]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ compile\_opts}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00577}00577\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ pp\_opts}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ [input\_opt,\ output\_opt]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00579}00579\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ extra\_postargs}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00581}00581\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ CompileError(msg)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00583}00583\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00584}00584\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ objects}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00585}00585\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00586}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ac17cc8956aa2747a4dcf61e7bc8cffe2}{00586}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ac17cc8956aa2747a4dcf61e7bc8cffe2}{create\_static\_lib}}(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00587}00587\ \ \ \ \ \ \ \ \ self,\ objects,\ output\_libname,\ output\_dir=None,\ debug=0,\ target\_lang=None}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00588}00588\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00589}00589\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00590}00590\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad902b194a0747de0cc74ac098cd5a054}{initialized}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a94f057de1dc9158080035d0acd89412f}{initialize}}()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00592}00592\ \ \ \ \ \ \ \ \ (objects,\ output\_dir)\ =\ self.\_fix\_object\_args(objects,\ output\_dir)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00593}00593\ \ \ \ \ \ \ \ \ output\_filename\ =\ self.library\_filename(output\_libname,\ output\_dir=output\_dir)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00594}00594\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00595}00595\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\_need\_link(objects,\ output\_filename):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00596}00596\ \ \ \ \ \ \ \ \ \ \ \ \ lib\_args\ =\ objects\ +\ [\textcolor{stringliteral}{'/OUT:'}\ +\ output\_filename]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00597}00597\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ debug:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00598}00598\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}\ \ \textcolor{comment}{\#\ XXX\ what\ goes\ here?}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00599}00599\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00600}00600\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn([self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_afeaf1580d34f456f38cddde4ab09fed5}{lib}}]\ +\ lib\_args)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00601}00601\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00602}00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ LibError(msg)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00603}00603\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00604}00604\ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}skipping\ \%s\ (up-\/to-\/date)"{}},\ output\_filename)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00605}00605\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00606}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a0c96b6aa97f0cccac88db8bc4220274f}{00606}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a0c96b6aa97f0cccac88db8bc4220274f}{link}}(\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00607}00607\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00608}00608\ \ \ \ \ \ \ \ \ target\_desc,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00609}00609\ \ \ \ \ \ \ \ \ objects,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00610}00610\ \ \ \ \ \ \ \ \ output\_filename,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00611}00611\ \ \ \ \ \ \ \ \ output\_dir=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00612}00612\ \ \ \ \ \ \ \ \ libraries=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00613}00613\ \ \ \ \ \ \ \ \ library\_dirs=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00614}00614\ \ \ \ \ \ \ \ \ runtime\_library\_dirs=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00615}00615\ \ \ \ \ \ \ \ \ export\_symbols=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00616}00616\ \ \ \ \ \ \ \ \ debug=0,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00617}00617\ \ \ \ \ \ \ \ \ extra\_preargs=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00618}00618\ \ \ \ \ \ \ \ \ extra\_postargs=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00619}00619\ \ \ \ \ \ \ \ \ build\_temp=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00620}00620\ \ \ \ \ \ \ \ \ target\_lang=None,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00621}00621\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00622}00622\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00623}00623\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad902b194a0747de0cc74ac098cd5a054}{initialized}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00624}00624\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a94f057de1dc9158080035d0acd89412f}{initialize}}()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00625}00625\ \ \ \ \ \ \ \ \ (objects,\ output\_dir)\ =\ self.\_fix\_object\_args(objects,\ output\_dir)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00626}00626\ \ \ \ \ \ \ \ \ fixed\_args\ =\ self.\_fix\_lib\_args(libraries,\ library\_dirs,\ runtime\_library\_dirs)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00627}00627\ \ \ \ \ \ \ \ \ (libraries,\ library\_dirs,\ runtime\_library\_dirs)\ =\ fixed\_args}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00628}00628\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00629}00629\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ runtime\_library\_dirs:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00630}00630\ \ \ \ \ \ \ \ \ \ \ \ \ self.warn(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00631}00631\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}I\ don't\ know\ what\ to\ do\ with\ 'runtime\_library\_dirs':\ "{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00632}00632\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ str(runtime\_library\_dirs)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00633}00633\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00634}00634\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00635}00635\ \ \ \ \ \ \ \ \ lib\_opts\ =\ gen\_lib\_options(self,\ library\_dirs,\ runtime\_library\_dirs,\ libraries)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00636}00636\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ output\_dir\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00637}00637\ \ \ \ \ \ \ \ \ \ \ \ \ output\_filename\ =\ os.path.join(output\_dir,\ output\_filename)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00638}00638\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00639}00639\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\_need\_link(objects,\ output\_filename):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ target\_desc\ ==\ CCompiler.EXECUTABLE:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ debug:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00642}00642\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ldflags\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a6cb4be27182cccb7394698886818c4bc}{ldflags\_shared\_debug}}[1:]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00644}00644\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ldflags\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a60cf0f1d5c1727f22cd78e29ae3b8698}{ldflags\_shared}}[1:]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ debug:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00647}00647\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ldflags\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a6cb4be27182cccb7394698886818c4bc}{ldflags\_shared\_debug}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00648}00648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ldflags\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a60cf0f1d5c1727f22cd78e29ae3b8698}{ldflags\_shared}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00650}00650\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00651}00651\ \ \ \ \ \ \ \ \ \ \ \ \ export\_opts\ =\ []}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00652}00652\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sym\ \textcolor{keywordflow}{in}\ export\_symbols\ \textcolor{keywordflow}{or}\ []:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00653}00653\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ export\_opts.append(\textcolor{stringliteral}{"{}/EXPORT:"{}}\ +\ sym)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00654}00654\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00655}00655\ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args\ =\ (}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00656}00656\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ldflags\ +\ lib\_opts\ +\ export\_opts\ +\ objects\ +\ [\textcolor{stringliteral}{'/OUT:'}\ +\ output\_filename]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00657}00657\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00658}00658\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00659}00659\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ The\ MSVC\ linker\ generates\ .lib\ and\ .exp\ files,\ which\ cannot\ be}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00660}00660\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ suppressed\ by\ any\ linker\ switches.\ The\ .lib\ files\ may\ even\ be}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00661}00661\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ needed!\ Make\ sure\ they\ are\ generated\ in\ the\ temporary\ build}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00662}00662\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ directory.\ Since\ they\ have\ different\ names\ for\ debug\ and\ release}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ builds,\ they\ can\ go\ into\ the\ same\ directory.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00664}00664\ \ \ \ \ \ \ \ \ \ \ \ \ build\_temp\ =\ os.path.dirname(objects[0])}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00665}00665\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ export\_symbols\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00666}00666\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (dll\_name,\ dll\_ext)\ =\ os.path.splitext(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00667}00667\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.path.basename(output\_filename)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00668}00668\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00669}00669\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ implib\_file\ =\ os.path.join(build\_temp,\ self.library\_filename(dll\_name))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00670}00670\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args.append(\textcolor{stringliteral}{'/IMPLIB:'}\ +\ implib\_file)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00671}00671\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00672}00672\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad32e1ea34be335a4f534934c7d6a09dc}{manifest\_setup\_ldargs}}(output\_filename,\ build\_temp,\ ld\_args)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00673}00673\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00674}00674\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ extra\_preargs:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00675}00675\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args[:0]\ =\ extra\_preargs}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00676}00676\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ extra\_postargs:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00677}00677\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args.extend(extra\_postargs)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00678}00678\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00679}00679\ \ \ \ \ \ \ \ \ \ \ \ \ self.mkpath(os.path.dirname(output\_filename))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00680}00680\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00681}00681\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn([self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a3419b57100c7fdafc1c9f7815db982d1}{linker}}]\ +\ ld\_args)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00682}00682\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00683}00683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ LinkError(msg)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00684}00684\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00685}00685\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ embed\ the\ manifest}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00686}00686\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ -\/\ this\ is\ somewhat\ fragile\ -\/\ if\ mt.exe\ fails,\ distutils}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00687}00687\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ will\ still\ consider\ the\ DLL\ up-\/to-\/date,\ but\ it\ will\ not\ have\ a}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00688}00688\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ manifest.\ \ Maybe\ we\ should\ link\ to\ a\ temp\ file?\ \ OTOH,\ that}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00689}00689\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ implies\ a\ build\ environment\ error\ that\ shouldn't\ go\ undetected.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00690}00690\ \ \ \ \ \ \ \ \ \ \ \ \ mfinfo\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a5bf8badb4686c7f2a73957f8ca921ec5}{manifest\_get\_embed\_info}}(target\_desc,\ ld\_args)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00691}00691\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ mfinfo\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00692}00692\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mffilename,\ mfid\ =\ mfinfo}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00693}00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ out\_arg\ =\ \textcolor{stringliteral}{'-\/outputresource:\{\};\{\}'}.format(output\_filename,\ mfid)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00694}00694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00695}00695\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn([\textcolor{stringliteral}{'mt.exe'},\ \textcolor{stringliteral}{'-\/nologo'},\ \textcolor{stringliteral}{'-\/manifest'},\ mffilename,\ out\_arg])}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00696}00696\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00697}00697\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ LinkError(msg)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00698}00698\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00699}00699\ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}skipping\ \%s\ (up-\/to-\/date)"{}},\ output\_filename)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00700}00700\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00701}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad32e1ea34be335a4f534934c7d6a09dc}{00701}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ad32e1ea34be335a4f534934c7d6a09dc}{manifest\_setup\_ldargs}}(self,\ output\_filename,\ build\_temp,\ ld\_args):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00702}00702\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ we\ need\ a\ manifest\ at\ all,\ an\ embedded\ manifest\ is\ recommended.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00703}00703\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ See\ MSDN\ article\ titled}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00704}00704\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ "{}How\ to:\ Embed\ a\ Manifest\ Inside\ a\ C/C++\ Application"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00705}00705\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (currently\ at\ http://msdn2.microsoft.com/en-\/us/library/ms235591(VS.80).aspx)}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00706}00706\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Ask\ the\ linker\ to\ generate\ the\ manifest\ in\ the\ temp\ dir,\ so}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00707}00707\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ can\ check\ it,\ and\ possibly\ embed\ it,\ later.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00708}00708\ \ \ \ \ \ \ \ \ temp\_manifest\ =\ os.path.join(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00709}00709\ \ \ \ \ \ \ \ \ \ \ \ \ build\_temp,\ os.path.basename(output\_filename)\ +\ \textcolor{stringliteral}{"{}.manifest"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00710}00710\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00711}00711\ \ \ \ \ \ \ \ \ ld\_args.append(\textcolor{stringliteral}{'/MANIFESTFILE:'}\ +\ temp\_manifest)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00712}00712\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00713}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a5bf8badb4686c7f2a73957f8ca921ec5}{00713}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a5bf8badb4686c7f2a73957f8ca921ec5}{manifest\_get\_embed\_info}}(self,\ target\_desc,\ ld\_args):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00714}00714\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ a\ manifest\ should\ be\ embedded,\ return\ a\ tuple\ of}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00715}00715\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (manifest\_filename,\ resource\_id).\ \ Returns\ None\ if\ no\ manifest}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00716}00716\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ should\ be\ embedded.\ \ See\ http://bugs.python.org/issue7833\ for\ why}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00717}00717\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ want\ to\ avoid\ any\ manifest\ for\ extension\ modules\ if\ we\ can)}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00718}00718\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ ld\_args:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00719}00719\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ arg.startswith(\textcolor{stringliteral}{"{}/MANIFESTFILE:"{}}):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00720}00720\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ temp\_manifest\ =\ arg.split(\textcolor{stringliteral}{"{}:"{}},\ 1)[1]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00721}00721\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00722}00722\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00723}00723\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ no\ /MANIFESTFILE\ so\ nothing\ to\ do.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00724}00724\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00725}00725\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ target\_desc\ ==\ CCompiler.EXECUTABLE:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00726}00726\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ by\ default,\ executables\ always\ get\ the\ manifest\ with\ the}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00727}00727\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ CRT\ referenced.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00728}00728\ \ \ \ \ \ \ \ \ \ \ \ \ mfid\ =\ 1}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00729}00729\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00730}00730\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Extension\ modules\ try\ and\ avoid\ any\ manifest\ if\ possible.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00731}00731\ \ \ \ \ \ \ \ \ \ \ \ \ mfid\ =\ 2}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00732}00732\ \ \ \ \ \ \ \ \ \ \ \ \ temp\_manifest\ =\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a18ee7d8ddaf02ec5a9cf2d808c2104d5}{\_remove\_visual\_c\_ref}}(temp\_manifest)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00733}00733\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ temp\_manifest\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00734}00734\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00735}00735\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ temp\_manifest,\ mfid}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00736}00736\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00737}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a18ee7d8ddaf02ec5a9cf2d808c2104d5}{00737}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a18ee7d8ddaf02ec5a9cf2d808c2104d5}{\_remove\_visual\_c\_ref}}(self,\ manifest\_file):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00738}00738\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00739}00739\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Remove\ references\ to\ the\ Visual\ C\ runtime,\ so\ they\ will}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00740}00740\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ fall\ through\ to\ the\ Visual\ C\ dependency\ of\ Python.exe.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00741}00741\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ way,\ when\ installed\ for\ a\ restricted\ user\ (e.g.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00742}00742\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ runtimes\ are\ not\ in\ WinSxS\ folder,\ but\ in\ Python's\ own}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00743}00743\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ folder),\ the\ runtimes\ do\ not\ need\ to\ be\ in\ every\ folder}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00744}00744\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ with\ .pyd's.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00745}00745\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Returns\ either\ the\ filename\ of\ the\ modified\ manifest\ or}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00746}00746\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ None\ if\ no\ manifest\ should\ be\ embedded.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00747}00747\ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_f\ =\ open(manifest\_file)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00748}00748\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00749}00749\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_buf\ =\ manifest\_f.read()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00750}00750\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00751}00751\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_f.close()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00752}00752\ \ \ \ \ \ \ \ \ \ \ \ \ pattern\ =\ re.compile(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00753}00753\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{r"{}"{}"{}<assemblyIdentity.*?name=("{}|')Microsoft\(\backslash\)."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00754}00754\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{r"{}"{}"{}VC\(\backslash\)d\{2\}\(\backslash\).CRT("{}|').*?(/>|</assemblyIdentity>)"{}"{}"{}},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00755}00755\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ re.DOTALL,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00756}00756\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00757}00757\ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_buf\ =\ re.sub(pattern,\ \textcolor{stringliteral}{"{}"{}},\ manifest\_buf)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00758}00758\ \ \ \ \ \ \ \ \ \ \ \ \ pattern\ =\ \textcolor{stringliteral}{r"{}<dependentAssembly>\(\backslash\)s*</dependentAssembly>"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00759}00759\ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_buf\ =\ re.sub(pattern,\ \textcolor{stringliteral}{"{}"{}},\ manifest\_buf)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00760}00760\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Now\ see\ if\ any\ other\ assemblies\ are\ referenced\ -\/\ if\ not,\ we}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00761}00761\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ don't\ want\ a\ manifest\ embedded.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00762}00762\ \ \ \ \ \ \ \ \ \ \ \ \ pattern\ =\ re.compile(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00763}00763\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{r"{}"{}"{}<assemblyIdentity.*?name=(?:"{}|')(.+?)(?:"{}|')"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00764}00764\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{r"{}"{}"{}.*?(?:/>|</assemblyIdentity>)"{}"{}"{}},}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00765}00765\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ re.DOTALL,}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00766}00766\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00767}00767\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ re.search(pattern,\ manifest\_buf)\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00768}00768\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00769}00769\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00770}00770\ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_f\ =\ open(manifest\_file,\ \textcolor{stringliteral}{'w'})}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00771}00771\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00772}00772\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_f.write(manifest\_buf)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00773}00773\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ manifest\_file}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00774}00774\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00775}00775\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ manifest\_f.close()}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00776}00776\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00777}00777\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00778}00778\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00779}00779\ \ \ \ \ \textcolor{comment}{\#\ -\/-\/\ Miscellaneous\ methods\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00780}00780\ \ \ \ \ \textcolor{comment}{\#\ These\ are\ all\ used\ by\ the\ 'gen\_lib\_options()\ function,\ in}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00781}00781\ \ \ \ \ \textcolor{comment}{\#\ ccompiler.py.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00782}00782\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00783}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ac278a776bf6ee17f260d42b803c8cfa5}{00783}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ac278a776bf6ee17f260d42b803c8cfa5}{library\_dir\_option}}(self,\ dir):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00784}00784\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}/LIBPATH:"{}}\ +\ dir}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00785}00785\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00786}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a8f2bbc6e78ea3837813ff85d0258527d}{00786}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a8f2bbc6e78ea3837813ff85d0258527d}{runtime\_library\_dir\_option}}(self,\ dir):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00787}00787\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsPlatformError(}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00788}00788\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}don't\ know\ how\ to\ set\ runtime\ library\ search\ path\ for\ MSVC++"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00789}00789\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00790}00790\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00791}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ae67300996893bfc1bb20dce8c17fdeb5}{00791}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_ae67300996893bfc1bb20dce8c17fdeb5}{library\_option}}(self,\ lib):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00792}00792\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.library\_filename(lib)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00793}00793\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00794}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_aec331991bd0bf1b37b7ce810f7fc4b19}{00794}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_aec331991bd0bf1b37b7ce810f7fc4b19}{find\_library\_file}}(self,\ dirs,\ lib,\ debug=0):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00795}00795\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Prefer\ a\ debugging\ library\ if\ found\ (and\ requested),\ but\ deal}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00796}00796\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ with\ it\ if\ we\ don't\ have\ one.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00797}00797\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ debug:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00798}00798\ \ \ \ \ \ \ \ \ \ \ \ \ try\_names\ =\ [lib\ +\ \textcolor{stringliteral}{"{}\_d"{}},\ lib]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00799}00799\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00800}00800\ \ \ \ \ \ \ \ \ \ \ \ \ try\_names\ =\ [lib]}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00801}00801\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ dir\ \textcolor{keywordflow}{in}\ dirs:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00802}00802\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ try\_names:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00803}00803\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ libfile\ =\ os.path.join(dir,\ self.library\_filename(name))}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00804}00804\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(libfile):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00805}00805\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ libfile}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00806}00806\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00807}00807\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Oops,\ didn't\ find\ it\ in\ *any*\ of\ 'dirs'}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00808}00808\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00809}00809\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00810}00810\ \ \ \ \ \textcolor{comment}{\#\ Helper\ methods\ for\ using\ the\ MSVC\ registry\ settings}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00811}00811\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00812}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{00812}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler_a01cb58614ce12071446ff74416f4eb88}{find\_exe}}(self,\ exe):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00813}00813\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ path\ to\ an\ MSVC\ executable\ program.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00814}00814\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00815}00815\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Tries\ to\ find\ the\ program\ in\ several\ places:\ first,\ one\ of\ the}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00816}00816\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ MSVC\ program\ search\ paths\ from\ the\ registry;\ next,\ the\ directories}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00817}00817\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ in\ the\ PATH\ environment\ variable.\ \ If\ any\ of\ those\ work,\ return\ an}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00818}00818\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ absolute\ path\ that\ is\ known\ to\ exist.\ \ If\ none\ of\ them\ work,\ just}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00819}00819\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ return\ the\ original\ program\ name,\ 'exe'.}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00820}00820\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00821}00821\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1msvc9compiler_1_1_m_s_v_c_compiler}{\_\_paths}}:}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00822}00822\ \ \ \ \ \ \ \ \ \ \ \ \ fn\ =\ os.path.join(os.path.abspath(p),\ exe)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00823}00823\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isfile(fn):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00824}00824\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ fn}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00825}00825\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00826}00826\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ didn't\ find\ it;\ try\ existing\ path}}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00827}00827\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ os.environ[\textcolor{stringliteral}{'Path'}].split(\textcolor{stringliteral}{';'}):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00828}00828\ \ \ \ \ \ \ \ \ \ \ \ \ fn\ =\ os.path.join(os.path.abspath(p),\ exe)}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00829}00829\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.isfile(fn):}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00830}00830\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ fn}
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00831}00831\ }
+\DoxyCodeLine{\Hypertarget{msvc9compiler_8py_source_l00832}00832\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ exe}
+
+\end{DoxyCode}

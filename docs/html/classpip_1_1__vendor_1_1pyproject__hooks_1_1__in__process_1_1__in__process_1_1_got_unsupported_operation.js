@@ -1,0 +1,4 @@
+var classpip_1_1__vendor_1_1pyproject__hooks_1_1__in__process_1_1__in__process_1_1_got_unsupported_operation =
+[
+    [ "traceback", "classpip_1_1__vendor_1_1pyproject__hooks_1_1__in__process_1_1__in__process_1_1_got_unsupported_operation.html#a35f9e8e1f158a36d85e58199f81702c7", null ]
+];

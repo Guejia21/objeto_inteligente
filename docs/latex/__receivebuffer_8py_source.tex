@@ -1,0 +1,159 @@
+\doxysection{\+\_\+receivebuffer.\+py}
+\hypertarget{__receivebuffer_8py_source}{}\label{__receivebuffer_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_receivebuffer.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_receivebuffer.py}}
+\mbox{\hyperlink{__receivebuffer_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00001}\mbox{\hyperlink{namespaceh11_1_1__receivebuffer}{00001}}\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00002}00002\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00003}00003\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ List,\ Optional,\ Union}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00005}00005\ \_\_all\_\_\ =\ [\textcolor{stringliteral}{"{}ReceiveBuffer"{}}]}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00008}00008\ \textcolor{comment}{\#\ Operations\ we\ want\ to\ support:}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00009}00009\ \textcolor{comment}{\#\ -\/\ find\ next\ \(\backslash\)r\(\backslash\)n\ or\ \(\backslash\)r\(\backslash\)n\(\backslash\)r\(\backslash\)n\ (\(\backslash\)n\ or\ \(\backslash\)n\(\backslash\)n\ are\ also\ acceptable),}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00010}00010\ \textcolor{comment}{\#\ \ \ or\ wait\ until\ there\ is\ one}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00011}00011\ \textcolor{comment}{\#\ -\/\ read\ at-\/most-\/N\ bytes}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00012}00012\ \textcolor{comment}{\#\ Goals:}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00013}00013\ \textcolor{comment}{\#\ -\/\ on\ average,\ do\ this\ fast}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00014}00014\ \textcolor{comment}{\#\ -\/\ worst\ case,\ do\ this\ in\ O(n)\ where\ n\ is\ the\ number\ of\ bytes\ processed}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00015}00015\ \textcolor{comment}{\#\ Plan:}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00016}00016\ \textcolor{comment}{\#\ -\/\ store\ bytearray,\ offset,\ how\ far\ we've\ searched\ for\ a\ separator\ token}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00017}00017\ \textcolor{comment}{\#\ -\/\ use\ the\ how-\/far-\/we've-\/searched\ data\ to\ avoid\ rescanning}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00018}00018\ \textcolor{comment}{\#\ -\/\ while\ doing\ a\ stream\ of\ uninterrupted\ processing,\ advance\ offset\ instead}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00019}00019\ \textcolor{comment}{\#\ \ \ of\ constantly\ copying}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00020}00020\ \textcolor{comment}{\#\ WARNING:}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00021}00021\ \textcolor{comment}{\#\ -\/\ I\ haven't\ benchmarked\ or\ profiled\ any\ of\ this\ yet.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00022}00022\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00023}00023\ \textcolor{comment}{\#\ Note\ that\ starting\ in\ Python\ 3.4,\ deleting\ the\ initial\ n\ bytes\ from\ a}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00024}00024\ \textcolor{comment}{\#\ bytearray\ is\ amortized\ O(n),\ thanks\ to\ some\ excellent\ work\ by\ Antoine}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00025}00025\ \textcolor{comment}{\#\ Martin:}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00026}00026\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00027}00027\ \textcolor{comment}{\#\ \ \ \ \ https://bugs.python.org/issue19087}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00028}00028\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00029}00029\ \textcolor{comment}{\#\ This\ means\ that\ if\ we\ only\ supported\ 3.4+,\ we\ could\ get\ rid\ of\ the\ code\ here}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00030}00030\ \textcolor{comment}{\#\ involving\ self.\_start\ and\ self.compress,\ because\ it's\ doing\ exactly\ the\ same}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00031}00031\ \textcolor{comment}{\#\ thing\ that\ bytearray\ now\ does\ internally.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00032}00032\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00033}00033\ \textcolor{comment}{\#\ BUT\ unfortunately,\ we\ still\ support\ 2.7,\ and\ reading\ short\ segments\ out\ of\ a}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00034}00034\ \textcolor{comment}{\#\ long\ buffer\ MUST\ be\ O(bytes\ read)\ to\ avoid\ DoS\ issues,\ so\ we\ can't\ actually}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00035}00035\ \textcolor{comment}{\#\ delete\ this\ code.\ Yet:}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00036}00036\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00037}00037\ \textcolor{comment}{\#\ \ \ \ \ https://pythonclock.org/}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00038}00038\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00039}00039\ \textcolor{comment}{\#\ (Two\ things\ to\ double-\/check\ first\ though:\ make\ sure\ PyPy\ also\ has\ the}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00040}00040\ \textcolor{comment}{\#\ optimization,\ and\ benchmark\ to\ make\ sure\ it's\ a\ win,\ since\ we\ do\ have\ a}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00041}00041\ \textcolor{comment}{\#\ slightly\ clever\ thing\ where\ we\ delay\ calling\ compress()\ until\ we've}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00042}00042\ \textcolor{comment}{\#\ processed\ a\ whole\ event,\ which\ could\ in\ theory\ be\ slightly\ more\ efficient}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00043}00043\ \textcolor{comment}{\#\ than\ the\ internal\ bytearray\ support.)}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00044}\mbox{\hyperlink{namespaceh11_1_1__receivebuffer_ad436dd3b95aec92f75e7fb7936b92d10}{00044}}\ blank\_line\_regex\ =\ re.compile(b\textcolor{stringliteral}{"{}\(\backslash\)n\(\backslash\)r?\(\backslash\)n"{}},\ re.MULTILINE)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00047}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer}{00047}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer}{ReceiveBuffer}}:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00048}00048\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00049}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{00049}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}\ =\ bytearray()}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00050}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a8861d0a757b7d15e88b3349f408a5e6b}{00050}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a8861d0a757b7d15e88b3349f408a5e6b}{\_next\_line\_search}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00051}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a2090bd2d758e6f683aeac268bec7d813}{00051}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a2090bd2d758e6f683aeac268bec7d813}{\_multiple\_lines\_search}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00053}00053\ \ \ \ \ \textcolor{keyword}{def\ }\_\_iadd\_\_(self,\ byteslike:\ Union[bytes,\ bytearray])\ -\/>\ \textcolor{stringliteral}{"{}ReceiveBuffer"{}}:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}\ +=\ byteslike}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00057}00057\ \ \ \ \ \textcolor{keyword}{def\ }\_\_bool\_\_(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bool(len(self))}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00060}00060\ \ \ \ \ \textcolor{keyword}{def\ }\_\_len\_\_(self)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ len(self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}})}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00063}00063\ \ \ \ \ \textcolor{comment}{\#\ for\ @property\ unprocessed\_data}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00064}00064\ \ \ \ \ \textcolor{keyword}{def\ }\_\_bytes\_\_(self)\ -\/>\ bytes:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bytes(self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}})}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00067}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aea15d15508bd7b4dfe87626e25145619}{00067}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aea15d15508bd7b4dfe87626e25145619}{\_extract}}(self,\ count:\ int)\ -\/>\ bytearray:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ extracting\ an\ initial\ slice\ of\ the\ data\ buffer\ and\ return\ it}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ out\ =\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}[:count]}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}[:count]}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a8861d0a757b7d15e88b3349f408a5e6b}{\_next\_line\_search}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a2090bd2d758e6f683aeac268bec7d813}{\_multiple\_lines\_search}}\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00077}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aa5e80c49bc7831f81c34388a5a3df74c}{00077}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aa5e80c49bc7831f81c34388a5a3df74c}{maybe\_extract\_at\_most}}(self,\ count:\ int)\ -\/>\ Optional[bytearray]:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Extract\ a\ fixed\ number\ of\ bytes\ from\ the\ buffer.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ out\ =\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}[:count]}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ out:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aea15d15508bd7b4dfe87626e25145619}{\_extract}}(count)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00087}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a0ac41f0629f03974a54614964e2b3655}{00087}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a0ac41f0629f03974a54614964e2b3655}{maybe\_extract\_next\_line}}(self)\ -\/>\ Optional[bytearray]:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Extract\ the\ first\ line,\ if\ it\ is\ completed\ in\ the\ buffer.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Only\ search\ in\ buffer\ space\ that\ we've\ not\ already\ looked\ at.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ search\_start\_index\ =\ max(0,\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a8861d0a757b7d15e88b3349f408a5e6b}{\_next\_line\_search}}\ -\/\ 1)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ partial\_idx\ =\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}.find(b\textcolor{stringliteral}{"{}\(\backslash\)r\(\backslash\)n"{}},\ search\_start\_index)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ partial\_idx\ ==\ -\/1:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a8861d0a757b7d15e88b3349f408a5e6b}{\_next\_line\_search}}\ =\ len(self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}})}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ +\ 2\ is\ to\ compensate\ len(b"{}\(\backslash\)r\(\backslash\)n"{})}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ idx\ =\ partial\_idx\ +\ 2}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aea15d15508bd7b4dfe87626e25145619}{\_extract}}(idx)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00104}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_acdfc2418cf14aa01e17b8d9757f22b1e}{00104}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_acdfc2418cf14aa01e17b8d9757f22b1e}{maybe\_extract\_lines}}(self)\ -\/>\ Optional[List[bytearray]]:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Extract\ everything\ up\ to\ the\ first\ blank\ line,\ and\ return\ a\ list\ of\ lines.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Handle\ the\ case\ where\ we\ have\ an\ immediate\ empty\ line.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}[:1]\ ==\ b\textcolor{stringliteral}{"{}\(\backslash\)n"{}}:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aea15d15508bd7b4dfe87626e25145619}{\_extract}}(1)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ []}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}[:2]\ ==\ b\textcolor{stringliteral}{"{}\(\backslash\)r\(\backslash\)n"{}}:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aea15d15508bd7b4dfe87626e25145619}{\_extract}}(2)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ []}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Only\ search\ in\ buffer\ space\ that\ we've\ not\ already\ looked\ at.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ match\ =\ blank\_line\_regex.search(self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}},\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a2090bd2d758e6f683aeac268bec7d813}{\_multiple\_lines\_search}})}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ match\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a2090bd2d758e6f683aeac268bec7d813}{\_multiple\_lines\_search}}\ =\ max(0,\ len(self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}})\ -\/\ 2)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Truncate\ the\ buffer\ and\ return\ it.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ idx\ =\ match.span(0)[-\/1]}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ out\ =\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_aea15d15508bd7b4dfe87626e25145619}{\_extract}}(idx)}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ lines\ =\ out.split(b\textcolor{stringliteral}{"{}\(\backslash\)n"{}})}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ line\ \textcolor{keywordflow}{in}\ lines:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ line.endswith(b\textcolor{stringliteral}{"{}\(\backslash\)r"{}}):}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ del\ line[-\/1]}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ lines[-\/2]\ ==\ lines[-\/1]\ ==\ b\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ del\ lines[-\/2:]}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lines}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00138}00138\ \ \ \ \ \textcolor{comment}{\#\ In\ theory\ we\ should\ wait\ until\ \`{}\(\backslash\)r\(\backslash\)n`\ before\ starting\ to\ validate}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00139}00139\ \ \ \ \ \textcolor{comment}{\#\ incoming\ data.\ However\ it's\ interesting\ to\ detect\ (very)\ invalid\ data}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00140}00140\ \ \ \ \ \textcolor{comment}{\#\ early\ given\ they\ might\ not\ even\ contain\ \`{}\(\backslash\)r\(\backslash\)n`\ at\ all\ (hence\ only}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00141}00141\ \ \ \ \ \textcolor{comment}{\#\ timeout\ will\ get\ rid\ of\ them).}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00142}00142\ \ \ \ \ \textcolor{comment}{\#\ This\ is\ not\ a\ 100\%\ effective\ detection\ but\ more\ of\ a\ cheap\ sanity\ check}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00143}00143\ \ \ \ \ \textcolor{comment}{\#\ allowing\ for\ early\ abort\ in\ some\ useful\ cases.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00144}00144\ \ \ \ \ \textcolor{comment}{\#\ This\ is\ especially\ interesting\ when\ peer\ is\ messing\ up\ with\ HTTPS\ and}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00145}00145\ \ \ \ \ \textcolor{comment}{\#\ sent\ us\ a\ TLS\ stream\ where\ we\ were\ expecting\ plain\ HTTP\ given\ all}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00146}00146\ \ \ \ \ \textcolor{comment}{\#\ versions\ of\ TLS\ so\ far\ start\ handshake\ with\ a\ 0x16\ message\ type\ code.}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00147}\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_ae37dceb5525fdb1c3f55473a6db457d1}{00147}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_ae37dceb5525fdb1c3f55473a6db457d1}{is\_next\_line\_obviously\_invalid\_request\_line}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ HTTP\ header\ line\ must\ not\ contain\ non-\/printable\ characters}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ should\ not\ start\ with\ a\ space}}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classh11_1_1__receivebuffer_1_1_receive_buffer_a60ec5e7b4209e9ba397ee594480a5cdd}{\_data}}[0]\ <\ 0x21}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ IndexError:}
+\DoxyCodeLine{\Hypertarget{__receivebuffer_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+
+\end{DoxyCode}

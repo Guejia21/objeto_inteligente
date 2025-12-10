@@ -1,0 +1,219 @@
+\doxysection{context.\+py}
+\hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source}{}\label{pkg__resources_2__vendor_2jaraco_2context_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/pkg\_resources/\_vendor/jaraco/context.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/pkg\_resources/\_vendor/jaraco/context.py}}
+\mbox{\hyperlink{pkg__resources_2__vendor_2jaraco_2context_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00001}\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context}{00001}}\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00002}00002\ \textcolor{keyword}{import}\ subprocess}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00003}00003\ \textcolor{keyword}{import}\ contextlib}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00004}00004\ \textcolor{keyword}{import}\ functools}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00005}00005\ \textcolor{keyword}{import}\ tempfile}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00006}00006\ \textcolor{keyword}{import}\ shutil}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00007}00007\ \textcolor{keyword}{import}\ operator}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00010}00010\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00011}\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_a6e823568dc82b7cd89c81b113122b260}{00011}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_a6e823568dc82b7cd89c81b113122b260}{pushd}}(dir):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00012}00012\ \ \ \ \ orig\ =\ os.getcwd()}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00013}00013\ \ \ \ \ os.chdir(dir)}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00014}00014\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ dir}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00016}00016\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ os.chdir(orig)}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00020}00020\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00021}\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_afa2d546c19d22998a49fa19b732dd7b6}{00021}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_afa2d546c19d22998a49fa19b732dd7b6}{tarball\_context}}(url,\ target\_dir=None,\ runner=None,\ pushd=pushd):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00022}00022\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ Get\ a\ tarball,\ extract\ it,\ change\ to\ that\ directory,\ yield,\ then}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ clean\ up.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ \`{}runner\`{}\ is\ the\ function\ to\ invoke\ commands.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ \`{}pushd\`{}\ is\ a\ context\ manager\ for\ changing\ the\ directory.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00028}00028\ \ \ \ \ \textcolor{keywordflow}{if}\ target\_dir\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ target\_dir\ =\ os.path.basename(url).replace(\textcolor{stringliteral}{'.tar.gz'},\ \textcolor{stringliteral}{''}).replace(\textcolor{stringliteral}{'.tgz'},\ \textcolor{stringliteral}{''})}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00030}00030\ \ \ \ \ \textcolor{keywordflow}{if}\ runner\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ runner\ =\ functools.partial(subprocess.check\_call,\ shell=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00032}00032\ \ \ \ \ \textcolor{comment}{\#\ In\ the\ tar\ command,\ use\ -\/-\/strip-\/components=1\ to\ strip\ the\ first\ path\ and}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00033}00033\ \ \ \ \ \textcolor{comment}{\#\ \ then}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00034}00034\ \ \ \ \ \textcolor{comment}{\#\ \ use\ -\/C\ to\ cause\ the\ files\ to\ be\ extracted\ to\ \{target\_dir\}.\ This\ ensures}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00035}00035\ \ \ \ \ \textcolor{comment}{\#\ \ that\ we\ always\ know\ where\ the\ files\ were\ extracted.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00036}00036\ \ \ \ \ runner(\textcolor{stringliteral}{'mkdir\ \{target\_dir\}'}.format(**vars()))}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00037}00037\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ getter\ =\ \textcolor{stringliteral}{'wget\ \{url\}\ -\/O\ -\/'}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ extract\ =\ \textcolor{stringliteral}{'tar\ x\{compression\}\ -\/-\/strip-\/components=1\ -\/C\ \{target\_dir\}'}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ cmd\ =\ \textcolor{stringliteral}{'\ |\ '}.join((getter,\ extract))}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ runner(cmd.format(compression=\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_aede5c2a836f8af275b0604568a5a83ad}{infer\_compression}}(url),\ **vars()))}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_a6e823568dc82b7cd89c81b113122b260}{pushd}}(target\_dir):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ target\_dir}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00044}00044\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ runner(\textcolor{stringliteral}{'rm\ -\/Rf\ \{target\_dir\}'}.format(**vars()))}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00048}\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_aede5c2a836f8af275b0604568a5a83ad}{00048}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_aede5c2a836f8af275b0604568a5a83ad}{infer\_compression}}(url):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00049}00049\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ Given\ a\ URL\ or\ filename,\ infer\ the\ compression\ code\ for\ tar.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00052}00052\ \ \ \ \ \textcolor{comment}{\#\ cheat\ and\ just\ assume\ it's\ the\ last\ two\ characters}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00053}00053\ \ \ \ \ compression\_indicator\ =\ url[-\/2:]}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00054}00054\ \ \ \ \ mapping\ =\ dict(gz=\textcolor{stringliteral}{'z'},\ bz=\textcolor{stringliteral}{'j'},\ xz=\textcolor{stringliteral}{'J'})}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00055}00055\ \ \ \ \ \textcolor{comment}{\#\ Assume\ 'z'\ (gzip)\ if\ no\ match}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{return}\ mapping.get(compression\_indicator,\ \textcolor{stringliteral}{'z'})}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00059}00059\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00060}\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_ac9a30e948ae67b5790a321d5337807c8}{00060}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_ac9a30e948ae67b5790a321d5337807c8}{temp\_dir}}(remover=shutil.rmtree):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00061}00061\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00062}00062\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ temporary\ directory\ context.\ Pass\ a\ custom\ remover}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00063}00063\ \textcolor{stringliteral}{\ \ \ \ to\ override\ the\ removal\ behavior.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00064}00064\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00065}00065\ \ \ \ \ temp\_dir\ =\ tempfile.mkdtemp()}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00066}00066\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ temp\_dir}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00068}00068\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ remover(temp\_dir)}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00072}00072\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00073}\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_a6979ce0a28276d7f954c449197c2a68a}{00073}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_a6979ce0a28276d7f954c449197c2a68a}{repo\_context}}(url,\ branch=None,\ quiet=True,\ dest\_ctx=temp\_dir):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00074}00074\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00075}00075\ \textcolor{stringliteral}{\ \ \ \ Check\ out\ the\ repo\ indicated\ by\ url.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00076}00076\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00077}00077\ \textcolor{stringliteral}{\ \ \ \ If\ dest\_ctx\ is\ supplied,\ it\ should\ be\ a\ context\ manager}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ to\ yield\ the\ target\ directory\ for\ the\ check\ out.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00080}00080\ \ \ \ \ exe\ =\ \textcolor{stringliteral}{'git'}\ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'git'}\ \textcolor{keywordflow}{in}\ url\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'hg'}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00081}00081\ \ \ \ \ \textcolor{keyword}{with}\ dest\_ctx()\ \textcolor{keyword}{as}\ repo\_dir:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ cmd\ =\ [exe,\ \textcolor{stringliteral}{'clone'},\ url,\ repo\_dir]}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ branch:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ cmd.extend([\textcolor{stringliteral}{'-\/-\/branch'},\ branch])}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ devnull\ =\ open(os.path.devnull,\ \textcolor{stringliteral}{'w'})}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ stdout\ =\ devnull\ \textcolor{keywordflow}{if}\ quiet\ \textcolor{keywordflow}{else}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ subprocess.check\_call(cmd,\ stdout=stdout)}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ repo\_dir}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00091}00091\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00092}\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_aaf96454d794970e8d0ff4bbdf6a0fba0}{00092}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1jaraco_1_1context_aaf96454d794970e8d0ff4bbdf6a0fba0}{null}}():}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00096}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap}{00096}}\ \textcolor{keyword}{class\ }ExceptionTrap:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00097}00097\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ A\ context\ manager\ that\ will\ catch\ certain\ exceptions\ and\ provide\ an}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ indication\ they\ occurred.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00100}00100\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ >>>\ with\ ExceptionTrap()\ as\ trap:}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ ...\ \ \ \ \ raise\ Exception()}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ >>>\ bool(trap)}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00105}00105\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ >>>\ with\ ExceptionTrap()\ as\ trap:}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ ...\ \ \ \ \ pass}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ >>>\ bool(trap)}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00110}00110\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ >>>\ with\ ExceptionTrap(ValueError)\ as\ trap:}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ ...\ \ \ \ \ raise\ ValueError("{}1\ +\ 1\ is\ not\ 3"{})}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ >>>\ bool(trap)}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00114}00114\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00115}00115\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00116}00116\ \textcolor{stringliteral}{\ \ \ \ >>>\ with\ ExceptionTrap(ValueError)\ as\ trap:}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00117}00117\ \textcolor{stringliteral}{\ \ \ \ ...\ \ \ \ \ raise\ Exception()}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ Traceback\ (most\ recent\ call\ last):}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00119}00119\ \textcolor{stringliteral}{\ \ \ \ ...}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ Exception}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00121}00121\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ >>>\ bool(trap)}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00126}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a6d4162ab4e4235fe41b95f1d37c38a24}{00126}}\ \ \ \ \ exc\_info\ =\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00128}00128\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ exceptions=(Exception,)):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00129}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_aefc73f8b652a213d2cc56e6170aafedc}{00129}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_aefc73f8b652a213d2cc56e6170aafedc}{exceptions}}\ =\ exceptions}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00131}00131\ \ \ \ \ \textcolor{keyword}{def\ }\_\_enter\_\_(self):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00134}00134\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00135}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a018b1c2c074a87c49f52cbc9fb9606bf}{00135}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_aa6b9776804a1e880ea73a166b085cbde}{type}}(self):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a6d4162ab4e4235fe41b95f1d37c38a24}{exc\_info}}[0]}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00138}00138\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00139}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a39fb0ebf79a980f43ac06486340130e5}{00139}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a39fb0ebf79a980f43ac06486340130e5}{value}}(self):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a6d4162ab4e4235fe41b95f1d37c38a24}{exc\_info}}[1]}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00142}00142\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00143}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a3ba5568a63d91c7eae48faab6749fce1}{00143}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a3ba5568a63d91c7eae48faab6749fce1}{tb}}(self):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a6d4162ab4e4235fe41b95f1d37c38a24}{exc\_info}}[2]}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00146}00146\ \ \ \ \ \textcolor{keyword}{def\ }\_\_exit\_\_(self,\ *exc\_info):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ type\ =\ exc\_info[0]}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ matches\ =\ type\ \textcolor{keywordflow}{and}\ issubclass(type,\ self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_aefc73f8b652a213d2cc56e6170aafedc}{exceptions}})}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ matches:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a6d4162ab4e4235fe41b95f1d37c38a24}{exc\_info}}\ =\ exc\_info}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ matches}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00153}00153\ \ \ \ \ \textcolor{keyword}{def\ }\_\_bool\_\_(self):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00154}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_aa6b9776804a1e880ea73a166b085cbde}{00154}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bool(self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_aa6b9776804a1e880ea73a166b085cbde}{type}})}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00156}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_ab0a3af46f76ba1c043589440f19f770b}{00156}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_ab0a3af46f76ba1c043589440f19f770b}{raises}}(self,\ func,\ *,\ \_test=bool):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Wrap\ func\ and\ replace\ the\ result\ with\ the\ truth}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ value\ of\ the\ trap\ (True\ if\ an\ exception\ occurred).}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00160}00160\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ First,\ give\ the\ decorator\ an\ alias\ to\ support\ Python\ 3.8}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00162}00162\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Syntax.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00163}00163\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00164}00164\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ raises\ =\ ExceptionTrap(ValueError).raises}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00165}00165\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00166}00166\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Now\ decorate\ a\ function\ that\ always\ fails.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00167}00167\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00168}00168\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ @raises}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00169}00169\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ...\ def\ fail():}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00170}00170\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ...\ \ \ \ \ raise\ ValueError('failed')}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00171}00171\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ fail()}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00172}00172\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{@functools.wraps(func)}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }wrapper(*args,\ **kwargs):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap}{ExceptionTrap}}(self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_aefc73f8b652a213d2cc56e6170aafedc}{exceptions}})\ \textcolor{keyword}{as}\ trap:}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ func(*args,\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_test(trap)}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ wrapper}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00183}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a64eca9ad2ee7fc65a18bf00969008eba}{00183}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_a64eca9ad2ee7fc65a18bf00969008eba}{passes}}(self,\ func):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00185}00185\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Wrap\ func\ and\ replace\ the\ result\ with\ the\ truth}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00186}00186\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ value\ of\ the\ trap\ (True\ if\ no\ exception).}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00187}00187\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00188}00188\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ First,\ give\ the\ decorator\ an\ alias\ to\ support\ Python\ 3.8}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00189}00189\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Syntax.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00190}00190\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00191}00191\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ passes\ =\ ExceptionTrap(ValueError).passes}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00192}00192\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00193}00193\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Now\ decorate\ a\ function\ that\ always\ fails.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00194}00194\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00195}00195\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ @passes}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00196}00196\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ...\ def\ fail():}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00197}00197\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ...\ \ \ \ \ raise\ ValueError('failed')}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00198}00198\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00199}00199\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ fail()}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00200}00200\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00201}00201\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1_exception_trap_ab0a3af46f76ba1c043589440f19f770b}{raises}}(func,\ \_test=operator.not\_)}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00205}\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1suppress}{00205}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1jaraco_1_1context_1_1suppress}{suppress}}(contextlib.suppress,\ contextlib.ContextDecorator):}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00206}00206\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00207}00207\ \textcolor{stringliteral}{\ \ \ \ A\ version\ of\ contextlib.suppress\ with\ decorator\ support.}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00208}00208\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00209}00209\ \textcolor{stringliteral}{\ \ \ \ >>>\ @suppress(KeyError)}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00210}00210\ \textcolor{stringliteral}{\ \ \ \ ...\ def\ key\_error():}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00211}00211\ \textcolor{stringliteral}{\ \ \ \ ...\ \ \ \ \ \{\}['']}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00212}00212\ \textcolor{stringliteral}{\ \ \ \ >>>\ key\_error()}}
+\DoxyCodeLine{\Hypertarget{pkg__resources_2__vendor_2jaraco_2context_8py_source_l00213}00213\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+
+\end{DoxyCode}

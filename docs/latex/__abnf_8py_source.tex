@@ -1,0 +1,138 @@
+\doxysection{\+\_\+abnf.\+py}
+\hypertarget{__abnf_8py_source}{}\label{__abnf_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_abnf.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_abnf.py}}
+\mbox{\hyperlink{__abnf_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00001}\mbox{\hyperlink{namespaceh11_1_1__abnf}{00001}}\ \textcolor{comment}{\#\ We\ use\ native\ strings\ for\ all\ the\ re\ patterns,\ to\ take\ advantage\ of\ string}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00002}00002\ \textcolor{comment}{\#\ formatting,\ and\ then\ convert\ to\ bytestrings\ when\ compiling\ the\ final\ re}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00003}00003\ \textcolor{comment}{\#\ objects.}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00005}00005\ \textcolor{comment}{\#\ https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html\#whitespace}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00006}00006\ \textcolor{comment}{\#\ \ OWS\ \ \ \ \ \ \ \ \ \ \ \ =\ *(\ SP\ /\ HTAB\ )}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00007}00007\ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ;\ optional\ whitespace}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00008}\mbox{\hyperlink{namespaceh11_1_1__abnf_ad212a1e5ae5722a7fbaa2d25b7e96ef5}{00008}}\ OWS\ =\ \textcolor{stringliteral}{r"{}[\ \(\backslash\)t]*"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00010}00010\ \textcolor{comment}{\#\ https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html\#rule.token.separators}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00011}00011\ \textcolor{comment}{\#\ \ \ token\ \ \ \ \ \ \ \ \ \ =\ 1*tchar}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00012}00012\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00013}00013\ \textcolor{comment}{\#\ \ \ tchar\ \ \ \ \ \ \ \ \ \ =\ "{}!"{}\ /\ "{}\#"{}\ /\ "{}\$"{}\ /\ "{}\%"{}\ /\ "{}\&"{}\ /\ "{}'"{}\ /\ "{}*"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00014}00014\ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ "{}+"{}\ /\ "{}-\/"{}\ /\ "{}."{}\ /\ "{}\string^"{}\ /\ "{}\_"{}\ /\ "{}`"{}\ /\ "{}|"{}\ /\ "{}\string~"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00015}00015\ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ DIGIT\ /\ ALPHA}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00016}00016\ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ;\ any\ VCHAR,\ except\ delimiters}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00017}\mbox{\hyperlink{namespaceh11_1_1__abnf_a7c23c0cbc2e17e34617300183c3e5e65}{00017}}\ token\ =\ \textcolor{stringliteral}{r"{}[-\/!\#\$\%\&'*+.\string^\_`|\string~0-\/9a-\/zA-\/Z]+"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00019}00019\ \textcolor{comment}{\#\ https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html\#header.fields}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00020}00020\ \textcolor{comment}{\#\ \ field-\/name\ \ \ \ \ =\ token}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00021}\mbox{\hyperlink{namespaceh11_1_1__abnf_abc93fa470702ca14aada26199a1e7517}{00021}}\ field\_name\ =\ token}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00023}00023\ \textcolor{comment}{\#\ The\ standard\ says:}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00024}00024\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00025}00025\ \textcolor{comment}{\#\ \ field-\/value\ \ \ \ =\ *(\ field-\/content\ /\ obs-\/fold\ )}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00026}00026\ \textcolor{comment}{\#\ \ field-\/content\ \ =\ field-\/vchar\ [\ 1*(\ SP\ /\ HTAB\ )\ field-\/vchar\ ]}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00027}00027\ \textcolor{comment}{\#\ \ field-\/vchar\ \ \ \ =\ VCHAR\ /\ obs-\/text}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00028}00028\ \textcolor{comment}{\#\ \ obs-\/fold\ \ \ \ \ \ \ =\ CRLF\ 1*(\ SP\ /\ HTAB\ )}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00029}00029\ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ;\ obsolete\ line\ folding}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00030}00030\ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ;\ see\ Section\ 3.2.4}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00031}00031\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00032}00032\ \textcolor{comment}{\#\ https://tools.ietf.org/html/rfc5234\#appendix-\/B.1}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00033}00033\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00034}00034\ \textcolor{comment}{\#\ \ \ VCHAR\ \ \ \ \ \ \ \ \ \ =\ \ \%x21-\/7E}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00035}00035\ \textcolor{comment}{\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ;\ visible\ (printing)\ characters}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00036}00036\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00037}00037\ \textcolor{comment}{\#\ https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html\#rule.quoted-\/string}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00038}00038\ \textcolor{comment}{\#\ \ \ obs-\/text\ \ \ \ \ \ \ =\ \%x80-\/FF}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00039}00039\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00040}00040\ \textcolor{comment}{\#\ However,\ the\ standard\ definition\ of\ field-\/content\ is\ WRONG!\ It\ disallows}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00041}00041\ \textcolor{comment}{\#\ fields\ containing\ a\ single\ visible\ character\ surrounded\ by\ whitespace,}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00042}00042\ \textcolor{comment}{\#\ e.g.\ "{}foo\ a\ bar"{}.}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00043}00043\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00044}00044\ \textcolor{comment}{\#\ See:\ https://www.rfc-\/editor.org/errata\_search.php?rfc=7230\&eid=4189}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00045}00045\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00046}00046\ \textcolor{comment}{\#\ So\ our\ definition\ of\ field\_content\ attempts\ to\ fix\ it\ up...}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00047}00047\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00048}00048\ \textcolor{comment}{\#\ Also,\ we\ allow\ lots\ of\ control\ characters,\ because\ apparently\ people\ assume}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00049}00049\ \textcolor{comment}{\#\ that\ they're\ legal\ in\ practice\ (e.g.,\ google\ analytics\ makes\ cookies\ with}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00050}00050\ \textcolor{comment}{\#\ \(\backslash\)x01\ in\ them!):}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00051}00051\ \textcolor{comment}{\#\ \ \ https://github.com/python-\/hyper/h11/issues/57}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00052}00052\ \textcolor{comment}{\#\ We\ still\ don't\ allow\ NUL\ or\ whitespace,\ because\ those\ are\ often\ treated\ as}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00053}00053\ \textcolor{comment}{\#\ meta-\/characters\ and\ letting\ them\ through\ can\ lead\ to\ nasty\ issues\ like\ SSRF.}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00054}\mbox{\hyperlink{namespaceh11_1_1__abnf_a53be2baff7891679b60ee70ebd36b5bf}{00054}}\ vchar\ =\ \textcolor{stringliteral}{r"{}[\(\backslash\)x21-\/\(\backslash\)x7e]"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00055}\mbox{\hyperlink{namespaceh11_1_1__abnf_a141ccf7e9231b0338c44c46d9a4106c2}{00055}}\ vchar\_or\_obs\_text\ =\ \textcolor{stringliteral}{r"{}[\string^\(\backslash\)x00\(\backslash\)s]"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00056}\mbox{\hyperlink{namespaceh11_1_1__abnf_a48ee16ad2974ecef69c81d03724f8b30}{00056}}\ field\_vchar\ =\ vchar\_or\_obs\_text}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00057}\mbox{\hyperlink{namespaceh11_1_1__abnf_a3e6845f6d3d05b57ed3d5d200db322ab}{00057}}\ field\_content\ =\ \textcolor{stringliteral}{r"{}\{field\_vchar\}+(?:[\ \(\backslash\)t]+\{field\_vchar\}+)*"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00059}00059\ \textcolor{comment}{\#\ We\ handle\ obs-\/fold\ at\ a\ different\ level,\ and\ our\ fixed-\/up\ field\_content}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00060}00060\ \textcolor{comment}{\#\ already\ grows\ to\ swallow\ the\ whole\ value,\ so\ ?\ instead\ of\ *}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00061}\mbox{\hyperlink{namespaceh11_1_1__abnf_a1eb48de301926304b7f5572c9590417b}{00061}}\ field\_value\ =\ \textcolor{stringliteral}{r"{}(\{field\_content\})?"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00063}00063\ \textcolor{comment}{\#\ \ header-\/field\ \ \ =\ field-\/name\ "{}:"{}\ OWS\ field-\/value\ OWS}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00064}\mbox{\hyperlink{namespaceh11_1_1__abnf_a8ae73cc928ff623da765f0e0cc465f5c}{00064}}\ header\_field\ =\ (}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00065}00065\ \ \ \ \ \textcolor{stringliteral}{r"{}(?P<field\_name>\{field\_name\})"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00066}00066\ \ \ \ \ \textcolor{stringliteral}{r"{}:"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00067}00067\ \ \ \ \ \textcolor{stringliteral}{r"{}\{OWS\}"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00068}00068\ \ \ \ \ \textcolor{stringliteral}{r"{}(?P<field\_value>\{field\_value\})"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00069}00069\ \ \ \ \ \textcolor{stringliteral}{r"{}\{OWS\}"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00070}00070\ )}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00072}00072\ \textcolor{comment}{\#\ https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html\#request.line}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00073}00073\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00074}00074\ \textcolor{comment}{\#\ \ \ request-\/line\ \ \ =\ method\ SP\ request-\/target\ SP\ HTTP-\/version\ CRLF}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00075}00075\ \textcolor{comment}{\#\ \ \ method\ \ \ \ \ \ \ \ \ =\ token}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00076}00076\ \textcolor{comment}{\#\ \ \ HTTP-\/version\ \ \ =\ HTTP-\/name\ "{}/"{}\ DIGIT\ "{}."{}\ DIGIT}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00077}00077\ \textcolor{comment}{\#\ \ \ HTTP-\/name\ \ \ \ \ \ =\ \%x48.54.54.50\ ;\ "{}HTTP"{},\ case-\/sensitive}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00078}00078\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00079}00079\ \textcolor{comment}{\#\ request-\/target\ is\ complicated\ (see\ RFC\ 7230\ sec\ 5.3)\ -\/-\/\ could\ be\ path,\ full}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00080}00080\ \textcolor{comment}{\#\ URL,\ host+port\ (for\ connect),\ or\ even\ "{}*"{},\ but\ in\ any\ case\ we\ are\ guaranteed}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00081}00081\ \textcolor{comment}{\#\ that\ it\ contists\ of\ the\ visible\ printing\ characters.}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00082}\mbox{\hyperlink{namespaceh11_1_1__abnf_a3808f40a3fef3e5fe80515319c620a8e}{00082}}\ method\ =\ token}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00083}\mbox{\hyperlink{namespaceh11_1_1__abnf_a8d01264b9d4f2c5f67b4227779c1685a}{00083}}\ request\_target\ =\ \textcolor{stringliteral}{r"{}\{vchar\}+"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00084}\mbox{\hyperlink{namespaceh11_1_1__abnf_acf9975963f2056803f12408c8f4618ce}{00084}}\ http\_version\ =\ \textcolor{stringliteral}{r"{}HTTP/(?P<http\_version>[0-\/9]\(\backslash\).[0-\/9])"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00085}\mbox{\hyperlink{namespaceh11_1_1__abnf_a81dd4a73519df772fbeec342fefe2b4f}{00085}}\ request\_line\ =\ (}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00086}00086\ \ \ \ \ \textcolor{stringliteral}{r"{}(?P<method>\{method\})"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00087}00087\ \ \ \ \ \textcolor{stringliteral}{r"{}\ "{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00088}00088\ \ \ \ \ \textcolor{stringliteral}{r"{}(?P<target>\{request\_target\})"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00089}00089\ \ \ \ \ \textcolor{stringliteral}{r"{}\ "{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00090}00090\ \ \ \ \ \textcolor{stringliteral}{r"{}\{http\_version\}"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00091}00091\ )}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00093}00093\ \textcolor{comment}{\#\ https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html\#status.line}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00094}00094\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00095}00095\ \textcolor{comment}{\#\ \ \ status-\/line\ =\ HTTP-\/version\ SP\ status-\/code\ SP\ reason-\/phrase\ CRLF}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00096}00096\ \textcolor{comment}{\#\ \ \ status-\/code\ \ \ \ =\ 3DIGIT}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00097}00097\ \textcolor{comment}{\#\ \ \ reason-\/phrase\ \ =\ *(\ HTAB\ /\ SP\ /\ VCHAR\ /\ obs-\/text\ )}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00098}\mbox{\hyperlink{namespaceh11_1_1__abnf_af609c280d28660105e90c92c2e53ad7b}{00098}}\ status\_code\ =\ \textcolor{stringliteral}{r"{}[0-\/9]\{3\}"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00099}\mbox{\hyperlink{namespaceh11_1_1__abnf_a5cfbd33d8b6b3a2d9b03635cb10794fd}{00099}}\ reason\_phrase\ =\ \textcolor{stringliteral}{r"{}([\ \(\backslash\)t]|\{vchar\_or\_obs\_text\})*"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00100}\mbox{\hyperlink{namespaceh11_1_1__abnf_a4a7e7475dacf4594852169e2963f5ccc}{00100}}\ status\_line\ =\ (}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00101}00101\ \ \ \ \ \textcolor{stringliteral}{r"{}\{http\_version\}"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00102}00102\ \ \ \ \ \textcolor{stringliteral}{r"{}\ "{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00103}00103\ \ \ \ \ \textcolor{stringliteral}{r"{}(?P<status\_code>\{status\_code\})"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00104}00104\ \ \ \ \ \textcolor{comment}{\#\ However,\ there\ are\ apparently\ a\ few\ too\ many\ servers\ out\ there\ that\ just}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00105}00105\ \ \ \ \ \textcolor{comment}{\#\ leave\ out\ the\ reason\ phrase:}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00106}00106\ \ \ \ \ \textcolor{comment}{\#\ \ \ https://github.com/scrapy/scrapy/issues/345\#issuecomment-\/281756036}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00107}00107\ \ \ \ \ \textcolor{comment}{\#\ \ \ https://github.com/seanmonstar/httparse/issues/29}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00108}00108\ \ \ \ \ \textcolor{comment}{\#\ so\ make\ it\ optional.\ ?:\ is\ a\ non-\/capturing\ group.}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00109}00109\ \ \ \ \ \textcolor{stringliteral}{r"{}(?:\ (?P<reason>\{reason\_phrase\}))?"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00110}00110\ )}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00112}\mbox{\hyperlink{namespaceh11_1_1__abnf_acee148e341db42d36b2e35d1d802b2bc}{00112}}\ HEXDIG\ =\ \textcolor{stringliteral}{r"{}[0-\/9A-\/Fa-\/f]"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00113}00113\ \textcolor{comment}{\#\ Actually}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00114}00114\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00115}00115\ \textcolor{comment}{\#\ \ \ \ \ \ chunk-\/size\ \ \ \ \ =\ 1*HEXDIG}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00116}00116\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00117}00117\ \textcolor{comment}{\#\ but\ we\ impose\ an\ upper-\/limit\ to\ avoid\ ridiculosity.\ len(str(2**64))\ ==\ 20}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00118}\mbox{\hyperlink{namespaceh11_1_1__abnf_a3ee8056e8de0b7b4192f0db1492a73e3}{00118}}\ chunk\_size\ =\ \textcolor{stringliteral}{r"{}(\{HEXDIG\})\{\{1,20\}\}"{}}.format(**globals())}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00119}00119\ \textcolor{comment}{\#\ Actually}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00120}00120\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00121}00121\ \textcolor{comment}{\#\ \ \ \ \ chunk-\/ext\ \ \ \ \ \ =\ *(\ "{};"{}\ chunk-\/ext-\/name\ [\ "{}="{}\ chunk-\/ext-\/val\ ]\ )}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00122}00122\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00123}00123\ \textcolor{comment}{\#\ but\ we\ aren't\ parsing\ the\ things\ so\ we\ don't\ really\ care.}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00124}\mbox{\hyperlink{namespaceh11_1_1__abnf_a00c1494bb85bef4f342e62a48ff75876}{00124}}\ chunk\_ext\ =\ \textcolor{stringliteral}{r"{};.*"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00125}\mbox{\hyperlink{namespaceh11_1_1__abnf_a149e494565a5e95ffc744e345b01c9cb}{00125}}\ chunk\_header\ =\ (}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00126}00126\ \ \ \ \ \textcolor{stringliteral}{r"{}(?P<chunk\_size>\{chunk\_size\})"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00127}00127\ \ \ \ \ \textcolor{stringliteral}{r"{}(?P<chunk\_ext>\{chunk\_ext\})?"{}}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00128}00128\ \ \ \ \ \textcolor{stringliteral}{r"{}\{OWS\}\(\backslash\)r\(\backslash\)n"{}}.format(}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ **globals()}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00130}00130\ \ \ \ \ )\ \ \textcolor{comment}{\#\ Even\ though\ the\ specification\ does\ not\ allow\ for\ extra\ whitespaces,}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00131}00131\ \ \ \ \ \textcolor{comment}{\#\ we\ are\ lenient\ with\ trailing\ whitespaces\ because\ some\ servers\ on\ the\ wild\ use\ it.}}
+\DoxyCodeLine{\Hypertarget{__abnf_8py_source_l00132}00132\ )}
+
+\end{DoxyCode}

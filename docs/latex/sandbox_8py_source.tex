@@ -1,0 +1,536 @@
+\doxysection{sandbox.\+py}
+\hypertarget{sandbox_8py_source}{}\label{sandbox_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/sandbox.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/sandbox.py}}
+\mbox{\hyperlink{sandbox_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1sandbox}{00001}}\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00002}00002\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00003}00003\ \textcolor{keyword}{import}\ tempfile}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00004}00004\ \textcolor{keyword}{import}\ operator}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00005}00005\ \textcolor{keyword}{import}\ functools}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00006}00006\ \textcolor{keyword}{import}\ itertools}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00007}00007\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00008}00008\ \textcolor{keyword}{import}\ contextlib}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00009}00009\ \textcolor{keyword}{import}\ pickle}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00010}00010\ \textcolor{keyword}{import}\ textwrap}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00011}00011\ \textcolor{keyword}{import}\ builtins}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00013}00013\ \textcolor{keyword}{import}\ pkg\_resources}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00014}00014\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ DistutilsError}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00015}00015\ \textcolor{keyword}{from}\ pkg\_resources\ \textcolor{keyword}{import}\ working\_set}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00017}00017\ \textcolor{keywordflow}{if}\ sys.platform.startswith(\textcolor{stringliteral}{'java'}):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00018}00018\ \ \ \ \ \textcolor{keyword}{import}\ org.python.modules.posix.PosixModule\ \textcolor{keyword}{as}\ \_os}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00019}00019\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00020}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a99f75779e14f881f51f4c38d4a586167}{00020}}\ \ \ \ \ \_os\ =\ sys.modules[os.name]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00021}00021\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00022}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a606d2df05a9166bff220807da3b98823}{00022}}\ \ \ \ \ \_file\ =\ file}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00023}00023\ \textcolor{keywordflow}{except}\ NameError:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00024}00024\ \ \ \ \ \_file\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00025}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a616fa17a666518a02267233ecdc9df33}{00025}}\ \_open\ =\ open}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00028}00028\ \_\_all\_\_\ =\ [}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00029}00029\ \ \ \ \ \textcolor{stringliteral}{"{}AbstractSandbox"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00030}00030\ \ \ \ \ \textcolor{stringliteral}{"{}DirectorySandbox"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00031}00031\ \ \ \ \ \textcolor{stringliteral}{"{}SandboxViolation"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00032}00032\ \ \ \ \ \textcolor{stringliteral}{"{}run\_setup"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00033}00033\ ]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00036}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a6d08b124d7fc3752504cea663fb8c233}{00036}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a6d08b124d7fc3752504cea663fb8c233}{\_execfile}}(filename,\ globals,\ locals=None):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00037}00037\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00038}00038\ \textcolor{stringliteral}{\ \ \ \ Python\ 3\ implementation\ of\ execfile.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00039}00039\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00040}00040\ \ \ \ \ mode\ =\ \textcolor{stringliteral}{'rb'}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00041}00041\ \ \ \ \ \textcolor{keyword}{with}\ open(filename,\ mode)\ \textcolor{keyword}{as}\ stream:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ script\ =\ stream.read()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00043}00043\ \ \ \ \ \textcolor{keywordflow}{if}\ locals\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ locals\ =\ globals}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00045}00045\ \ \ \ \ code\ =\ compile(script,\ filename,\ \textcolor{stringliteral}{'exec'})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00046}00046\ \ \ \ \ exec(code,\ globals,\ locals)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00049}00049\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00050}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a90b846a7925c83d8f9ce1749286849ea}{00050}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a90b846a7925c83d8f9ce1749286849ea}{save\_argv}}(repl=None):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00051}00051\ \ \ \ \ saved\ =\ sys.argv[:]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{if}\ repl\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ sys.argv[:]\ =\ repl}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00054}00054\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ sys.argv[:]\ =\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00060}00060\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00061}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_ad158dc58681bf5b4f0d4ecf3eb55370e}{00061}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_ad158dc58681bf5b4f0d4ecf3eb55370e}{save\_path}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00062}00062\ \ \ \ \ saved\ =\ sys.path[:]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00063}00063\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ sys.path[:]\ =\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00069}00069\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00070}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a6f51ebddfe81ff65264f49b215961f47}{00070}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a6f51ebddfe81ff65264f49b215961f47}{override\_temp}}(replacement):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00071}00071\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ Monkey-\/patch\ tempfile.tempdir\ with\ replacement,\ ensuring\ it\ exists}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00074}00074\ \ \ \ \ os.makedirs(replacement,\ exist\_ok=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00076}00076\ \ \ \ \ saved\ =\ tempfile.tempdir}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00078}00078\ \ \ \ \ tempfile.tempdir\ =\ replacement}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00082}00082\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ tempfile.tempdir\ =\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00086}00086\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00087}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a08a2a439e9ca37133fe9382e30b1ea40}{00087}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a08a2a439e9ca37133fe9382e30b1ea40}{pushd}}(target):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00088}00088\ \ \ \ \ saved\ =\ os.getcwd()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00089}00089\ \ \ \ \ os.chdir(target)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00090}00090\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ os.chdir(saved)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00096}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_unpickleable_exception}{00096}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_unpickleable_exception}{UnpickleableException}}(Exception):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00097}00097\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ An\ exception\ representing\ another\ Exception\ that\ could\ not\ be\ pickled.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00101}00101\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00102}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_unpickleable_exception_ad3751807db04232b3c991bda92783b95}{00102}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_unpickleable_exception_ad3751807db04232b3c991bda92783b95}{dump}}(type,\ exc):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Always\ return\ a\ dumped\ (pickled)\ type\ and\ exc.\ If\ exc\ can't\ be\ pickled,}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ wrap\ it\ in\ UnpickleableException\ first.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pickle.dumps(type),\ pickle.dumps(exc)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ get\ UnpickleableException\ inside\ the\ sandbox}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox}{setuptools.sandbox}}\ \textcolor{keyword}{import}\ UnpickleableException\ \textcolor{keyword}{as}\ cls}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cls.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_unpickleable_exception_ad3751807db04232b3c991bda92783b95}{dump}}(cls,\ cls(repr(exc)))}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00116}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver}{00116}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver}{ExceptionSaver}}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00117}00117\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ A\ Context\ Manager\ that\ will\ save\ an\ exception,\ serialized,\ and\ restore\ it}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00119}00119\ \textcolor{stringliteral}{\ \ \ \ later.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00122}00122\ \ \ \ \ \textcolor{keyword}{def\ }\_\_enter\_\_(self):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00125}00125\ \ \ \ \ \textcolor{keyword}{def\ }\_\_exit\_\_(self,\ type,\ exc,\ tb):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ exc:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ dump\ the\ exception}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00130}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_a42aec241b7e701c539cf2e6fdfb9c4fd}{00130}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_a42aec241b7e701c539cf2e6fdfb9c4fd}{\_saved}}\ =\ UnpickleableException.dump(type,\ exc)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00131}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_ad61930d0d7160effa38aa5a875d3fcf8}{00131}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_ad61930d0d7160effa38aa5a875d3fcf8}{\_tb}}\ =\ tb}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ suppress\ the\ exception}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00136}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_afd9fab9e533ea1562cc753ed362e0bca}{00136}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_afd9fab9e533ea1562cc753ed362e0bca}{resume}}(self):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}restore\ and\ re-\/raise\ any\ exception"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'\_saved'}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ vars(self):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ type,\ exc\ =\ map(pickle.loads,\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_a42aec241b7e701c539cf2e6fdfb9c4fd}{\_saved}})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ exc.with\_traceback(self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver_ad61930d0d7160effa38aa5a875d3fcf8}{\_tb}})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00146}00146\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00147}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a9df46ce1bd17dbce065c7e11dc46d010}{00147}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a9df46ce1bd17dbce065c7e11dc46d010}{save\_modules}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00148}00148\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ Context\ in\ which\ imported\ modules\ are\ saved.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00150}00150\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ Translates\ exceptions\ internal\ to\ the\ context\ into\ the\ equivalent\ exception}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ outside\ the\ context.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00153}00153\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00154}00154\ \ \ \ \ saved\ =\ sys.modules.copy()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00155}00155\ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_exception_saver}{ExceptionSaver}}()\ \textcolor{keyword}{as}\ saved\_exc:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00158}00158\ \ \ \ \ sys.modules.update(saved)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00159}00159\ \ \ \ \ \textcolor{comment}{\#\ remove\ any\ modules\ imported\ since}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00160}00160\ \ \ \ \ del\_modules\ =\ (}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ mod\_name}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ mod\_name\ \textcolor{keywordflow}{in}\ sys.modules}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ mod\_name\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ exclude\ any\ encodings\ modules.\ See\ \#285}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ mod\_name.startswith(\textcolor{stringliteral}{'encodings.'})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00166}00166\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00167}00167\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a643f2aae05bdb3af1a073416aa4436e4}{\_clear\_modules}}(del\_modules)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00169}00169\ \ \ \ \ saved\_exc.resume()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00171}00171\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00172}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a643f2aae05bdb3af1a073416aa4436e4}{00172}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a643f2aae05bdb3af1a073416aa4436e4}{\_clear\_modules}}(module\_names):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00173}00173\ \ \ \ \ \textcolor{keywordflow}{for}\ mod\_name\ \textcolor{keywordflow}{in}\ list(module\_names):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ del\ sys.modules[mod\_name]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00177}00177\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00178}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a2c716f0ba46e678dd85be72db41c4e14}{00178}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a2c716f0ba46e678dd85be72db41c4e14}{save\_pkg\_resources\_state}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00179}00179\ \ \ \ \ saved\ =\ pkg\_resources.\_\_getstate\_\_()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00180}00180\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ saved}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00182}00182\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ pkg\_resources.\_\_setstate\_\_(saved)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00186}00186\ \textcolor{preprocessor}{@contextlib.contextmanager}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00187}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a8e87463f0039530f6b3b039c58ec09da}{00187}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a8e87463f0039530f6b3b039c58ec09da}{setup\_context}}(setup\_dir):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00188}00188\ \ \ \ \ temp\_dir\ =\ os.path.join(setup\_dir,\ \textcolor{stringliteral}{'temp'})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00189}00189\ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a2c716f0ba46e678dd85be72db41c4e14}{save\_pkg\_resources\_state}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a9df46ce1bd17dbce065c7e11dc46d010}{save\_modules}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_ad158dc58681bf5b4f0d4ecf3eb55370e}{save\_path}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a579ab6c2031e94770efe338681e83bd7}{hide\_setuptools}}()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a90b846a7925c83d8f9ce1749286849ea}{save\_argv}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a6f51ebddfe81ff65264f49b215961f47}{override\_temp}}(temp\_dir):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a08a2a439e9ca37133fe9382e30b1ea40}{pushd}}(setup\_dir):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ ensure\ setuptools\ commands\ are\ available}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_import\_\_(\textcolor{stringliteral}{'setuptools'})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00201}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_ac97e22be742d4ea8e38a68abd51c0410}{00201}}\ \_MODULES\_TO\_HIDE\ =\ \{}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00202}00202\ \ \ \ \ \textcolor{stringliteral}{'setuptools'},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00203}00203\ \ \ \ \ \textcolor{stringliteral}{'distutils'},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00204}00204\ \ \ \ \ \textcolor{stringliteral}{'pkg\_resources'},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00205}00205\ \ \ \ \ \textcolor{stringliteral}{'Cython'},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00206}00206\ \ \ \ \ \textcolor{stringliteral}{'\_distutils\_hack'},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00207}00207\ \}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00210}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a3e3f4d25efb1d719550e5d80d1f5e16b}{00210}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a3e3f4d25efb1d719550e5d80d1f5e16b}{\_needs\_hiding}}(mod\_name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00211}00211\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00212}00212\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_needs\_hiding('setuptools')}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00213}00213\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00214}00214\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_needs\_hiding('pkg\_resources')}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00215}00215\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00216}00216\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_needs\_hiding('setuptools\_plugin')}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00217}00217\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00218}00218\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_needs\_hiding('setuptools.\_\_init\_\_')}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00219}00219\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00220}00220\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_needs\_hiding('distutils')}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00221}00221\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00222}00222\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_needs\_hiding('os')}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00223}00223\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00224}00224\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_needs\_hiding('Cython')}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00225}00225\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00226}00226\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00227}00227\ \ \ \ \ base\_module\ =\ mod\_name.split(\textcolor{stringliteral}{'.'},\ 1)[0]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00228}00228\ \ \ \ \ \textcolor{keywordflow}{return}\ base\_module\ \textcolor{keywordflow}{in}\ \_MODULES\_TO\_HIDE}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00230}00230\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00231}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a579ab6c2031e94770efe338681e83bd7}{00231}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a579ab6c2031e94770efe338681e83bd7}{hide\_setuptools}}():}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00232}00232\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00233}00233\ \textcolor{stringliteral}{\ \ \ \ Remove\ references\ to\ setuptools'\ modules\ from\ sys.modules\ to\ allow\ the}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00234}00234\ \textcolor{stringliteral}{\ \ \ \ invocation\ to\ import\ the\ most\ appropriate\ setuptools.\ This\ technique\ is}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00235}00235\ \textcolor{stringliteral}{\ \ \ \ necessary\ to\ avoid\ issues\ such\ as\ \#315\ where\ setuptools\ upgrading\ itself}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00236}00236\ \textcolor{stringliteral}{\ \ \ \ would\ fail\ to\ find\ a\ function\ declared\ in\ the\ metadata.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00237}00237\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00238}00238\ \ \ \ \ \_distutils\_hack\ =\ sys.modules.get(\textcolor{stringliteral}{'\_distutils\_hack'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00239}00239\ \ \ \ \ \textcolor{keywordflow}{if}\ \_distutils\_hack\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace__distutils__hack_aeae986458f97ec3e8d59021d28be6958}{\_distutils\_hack.remove\_shim}}()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00242}00242\ \ \ \ \ modules\ =\ filter(\_needs\_hiding,\ sys.modules)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00243}00243\ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a643f2aae05bdb3af1a073416aa4436e4}{\_clear\_modules}}(modules)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00246}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a964522b9141f1d217f4c117aae1a409f}{00246}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1sandbox_a964522b9141f1d217f4c117aae1a409f}{run\_setup}}(setup\_script,\ args):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00247}00247\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Run\ a\ distutils\ setup\ script,\ sandboxed\ in\ its\ directory"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00248}00248\ \ \ \ \ setup\_dir\ =\ os.path.abspath(os.path.dirname(setup\_script))}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00249}00249\ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a8e87463f0039530f6b3b039c58ec09da}{setup\_context}}(setup\_dir):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ sys.argv[:]\ =\ [setup\_script]\ +\ list(args)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ sys.path.insert(0,\ setup\_dir)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ reset\ to\ include\ setup\ dir,\ w/clean\ callback\ list}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ working\_set.\_\_init\_\_()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ working\_set.callbacks.append(\textcolor{keyword}{lambda}\ dist:\ dist.activate())}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox}{DirectorySandbox}}(setup\_dir):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ns\ =\ dict(\_\_file\_\_=setup\_script,\ \_\_name\_\_=\textcolor{stringliteral}{'\_\_main\_\_'})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1sandbox_a6d08b124d7fc3752504cea663fb8c233}{\_execfile}}(setup\_script,\ ns)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ SystemExit\ \textcolor{keyword}{as}\ v:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ v.args\ \textcolor{keywordflow}{and}\ v.args[0]:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Normal\ exit,\ just\ return}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00265}00265\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00266}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox}{00266}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox}{AbstractSandbox}}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00267}00267\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Wrap\ 'os'\ module\ and\ 'open()'\ builtin\ for\ virtualizing\ setup\ scripts"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00268}00268\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00269}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{00269}}\ \ \ \ \ \_active\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00271}00271\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00272}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af08adae9af4c82fbcf285bab2bd7e412}{00272}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af08adae9af4c82fbcf285bab2bd7e412}{\_attrs}}\ =\ [}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ name}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ dir(\_os)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ name.startswith(\textcolor{stringliteral}{'\_'})\ \textcolor{keywordflow}{and}\ hasattr(self,\ name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00277}00277\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00278}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af4da8a59a0028203f552a2ce6054a2bc}{00278}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af4da8a59a0028203f552a2ce6054a2bc}{\_copy}}(self,\ source):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af08adae9af4c82fbcf285bab2bd7e412}{\_attrs}}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ setattr(os,\ name,\ getattr(source,\ name))}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00282}00282\ \ \ \ \ \textcolor{keyword}{def\ }\_\_enter\_\_(self):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af4da8a59a0028203f552a2ce6054a2bc}{\_copy}}(self)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \_file:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ builtins.file\ =\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ae6750304e87a747e89d951e86347ca78}{\_file}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ builtins.open\ =\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af0de8eafa5257a30a2d4df3c8f9d1551}{\_open}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00289}00289\ \ \ \ \ \textcolor{keyword}{def\ }\_\_exit\_\_(self,\ exc\_type,\ exc\_value,\ traceback):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \_file:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \ \ \ \ builtins.file\ =\ \_file}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ builtins.open\ =\ \_open}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af4da8a59a0028203f552a2ce6054a2bc}{\_copy}}(\_os)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00295}00295\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00296}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a2b5ffd2afb462155ee7efea7758305b9}{00296}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a2b5ffd2afb462155ee7efea7758305b9}{run}}(self,\ func):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Run\ 'func'\ under\ os\ sandboxing"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ self:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ func()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00301}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a3eb0a11ddeec950e33854f3e61230793}{00301}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a3eb0a11ddeec950e33854f3e61230793}{\_mk\_dual\_path\_wrapper}}(name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ original\ =\ getattr(\_os,\ name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00303}00303\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }wrap(self,\ src,\ dst,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ src,\ dst\ =\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a0d8bf7201df71da2d9def02b75344396}{\_remap\_pair}}(name,\ src,\ dst,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ original(src,\ dst,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ wrap}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00310}00310\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00311}00311\ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ [\textcolor{stringliteral}{"{}rename"{}},\ \textcolor{stringliteral}{"{}link"{}},\ \textcolor{stringliteral}{"{}symlink"{}}]:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(\_os,\ name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ locals()[name]\ =\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a3eb0a11ddeec950e33854f3e61230793}{\_mk\_dual\_path\_wrapper}}(name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00315}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a7bf77839bba80934a006c87fd91956ac}{00315}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a7bf77839bba80934a006c87fd91956ac}{\_mk\_single\_path\_wrapper}}(name,\ original=None):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ original\ =\ original\ \textcolor{keywordflow}{or}\ getattr(\_os,\ name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00317}00317\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }wrap(self,\ path,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ path\ =\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac1e398a32fa84456a467d86937fdd1ac}{\_remap\_input}}(name,\ path,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ original(path,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ wrap}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00325}00325\ \ \ \ \ \textcolor{keywordflow}{if}\ \_file:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00326}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ae6750304e87a747e89d951e86347ca78}{00326}}\ \ \ \ \ \ \ \ \ \_file\ =\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a7bf77839bba80934a006c87fd91956ac}{\_mk\_single\_path\_wrapper}}(\textcolor{stringliteral}{'file'},\ \_file)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00327}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af0de8eafa5257a30a2d4df3c8f9d1551}{00327}}\ \ \ \ \ \_open\ =\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a7bf77839bba80934a006c87fd91956ac}{\_mk\_single\_path\_wrapper}}(\textcolor{stringliteral}{'open'},\ \_open)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00328}00328\ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ [}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}stat"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}listdir"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chdir"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}open"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chmod"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chown"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mkdir"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}remove"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}unlink"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}rmdir"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}utime"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}lchown"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chroot"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}lstat"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00343}00343\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}startfile"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mkfifo"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mknod"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}pathconf"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}access"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00348}00348\ \ \ \ \ ]:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(\_os,\ name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ locals()[name]\ =\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a7bf77839bba80934a006c87fd91956ac}{\_mk\_single\_path\_wrapper}}(name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00352}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_aaac94aedfc97617488bf08379c770ac2}{00352}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_aaac94aedfc97617488bf08379c770ac2}{\_mk\_single\_with\_return}}(name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ original\ =\ getattr(\_os,\ name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00354}00354\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }wrap(self,\ path,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ path\ =\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac1e398a32fa84456a467d86937fdd1ac}{\_remap\_input}}(name,\ path,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a07405764bf4fd6565b5e49b931c45e89}{\_remap\_output}}(name,\ original(path,\ *args,\ **kw))}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ original(path,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00360}00360\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ wrap}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00362}00362\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00363}00363\ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ [\textcolor{stringliteral}{'readlink'},\ \textcolor{stringliteral}{'tempnam'}]:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(\_os,\ name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ locals()[name]\ =\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_aaac94aedfc97617488bf08379c770ac2}{\_mk\_single\_with\_return}}(name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00366}00366\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00367}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a6f9568f468da126000aa228cc18961e4}{00367}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a6f9568f468da126000aa228cc18961e4}{\_mk\_query}}(name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ original\ =\ getattr(\_os,\ name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00369}00369\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }wrap(self,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ retval\ =\ original(*args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a07405764bf4fd6565b5e49b931c45e89}{\_remap\_output}}(name,\ retval)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ retval}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00375}00375\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ wrap}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00377}00377\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00378}00378\ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ [\textcolor{stringliteral}{'getcwd'},\ \textcolor{stringliteral}{'tmpnam'}]:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(\_os,\ name):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ locals()[name]\ =\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a6f9568f468da126000aa228cc18961e4}{\_mk\_query}}(name)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00381}00381\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00382}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a2f8c8a7f84e73a6db64eaae13f5024a1}{00382}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a2f8c8a7f84e73a6db64eaae13f5024a1}{\_validate\_path}}(self,\ path):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Called\ to\ remap\ or\ validate\ any\ path,\ whether\ input\ or\ output"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ path}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00385}00385\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00386}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac1e398a32fa84456a467d86937fdd1ac}{00386}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac1e398a32fa84456a467d86937fdd1ac}{\_remap\_input}}(self,\ operation,\ path,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Called\ for\ path\ inputs"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a2f8c8a7f84e73a6db64eaae13f5024a1}{\_validate\_path}}(path)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00389}00389\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00390}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a07405764bf4fd6565b5e49b931c45e89}{00390}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a07405764bf4fd6565b5e49b931c45e89}{\_remap\_output}}(self,\ operation,\ path):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Called\ for\ path\ outputs"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a2f8c8a7f84e73a6db64eaae13f5024a1}{\_validate\_path}}(path)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00393}00393\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00394}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a0d8bf7201df71da2d9def02b75344396}{00394}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_a0d8bf7201df71da2d9def02b75344396}{\_remap\_pair}}(self,\ operation,\ src,\ dst,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Called\ for\ path\ pairs\ like\ rename,\ link,\ and\ symlink\ operations"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac1e398a32fa84456a467d86937fdd1ac}{\_remap\_input}}(operation\ +\ \textcolor{stringliteral}{'-\/from'},\ src,\ *args,\ **kw),}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac1e398a32fa84456a467d86937fdd1ac}{\_remap\_input}}(operation\ +\ \textcolor{stringliteral}{'-\/to'},\ dst,\ *args,\ **kw),}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00400}00400\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00401}00401\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00402}00402\ \textcolor{keywordflow}{if}\ hasattr(os,\ \textcolor{stringliteral}{'devnull'}):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00403}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_aa68adb36abe8accb61bfff7f33e49462}{00403}}\ \ \ \ \ \_EXCEPTIONS\ =\ [os.devnull]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00404}00404\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00405}00405\ \ \ \ \ \_EXCEPTIONS\ =\ []}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00406}00406\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00407}00407\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00408}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox}{00408}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox}{DirectorySandbox}}(\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox}{AbstractSandbox}}):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00409}00409\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Restrict\ operations\ to\ a\ single\ subdirectory\ -\/\ pseudo-\/chroot"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00410}00410\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00411}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_aff584c6cf57155616b5e0c03db1dd317}{00411}}\ \ \ \ \ write\_ops\ =\ dict.fromkeys(}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00412}00412\ \ \ \ \ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}open"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chmod"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00415}00415\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chown"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00416}00416\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mkdir"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}remove"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00418}00418\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}unlink"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}rmdir"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}utime"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}lchown"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chroot"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00423}00423\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mkfifo"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mknod"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00425}00425\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tempnam"{}},}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00426}00426\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00427}00427\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00428}00428\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00429}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a1da06365c513a5524d6c8becda3a212d}{00429}}\ \ \ \ \ \_exception\_patterns\ =\ []}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00430}00430\ \ \ \ \ \textcolor{stringliteral}{"{}exempt\ writing\ to\ paths\ that\ match\ the\ pattern"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00432}00432\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ sandbox,\ exceptions=\_EXCEPTIONS):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00433}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a50fa6d4896785089868450e65c674273}{00433}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a50fa6d4896785089868450e65c674273}{\_sandbox}}\ =\ os.path.normcase(os.path.realpath(sandbox))}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00434}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a3189362008bcaa3668b563ed66fd01ef}{00434}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a3189362008bcaa3668b563ed66fd01ef}{\_prefix}}\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a50fa6d4896785089868450e65c674273}{\_sandbox}},\ \textcolor{stringliteral}{''})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00435}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a5476b744dc4ab60a40fca999d7632c3a}{00435}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a5476b744dc4ab60a40fca999d7632c3a}{\_exceptions}}\ =\ [}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ os.path.normcase(os.path.realpath(path))\ \textcolor{keywordflow}{for}\ path\ \textcolor{keywordflow}{in}\ exceptions}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ AbstractSandbox.\_\_init\_\_(self)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00439}00439\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00440}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{00440}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{\_violation}}(self,\ operation,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1sandbox}{setuptools.sandbox}}\ \textcolor{keyword}{import}\ SandboxViolation}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_sandbox_violation}{SandboxViolation}}(operation,\ args,\ kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00444}00444\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00445}00445\ \ \ \ \ \textcolor{keywordflow}{if}\ \_file:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00446}00446\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00447}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_acf799106ef73553cbfdf57cc16babd98}{00447}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ae6750304e87a747e89d951e86347ca78}{\_file}}(self,\ path,\ mode='r',\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ mode\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'r'},\ \textcolor{stringliteral}{'rt'},\ \textcolor{stringliteral}{'rb'},\ \textcolor{stringliteral}{'rU'},\ \textcolor{stringliteral}{'U'})\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{\_ok}}(path):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{\_violation}}(\textcolor{stringliteral}{"{}file"{}},\ path,\ mode,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ae6750304e87a747e89d951e86347ca78}{\_file}}(path,\ mode,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00451}00451\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00452}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_adde036059e5fcd0e0655278d744b99db}{00452}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af0de8eafa5257a30a2d4df3c8f9d1551}{\_open}}(self,\ path,\ mode='r',\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00453}00453\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ mode\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'r'},\ \textcolor{stringliteral}{'rt'},\ \textcolor{stringliteral}{'rb'},\ \textcolor{stringliteral}{'rU'},\ \textcolor{stringliteral}{'U'})\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{\_ok}}(path):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{\_violation}}(\textcolor{stringliteral}{"{}open"{}},\ path,\ mode,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_af0de8eafa5257a30a2d4df3c8f9d1551}{\_open}}(path,\ mode,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00457}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a20c4a51f56c1ad1bc3ac634741f2f057}{00457}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a20c4a51f56c1ad1bc3ac634741f2f057}{tmpnam}}(self):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{\_violation}}(\textcolor{stringliteral}{"{}tmpnam"{}})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00460}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{00460}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{\_ok}}(self,\ path):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ active\ =\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00463}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox}{00463}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00464}00464\ \ \ \ \ \ \ \ \ \ \ \ \ realpath\ =\ os.path.normcase(os.path.realpath(path))}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_ac753002f21e3fc57946ade66171ed6e3}{\_exempted}}(realpath)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ realpath\ ==\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a50fa6d4896785089868450e65c674273}{\_sandbox}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ realpath.startswith(self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a3189362008bcaa3668b563ed66fd01ef}{\_prefix}})}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_abstract_sandbox_ac3a181406de5531d1b8469079846e9d4}{\_active}}\ =\ active}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00472}00472\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00473}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_ac753002f21e3fc57946ade66171ed6e3}{00473}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_ac753002f21e3fc57946ade66171ed6e3}{\_exempted}}(self,\ filepath):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ start\_matches\ =\ (}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ filepath.startswith(exception)\ \textcolor{keywordflow}{for}\ exception\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a5476b744dc4ab60a40fca999d7632c3a}{\_exceptions}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00477}00477\ \ \ \ \ \ \ \ \ pattern\_matches\ =\ (}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \ \ \ \ re.match(pattern,\ filepath)\ \textcolor{keywordflow}{for}\ pattern\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a1da06365c513a5524d6c8becda3a212d}{\_exception\_patterns}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ candidates\ =\ itertools.chain(start\_matches,\ pattern\_matches)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ any(candidates)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00482}00482\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00483}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a048d782bf0fd34acedea0607481539e4}{00483}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a048d782bf0fd34acedea0607481539e4}{\_remap\_input}}(self,\ operation,\ path,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Called\ for\ path\ inputs"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ operation\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_aff584c6cf57155616b5e0c03db1dd317}{write\_ops}}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{\_ok}}(path):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{\_violation}}(operation,\ os.path.realpath(path),\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ path}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00488}00488\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00489}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a91fcaa09107e9d234d702e0d83a0ead6}{00489}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a91fcaa09107e9d234d702e0d83a0ead6}{\_remap\_pair}}(self,\ operation,\ src,\ dst,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Called\ for\ path\ pairs\ like\ rename,\ link,\ and\ symlink\ operations"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{\_ok}}(src)\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{\_ok}}(dst):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{\_violation}}(operation,\ src,\ dst,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (src,\ dst)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00494}00494\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00495}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a511d2b442bd19a4a6315c686aa9b3a42}{00495}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a511d2b442bd19a4a6315c686aa9b3a42}{open}}(self,\ file,\ flags,\ mode=0o777,\ *args,\ **kw):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Called\ for\ low-\/level\ os.open()"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ flags\ \&\ WRITE\_FLAGS\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_abfdcff9b89e73dd53456f61f8e4faffe}{\_ok}}(file):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_directory_sandbox_a8c89d3b8ec435167b115d5baa50e244f}{\_violation}}(\textcolor{stringliteral}{"{}os.open"{}},\ file,\ flags,\ mode,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_os.open(file,\ flags,\ mode,\ *args,\ **kw)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00500}00500\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00501}00501\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00502}\mbox{\hyperlink{namespacesetuptools_1_1sandbox_ae2d3c0e479bb79bd56a7f884d5a5826b}{00502}}\ WRITE\_FLAGS\ =\ functools.reduce(}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00503}00503\ \ \ \ \ operator.or\_,}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00504}00504\ \ \ \ \ [}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ getattr(\_os,\ a,\ 0)}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ a\ \textcolor{keywordflow}{in}\ \textcolor{stringliteral}{"{}O\_WRONLY\ O\_RDWR\ O\_APPEND\ O\_CREAT\ O\_TRUNC\ O\_TEMPORARY"{}}.split()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00507}00507\ \ \ \ \ ],}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00508}00508\ )}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00510}00510\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00511}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_sandbox_violation}{00511}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_sandbox_violation}{SandboxViolation}}(DistutilsError):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00512}00512\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ setup\ script\ attempted\ to\ modify\ the\ filesystem\ outside\ the\ sandbox"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00513}00513\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00514}\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_sandbox_violation_a9ad18d8a93d06a6b96fca910177998d6}{00514}}\ \ \ \ \ tmpl\ =\ textwrap.dedent(}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00516}00516\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ SandboxViolation:\ \{cmd\}\{args!r\}\ \{kwargs\}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00517}00517\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00518}00518\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ package\ setup\ script\ has\ attempted\ to\ modify\ files\ on\ your\ system}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00519}00519\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ that\ are\ not\ within\ the\ EasyInstall\ build\ area,\ and\ has\ been\ aborted.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00520}00520\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00521}00521\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ package\ cannot\ be\ safely\ installed\ by\ EasyInstall,\ and\ may\ not}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00522}00522\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ support\ alternate\ installation\ locations\ even\ if\ you\ run\ its\ setup}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00523}00523\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ script\ by\ hand.\ \ Please\ inform\ the\ package's\ author\ and\ the\ EasyInstall}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00524}00524\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ maintainers\ to\ find\ out\ if\ a\ fix\ or\ workaround\ is\ available.}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00525}00525\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00526}00526\ \ \ \ \ ).lstrip()}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00527}00527\ }
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00528}00528\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self):}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ cmd,\ args,\ kwargs\ =\ self.args}
+\DoxyCodeLine{\Hypertarget{sandbox_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1sandbox_1_1_sandbox_violation_a9ad18d8a93d06a6b96fca910177998d6}{tmpl}}.format(**locals())}
+
+\end{DoxyCode}

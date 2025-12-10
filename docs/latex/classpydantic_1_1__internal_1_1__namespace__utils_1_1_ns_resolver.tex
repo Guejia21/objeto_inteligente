@@ -1,0 +1,190 @@
+\doxysection{Referencia de la clase pydantic.\+\_\+internal.\+\_\+namespace\+\_\+utils.\+Ns\+Resolver}
+\hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver}{}\label{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver}\index{pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}}
+\doxysubsubsection*{Métodos públicos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_namespaces_tuple}{Namespaces\+Tuple}} \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_aaa7bb415d32fb25f11d6ff91cf95c95f}{types\+\_\+namespace}} (self)
+\item 
+Generator\mbox{[}None\mbox{]} \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_a007d9562d8ad42642e12b6ec0d1e95a0}{push}} (self, type\mbox{[}Any\mbox{]}\texorpdfstring{$\vert$}{|}\mbox{\hyperlink{classtyping__extensions_1_1_type_alias_type}{Type\+Alias\+Type}} typ)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Atributos protegidos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_af096f6b27bae380f358e24a0bd27b7b8}{\+\_\+base\+\_\+ns\+\_\+tuple}} = namespaces\+\_\+tuple or \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_namespaces_tuple}{Namespaces\+Tuple}}(\{\}, \{\})
+\item 
+\mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_a443129ef28fba2e50b2c68b9ae218dca}{\+\_\+parent\+\_\+ns}} = parent\+\_\+namespace
+\item 
+list \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_ac53e1f2680bba8bdfc5630fbb9f9cf63}{\+\_\+types\+\_\+stack}} = \mbox{[}$\,$\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+\begin{DoxyVerb}A class responsible for the namespaces resolving logic for annotations evaluation.
+
+This class handles the namespace logic when evaluating annotations mainly for class objects.
+
+It holds a stack of classes that are being inspected during the core schema building,
+and the `types_namespace` property exposes the globals and locals to be used for
+type annotation evaluation. Additionally -- if no class is present in the stack -- a
+fallback globals and locals can be provided using the `namespaces_tuple` argument
+(this is useful when generating a schema for a simple annotation, e.g. when using
+`TypeAdapter`).
+
+The namespace creation logic is unfortunately flawed in some cases, for backwards
+compatibility reasons and to better support valid edge cases. See the description
+for the `parent_namespace` argument and the example for more details.
+
+Args:
+    namespaces_tuple: The default globals and locals to use if no class is present
+        on the stack. This can be useful when using the `GenerateSchema` class
+        with `TypeAdapter`, where the "type" being analyzed is a simple annotation.
+    parent_namespace: An optional parent namespace that will be added to the locals
+        with the lowest priority. For a given class defined in a function, the locals
+        of this function are usually used as the parent namespace:
+
+        ```python {lint="skip" test="skip"}
+        from pydantic import BaseModel
+
+        def func() -> None:
+            SomeType = int
+
+            class Model(BaseModel):
+                f: 'SomeType'
+
+            # when collecting fields, an namespace resolver instance will be created
+            # this way:
+            # ns_resolver = NsResolver(parent_namespace={'SomeType': SomeType})
+        ```
+
+        For backwards compatibility reasons and to support valid edge cases, this parent
+        namespace will be used for *every* type being pushed to the stack. In the future,
+        we might want to be smarter by only doing so when the type being pushed is defined
+        in the same module as the parent namespace.
+
+Example:
+    ```python {lint="skip" test="skip"}
+    ns_resolver = NsResolver(
+        parent_namespace={'fallback': 1},
+    )
+
+    class Sub:
+        m: 'Model'
+
+    class Model:
+        some_local = 1
+        sub: Sub
+
+    ns_resolver = NsResolver()
+
+    # This is roughly what happens when we build a core schema for `Model`:
+    with ns_resolver.push(Model):
+        ns_resolver.types_namespace
+        #> NamespacesTuple({'Sub': Sub}, {'Model': Model, 'some_local': 1})
+        # First thing to notice here, the model being pushed is added to the locals.
+        # Because `NsResolver` is being used during the model definition, it is not
+        # yet added to the globals. This is useful when resolving self-referencing annotations.
+
+        with ns_resolver.push(Sub):
+            ns_resolver.types_namespace
+            #> NamespacesTuple({'Sub': Sub}, {'Sub': Sub, 'Model': Model})
+            # Second thing to notice: `Sub` is present in both the globals and locals.
+            # This is not an issue, just that as described above, the model being pushed
+            # is added to the locals, but it happens to be present in the globals as well
+            # because it is already defined.
+            # Third thing to notice: `Model` is also added in locals. This is a backwards
+            # compatibility workaround that allows for `Sub` to be able to resolve `'Model'`
+            # correctly (as otherwise models would have to be rebuilt even though this
+            # doesn't look necessary).
+    ```
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{__namespace__utils_8py_source_l00143}{143}} del archivo \mbox{\hyperlink{__namespace__utils_8py_source}{\+\_\+namespace\+\_\+utils.\+py}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_doc-func-members}
+\doxysubsection{Documentación de funciones miembro}
+\Hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_a007d9562d8ad42642e12b6ec0d1e95a0}\index{pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}!push@{push}}
+\index{push@{push}!pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}}
+\doxysubsubsection{\texorpdfstring{push()}{push()}}
+{\footnotesize\ttfamily \label{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_a007d9562d8ad42642e12b6ec0d1e95a0} 
+ Generator\mbox{[}None\mbox{]} pydantic.\+\_\+internal.\+\_\+namespace\+\_\+utils.\+Ns\+Resolver.\+push (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{type\mbox{[}Any\mbox{]} \texorpdfstring{$\vert$}{|} \mbox{\hyperlink{classtyping__extensions_1_1_type_alias_type}{Type\+Alias\+Type}}}]{typ}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Push a type to the stack.\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{__namespace__utils_8py_source_l00284}{284}} del archivo \mbox{\hyperlink{__namespace__utils_8py_source}{\+\_\+namespace\+\_\+utils.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2charset__normalizer_2models_8py_source_l00360}{charset\+\_\+normalizer.\+models.\+Cli\+Detection\+Result.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2charset__normalizer_2models_8py_source_l00344}{charset\+\_\+normalizer.\+models.\+Cli\+Detection\+Result.\+\_\+\+\_\+dict\+\_\+\+\_\+()}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2colorama_2ansitowin32_8py_source_l00041}{colorama.\+ansitowin32.\+Stream\+Wrapper.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2colorama_2ansitowin32_8py_source_l00041}{pip.\+\_\+vendor.\+colorama.\+ansitowin32.\+Stream\+Wrapper.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2pygments_2lexer_8py_source_l00655}{pip.\+\_\+vendor.\+pygments.\+lexer.\+Regex\+Lexer\+Meta.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2requests_2cookies_8py_source_l00425}{pip.\+\_\+vendor.\+requests.\+cookies.\+Requests\+Cookie\+Jar.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2typing__extensions_8py_source_l00755}{pip.\+\_\+vendor.\+typing\+\_\+extensions.\+Protocol.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2urllib3_2util_2retry_8py_source_l00329}{pip.\+\_\+vendor.\+urllib3.\+util.\+retry.\+Retry.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2main_8py_source_l00959}{pydantic.\+main.\+Base\+Model.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{root__model_8py_source_l00090}{pydantic.\+root\+\_\+model.\+Root\+Model.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2errors_8py_source_l00124}{pydantic.\+v1.\+errors.\+Pydantic\+Error\+Mixin.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2main_8py_source_l00416}{pydantic.\+v1.\+main.\+Base\+Model.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2requests_2cookies_8py_source_l00425}{requests.\+cookies.\+Requests\+Cookie\+Jar.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__vendor_2typing__extensions_8py_source_l00816}{setuptools.\+\_\+vendor.\+typing\+\_\+extensions.\+\_\+\+Protocol\+Meta.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__vendor_2typing__extensions_8py_source_l01349}{setuptools.\+\_\+vendor.\+typing\+\_\+extensions.\+Annotated\+Meta.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__vendor_2typing__extensions_8py_source_l00608}{setuptools.\+\_\+vendor.\+typing\+\_\+extensions.\+Protocol.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{command_2build__py_8py_source_l00040}{setuptools.\+command.\+build\+\_\+py.\+build\+\_\+py.\+\_\+\+\_\+dict\+\_\+\+\_\+}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2typing__extensions_8py_source_l00802}{typing\+\_\+extensions.\+Protocol.\+\_\+\+\_\+dict\+\_\+\+\_\+}} y \mbox{\hyperlink{__namespace__utils_8py_source_l00230}{\+\_\+types\+\_\+stack}}.
+
+\Hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_aaa7bb415d32fb25f11d6ff91cf95c95f}\index{pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}!types\_namespace@{types\_namespace}}
+\index{types\_namespace@{types\_namespace}!pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}}
+\doxysubsubsection{\texorpdfstring{types\_namespace()}{types\_namespace()}}
+{\footnotesize\ttfamily \label{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_aaa7bb415d32fb25f11d6ff91cf95c95f} 
+ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_namespaces_tuple}{Namespaces\+Tuple}} pydantic.\+\_\+internal.\+\_\+namespace\+\_\+utils.\+Ns\+Resolver.\+types\+\_\+namespace (\begin{DoxyParamCaption}\item[{}]{self}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}The current global and local namespaces to be used for annotations evaluation.\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{__namespace__utils_8py_source_l00233}{233}} del archivo \mbox{\hyperlink{__namespace__utils_8py_source}{\+\_\+namespace\+\_\+utils.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{__namespace__utils_8py_source_l00228}{\+\_\+base\+\_\+ns\+\_\+tuple}}, \mbox{\hyperlink{__namespace__utils_8py_source_l00229}{\+\_\+parent\+\_\+ns}}, \mbox{\hyperlink{__namespace__utils_8py_source_l00230}{\+\_\+types\+\_\+stack}} y \mbox{\hyperlink{__namespace__utils_8py_source_l00048}{pydantic.\+\_\+internal.\+\_\+namespace\+\_\+utils.\+get\+\_\+module\+\_\+ns\+\_\+of()}}.
+
+
+
+\label{doc-variable-members}
+\Hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_doc-variable-members}
+\doxysubsection{Documentación de datos miembro}
+\Hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_af096f6b27bae380f358e24a0bd27b7b8}\index{pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}!\_base\_ns\_tuple@{\_base\_ns\_tuple}}
+\index{\_base\_ns\_tuple@{\_base\_ns\_tuple}!pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}}
+\doxysubsubsection{\texorpdfstring{\_base\_ns\_tuple}{\_base\_ns\_tuple}}
+{\footnotesize\ttfamily \label{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_af096f6b27bae380f358e24a0bd27b7b8} 
+pydantic.\+\_\+internal.\+\_\+namespace\+\_\+utils.\+Ns\+Resolver.\+\_\+base\+\_\+ns\+\_\+tuple = namespaces\+\_\+tuple or \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_namespaces_tuple}{Namespaces\+Tuple}}(\{\}, \{\})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{__namespace__utils_8py_source_l00228}{228}} del archivo \mbox{\hyperlink{__namespace__utils_8py_source}{\+\_\+namespace\+\_\+utils.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{__namespace__utils_8py_source_l00233}{types\+\_\+namespace()}}.
+
+\Hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_a443129ef28fba2e50b2c68b9ae218dca}\index{pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}!\_parent\_ns@{\_parent\_ns}}
+\index{\_parent\_ns@{\_parent\_ns}!pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}}
+\doxysubsubsection{\texorpdfstring{\_parent\_ns}{\_parent\_ns}}
+{\footnotesize\ttfamily \label{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_a443129ef28fba2e50b2c68b9ae218dca} 
+pydantic.\+\_\+internal.\+\_\+namespace\+\_\+utils.\+Ns\+Resolver.\+\_\+parent\+\_\+ns = parent\+\_\+namespace\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{__namespace__utils_8py_source_l00229}{229}} del archivo \mbox{\hyperlink{__namespace__utils_8py_source}{\+\_\+namespace\+\_\+utils.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{__namespace__utils_8py_source_l00233}{types\+\_\+namespace()}}.
+
+\Hypertarget{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_ac53e1f2680bba8bdfc5630fbb9f9cf63}\index{pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}!\_types\_stack@{\_types\_stack}}
+\index{\_types\_stack@{\_types\_stack}!pydantic.\_internal.\_namespace\_utils.NsResolver@{pydantic.\_internal.\_namespace\_utils.NsResolver}}
+\doxysubsubsection{\texorpdfstring{\_types\_stack}{\_types\_stack}}
+{\footnotesize\ttfamily \label{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver_ac53e1f2680bba8bdfc5630fbb9f9cf63} 
+pydantic.\+\_\+internal.\+\_\+namespace\+\_\+utils.\+Ns\+Resolver.\+\_\+types\+\_\+stack = \mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{__namespace__utils_8py_source_l00230}{230}} del archivo \mbox{\hyperlink{__namespace__utils_8py_source}{\+\_\+namespace\+\_\+utils.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{__namespace__utils_8py_source_l00284}{push()}} y \mbox{\hyperlink{__namespace__utils_8py_source_l00233}{types\+\_\+namespace()}}.
+
+
+
+La documentación de esta clase está generada del siguiente archivo\+:\begin{DoxyCompactItemize}
+\item 
+micro\+\_\+gestion\+\_\+objetos/venv/\+Lib/site-\/packages/pydantic/\+\_\+internal/\mbox{\hyperlink{__namespace__utils_8py}{\+\_\+namespace\+\_\+utils.\+py}}\end{DoxyCompactItemize}

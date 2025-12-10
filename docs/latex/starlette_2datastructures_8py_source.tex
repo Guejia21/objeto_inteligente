@@ -1,0 +1,698 @@
+\doxysection{datastructures.\+py}
+\hypertarget{starlette_2datastructures_8py_source}{}\label{starlette_2datastructures_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/datastructures.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/datastructures.py}}
+\mbox{\hyperlink{starlette_2datastructures_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00001}\mbox{\hyperlink{namespacestarlette_1_1datastructures}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ ItemsView,\ Iterable,\ Iterator,\ KeysView,\ Mapping,\ MutableMapping,\ Sequence,\ ValuesView}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00004}00004\ \textcolor{keyword}{from}\ shlex\ \textcolor{keyword}{import}\ shlex}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00005}00005\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00006}00006\ \ \ \ \ Any,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00007}00007\ \ \ \ \ BinaryIO,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00008}00008\ \ \ \ \ NamedTuple,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00009}00009\ \ \ \ \ TypeVar,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00010}00010\ \ \ \ \ Union,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00011}00011\ \ \ \ \ cast,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00012}00012\ )}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00013}00013\ \textcolor{keyword}{from}\ urllib.parse\ \textcolor{keyword}{import}\ SplitResult,\ parse\_qsl,\ urlencode,\ urlsplit}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00015}00015\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1concurrency}{starlette.concurrency}}\ \textcolor{keyword}{import}\ run\_in\_threadpool}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00016}00016\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1types}{starlette.types}}\ \textcolor{keyword}{import}\ Scope}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00019}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_address}{00019}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_address}{Address}}(NamedTuple):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00020}00020\ \ \ \ \ host:\ str}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00021}00021\ \ \ \ \ port:\ int}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00024}\mbox{\hyperlink{namespacestarlette_1_1datastructures_a28b1a6f469ad0946eb9fa0183573030c}{00024}}\ \_KeyType\ =\ TypeVar(\textcolor{stringliteral}{"{}\_KeyType"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00025}00025\ \textcolor{comment}{\#\ Mapping\ keys\ are\ invariant\ but\ their\ values\ are\ covariant\ since}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00026}00026\ \textcolor{comment}{\#\ you\ can\ only\ read\ them}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00027}00027\ \textcolor{comment}{\#\ that\ is,\ you\ can't\ do\ \`{}Mapping[str,\ Animal]()["{}fido"{}]\ =\ Dog()`}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00028}\mbox{\hyperlink{namespacestarlette_1_1datastructures_a44198dab1c8b474230e438c03390be61}{00028}}\ \_CovariantValueType\ =\ TypeVar(\textcolor{stringliteral}{"{}\_CovariantValueType"{}},\ covariant=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00031}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{00031}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00032}00032\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ url:\ str\ =\ \textcolor{stringliteral}{"{}"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ scope:\ Scope\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ **components:\ Any,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00037}00037\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ scope\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keywordflow}{not}\ url,\ \textcolor{stringliteral}{'Cannot\ set\ both\ "{}url"{}\ and\ "{}scope"{}.'}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keywordflow}{not}\ components,\ \textcolor{stringliteral}{'Cannot\ set\ both\ "{}scope"{}\ and\ "{}**components"{}.'}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ scheme\ =\ scope.get(\textcolor{stringliteral}{"{}scheme"{}},\ \textcolor{stringliteral}{"{}http"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ server\ =\ scope.get(\textcolor{stringliteral}{"{}server"{}},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ path\ =\ scope[\textcolor{stringliteral}{"{}path"{}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ query\_string\ =\ scope.get(\textcolor{stringliteral}{"{}query\_string"{}},\ b\textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ host\_header\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ scope[\textcolor{stringliteral}{"{}headers"{}}]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ key\ ==\ b\textcolor{stringliteral}{"{}host"{}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ host\_header\ =\ value.decode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ host\_header\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}\{scheme\}://\{host\_header\}\{path\}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ server\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ path}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ host,\ port\ =\ server}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ default\_port\ =\ \{\textcolor{stringliteral}{"{}http"{}}:\ 80,\ \textcolor{stringliteral}{"{}https"{}}:\ 443,\ \textcolor{stringliteral}{"{}ws"{}}:\ 80,\ \textcolor{stringliteral}{"{}wss"{}}:\ 443\}[scheme]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ port\ ==\ default\_port:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}\{scheme\}://\{host\}\{path\}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}\{scheme\}://\{host\}:\{port\}\{path\}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ query\_string:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url\ +=\ \textcolor{stringliteral}{"{}?"{}}\ +\ query\_string.decode()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ components:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keywordflow}{not}\ url,\ \textcolor{stringliteral}{'Cannot\ set\ both\ "{}url"{}\ and\ "{}**components"{}.'}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}(\textcolor{stringliteral}{"{}"{}}).\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_af270f1f7a1c961547e1d8fecd9ab0f3e}{replace}}(**components).components.geturl()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00070}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a97f0063611c5e914ced050cc9571775c}{00070}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a97f0063611c5e914ced050cc9571775c}{\_url}}\ =\ url}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00072}00072\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00073}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{00073}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}(self)\ -\/>\ SplitResult:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_components"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00075}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a4ee9f429d6e5eb27cc7df3f1e1dc4e09}{00075}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a4ee9f429d6e5eb27cc7df3f1e1dc4e09}{\_components}}\ =\ urlsplit(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a97f0063611c5e914ced050cc9571775c}{\_url}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a4ee9f429d6e5eb27cc7df3f1e1dc4e09}{\_components}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00078}00078\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00079}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a3490eba0794508f5ccbebab3915d4cb7}{00079}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a3490eba0794508f5ccbebab3915d4cb7}{scheme}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.scheme}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00082}00082\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00083}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a6c5f09a5ad6959f28955e26267ed2fd6}{00083}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a6c5f09a5ad6959f28955e26267ed2fd6}{netloc}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.netloc}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00086}00086\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00087}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_ac012d48278366cce80f2f1407aa79c1c}{00087}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_ac012d48278366cce80f2f1407aa79c1c}{path}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.path}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00090}00090\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00091}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_ae7e3dcfae3cf73870863f26bff642c63}{00091}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_ae7e3dcfae3cf73870863f26bff642c63}{query}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.query}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00094}00094\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00095}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a6e99277287898b49665b43d3d414690a}{00095}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a6e99277287898b49665b43d3d414690a}{fragment}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.fragment}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00098}00098\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00099}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aa11f77d9a7acf40f2f59c559cb6434eb}{00099}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aa11f77d9a7acf40f2f59c559cb6434eb}{username}}(self)\ -\/>\ None\ |\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.username}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00102}00102\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00103}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a9e86c36340ab0637d8ec0c49d3274bab}{00103}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_adc484599526cd9c3e617137a9dab2189}{password}}(self)\ -\/>\ None\ |\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.password}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00106}00106\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00107}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a2644d2765aa0827245e3d6e18cafd258}{00107}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a2644d2765aa0827245e3d6e18cafd258}{hostname}}(self)\ -\/>\ None\ |\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.hostname}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00110}00110\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00111}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aa61a9893ce2e310cf3ee0e876b21761f}{00111}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aa61a9893ce2e310cf3ee0e876b21761f}{port}}(self)\ -\/>\ int\ |\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.port}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00114}00114\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00115}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a2d220413ae8e60d6b18bcf624dbe0444}{00115}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a2d220413ae8e60d6b18bcf624dbe0444}{is\_secure}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a3490eba0794508f5ccbebab3915d4cb7}{scheme}}\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{"{}https"{}},\ \textcolor{stringliteral}{"{}wss"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00118}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_af270f1f7a1c961547e1d8fecd9ab0f3e}{00118}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_af270f1f7a1c961547e1d8fecd9ab0f3e}{replace}}(self,\ **kwargs:\ Any)\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}username"{}}\ \textcolor{keywordflow}{in}\ kwargs\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}password"{}}\ \textcolor{keywordflow}{in}\ kwargs\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}hostname"{}}\ \textcolor{keywordflow}{in}\ kwargs\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}port"{}}\ \textcolor{keywordflow}{in}\ kwargs:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ hostname\ =\ kwargs.pop(\textcolor{stringliteral}{"{}hostname"{}},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ port\ =\ kwargs.pop(\textcolor{stringliteral}{"{}port"{}},\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aa61a9893ce2e310cf3ee0e876b21761f}{port}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ username\ =\ kwargs.pop(\textcolor{stringliteral}{"{}username"{}},\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aa11f77d9a7acf40f2f59c559cb6434eb}{username}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ password\ =\ kwargs.pop(\textcolor{stringliteral}{"{}password"{}},\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_adc484599526cd9c3e617137a9dab2189}{password}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hostname\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ netloc\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a6c5f09a5ad6959f28955e26267ed2fd6}{netloc}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_,\ \_,\ hostname\ =\ netloc.rpartition(\textcolor{stringliteral}{"{}@"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hostname[-\/1]\ !=\ \textcolor{stringliteral}{"{}]"{}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hostname\ =\ hostname.rsplit(\textcolor{stringliteral}{"{}:"{}},\ 1)[0]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ netloc\ =\ hostname}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ port\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ netloc\ +=\ f\textcolor{stringliteral}{"{}:\{port\}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ username\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ userpass\ =\ username}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ password\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ userpass\ +=\ f\textcolor{stringliteral}{"{}:\{password\}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ netloc\ =\ f\textcolor{stringliteral}{"{}\{userpass\}@\{netloc\}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ kwargs[\textcolor{stringliteral}{"{}netloc"{}}]\ =\ netloc}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ components\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_aee656527532833902ca5862ba033ec0d}{components}}.\_replace(**kwargs)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\_\_class\_\_(components.geturl())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00146}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a4f2014860d44517cda4fd04e4b6a45ef}{00146}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a4f2014860d44517cda4fd04e4b6a45ef}{include\_query\_params}}(self,\ **kwargs:\ Any)\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ params\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict}{MultiDict}}(parse\_qsl(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_ae7e3dcfae3cf73870863f26bff642c63}{query}},\ keep\_blank\_values=\textcolor{keyword}{True}))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ params.update(\{str(key):\ str(value)\ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ kwargs.items()\})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ query\ =\ urlencode(params.multi\_items())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_af270f1f7a1c961547e1d8fecd9ab0f3e}{replace}}(query=query)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00152}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_abbae80236b59b90ba118bb0cb078dca6}{00152}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_abbae80236b59b90ba118bb0cb078dca6}{replace\_query\_params}}(self,\ **kwargs:\ Any)\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ query\ =\ urlencode([(str(key),\ str(value))\ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ kwargs.items()])}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_af270f1f7a1c961547e1d8fecd9ab0f3e}{replace}}(query=query)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00156}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a9effc4baab4e4f3b956b5d746a9e4872}{00156}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a9effc4baab4e4f3b956b5d746a9e4872}{remove\_query\_params}}(self,\ keys:\ str\ |\ Sequence[str])\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(keys,\ str):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ keys\ =\ [keys]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ params\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict}{MultiDict}}(parse\_qsl(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_ae7e3dcfae3cf73870863f26bff642c63}{query}},\ keep\_blank\_values=\textcolor{keyword}{True}))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key\ \textcolor{keywordflow}{in}\ keys:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ params.pop(key,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ query\ =\ urlencode(params.multi\_items())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_af270f1f7a1c961547e1d8fecd9ab0f3e}{replace}}(query=query)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00165}00165\ \ \ \ \ \textcolor{keyword}{def\ }\_\_eq\_\_(self,\ other:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(self)\ ==\ str(other)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00168}00168\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_a97f0063611c5e914ced050cc9571775c}{\_url}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00171}00171\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ url\ =\ str(self)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00173}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_adc484599526cd9c3e617137a9dab2189}{00173}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_adc484599526cd9c3e617137a9dab2189}{password}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ str(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_af270f1f7a1c961547e1d8fecd9ab0f3e}{replace}}(password=\textcolor{stringliteral}{"{}********"{}}))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{self.\_\_class\_\_.\_\_name\_\_\}(\{repr(url)\})"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00178}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path}{00178}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path}{URLPath}}(str):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00179}00179\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00180}00180\ \textcolor{stringliteral}{\ \ \ \ A\ URL\ path\ string\ that\ may\ also\ hold\ an\ associated\ protocol\ and/or\ host.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ Used\ by\ the\ routing\ to\ return\ \`{}url\_path\_for\`{}\ matches.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00184}00184\ \ \ \ \ \textcolor{keyword}{def\ }\_\_new\_\_(cls,\ path:\ str,\ protocol:\ str\ =\ \textcolor{stringliteral}{"{}"{}},\ host:\ str\ =\ \textcolor{stringliteral}{"{}"{}})\ -\/>\ URLPath:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ protocol\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{"{}http"{}},\ \textcolor{stringliteral}{"{}websocket"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str.\_\_new\_\_(cls,\ path)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00188}00188\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ path:\ str,\ protocol:\ str\ =\ \textcolor{stringliteral}{"{}"{}},\ host:\ str\ =\ \textcolor{stringliteral}{"{}"{}})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00189}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_aca7b252431dbf00246c2090d79821c6d}{00189}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_aca7b252431dbf00246c2090d79821c6d}{protocol}}\ =\ protocol}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00190}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_a685ea77d021b7b8ae9f4d96c635a2ce5}{00190}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_a685ea77d021b7b8ae9f4d96c635a2ce5}{host}}\ =\ host}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00192}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_a315b0559b48e2f0aa7ea4ae9693d4a12}{00192}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_a315b0559b48e2f0aa7ea4ae9693d4a12}{make\_absolute\_url}}(self,\ base\_url:\ str\ |\ URL)\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(base\_url,\ str):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ base\_url\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}(base\_url)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_aca7b252431dbf00246c2090d79821c6d}{protocol}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ scheme\ =\ \{}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}http"{}}:\ \{\textcolor{keyword}{True}:\ \textcolor{stringliteral}{"{}https"{}},\ \textcolor{keyword}{False}:\ \textcolor{stringliteral}{"{}http"{}}\},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}websocket"{}}:\ \{\textcolor{keyword}{True}:\ \textcolor{stringliteral}{"{}wss"{}},\ \textcolor{keyword}{False}:\ \textcolor{stringliteral}{"{}ws"{}}\},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ \}[self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_aca7b252431dbf00246c2090d79821c6d}{protocol}}][base\_url.is\_secure]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ scheme\ =\ base\_url.scheme}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ netloc\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l_path_a685ea77d021b7b8ae9f4d96c635a2ce5}{host}}\ \textcolor{keywordflow}{or}\ base\_url.netloc}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ path\ =\ base\_url.path.rstrip(\textcolor{stringliteral}{"{}/"{}})\ +\ str(self)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}(scheme=scheme,\ netloc=netloc,\ path=path)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00208}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_secret}{00208}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_secret}{Secret}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00209}00209\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00210}00210\ \textcolor{stringliteral}{\ \ \ \ Holds\ a\ string\ value\ that\ should\ not\ be\ revealed\ in\ tracebacks\ etc.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00211}00211\ \textcolor{stringliteral}{\ \ \ \ You\ should\ cast\ the\ value\ to\ \`{}str\`{}\ at\ the\ point\ it\ is\ required.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00212}00212\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00214}00214\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ value:\ str):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00215}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_secret_ab77c7db883f21a02066b4e5af44b4558}{00215}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_secret_ab77c7db883f21a02066b4e5af44b4558}{\_value}}\ =\ value}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00217}00217\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ class\_name\ =\ self.\_\_class\_\_.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{class\_name\}('**********')"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00221}00221\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_secret_ab77c7db883f21a02066b4e5af44b4558}{\_value}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00224}00224\ \ \ \ \ \textcolor{keyword}{def\ }\_\_bool\_\_(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bool(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_secret_ab77c7db883f21a02066b4e5af44b4558}{\_value}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00228}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings}{00228}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings}{CommaSeparatedStrings}}(Sequence[str]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00229}00229\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ value:\ str\ |\ Sequence[str]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ str):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ splitter\ =\ shlex(value,\ posix=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ splitter.whitespace\ =\ \textcolor{stringliteral}{"{},"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ splitter.whitespace\_split\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00234}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings_a50131838907bfa6cfdbc767f3d35c43d}{00234}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings_a50131838907bfa6cfdbc767f3d35c43d}{\_items}}\ =\ [item.strip()\ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ splitter]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings_a50131838907bfa6cfdbc767f3d35c43d}{\_items}}\ =\ list(value)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00238}00238\ \ \ \ \ \textcolor{keyword}{def\ }\_\_len\_\_(self)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ len(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings_a50131838907bfa6cfdbc767f3d35c43d}{\_items}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00240}00240\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00241}00241\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getitem\_\_(self,\ index:\ int\ |\ slice)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings_a50131838907bfa6cfdbc767f3d35c43d}{\_items}}[index]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00244}00244\ \ \ \ \ \textcolor{keyword}{def\ }\_\_iter\_\_(self)\ -\/>\ Iterator[str]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ iter(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_comma_separated_strings_a50131838907bfa6cfdbc767f3d35c43d}{\_items}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00247}00247\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ class\_name\ =\ self.\_\_class\_\_.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ items\ =\ [item\ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ self]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{class\_name\}(\{items!r\})"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00252}00252\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{},\ "{}}.join(repr(item)\ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ self)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00256}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{00256}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{ImmutableMultiDict}}(Mapping[\_KeyType,\ \_CovariantValueType]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00257}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{00257}}\ \ \ \ \ \_dict:\ dict[\_KeyType,\ \_CovariantValueType]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00258}00258\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00259}00259\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ *args:\ ImmutableMultiDict[\_KeyType,\ \_CovariantValueType]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ |\ Mapping[\_KeyType,\ \_CovariantValueType]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ |\ Iterable[tuple[\_KeyType,\ \_CovariantValueType]],}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ **kwargs:\ Any,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00265}00265\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ len(args)\ <\ 2,\ \textcolor{stringliteral}{"{}Too\ many\ arguments."{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ value:\ Any\ =\ args[0]\ \textcolor{keywordflow}{if}\ args\ \textcolor{keywordflow}{else}\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ kwargs:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{ImmutableMultiDict}}(value).\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a785b5ca8b001646d863e6f8dd2418b3e}{multi\_items}}()\ +\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{ImmutableMultiDict}}(kwargs).\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a785b5ca8b001646d863e6f8dd2418b3e}{multi\_items}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ value:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \_items:\ list[tuple[Any,\ Any]]\ =\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ hasattr(value,\ \textcolor{stringliteral}{"{}multi\_items"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ cast(ImmutableMultiDict[\_KeyType,\ \_CovariantValueType],\ value)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \_items\ =\ list(value.multi\_items())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ hasattr(value,\ \textcolor{stringliteral}{"{}items"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ cast(Mapping[\_KeyType,\ \_CovariantValueType],\ value)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \_items\ =\ list(value.items())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ cast(\textcolor{stringliteral}{"{}list[tuple[Any,\ Any]]"{}},\ value)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \_items\ =\ list(value)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00283}00283\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}\ =\ \{k:\ v\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ \_items\}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00285}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{00285}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ =\ \_items}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00286}00286\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00287}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a5ee47100e82686b13d0b6599bec36b03}{00287}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a5ee47100e82686b13d0b6599bec36b03}{getlist}}(self,\ key:\ Any)\ -\/>\ list[\_CovariantValueType]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [item\_value\ \textcolor{keywordflow}{for}\ item\_key,\ item\_value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ \textcolor{keywordflow}{if}\ item\_key\ ==\ key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00290}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a7a2ec67fd8681703eea8e69b3b411a02}{00290}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a7a2ec67fd8681703eea8e69b3b411a02}{keys}}(self)\ -\/>\ KeysView[\_KeyType]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a7a2ec67fd8681703eea8e69b3b411a02}{keys}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00292}00292\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00293}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_aec09aefdbe8d464af33832c3b30dfe13}{00293}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_aec09aefdbe8d464af33832c3b30dfe13}{values}}(self)\ -\/>\ ValuesView[\_CovariantValueType]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_aec09aefdbe8d464af33832c3b30dfe13}{values}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00295}00295\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00296}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a2b1097c33c3079a46d2116b3ef8994aa}{00296}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a2b1097c33c3079a46d2116b3ef8994aa}{items}}(self)\ -\/>\ ItemsView[\_KeyType,\ \_CovariantValueType]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a2b1097c33c3079a46d2116b3ef8994aa}{items}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00299}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a785b5ca8b001646d863e6f8dd2418b3e}{00299}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a785b5ca8b001646d863e6f8dd2418b3e}{multi\_items}}(self)\ -\/>\ list[tuple[\_KeyType,\ \_CovariantValueType]]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ list(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00302}00302\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getitem\_\_(self,\ key:\ \_KeyType)\ -\/>\ \_CovariantValueType:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}[key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00305}00305\ \ \ \ \ \textcolor{keyword}{def\ }\_\_contains\_\_(self,\ key:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ key\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00308}00308\ \ \ \ \ \textcolor{keyword}{def\ }\_\_iter\_\_(self)\ -\/>\ Iterator[\_KeyType]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ iter(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a7a2ec67fd8681703eea8e69b3b411a02}{keys}}())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00310}00310\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00311}00311\ \ \ \ \ \textcolor{keyword}{def\ }\_\_len\_\_(self)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ len(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00314}00314\ \ \ \ \ \textcolor{keyword}{def\ }\_\_eq\_\_(self,\ other:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(other,\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{\_\_class\_\_}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sorted(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}})\ ==\ sorted(other.\_list)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00319}00319\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ class\_name\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{\_\_class\_\_}}.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ items\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a785b5ca8b001646d863e6f8dd2418b3e}{multi\_items}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{class\_name\}(\{items!r\})"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00323}00323\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00325}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict}{00325}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict}{MultiDict}}(\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{ImmutableMultiDict}}[Any,\ Any]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00326}00326\ \ \ \ \ \textcolor{keyword}{def\ }\_\_setitem\_\_(self,\ key:\ Any,\ value:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a2fb470d40e04dc56422ff64024c80cb9}{setlist}}(key,\ [value])}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00329}00329\ \ \ \ \ \textcolor{keyword}{def\ }\_\_delitem\_\_(self,\ key:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00330}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict}{00330}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ =\ [(k,\ v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ \textcolor{keywordflow}{if}\ k\ !=\ key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}[key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00333}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_abf89dd08f346dbf612f359f6f92a8c34}{00333}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_abf89dd08f346dbf612f359f6f92a8c34}{pop}}(self,\ key:\ Any,\ default:\ Any\ =\ \textcolor{keywordtype}{None})\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ =\ [(k,\ v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ \textcolor{keywordflow}{if}\ k\ !=\ key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_abf89dd08f346dbf612f359f6f92a8c34}{pop}}(key,\ default)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00336}00336\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00337}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_ac8e0bb5e78f066cb910e70e1116e33c7}{00337}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_ac8e0bb5e78f066cb910e70e1116e33c7}{popitem}}(self)\ -\/>\ tuple[Any,\ Any]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ key,\ value\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_ac8e0bb5e78f066cb910e70e1116e33c7}{popitem}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ =\ [(k,\ v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ \textcolor{keywordflow}{if}\ k\ !=\ key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ key,\ value}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00342}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_abfe5a83b687de542b50a73615bd43583}{00342}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_abfe5a83b687de542b50a73615bd43583}{poplist}}(self,\ key:\ Any)\ -\/>\ list[Any]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00343}00343\ \ \ \ \ \ \ \ \ values\ =\ [v\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ \textcolor{keywordflow}{if}\ k\ ==\ key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_abf89dd08f346dbf612f359f6f92a8c34}{pop}}(key)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ values}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00346}00346\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00347}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a94c06daae54737da15362d2d7c8b92b0}{00347}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a94c06daae54737da15362d2d7c8b92b0}{clear}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a94c06daae54737da15362d2d7c8b92b0}{clear}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a94c06daae54737da15362d2d7c8b92b0}{clear}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00351}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a94df96a2f13b2164cf440f29a16971e8}{00351}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a94df96a2f13b2164cf440f29a16971e8}{setdefault}}(self,\ key:\ Any,\ default:\ Any\ =\ \textcolor{keywordtype}{None})\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ key\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ self:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}[key]\ =\ default}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a22ef78e0a2a1ebb6c8276ad3854b325c}{append}}((key,\ default))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00355}00355\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self[key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00358}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a2fb470d40e04dc56422ff64024c80cb9}{00358}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a2fb470d40e04dc56422ff64024c80cb9}{setlist}}(self,\ key:\ Any,\ values:\ list[Any])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ values:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_abf89dd08f346dbf612f359f6f92a8c34}{pop}}(key,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ existing\_items\ =\ [(k,\ v)\ \textcolor{keywordflow}{for}\ (k,\ v)\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ \textcolor{keywordflow}{if}\ k\ !=\ key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ =\ existing\_items\ +\ [(key,\ value)\ \textcolor{keywordflow}{for}\ value\ \textcolor{keywordflow}{in}\ values]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}[key]\ =\ values[-\/1]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00365}00365\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00366}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a22ef78e0a2a1ebb6c8276ad3854b325c}{00366}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a22ef78e0a2a1ebb6c8276ad3854b325c}{append}}(self,\ key:\ Any,\ value:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a22ef78e0a2a1ebb6c8276ad3854b325c}{append}}((key,\ value))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}[key]\ =\ value}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00369}00369\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00370}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a785c8fbbf0e080a9a60864b684bc2406}{00370}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a785c8fbbf0e080a9a60864b684bc2406}{update}}(}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ *args:\ MultiDict\ |\ Mapping[Any,\ Any]\ |\ list[tuple[Any,\ Any]],}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ **kwargs:\ Any,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00374}00374\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ value\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict}{MultiDict}}(*args,\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ existing\_items\ =\ [(k,\ v)\ \textcolor{keywordflow}{for}\ (k,\ v)\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ \textcolor{keywordflow}{if}\ k\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ value.keys()]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ =\ existing\_items\ +\ value.multi\_items()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_multi_dict_a785c8fbbf0e080a9a60864b684bc2406}{update}}(value)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00379}00379\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00380}00380\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00381}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_query_params}{00381}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_query_params}{QueryParams}}(\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{ImmutableMultiDict}}[str,\ str]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00382}00382\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00383}00383\ \textcolor{stringliteral}{\ \ \ \ An\ immutable\ multidict.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00384}00384\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00385}00385\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00386}00386\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ *args:\ ImmutableMultiDict[Any,\ Any]\ |\ Mapping[Any,\ Any]\ |\ list[tuple[Any,\ Any]]\ |\ str\ |\ bytes,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ **kwargs:\ Any,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00390}00390\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ len(args)\ <\ 2,\ \textcolor{stringliteral}{"{}Too\ many\ arguments."{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ value\ =\ args[0]\ \textcolor{keywordflow}{if}\ args\ \textcolor{keywordflow}{else}\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00394}00394\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ str):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ super().\_\_init\_\_(parse\_qsl(value,\ keep\_blank\_values=\textcolor{keyword}{True}),\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ super().\_\_init\_\_(parse\_qsl(value.decode(\textcolor{stringliteral}{"{}latin-\/1"{}}),\ keep\_blank\_values=\textcolor{keyword}{True}),\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ super().\_\_init\_\_(*args,\ **kwargs)\ \ \textcolor{comment}{\#\ type:\ ignore[arg-\/type]}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00401}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_query_params}{00401}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}\ =\ [(str(k),\ str(v))\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00402}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_query_params}{00402}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}\ =\ \{str(k):\ str(v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a68d2c32718137b3f6031cb848ab53e38}{\_dict}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a2b1097c33c3079a46d2116b3ef8994aa}{items}}()\}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00403}00403\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00404}00404\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ urlencode(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a87f3a265f44dd6649cd359ecc251fcf1}{\_list}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00406}00406\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00407}00407\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00408}00408\ \ \ \ \ \ \ \ \ class\_name\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{\_\_class\_\_}}.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ query\_string\ =\ str(self)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00410}00410\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{class\_name\}(\{query\_string!r\})"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00411}00411\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00413}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file}{00413}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file}{UploadFile}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00414}00414\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00415}00415\ \textcolor{stringliteral}{\ \ \ \ An\ uploaded\ file\ included\ as\ part\ of\ the\ request\ data.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00416}00416\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00417}00417\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00418}00418\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00419}00419\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ file:\ BinaryIO,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00421}00421\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ size:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00423}00423\ \ \ \ \ \ \ \ \ filename:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ headers:\ Headers\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00425}00425\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00426}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_ac2d1e14b49939a0ff4a8ef2c29395ca8}{00426}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_ac2d1e14b49939a0ff4a8ef2c29395ca8}{filename}}\ =\ filename}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00427}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{00427}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}\ =\ file}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00428}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a70ef7d42867698c63e06ef909a7abf8e}{00428}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a70ef7d42867698c63e06ef909a7abf8e}{size}}\ =\ size}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00429}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_af95265f2ce7d90d0ddc2faad431578d6}{00429}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_af95265f2ce7d90d0ddc2faad431578d6}{headers}}\ =\ headers\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers}{Headers}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00430}00430\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00431}00431\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Capture\ max\ size\ from\ SpooledTemporaryFile\ if\ one\ is\ provided.\ This\ slightly\ speeds\ up\ future\ checks.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00432}00432\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Note\ 0\ means\ unlimited\ mirroring\ SpooledTemporaryFile's\ \_\_init\_\_}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00433}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a2526d33073010bf4ea8f41eabb8a3c31}{00433}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a2526d33073010bf4ea8f41eabb8a3c31}{\_max\_mem\_size}}\ =\ getattr(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}},\ \textcolor{stringliteral}{"{}\_max\_size"{}},\ 0)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00434}00434\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00435}00435\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00436}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_aeaa6796b171729fe27f3c2cb9dfe5f81}{00436}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_aeaa6796b171729fe27f3c2cb9dfe5f81}{content\_type}}(self)\ -\/>\ str\ |\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_af95265f2ce7d90d0ddc2faad431578d6}{headers}}.get(\textcolor{stringliteral}{"{}content-\/type"{}},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00438}00438\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00439}00439\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00440}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a478323c11e43c672f5ea87c08839c4b6}{00440}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a8fbcf96dd6a28acd5d21ec60823077d7}{\_in\_memory}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ check\ for\ SpooledTemporaryFile.\_rolled}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ rolled\_to\_disk\ =\ getattr(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}},\ \textcolor{stringliteral}{"{}\_rolled"{}},\ \textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordflow}{not}\ rolled\_to\_disk}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00444}00444\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00445}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a3e2041492af854212c28f2618123747e}{00445}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a3e2041492af854212c28f2618123747e}{\_will\_roll}}(self,\ size\_to\_add:\ int)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ we're\ not\ in\_memory\ then\ we\ will\ always\ roll}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00447}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a8fbcf96dd6a28acd5d21ec60823077d7}{00447}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a8fbcf96dd6a28acd5d21ec60823077d7}{\_in\_memory}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00449}00449\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Check\ for\ SpooledTemporaryFile.\_max\_size}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ future\_size\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.tell()\ +\ size\_to\_add}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00452}00452\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bool(future\_size\ >\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a2526d33073010bf4ea8f41eabb8a3c31}{\_max\_mem\_size}})\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a2526d33073010bf4ea8f41eabb8a3c31}{\_max\_mem\_size}}\ \textcolor{keywordflow}{else}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00453}00453\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00454}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_acba80c99b21510668c1c9a46caa5969b}{00454}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_acba80c99b21510668c1c9a46caa5969b}{write}}(self,\ data:\ bytes)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ new\_data\_len\ =\ len(data)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00456}00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a70ef7d42867698c63e06ef909a7abf8e}{size}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a70ef7d42867698c63e06ef909a7abf8e}{size}}\ +=\ new\_data\_len}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00458}00458\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00459}00459\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a3e2041492af854212c28f2618123747e}{\_will\_roll}}(new\_data\_len):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \ \ \ \ await\ run\_in\_threadpool(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.write,\ data)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_acba80c99b21510668c1c9a46caa5969b}{write}}(data)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00463}00463\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00464}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a97e05d49f4917634c051af9619a647b1}{00464}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a97e05d49f4917634c051af9619a647b1}{read}}(self,\ size:\ int\ =\ -\/1)\ -\/>\ bytes:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a8fbcf96dd6a28acd5d21ec60823077d7}{\_in\_memory}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a97e05d49f4917634c051af9619a647b1}{read}}(size)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ await\ run\_in\_threadpool(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.read,\ size)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00468}00468\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00469}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a210d26d7372c1a1c8a9d0b38c4669113}{00469}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a210d26d7372c1a1c8a9d0b38c4669113}{seek}}(self,\ offset:\ int)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a8fbcf96dd6a28acd5d21ec60823077d7}{\_in\_memory}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a210d26d7372c1a1c8a9d0b38c4669113}{seek}}(offset)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ await\ run\_in\_threadpool(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.seek,\ offset)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00474}00474\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00475}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a45322c3aa75f1ea3cb7ddf56cd704de0}{00475}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a45322c3aa75f1ea3cb7ddf56cd704de0}{close}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a8fbcf96dd6a28acd5d21ec60823077d7}{\_in\_memory}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a45322c3aa75f1ea3cb7ddf56cd704de0}{close}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ await\ run\_in\_threadpool(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_upload_file_a36afc01dc48e8bc2466f072623981668}{file}}.close)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00480}00480\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00481}00481\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{self.\_\_class\_\_.\_\_name\_\_\}(filename=\{self.filename!r\},\ size=\{self.size!r\},\ headers=\{self.headers!r\})"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00483}00483\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00484}00484\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00485}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_form_data}{00485}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_form_data}{FormData}}(\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict}{ImmutableMultiDict}}[str,\ Union[UploadFile,\ str]]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00486}00486\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00487}00487\ \textcolor{stringliteral}{\ \ \ \ An\ immutable\ multidict,\ containing\ both\ file\ uploads\ and\ text\ input.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00488}00488\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00489}00489\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00490}00490\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ *args:\ FormData\ |\ Mapping[str,\ str\ |\ UploadFile]\ |\ list[tuple[str,\ str\ |\ UploadFile]],}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ **kwargs:\ str\ |\ UploadFile,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00494}00494\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(*args,\ **kwargs)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00496}00496\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00497}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_form_data_ae42b8488b9e2de933c2866f55670f5e6}{00497}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_form_data_ae42b8488b9e2de933c2866f55670f5e6}{close}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_immutable_multi_dict_a785b5ca8b001646d863e6f8dd2418b3e}{multi\_items}}():}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ UploadFile):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ value.close()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00501}00501\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00502}00502\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00503}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers}{00503}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers}{Headers}}(Mapping[str,\ str]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00504}00504\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00505}00505\ \textcolor{stringliteral}{\ \ \ \ An\ immutable,\ case-\/insensitive\ multidict.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00506}00506\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00507}00507\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00508}00508\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ headers:\ Mapping[str,\ str]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ raw:\ list[tuple[bytes,\ bytes]]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ scope:\ MutableMapping[str,\ Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00513}00513\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00514}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{00514}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}:\ list[tuple[bytes,\ bytes]]\ =\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ headers\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00516}00516\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ raw\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{'Cannot\ set\ both\ "{}headers"{}\ and\ "{}raw"{}.'}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00517}00517\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ scope\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{'Cannot\ set\ both\ "{}headers"{}\ and\ "{}scope"{}.'}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00518}00518\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}\ =\ [(key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}}),\ value.encode(\textcolor{stringliteral}{"{}latin-\/1"{}}))\ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ headers.items()]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ raw\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00520}00520\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ scope\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{'Cannot\ set\ both\ "{}raw"{}\ and\ "{}scope"{}.'}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}\ =\ raw}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ scope\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00523}00523\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ scope["{}headers"{}]\ isn't\ necessarily\ a\ list}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ it\ might\ be\ a\ tuple\ or\ other\ iterable}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}\ =\ scope[\textcolor{stringliteral}{"{}headers"{}}]\ =\ list(scope[\textcolor{stringliteral}{"{}headers"{}}])}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00526}00526\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00527}00527\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00528}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a3342226a0a5a65fe3d6e1f9ad38972c7}{00528}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a3342226a0a5a65fe3d6e1f9ad38972c7}{raw}}(self)\ -\/>\ list[tuple[bytes,\ bytes]]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ list(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00530}00530\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00531}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a9f4d9a6c682f8ff9a13735041a75c126}{00531}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a9f4d9a6c682f8ff9a13735041a75c126}{keys}}(self)\ -\/>\ list[str]:\ \ \textcolor{comment}{\#\ type:\ ignore[override]}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [key.decode(\textcolor{stringliteral}{"{}latin-\/1"{}})\ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00533}00533\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00534}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a90987741670b71d2add4922e4d013741}{00534}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a90987741670b71d2add4922e4d013741}{values}}(self)\ -\/>\ list[str]:\ \ \textcolor{comment}{\#\ type:\ ignore[override]}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00535}00535\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [value.decode(\textcolor{stringliteral}{"{}latin-\/1"{}})\ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00536}00536\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00537}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a44852a7dcc5cdb4b5eb3abe9e4bc6746}{00537}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a44852a7dcc5cdb4b5eb3abe9e4bc6746}{items}}(self)\ -\/>\ list[tuple[str,\ str]]:\ \ \textcolor{comment}{\#\ type:\ ignore[override]}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00538}00538\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [(key.decode(\textcolor{stringliteral}{"{}latin-\/1"{}}),\ value.decode(\textcolor{stringliteral}{"{}latin-\/1"{}}))\ \textcolor{keywordflow}{for}\ key,\ value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00539}00539\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00540}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a3b501af2761a3bd02ce71e32febb90fe}{00540}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a3b501af2761a3bd02ce71e32febb90fe}{getlist}}(self,\ key:\ str)\ -\/>\ list[str]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ get\_header\_key\ =\ key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00542}00542\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [item\_value.decode(\textcolor{stringliteral}{"{}latin-\/1"{}})\ \textcolor{keywordflow}{for}\ item\_key,\ item\_value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}\ \textcolor{keywordflow}{if}\ item\_key\ ==\ get\_header\_key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00543}00543\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00544}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_ac251f242e671a0adc9845241aecb5021}{00544}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_ac251f242e671a0adc9845241aecb5021}{mutablecopy}}(self)\ -\/>\ MutableHeaders:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers}{MutableHeaders}}(raw=self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}[:])}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00546}00546\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00547}00547\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getitem\_\_(self,\ key:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00548}00548\ \ \ \ \ \ \ \ \ get\_header\_key\ =\ key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00549}00549\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ header\_key,\ header\_value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ header\_key\ ==\ get\_header\_key:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ header\_value.decode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00552}00552\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ KeyError(key)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00553}00553\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00554}00554\ \ \ \ \ \textcolor{keyword}{def\ }\_\_contains\_\_(self,\ key:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00555}00555\ \ \ \ \ \ \ \ \ get\_header\_key\ =\ key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00556}00556\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ header\_key,\ header\_value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ header\_key\ ==\ get\_header\_key:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00559}00559\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00560}00560\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00561}00561\ \ \ \ \ \textcolor{keyword}{def\ }\_\_iter\_\_(self)\ -\/>\ Iterator[Any]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00562}00562\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ iter(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a9f4d9a6c682f8ff9a13735041a75c126}{keys}}())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00563}00563\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00564}00564\ \ \ \ \ \textcolor{keyword}{def\ }\_\_len\_\_(self)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ len(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00566}00566\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00567}00567\ \ \ \ \ \textcolor{keyword}{def\ }\_\_eq\_\_(self,\ other:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00568}00568\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(other,\ Headers):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00570}00570\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sorted(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}})\ ==\ sorted(other.\_list)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00571}00571\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00572}00572\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ class\_name\ =\ self.\_\_class\_\_.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00574}00574\ \ \ \ \ \ \ \ \ as\_dict\ =\ dict(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_a44852a7dcc5cdb4b5eb3abe9e4bc6746}{items}}())}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00575}00575\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(as\_dict)\ ==\ len(self):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00576}00576\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{class\_name\}(\{as\_dict!r\})"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00577}00577\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{class\_name\}(raw=\{self.raw!r\})"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00578}00578\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00579}00579\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00580}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers}{00580}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers}{MutableHeaders}}(\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers}{Headers}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00581}00581\ \ \ \ \ \textcolor{keyword}{def\ }\_\_setitem\_\_(self,\ key:\ str,\ value:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00583}00583\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Set\ the\ header\ \`{}key\`{}\ to\ \`{}value\`{},\ removing\ any\ duplicate\ entries.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00584}00584\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Retains\ insertion\ order.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00585}00585\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00586}00586\ \ \ \ \ \ \ \ \ set\_key\ =\ key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00587}00587\ \ \ \ \ \ \ \ \ set\_value\ =\ value.encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00588}00588\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00589}00589\ \ \ \ \ \ \ \ \ found\_indexes:\ list[int]\ =\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00590}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers}{00590}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ idx,\ (item\_key,\ item\_value)\ \textcolor{keywordflow}{in}\ enumerate(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ item\_key\ ==\ set\_key:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00592}00592\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ found\_indexes.append(idx)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00593}00593\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00594}00594\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ idx\ \textcolor{keywordflow}{in}\ reversed(found\_indexes[1:]):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00595}00595\ \ \ \ \ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}[idx]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00596}00596\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00597}00597\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ found\_indexes:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00598}00598\ \ \ \ \ \ \ \ \ \ \ \ \ idx\ =\ found\_indexes[0]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00599}00599\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}[idx]\ =\ (set\_key,\ set\_value)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00600}00600\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00601}00601\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_af4eda4a500a8e8048e5f91b734febc80}{append}}((set\_key,\ set\_value))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00602}00602\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00603}00603\ \ \ \ \ \textcolor{keyword}{def\ }\_\_delitem\_\_(self,\ key:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00604}00604\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00605}00605\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Remove\ the\ header\ \`{}key\`{}.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00606}00606\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00607}00607\ \ \ \ \ \ \ \ \ del\_key\ =\ key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00608}00608\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00609}00609\ \ \ \ \ \ \ \ \ pop\_indexes:\ list[int]\ =\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00610}00610\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ idx,\ (item\_key,\ item\_value)\ \textcolor{keywordflow}{in}\ enumerate(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00611}00611\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ item\_key\ ==\ del\_key:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00612}00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pop\_indexes.append(idx)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00613}00613\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00614}00614\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ idx\ \textcolor{keywordflow}{in}\ reversed(pop\_indexes):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}[idx]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00616}00616\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00617}00617\ \ \ \ \ \textcolor{keyword}{def\ }\_\_ior\_\_(self,\ other:\ Mapping[str,\ str])\ -\/>\ MutableHeaders:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00618}00618\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(other,\ Mapping):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Expected\ a\ mapping\ but\ got\ \{other.\_\_class\_\_.\_\_name\_\_\}"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00620}00620\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_a0ba394040da29e78162c9795fdf879f2}{update}}(other)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00621}00621\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00622}00622\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00623}00623\ \ \ \ \ \textcolor{keyword}{def\ }\_\_or\_\_(self,\ other:\ Mapping[str,\ str])\ -\/>\ MutableHeaders:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00624}00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(other,\ Mapping):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Expected\ a\ mapping\ but\ got\ \{other.\_\_class\_\_.\_\_name\_\_\}"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00626}00626\ \ \ \ \ \ \ \ \ new\ =\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_ac251f242e671a0adc9845241aecb5021}{mutablecopy}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00627}00627\ \ \ \ \ \ \ \ \ new.update(other)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00628}00628\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ new}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00629}00629\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00630}00630\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00631}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_aac1610778d1803de018b5d3712305270}{00631}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_aac1610778d1803de018b5d3712305270}{raw}}(self)\ -\/>\ list[tuple[bytes,\ bytes]]:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00632}00632\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00633}00633\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00634}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_a29f597481b76ea299ef715e0276dde33}{00634}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_a29f597481b76ea299ef715e0276dde33}{setdefault}}(self,\ key:\ str,\ value:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00635}00635\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00636}00636\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ the\ header\ \`{}key\`{}\ does\ not\ exist,\ then\ set\ it\ to\ \`{}value\`{}.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00637}00637\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ the\ header\ value.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00638}00638\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00639}00639\ \ \ \ \ \ \ \ \ set\_key\ =\ key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ set\_value\ =\ value.encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00641}00641\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00642}00642\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ idx,\ (item\_key,\ item\_value)\ \textcolor{keywordflow}{in}\ enumerate(self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ item\_key\ ==\ set\_key:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00644}00644\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ item\_value.decode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_af4eda4a500a8e8048e5f91b734febc80}{append}}((set\_key,\ set\_value))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00646}00646\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00647}00647\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00648}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_a0ba394040da29e78162c9795fdf879f2}{00648}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_a0ba394040da29e78162c9795fdf879f2}{update}}(self,\ other:\ Mapping[str,\ str])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00649}00649\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key,\ val\ \textcolor{keywordflow}{in}\ other.items():}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00650}00650\ \ \ \ \ \ \ \ \ \ \ \ \ self[key]\ =\ val}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00651}00651\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00652}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_af4eda4a500a8e8048e5f91b734febc80}{00652}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_af4eda4a500a8e8048e5f91b734febc80}{append}}(self,\ key:\ str,\ value:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00653}00653\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00654}00654\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Append\ a\ header,\ preserving\ any\ duplicate\ entries.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00655}00655\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00656}00656\ \ \ \ \ \ \ \ \ append\_key\ =\ key.lower().encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00657}00657\ \ \ \ \ \ \ \ \ append\_value\ =\ value.encode(\textcolor{stringliteral}{"{}latin-\/1"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00658}00658\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers_abb371f0478dfa2d67dc2234184bf82b1}{\_list}}.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_af4eda4a500a8e8048e5f91b734febc80}{append}}((append\_key,\ append\_value))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00659}00659\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00660}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_a86f5a5d7274282a58db07b1060910a45}{00660}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_mutable_headers_a86f5a5d7274282a58db07b1060910a45}{add\_vary\_header}}(self,\ vary:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00661}00661\ \ \ \ \ \ \ \ \ existing\ =\ self.get(\textcolor{stringliteral}{"{}vary"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00662}00662\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ existing\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ vary\ =\ \textcolor{stringliteral}{"{},\ "{}}.join([existing,\ vary])}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00664}00664\ \ \ \ \ \ \ \ \ self[\textcolor{stringliteral}{"{}vary"{}}]\ =\ vary}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00665}00665\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00666}00666\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00667}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_state}{00667}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_state}{State}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00668}00668\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00669}00669\ \textcolor{stringliteral}{\ \ \ \ An\ object\ that\ can\ be\ used\ to\ store\ arbitrary\ state.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00670}00670\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00671}00671\ \textcolor{stringliteral}{\ \ \ \ Used\ for\ \`{}request.state\`{}\ and\ \`{}app.state\`{}.}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00672}00672\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00673}00673\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00674}\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_state_a1bb964213ef7a06c2b83af749a52ff72}{00674}}\ \ \ \ \ \_state:\ dict[str,\ Any]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00675}00675\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00676}00676\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ state:\ dict[str,\ Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}):}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00677}00677\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ state\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00678}00678\ \ \ \ \ \ \ \ \ \ \ \ \ state\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00679}00679\ \ \ \ \ \ \ \ \ super().\_\_setattr\_\_(\textcolor{stringliteral}{"{}\_state"{}},\ state)}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00680}00680\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00681}00681\ \ \ \ \ \textcolor{keyword}{def\ }\_\_setattr\_\_(self,\ key:\ Any,\ value:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00682}00682\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_state_a1bb964213ef7a06c2b83af749a52ff72}{\_state}}[key]\ =\ value}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00683}00683\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00684}00684\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getattr\_\_(self,\ key:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00685}00685\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00686}00686\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_state_a1bb964213ef7a06c2b83af749a52ff72}{\_state}}[key]}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00687}00687\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00688}00688\ \ \ \ \ \ \ \ \ \ \ \ \ message\ =\ \textcolor{stringliteral}{"{}'\{\}'\ object\ has\ no\ attribute\ '\{\}'"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00689}00689\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ AttributeError(message.format(self.\_\_class\_\_.\_\_name\_\_,\ key))}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00690}00690\ }
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00691}00691\ \ \ \ \ \textcolor{keyword}{def\ }\_\_delattr\_\_(self,\ key:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2datastructures_8py_source_l00692}00692\ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classstarlette_1_1datastructures_1_1_state_a1bb964213ef7a06c2b83af749a52ff72}{\_state}}[key]}
+
+\end{DoxyCode}

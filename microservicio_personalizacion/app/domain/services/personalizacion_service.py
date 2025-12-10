@@ -1,3 +1,29 @@
+"""
+    @file personalizacion_service.py
+    @brief Servicio de aplicación para gestión de personalización de usuario.
+    @details
+    Implementa la lógica de negocio para:
+    - Gestión de preferencias/contratos ECA del usuario
+    - Carga y activación de ontologías de perfil
+    - Coordinación con microservicio de automatización
+    - Registro de interacciones usuario-objeto
+    
+    Patrón: Application Service + Domain Service
+    
+    Dependencias externas:
+    - micro_gestion_conocimiento: para carga de ontologías
+    - micro_automatizacion: para creación/gestión de ECAs
+    - microservicio_data_stream: para registros de interacción
+    
+    @author Sistema Objeto Inteligente
+    @version 1.0
+    @date 2025-01-10
+    
+    @see PersonalizacionService Para endpoints
+    @see ontology_service Para operaciones de ontología
+    @see eca_service Para gestión de reglas ECA
+"""
+
 import json
 import logging
 import os
@@ -20,22 +46,70 @@ from infrastructure.logging.ILogPanelMQTT import ILogPanelMQTT
 from infrastructure.logging.Logging import logger
 
 class PersonalizacionService:
+    """
+        @class PersonalizacionService
+        @brief Servicio de aplicación para gestión de preferencias e interacciones de usuario.
+        
+        @details
+        Responsabilidades:
+        - Orquestar carga de ontologías de perfil de usuario
+        - Coordinar creación de preferencias/ECAs con micro_automatizacion
+        - Activar/desactivar ECAs del usuario
+        - Registrar interacciones usuario-objeto para personalización
+        - Mantener conexión con servidor de perfil de usuario (ConexionPu)
+        
+        Atributos:
+        - osid: ID del objeto inteligente activo
+        - ipServidorPU: dirección del servidor de perfil de usuario
+        - path: ruta donde se guardan las ECAs
+        - conexion_pu: cliente para comunicación con servidor perfil
+        - Log: cliente MQTT para logging distribuido
+        
+        @note Esta clase coordina múltiples microservicios de forma distribuida.
+              Considerar implementar sagas/compensación para operaciones compuestas.
+        
+        @author Sistema Objeto Inteligente
+        @date 2025-01-10
+    """
     def __init__(self, log = ILogPanelMQTT):
+        """
+            @brief Constructor del servicio de personalización.
+            
+            @param log Instancia del cliente MQTT para logging distribuido.
+            
+            @details
+            Inicializa conexiones a servicios externos y configura rutas.
+        """
         self.osid = ontology_service.get_osid()
         self.ipServidorPU = "http://localhost"  # Dirección del servidor de perfil de usuario        
         self.path =settings.PATH_ECAS
         self.conexion_pu = ConexionPu()
         self.Log = log
     async def recibir_ontologia(self,file:UploadFile, nombre: str, ipCoordinador: str) -> JSONResponse:
-        """Recibe una ontología desde el coordinador y la envía al microservicio de ontologías.
+        """
+            @brief Recibe una ontología desde el coordinador y la envía al microservicio de ontologías.
 
-        Args:
-            file (UploadFile): Archivo de ontología recibido.
-            nombre (str): Nombre de la ontología.
-            ipCoordinador (str): IP del coordinador que envía la ontología.
+            @param file Archivo .owl con la ontología de usuario.
+            @param nombre Identificador/nombre de la ontología.
+            @param ipCoordinador IP del coordinador que envía la ontología (para tracking).
 
-        Returns:
-            JSONResponse: Respuesta indicando el resultado de la operación.
+            @return JSONResponse con status 200 si exitoso, o error 400/500.
+            
+            @exception ValueError Si el archivo no es .owl.
+            @exception RuntimeError Si falla el envío a micro_gestion_conocimiento.
+            
+            @details
+            Flujo:
+            1. Valida que el archivo sea .owl
+            2. Delega carga en ontology_service (que se comunica con micro_gestion_conocimiento)
+            3. Guarda IP del coordinador en archivo (para auditoría)
+            4. Activa ECAs del usuario actual
+            
+            @note Esta operación es distribuida: coordina con micro_gestion_conocimiento
+                  y micro_automatizacion. Considerar saga si falla en mitad.
+            
+            @see ontology_service.cargar_ontologia()
+            @see activarEcasUsuario()
         """
         logger.info(f"Recibiendo ontología: {nombre} desde {ipCoordinador}")
         
@@ -61,12 +135,28 @@ class PersonalizacionService:
                 content={"error": "Error enviando ontología al microservicio de ontologías"}
             )    
     async def crear_preferencia(self, data:MakeContractRequest) -> JSONResponse:
-        if not self.verificarUsuario(data.email):
-            logger.error("El email proporcionado no coincide con el usuario actual")
-            return JSONResponse(
-                status_code=400,
-                content={"error": "El email proporcionado no coincide con el usuario actual"}
-            )
+        """
+            @brief Crea una nueva preferencia/contrato ECA para el usuario.
+            
+            @param data DTO MakeContractRequest con definición del contrato.
+            
+            @return JSONResponse con status 200 si exitoso, o error 400/500.
+            
+            @exception ValueError Si email no coincide con usuario actual.
+            @exception RuntimeError Si falla comunicación con micro_automatizacion.
+            
+            @details
+            Flujo:
+            1. Valida que el email del DTO coincida con el usuario activo
+            2. Envía solicitud POST a micro_automatizacion
+            3. Si es exitoso, registra preferencia en ontología de usuario
+            
+            @note Operación distribuida: requiere coordinación con micro_automatizacion.
+                  Si micro_automatizacion responde error, la preferencia no se registra.
+            
+            @see MakeContractRequest DTO
+            @see settings.AUTOMATIZACION_MS_URL Para endpoint remoto
+        """
         try:
             response = requests.post(
                 f"{settings.AUTOMATIZACION_MS_URL}",

@@ -1,0 +1,151 @@
+\doxysection{\+\_\+writers.\+py}
+\hypertarget{__writers_8py_source}{}\label{__writers_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_writers.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_writers.py}}
+\mbox{\hyperlink{__writers_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00001}\mbox{\hyperlink{namespaceh11_1_1__writers}{00001}}\ \textcolor{comment}{\#\ Code\ to\ read\ HTTP\ data}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00002}00002\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00003}00003\ \textcolor{comment}{\#\ Strategy:\ each\ writer\ takes\ an\ event\ +\ a\ write-\/some-\/bytes\ function,\ which\ is}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00004}00004\ \textcolor{comment}{\#\ calls.}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00005}00005\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00006}00006\ \textcolor{comment}{\#\ WRITERS\ is\ a\ dict\ describing\ how\ to\ pick\ a\ reader.\ It\ maps\ states\ to\ either:}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00007}00007\ \textcolor{comment}{\#\ -\/\ a\ writer}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00008}00008\ \textcolor{comment}{\#\ -\/\ or,\ for\ body\ writers,\ a\ dict\ of\ framin-\/dependent\ writer\ factories}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00010}00010\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any,\ Callable,\ Dict,\ List,\ Tuple,\ Type,\ Union}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00012}00012\ \textcolor{keyword}{from}\ .\_events\ \textcolor{keyword}{import}\ Data,\ EndOfMessage,\ Event,\ InformationalResponse,\ Request,\ Response}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00013}00013\ \textcolor{keyword}{from}\ .\_headers\ \textcolor{keyword}{import}\ Headers}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00014}00014\ \textcolor{keyword}{from}\ .\_state\ \textcolor{keyword}{import}\ CLIENT,\ IDLE,\ SEND\_BODY,\ SEND\_RESPONSE,\ SERVER}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00015}00015\ \textcolor{keyword}{from}\ .\_util\ \textcolor{keyword}{import}\ LocalProtocolError,\ Sentinel}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00017}00017\ \_\_all\_\_\ =\ [\textcolor{stringliteral}{"{}WRITERS"{}}]}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00019}\mbox{\hyperlink{namespaceh11_1_1__writers_ae22bc7581d56ded7a9d6a349136cb8ad}{00019}}\ Writer\ =\ Callable[[bytes],\ Any]}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00022}\mbox{\hyperlink{namespaceh11_1_1__writers_a5c6a6eaaa7e1d1984cbd6d694ac7b365}{00022}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceh11_1_1__writers_a5c6a6eaaa7e1d1984cbd6d694ac7b365}{write\_headers}}(headers:\ Headers,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00023}00023\ \ \ \ \ \textcolor{comment}{\#\ "{}Since\ the\ Host\ field-\/value\ is\ critical\ information\ for\ handling\ a}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00024}00024\ \ \ \ \ \textcolor{comment}{\#\ request,\ a\ user\ agent\ SHOULD\ generate\ Host\ as\ the\ first\ header\ field}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00025}00025\ \ \ \ \ \textcolor{comment}{\#\ following\ the\ request-\/line."{}\ -\/\ RFC\ 7230}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00026}00026\ \ \ \ \ raw\_items\ =\ headers.\_full\_items}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00027}00027\ \ \ \ \ \textcolor{keywordflow}{for}\ raw\_name,\ name,\ value\ \textcolor{keywordflow}{in}\ raw\_items:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ ==\ b\textcolor{stringliteral}{"{}host"{}}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ write(b\textcolor{stringliteral}{"{}\%s:\ \%s\(\backslash\)r\(\backslash\)n"{}}\ \%\ (raw\_name,\ value))}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00030}00030\ \ \ \ \ \textcolor{keywordflow}{for}\ raw\_name,\ name,\ value\ \textcolor{keywordflow}{in}\ raw\_items:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ !=\ b\textcolor{stringliteral}{"{}host"{}}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ write(b\textcolor{stringliteral}{"{}\%s:\ \%s\(\backslash\)r\(\backslash\)n"{}}\ \%\ (raw\_name,\ value))}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00033}00033\ \ \ \ \ write(b\textcolor{stringliteral}{"{}\(\backslash\)r\(\backslash\)n"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00036}\mbox{\hyperlink{namespaceh11_1_1__writers_a7db38a9a3666901c4e7155cdc84db09f}{00036}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceh11_1_1__writers_a7db38a9a3666901c4e7155cdc84db09f}{write\_request}}(request:\ Request,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00037}00037\ \ \ \ \ \textcolor{keywordflow}{if}\ request.http\_version\ !=\ b\textcolor{stringliteral}{"{}1.1"{}}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{LocalProtocolError}}(\textcolor{stringliteral}{"{}I\ only\ send\ HTTP/1.1"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00039}00039\ \ \ \ \ write(b\textcolor{stringliteral}{"{}\%s\ \%s\ HTTP/1.1\(\backslash\)r\(\backslash\)n"{}}\ \%\ (request.method,\ request.target))}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00040}00040\ \ \ \ \ \mbox{\hyperlink{namespaceh11_1_1__writers_a5c6a6eaaa7e1d1984cbd6d694ac7b365}{write\_headers}}(request.headers,\ write)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00043}00043\ \textcolor{comment}{\#\ Shared\ between\ InformationalResponse\ and\ Response}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00044}\mbox{\hyperlink{namespaceh11_1_1__writers_aa455e87b29c0edc885b3d7eafaf3d3e4}{00044}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceh11_1_1__writers_aa455e87b29c0edc885b3d7eafaf3d3e4}{write\_any\_response}}(}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00045}00045\ \ \ \ \ response:\ Union[InformationalResponse,\ Response],\ write:\ Writer}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00046}00046\ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00047}00047\ \ \ \ \ \textcolor{keywordflow}{if}\ response.http\_version\ !=\ b\textcolor{stringliteral}{"{}1.1"{}}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{LocalProtocolError}}(\textcolor{stringliteral}{"{}I\ only\ send\ HTTP/1.1"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00049}00049\ \ \ \ \ status\_bytes\ =\ str(response.status\_code).encode(\textcolor{stringliteral}{"{}ascii"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00050}00050\ \ \ \ \ \textcolor{comment}{\#\ We\ don't\ bother\ sending\ ascii\ status\ messages\ like\ "{}OK"{};\ they're}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00051}00051\ \ \ \ \ \textcolor{comment}{\#\ optional\ and\ ignored\ by\ the\ protocol.\ (But\ the\ space\ after\ the\ numeric}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00052}00052\ \ \ \ \ \textcolor{comment}{\#\ status\ code\ is\ mandatory.)}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00053}00053\ \ \ \ \ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00054}00054\ \ \ \ \ \textcolor{comment}{\#\ XX\ FIXME:\ could\ at\ least\ make\ an\ effort\ to\ pull\ out\ the\ status\ message}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00055}00055\ \ \ \ \ \textcolor{comment}{\#\ from\ stdlib's\ http.HTTPStatus\ table.\ Or\ maybe\ just\ steal\ their\ enums}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00056}00056\ \ \ \ \ \textcolor{comment}{\#\ (either\ by\ import\ or\ copy/paste).\ We\ already\ accept\ them\ as\ status\ codes}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00057}00057\ \ \ \ \ \textcolor{comment}{\#\ since\ they're\ of\ type\ IntEnum\ <\ int.}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00058}00058\ \ \ \ \ write(b\textcolor{stringliteral}{"{}HTTP/1.1\ \%s\ \%s\(\backslash\)r\(\backslash\)n"{}}\ \%\ (status\_bytes,\ response.reason))}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00059}00059\ \ \ \ \ \mbox{\hyperlink{namespaceh11_1_1__writers_a5c6a6eaaa7e1d1984cbd6d694ac7b365}{write\_headers}}(response.headers,\ write)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00062}\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer}{00062}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer}{BodyWriter}}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00063}00063\ \ \ \ \ \textcolor{keyword}{def\ }\_\_call\_\_(self,\ event:\ Event,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type(event)\ \textcolor{keywordflow}{is}\ Data:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer_aa8d527104d43d9dfdbfa82f37fb76229}{send\_data}}(event.data,\ write)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ type(event)\ \textcolor{keywordflow}{is}\ EndOfMessage:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer_aadb3cc475c3fe58f6a6ba7e7ec586814}{send\_eom}}(event.headers,\ write)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00071}\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer_aa8d527104d43d9dfdbfa82f37fb76229}{00071}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer_aa8d527104d43d9dfdbfa82f37fb76229}{send\_data}}(self,\ data:\ bytes,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00074}\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer_aadb3cc475c3fe58f6a6ba7e7ec586814}{00074}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer_aadb3cc475c3fe58f6a6ba7e7ec586814}{send\_eom}}(self,\ headers:\ Headers,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00078}00078\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00079}00079\ \textcolor{comment}{\#\ These\ are\ all\ careful\ not\ to\ do\ anything\ to\ 'data'\ except\ call\ len(data)\ and}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00080}00080\ \textcolor{comment}{\#\ write(data).\ This\ allows\ us\ to\ transparently\ pass-\/through\ funny\ objects,}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00081}00081\ \textcolor{comment}{\#\ like\ placeholder\ objects\ referring\ to\ files\ on\ disk\ that\ will\ be\ sent\ via}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00082}00082\ \textcolor{comment}{\#\ sendfile(2).}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00083}00083\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00084}\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer}{00084}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer}{ContentLengthWriter}}(\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer}{BodyWriter}}):}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00085}00085\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ length:\ int)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00086}\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_aba6597ffae919f336e469453ffa325f7}{00086}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_aba6597ffae919f336e469453ffa325f7}{\_length}}\ =\ length}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00088}\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_ac064daeaaa69d988da0d67726a08e452}{00088}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_ac064daeaaa69d988da0d67726a08e452}{send\_data}}(self,\ data:\ bytes,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_aba6597ffae919f336e469453ffa325f7}{\_length}}\ -\/=\ len(data)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_aba6597ffae919f336e469453ffa325f7}{\_length}}\ <\ 0:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{LocalProtocolError}}(\textcolor{stringliteral}{"{}Too\ much\ data\ for\ declared\ Content-\/Length"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ write(data)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00094}\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_a575d63f0f246506ed061766f2ecedc02}{00094}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_a575d63f0f246506ed061766f2ecedc02}{send\_eom}}(self,\ headers:\ Headers,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classh11_1_1__writers_1_1_content_length_writer_aba6597ffae919f336e469453ffa325f7}{\_length}}\ !=\ 0:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{LocalProtocolError}}(\textcolor{stringliteral}{"{}Too\ little\ data\ for\ declared\ Content-\/Length"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ headers:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{LocalProtocolError}}(\textcolor{stringliteral}{"{}Content-\/Length\ and\ trailers\ don't\ mix"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00101}\mbox{\hyperlink{classh11_1_1__writers_1_1_chunked_writer}{00101}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_chunked_writer}{ChunkedWriter}}(\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer}{BodyWriter}}):}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00102}\mbox{\hyperlink{classh11_1_1__writers_1_1_chunked_writer_afe2b8113fec444743c6ca26f476521b2}{00102}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_chunked_writer_afe2b8113fec444743c6ca26f476521b2}{send\_data}}(self,\ data:\ bytes,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ if\ we\ encoded\ 0-\/length\ data\ in\ the\ naive\ way,\ it\ would\ look\ like\ an}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ end-\/of-\/message.}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ data:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ write(b\textcolor{stringliteral}{"{}\%x\(\backslash\)r\(\backslash\)n"{}}\ \%\ len(data))}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ write(data)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ write(b\textcolor{stringliteral}{"{}\(\backslash\)r\(\backslash\)n"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00111}\mbox{\hyperlink{classh11_1_1__writers_1_1_chunked_writer_afd039bf751c91c7a1045c1adc4dc3cf0}{00111}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_chunked_writer_afd039bf751c91c7a1045c1adc4dc3cf0}{send\_eom}}(self,\ headers:\ Headers,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ write(b\textcolor{stringliteral}{"{}0\(\backslash\)r\(\backslash\)n"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceh11_1_1__writers_a5c6a6eaaa7e1d1984cbd6d694ac7b365}{write\_headers}}(headers,\ write)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00116}\mbox{\hyperlink{classh11_1_1__writers_1_1_http10_writer}{00116}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_http10_writer}{Http10Writer}}(\mbox{\hyperlink{classh11_1_1__writers_1_1_body_writer}{BodyWriter}}):}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00117}\mbox{\hyperlink{classh11_1_1__writers_1_1_http10_writer_a01e59b8a0a04f0351843c86137659c16}{00117}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_http10_writer_a01e59b8a0a04f0351843c86137659c16}{send\_data}}(self,\ data:\ bytes,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ write(data)}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00120}\mbox{\hyperlink{classh11_1_1__writers_1_1_http10_writer_a10677154d10325019cc2f8a073c9e437}{00120}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__writers_1_1_http10_writer_a10677154d10325019cc2f8a073c9e437}{send\_eom}}(self,\ headers:\ Headers,\ write:\ Writer)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ headers:}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{LocalProtocolError}}(\textcolor{stringliteral}{"{}can't\ send\ trailers\ to\ HTTP/1.0\ client"{}})}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ no\ need\ to\ close\ the\ socket\ ourselves,\ that\ will\ be\ taken\ care\ of\ by}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Connection:\ close\ machinery}}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00127}\mbox{\hyperlink{namespaceh11_1_1__writers_aed8e9b2867318b2339e46016c5492c1c}{00127}}\ WritersType\ =\ Dict[}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00128}00128\ \ \ \ \ Union[Tuple[Type[Sentinel],\ Type[Sentinel]],\ Type[Sentinel]],}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00129}00129\ \ \ \ \ Union[}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ Dict[str,\ Type[BodyWriter]],}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ Callable[[Union[InformationalResponse,\ Response],\ Writer],\ \textcolor{keywordtype}{None}],}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ Callable[[Request,\ Writer],\ \textcolor{keywordtype}{None}],}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00133}00133\ \ \ \ \ ],}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00134}00134\ ]}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00136}\mbox{\hyperlink{namespaceh11_1_1__writers_a0008462bfcb9762726335cb7b5e41dbc}{00136}}\ WRITERS:\ WritersType\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00137}00137\ \ \ \ \ (CLIENT,\ IDLE):\ write\_request,}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00138}00138\ \ \ \ \ (SERVER,\ IDLE):\ write\_any\_response,}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00139}00139\ \ \ \ \ (SERVER,\ SEND\_RESPONSE):\ write\_any\_response,}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00140}00140\ \ \ \ \ SEND\_BODY:\ \{}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chunked"{}}:\ ChunkedWriter,}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}content-\/length"{}}:\ ContentLengthWriter,}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}http/1.0"{}}:\ Http10Writer,}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00144}00144\ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{__writers_8py_source_l00145}00145\ \}}
+
+\end{DoxyCode}

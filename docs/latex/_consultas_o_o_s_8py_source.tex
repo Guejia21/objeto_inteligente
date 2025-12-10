@@ -1,0 +1,1061 @@
+\doxysection{Consultas\+OOS.\+py}
+\hypertarget{_consultas_o_o_s_8py_source}{}\label{_consultas_o_o_s_8py_source}\index{micro\_gestion\_conocimiento/app/infraestructure/adaptadores/ConsultasOOS.py@{micro\_gestion\_conocimiento/app/infraestructure/adaptadores/ConsultasOOS.py}}
+\mbox{\hyperlink{_consultas_o_o_s_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00001}\mbox{\hyperlink{namespace_consultas_o_o_s}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00002}00002\ \textcolor{stringliteral}{Adaptador\ de\ Consultas\ a\ la\ Base\ de\ Conocimiento\ OOS}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00003}00003\ \textcolor{stringliteral}{Se\ extiende\ de\ la\ interfaz\ IConsultasOOS\ permitiendo\ generar\ todo\ tipo\ de\ consultas\ a\ la\ ontología\ instanciada\ ubicada\ en\ /OWL/ontologiainstanciada.owl.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00004}00004\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00007}00007\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00009}00009\ \textcolor{keyword}{from}\ infraestructure.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00010}00010\ \textcolor{keyword}{from}\ infraestructure.acceso\_ontologia.Ontologia\ \textcolor{keyword}{import}\ Ontologia}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00011}00011\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceinfraestructure_1_1util_1_1_uris_o_o_s}{infraestructure.util.UrisOOS}}\ \textcolor{keyword}{import}\ UrisOOS}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00012}00012\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00013}00013\ \textcolor{keyword}{from}\ infraestructure.interfaces.IConsultas\ \textcolor{keyword}{import}\ IConsultasOOS}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00016}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s}{00016}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s}{ConsultasOOS}}(IConsultasOOS):\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00018}00018\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(settings.ONTOLOGIA\_INSTANCIADA):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00020}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{00020}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}\ =\ \mbox{\hyperlink{namespace_ontologia}{Ontologia}}(settings.ONTOLOGIA\_INSTANCIADA)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00021}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a3fb1ca65b3ae9f015429aaef73b81ba4}{00021}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a3fb1ca65b3ae9f015429aaef73b81ba4}{ontoExists}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00022}00022\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}La\ ontologia\ instanciada\ no\ existe\ en\ la\ ruta\ especificada:\ \{settings.ONTOLOGIA\_INSTANCIADA\}"{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a3fb1ca65b3ae9f015429aaef73b81ba4}{ontoExists}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}\ =\ \mbox{\hyperlink{namespace_ontologia}{Ontologia}}(settings.ONTOLOGIA\_PU)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00027}00027\ \ \ \ \ \textcolor{comment}{\#\#\ -\/-\/-\/-\/>\ \ El\ metodo\ ontologia.consultaDataProperty\ retorna\ una\ lista\ con\ los\ resultados\ [[],[]]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00029}00029\ \textcolor{comment}{\#\ Propiedades\ válidas\ del\ State}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00030}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a6ea07bd40cd411a13670f3bc83b5e78d}{00030}}\ \ \ \ \ STATE\_PROPERTIES\ =\ \{}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'title'},\ \textcolor{stringliteral}{'description'},\ \textcolor{stringliteral}{'feed'},\ \textcolor{stringliteral}{'private'},\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'status'},\ \textcolor{stringliteral}{'updated'},\ \textcolor{stringliteral}{'created'},\ \textcolor{stringliteral}{'creator'},\ \textcolor{stringliteral}{'version'},\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'website'},\ \textcolor{stringliteral}{'service\_state'}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00034}00034\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00035}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{00035}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(self,\ property\_name:\ str):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00037}00037\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Consulta\ genérica\ de\ propiedades\ del\ State.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00038}00038\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00039}00039\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00040}00040\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ property\_name:\ Nombre\ de\ la\ propiedad\ (sin\ prefijo\ oos:)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00041}00041\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00042}00042\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ El\ valor\ de\ la\ propiedad\ o\ None\ si\ no\ existe}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Raises:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ValueError:\ Si\ la\ propiedad\ no\ está\ en\ STATE\_PROPERTIES}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ property\_name\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a6ea07bd40cd411a13670f3bc83b5e78d}{STATE\_PROPERTIES}}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}Propiedad\ '\{property\_name\}'\ no\ válida.\ "{}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ query\ =\ f\textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00057}00057\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ PREFIX\ oos:\ <\{UrisOOS.ns\_oos\}>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00058}00058\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ SELECT\ ?\{property\_name\}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00059}00059\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ WHERE\ \{\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00060}00060\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:\{property\_name\}\ ?\{property\_name\}.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00061}00061\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:State\ .}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00062}00062\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \}\}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00063}00063\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Devolver\ cadena\ vacía\ cuando\ no\ haya\ resultado\ para\ evitar\ errores}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ de\ validación\ en\ endpoints\ que\ esperan\ \`{}str`\ (no\ Optional).}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ resultado\ \textcolor{keywordflow}{and}\ resultado[0]:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultado[0][0]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00070}00070\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00071}00071\ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ CONSUTAS\ BaSICAS\ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00072}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{00072}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a3fb1ca65b3ae9f015429aaef73b81ba4}{ontoExists}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00075}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a9a63a411ea4b21097f3a1cd07e4851b5}{00075}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a9a63a411ea4b21097f3a1cd07e4851b5}{consultarId}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}\ PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?id}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:id\_object\ ?id.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:Object}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ print\ "{}desde\ consultar\ ID\ "{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ print\ resultado}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ print\ "{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ resultado\ ==[]:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ resultado\ =\ \textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ resultado\ =\ resultado[0][0].decode(\textcolor{stringliteral}{'utf-\/8'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultado}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00095}00095\ \ \ \ \ \textcolor{comment}{\#\#Retornar\ la\ descripcion}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00096}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af91a9a1051b31aea4d56e1e42917ae24}{00096}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af91a9a1051b31aea4d56e1e42917ae24}{consultarDescription}}(self):\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'description'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00099}00099\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ si\ el\ Feed\ es\ private(true)\ o\ si\ es\ public(false)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00100}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aec382ce4d8ee8b7679b61c2aac20aad9}{00100}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aec382ce4d8ee8b7679b61c2aac20aad9}{consultarPrivate}}(self):\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'private'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00103}00103\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ el\ tittle\ (Un\ nombre\ descriptivo\ para\ el\ Feed}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00104}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac6dce2bb4d5ddb69550f072ffa4d7f4a}{00104}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac6dce2bb4d5ddb69550f072ffa4d7f4a}{consultarTitle}}(self):\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'title'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00107}00107\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ la\ url\ del\ feed\ (.json)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00108}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a5f56b71a2729db166a4fd56f66a5ee64}{00108}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a5f56b71a2729db166a4fd56f66a5ee64}{consultarFeed}}(self):\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'feed'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00111}00111\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ live\ si\ el\ Feed\ ha\ sido\ actualizado}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00112}00112\ \textcolor{comment}{\ \ \ \ \#\#\#en\ los\ ultimos\ 15min,\ de\ lo\ contrario\ frozen}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00113}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af0d10841e58170052bbc64bd6326c667}{00113}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af0d10841e58170052bbc64bd6326c667}{consultarStatus}}(self):\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'status'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00116}00116\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ la\ hora\ en\ la\ cual\ Feed\ tuvo\ su\ ultim\ actualizacion}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00117}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a16b4a2f5aa5937e409d8d015519e44e1}{00117}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a16b4a2f5aa5937e409d8d015519e44e1}{consultarUpdated}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'updated'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00120}00120\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ la\ fecha\ en\ que\ el\ Feed\ fue\ creado}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00121}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ab693d3bfb99a2846689ac8ae50ba96dc}{00121}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ab693d3bfb99a2846689ac8ae50ba96dc}{consultarCreated}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'created'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00124}00124\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ una\ URL\ referenciando\ al\ creador\ del\ Feed}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00125}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af2e1c8b90ca07493d53dd30ca6cf5c35}{00125}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af2e1c8b90ca07493d53dd30ca6cf5c35}{consultarCreator}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'creator'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00128}00128\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ Version\ of\ the\ data\ format\ Feed\ returned.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00129}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a60ca9f046cb89a38d50328174745430b}{00129}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a60ca9f046cb89a38d50328174745430b}{consultarVersion}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'version'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00131}00131\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ la\ URL\ de\ un\ sitio\ web\ que\ es\ relevante\ para\ este\ feed}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00132}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a418ec7d2d40212059587463df41ee2c4}{00132}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a418ec7d2d40212059587463df41ee2c4}{consultarWebsite}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'website'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00135}00135\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ el\ estado\ del\ servicio\ basico\ del\ objeto}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00136}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a98a2d4f55d47934db7381b6a5a5529d4}{00136}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a98a2d4f55d47934db7381b6a5a5529d4}{consultarServiceState}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac3938deca2284a08a78101dcfe0201c6}{consultar\_state\_property}}(\textcolor{stringliteral}{'service\_state'})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00139}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ab5803ac3fc5d03b00ac3954791fdbd8f}{00139}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ab5803ac3fc5d03b00ac3954791fdbd8f}{consultarTagsDatastream}}(self,\ idDatastream):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ queryTags\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00144}00144\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?tags}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00145}00145\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00146}00146\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:tags\ ?tags\ .}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00147}00147\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_id\ ?datastream\_id.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00148}00148\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?datastream\_id,"{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ idDatastream\ +\ \textcolor{stringliteral}{"{}"{}"{}')}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:datastreams.\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ resultadoTags\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(queryTags)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultadoTags}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00153}00153\ \ \ \ \ \textcolor{comment}{\#\#Retorna\ un\ diccionario\ \{label,\ symbol\}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00154}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a514dcc36d3318a9610ea7604bbfdcd53}{00154}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a514dcc36d3318a9610ea7604bbfdcd53}{consultarUnitDatastream}}(self,\ idDatastream):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ queryUnit\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PREFIX\ kos:<http://localhost/kos\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00160}00160\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?label\ ?symbol\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00162}00162\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:label\ ?label\ .}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00163}00163\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:Symbol\ ?symbol.\ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00164}00164\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?datastream\ \ oos:isMeasured\ ?unidad.\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00165}00165\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ rdf:type\ \ kos:Unit.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00166}00166\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?datastream\ oos:datastream\_id\ ?datastream\_id.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00167}00167\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?datastream\_id,"{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ idDatastream\ +\ \textcolor{stringliteral}{"{}"{}"{}').\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ keysUnit\ =\ [\textcolor{stringliteral}{'label'},\ \textcolor{stringliteral}{'symbol'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ resultadoUnit\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(queryUnit)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ dicUnit\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(resultadoUnit,\ keysUnit)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dicUnit}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00174}00174\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00175}00175\ \textcolor{comment}{\ \ \ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ \ \ \ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00177}00177\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ una\ coleccion\ de\ los\ Datastreams\ en\ ese\ Feed\ en\ un}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00178}00178\ \textcolor{comment}{\ \ \ \ \#\#\#diccionario\ \{\ 'min\_value',\ 'max\_value',\ 'datastream\_id',\ "{}datastream\_format"{},\ \ "{}datastream\_type"{}\ ,'tags','unit':\{'label','symbol'\}\ \}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00179}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aaa4d516246f573e3c3c5a7eb72cf8354}{00179}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aaa4d516246f573e3c3c5a7eb72cf8354}{consultarDatastreams}}(self,\ idDatastream):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'min\_value'},\ \textcolor{stringliteral}{'max\_value'},\ \textcolor{stringliteral}{'datastream\_id'},\ \textcolor{stringliteral}{"{}datastream\_format"{}},\ \textcolor{stringliteral}{"{}datastream\_type"{}},\ \textcolor{stringliteral}{'tags'},\ \textcolor{stringliteral}{'unit'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}\ PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00185}00185\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PREFIX\ kos:<http://localhost/kos\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00186}00186\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?min\_value\ ?max\_value\ \ ?datastream\_id\ ?datastream\_format\ ?datastream\_type\ ?label\ ?symbol}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00187}00187\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{\ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00188}00188\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:min\_value\ ?min\_value.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00189}00189\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:max\_value\ ?max\_value.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00190}00190\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_id\ ?datastream\_id.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00191}00191\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_format\ ?datastream\_format.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00192}00192\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:label\ ?label\ .}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00193}00193\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:Symbol\ ?symbol.\ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00194}00194\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ \ oos:isMeasured\ ?unidad.\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00195}00195\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ rdf:type\ \ kos:Unit.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00196}00196\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_type\ ?datastream\_type.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00197}00197\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?datastream\_id,"{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ idDatastream\ +\ \textcolor{stringliteral}{"{}"{}"{}')}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00198}00198\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:datastreams.\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Consulta\ para\ los\ tags}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ resultadoTags\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ab5803ac3fc5d03b00ac3954791fdbd8f}{consultarTagsDatastream}}(idDatastream)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ resultado.append(resultadoTags)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ dictUnit\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ dictUnit[\textcolor{stringliteral}{'label'}]\ =\ resultado[5]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ dictUnit[\textcolor{stringliteral}{'symbol'}]\ =\ resultado[6]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ resultado.append(dictUnit)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ diccionario\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(resultado,\ keys)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionario}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00210}00210\ \ \ \ \ \textcolor{comment}{\#\#Retorna\ [[],[],[]]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00211}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a789b35a37a00211027204c8b6df137e1}{00211}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a789b35a37a00211027204c8b6df137e1}{consultarTagsTodosDatastreams}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ queryTags\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00216}00216\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?datastream\_id\ ?tags}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00217}00217\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00218}00218\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:tags\ ?tags\ .}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00219}00219\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_id\ ?datastream\_id.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00220}00220\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:datastreams.\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ resultadoTags\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(queryTags)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultadoTags}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00224}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a11daf31592d18ab2eec4b3407b632323}{00224}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a11daf31592d18ab2eec4b3407b632323}{consultarUnitTodosDatastreams}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}datastream\_id"{}},\ \textcolor{stringliteral}{"{}label"{}},\ \textcolor{stringliteral}{"{}symbol"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ queryUnit\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00230}00230\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PREFIX\ kos:<http://localhost/kos\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00231}00231\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?datastream\_id\ ?label\ ?symbol\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00232}00232\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00233}00233\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:label\ ?label\ .}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00234}00234\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:Symbol\ ?symbol.\ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00235}00235\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?datastream\ \ oos:isMeasured\ ?unidad.\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00236}00236\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ rdf:type\ \ kos:Unit.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00237}00237\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?datastream\ oos:datastream\_id\ ?datastream\_id.\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ resultadoUnit\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(queryUnit)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ listaDicc\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoUnit:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ listaDicc.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDicc}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00244}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac44395abb1e7b9b62f56d05a4a2e6359}{00244}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac44395abb1e7b9b62f56d05a4a2e6359}{consultarTodosDatastreams}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'datastream\_id'},\ \textcolor{stringliteral}{'min\_value'},\ \textcolor{stringliteral}{'max\_value'},\ \textcolor{stringliteral}{"{}datastream\_format"{}},\ \textcolor{stringliteral}{"{}datastream\_type"{}},\ \textcolor{stringliteral}{'tags'},\ \textcolor{stringliteral}{'unit'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ keysMetaDatos\ =\ [\textcolor{stringliteral}{'datastream\_id'},\ \textcolor{stringliteral}{'min\_value'},\ \textcolor{stringliteral}{'max\_value'},\ \textcolor{stringliteral}{"{}datastream\_format"{}},\ \textcolor{stringliteral}{"{}datastream\_type"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00251}00251\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PREFIX\ kos:<http://localhost/kos\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00252}00252\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?datastream\_id\ ?min\_value\ ?max\_value\ \ \ ?datastream\_format\ ?datastream\_type\ ?label\ ?symbol}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00253}00253\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{\ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00254}00254\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:min\_value\ ?min\_value.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00255}00255\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:max\_value\ ?max\_value.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00256}00256\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_id\ ?datastream\_id.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00257}00257\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_format\ ?datastream\_format.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00258}00258\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:label\ ?label\ .}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00259}00259\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00260}00260\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OPTIONAL\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00261}00261\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ oos:Symbol\ ?symbol\}.\ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00262}00262\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ \ oos:isMeasured\ ?unidad.\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00263}00263\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unidad\ rdf:type\ \ kos:Unit.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00264}00264\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_type\ ?datastream\_type.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00265}00265\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:datastreams.\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ listaDataStreams\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultado:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ diccDS\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keysMetaDatos)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ dicUnit\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ dicUnit[\textcolor{stringliteral}{'label'}]\ =\ item[5]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ dicUnit[\textcolor{stringliteral}{'symbol'}]\ =\ item[6]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ diccDS[\textcolor{stringliteral}{'unit'}]\ =\ dicUnit}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ listaDataStreams.append(diccDS)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ diccDS[\textcolor{stringliteral}{"{}tags"{}}]\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#consulta\ los\ tags}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ resultadoTags\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a789b35a37a00211027204c8b6df137e1}{consultarTagsTodosDatastreams}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ dic\ \textcolor{keywordflow}{in}\ listaDataStreams:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ Did\ =\ dic[\textcolor{stringliteral}{'datastream\_id'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ tag\ \textcolor{keywordflow}{in}\ resultadoTags:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ tag[0]\ ==\ Did:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dic[\textcolor{stringliteral}{'tags'}].append(tag[1].decode(\textcolor{stringliteral}{"{}utf8"{}}))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDataStreams}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00286}00286\ \ \ \ \ \textcolor{comment}{\#\#\#Retorna\ una\ lista\ con\ los\ id\ de\ los\ Datastreams}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00287}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ab1a2f30865f8e3d77cdf32aa64a91794}{00287}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ab1a2f30865f8e3d77cdf32aa64a91794}{consultarListaIdDatastreams}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00292}00292\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?datastreams}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00293}00293\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00294}00294\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_id\ ?datastreams.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00295}00295\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:datastreams}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00296}00296\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ lista\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultado:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lista.append(item[0].decode(\textcolor{stringliteral}{'utf-\/8'}))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lista.append(item[0])}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lista}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00305}00305\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00306}00306\ \ \ \ \ \textcolor{comment}{\#\#\#Retornar\ la\ localizacion\ del\ objeto\ en\ una}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00307}00307\ \textcolor{comment}{\ \ \ \ \#\#\#diccionario\{lon,lat,name,domail,ele\}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00308}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a7e20ce58a854f726fb2a760861e8db8f}{00308}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a7e20ce58a854f726fb2a760861e8db8f}{consultarLocation}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'lon'},\ \textcolor{stringliteral}{'lat'},\ \textcolor{stringliteral}{'name'},\ \textcolor{stringliteral}{'domain'},\ \textcolor{stringliteral}{'ele'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00314}00314\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?lon\ ?lat\ ?name\ ?domain\ ?ele}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00315}00315\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00316}00316\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:lon\ ?lon.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00317}00317\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:lat\ ?lat.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00318}00318\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:name\ ?name.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00319}00319\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:domain\ ?domain.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00320}00320\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:ele\ ?ele.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00321}00321\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:location\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)[0]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ diccionario\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(resultado,\ keys)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionario}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00326}00326\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00327}00327\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00328}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_afd278340d189495f73e43c1bae62141c}{00328}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_afd278340d189495f73e43c1bae62141c}{consultarState}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'id'},\ \textcolor{stringliteral}{'title'},\ \textcolor{stringliteral}{'description'},\ \textcolor{stringliteral}{'created'},\ \textcolor{stringliteral}{'creator'},\ \textcolor{stringliteral}{'feed'},\ \textcolor{stringliteral}{'private'},\ \textcolor{stringliteral}{'status'},\ \textcolor{stringliteral}{'updated'}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ ,\ \textcolor{stringliteral}{'version'},\ \textcolor{stringliteral}{'website'},\ \textcolor{stringliteral}{'service\_state'},\ \textcolor{stringliteral}{"{}ip\_object"{}},\ \textcolor{stringliteral}{"{}tags"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00335}00335\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?id\ ?title\ ?description\ ?created\ ?creator\ ?feed\ ?private\ ?status\ ?updated\ ?version\ ?website\ ?service\_state}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00336}00336\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?ip\_object\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00337}00337\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00338}00338\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityObject\ oos:id\_object\ ?id.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00339}00339\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:title\ ?title.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00340}00340\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:description\ ?description.\ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00341}00341\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:created\ ?created.\ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00342}00342\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:creator\ ?creator.\ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00343}00343\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:feed\ ?feed.\ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00344}00344\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:private\ ?private.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00345}00345\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:status\ ?status.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00346}00346\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:updated\ ?updated.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00347}00347\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:version\ ?version.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00348}00348\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:website\ ?website.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00349}00349\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:service\_state\ ?service\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00350}00350\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:ip\_object\ ?ip\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00351}00351\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:State.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00352}00352\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityObject\ rdf:type\ oos:Object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00353}00353\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)[0]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ resultadoTags\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af7c00410efb23d573e8d152d238bfc82}{consultarTagsObjeto}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ resultado.append(resultadoTags)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ diccionario\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(resultado,\ keys)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ diccionario\ =\ self.decodificar(diccionario)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionario}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00362}00362\ \ \ \ \ \textcolor{comment}{\#\#Retorna\ una\ lista\ con\ los\ tags}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00363}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af7c00410efb23d573e8d152d238bfc82}{00363}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af7c00410efb23d573e8d152d238bfc82}{consultarTagsObjeto}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ queryTags\ =\ \textcolor{stringliteral}{"{}"{}"{}\ PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00368}00368\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?tags}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00369}00369\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00370}00370\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:tags\ ?tags.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00371}00371\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:State}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00372}00372\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#Llega\ una\ lista\ de\ listas}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ rTags\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(queryTags)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ resultadoTags\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ rTags:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ resultadoTags.append(item[0])}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultadoTags}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00379}00379\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00380}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a4cd6f31e1aa11fdceb579331295fc533}{00380}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a4cd6f31e1aa11fdceb579331295fc533}{consultarDataStreamFormat}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}datastream\_id"{}},\ \textcolor{stringliteral}{"{}datastream\_format"{}},\ \textcolor{stringliteral}{'datastream\_type'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00386}00386\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?datastream\_id\ ?datastream\_format\ ?datastream\_type}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00387}00387\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00388}00388\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_id\ \ ?datastream\_id\ ;}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00389}00389\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ oos:datastream\_format\ ?datastream\_format.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00390}00390\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_type\ ?datastream\_type.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00391}00391\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:datastreams.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00392}00392\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultado:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ dcAux\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dcAux\ =\ self.decodificar(dcAux)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dcAux\ =\ dcAux}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(dcAux)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00403}00403\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00404}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac51fb96495e559d8036bccc9e5a72388}{00404}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac51fb96495e559d8036bccc9e5a72388}{consultarDataStreamFormatPorId}}(self,\ datastream\_id):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00408}00408\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00409}00409\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?datastream\_id\ ?datastream\_format}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00410}00410\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00411}00411\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:datastream\_id\ \ ?datastream\_id\ ;}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00412}00412\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ oos:datastream\_format\ ?datastream\_format.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00413}00413\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?datastream\_id,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ datastream\_id\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00414}00414\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ \ oos:datastreams.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00415}00415\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00416}00416\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultado}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00419}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a41530893baabc74cf638ddb0605950b5}{00419}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a41530893baabc74cf638ddb0605950b5}{consultarServiceIntelligent}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00423}00423\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}id"{}},\ \textcolor{stringliteral}{"{}service\_state"{}},\ \textcolor{stringliteral}{"{}datastream"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00425}00425\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?id\ ?service\_state\ ?datastream}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00426}00426\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00427}00427\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:id\_object\ ?id.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00428}00428\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityData\ oos:datastream\_id\ ?datastream.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00429}00429\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityState\ oos:service\_state\ ?service\_state.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00430}00430\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ oos:Object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00431}00431\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityData\ rdf:type\ oos:datastreams.\ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00432}00432\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityState\ rdf:type\ oos:State.\}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00433}00433\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00434}00434\ \ \ \ \ \ \ \ \ resultado\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00435}00435\ \ \ \ \ \ \ \ \ datastream\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00436}00436\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ datastream.append(i[2])}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00439}00439\ \ \ \ \ \ \ \ \ dicc\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00440}00440\ \ \ \ \ \ \ \ \ dicc[\textcolor{stringliteral}{"{}datastreams"{}}]\ =\ datastream}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ dicc[\textcolor{stringliteral}{"{}id"{}}]\ =\ resultadoConsulta[0][0]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ dicc[\textcolor{stringliteral}{"{}service\_state"{}}]\ =\ resultadoConsulta[0][1]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dicc}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00444}00444\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00445}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_afee8b2440e1058b4a5c26b1ccd6940f8}{00445}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_afee8b2440e1058b4a5c26b1ccd6940f8}{consultarMetodosSend}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00450}00450\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?entity}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00451}00451\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00452}00452\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ ?type.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00453}00453\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?type\ rdfs:subClassOf*\ oos:Send.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00454}00454\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultarInstancias(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00456}00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultadoConsulta}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00458}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a4f539e9c201bd7975490ef1473088cbb}{00458}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a4f539e9c201bd7975490ef1473088cbb}{consultarMetodosReceive}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00459}00459\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00463}00463\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?entity}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00464}00464\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00465}00465\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ ?type.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00466}00466\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?type\ rdfs:subClassOf*\ oos:Receive.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00467}00467\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultarInstancias(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultadoConsulta}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00470}00470\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00471}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a86aa5ce60c86a1ee57273f4b715d23e8}{00471}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a86aa5ce60c86a1ee57273f4b715d23e8}{consultarMetodosExternal}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00474}00474\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?entity}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00475}00475\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00476}00476\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ ?type.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00477}00477\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?type\ rdfs:subClassOf*\ oos:External.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00478}00478\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaInstancias(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultadoConsulta}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00481}00481\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00482}00482\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00483}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a1cf36bbdb98ad100e80adc145fca7093}{00483}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a1cf36bbdb98ad100e80adc145fca7093}{diccionarioMetaDatosObjeto}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ keys\ =\ ['id','title','description','created','creator','feed','private','status','updated'\ ,'version','website','service\_state',"{}ip\_object"{},\ 'lon','lat','name','domain','ele',"{}tags"{}]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'id'},\ \textcolor{stringliteral}{'title'},\ \textcolor{stringliteral}{'description'},\ \textcolor{stringliteral}{'created'},\ \textcolor{stringliteral}{'creator'},\ \textcolor{stringliteral}{'feed'},\ \textcolor{stringliteral}{'private'},\ \textcolor{stringliteral}{'status'},\ \textcolor{stringliteral}{'updated'}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ ,\ \textcolor{stringliteral}{'version'},\ \textcolor{stringliteral}{'website'},\ \textcolor{stringliteral}{"{}ip\_object"{}},\ \textcolor{stringliteral}{'lon'},\ \textcolor{stringliteral}{'lat'},\ \textcolor{stringliteral}{'name'},\ \textcolor{stringliteral}{'domain'},\ \textcolor{stringliteral}{'ele'},\ \textcolor{stringliteral}{"{}tags"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00491}00491\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?id\ ?title\ ?description\ ?created\ ?creator\ ?feed\ ?private\ ?status\ ?updated\ ?version\ ?website\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00492}00492\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?ip\_object\ ?lon\ ?lat\ ?name\ ?domain\ ?ele}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00493}00493\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00494}00494\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityObject\ oos:id\_object\ ?id.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00495}00495\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityObject\ oos:ip\_object\ ?ip\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00496}00496\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entityObject\ rdf:type\ oos:Object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00497}00497\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:title\ ?title.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00498}00498\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:description\ ?description.\ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00499}00499\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:created\ ?created.\ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00500}00500\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:creator\ ?creator.\ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00501}00501\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:feed\ ?feed.\ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00502}00502\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:private\ ?private.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00503}00503\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:status\ ?status.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00504}00504\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:updated\ ?updated.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00505}00505\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:version\ ?version.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00506}00506\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:website\ ?website.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00507}00507\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ oos:State.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00508}00508\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?location\ oos:lon\ ?lon.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00509}00509\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?location\ oos:lat\ ?lat.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00510}00510\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?location\ oos:name\_location\ ?name.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00511}00511\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?location\ oos:domain\ ?domain.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00512}00512\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?location\ oos:ele\ ?ele.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00513}00513\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?location\ rdf:type\ \ oos:location}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00514}00514\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00515}00515\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00516}00516\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#print(query)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00517}00517\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\#print\ (self.ontologia.consultaDataProperty(query))}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00518}00518\ \ \ \ \ \ \ \ \ r\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#print(r)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00520}00520\ \ \ \ \ \ \ \ \ resultado\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)[0]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ resultadoTags\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af7c00410efb23d573e8d152d238bfc82}{consultarTagsObjeto}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ resultado.append(resultadoTags)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00523}00523\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ diccionario\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(resultado,\ keys)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ diccionario\ =\ self.decodificar(diccionario)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionario}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00527}00527\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00528}00528\ \ \ \ \ \textcolor{comment}{\#\#Retorna\ una\ lista\ de\ diccionarios}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00529}00529\ \textcolor{comment}{\ \ \ \ \#\#cada\ diccionario\ tiene\ las\ claves:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00530}00530\ \textcolor{comment}{\ \ \ \ \#\ [("{}datastream\_id"{},\ ("{}label"{},\ ("{}symbol"{},\ ("{}datastream\_type"{},("{}min\_value"{}("{}max\_value"{}]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00531}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a9e3657447a202c099aad5e2abde9eaea}{00531}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a9e3657447a202c099aad5e2abde9eaea}{listaMetaDatosDataStreams}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ lista\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ datastreams\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ac44395abb1e7b9b62f56d05a4a2e6359}{consultarTodosDatastreams}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ datastreams}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00535}00535\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00536}00536\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\ Consultas\ ecas\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00537}00537\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00538}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a4d1710413a075a52d020ac2ecac628e3}{00538}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a4d1710413a075a52d020ac2ecac628e3}{tieneContrato}}(self,\ osidDestino):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00539}00539\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00540}00540\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}id"{}},\ \textcolor{stringliteral}{"{}id\_action\_resource"{}},\ \textcolor{stringliteral}{"{}comparator\_action"{}},\ \textcolor{stringliteral}{"{}variable\_action"{}},\ \textcolor{stringliteral}{"{}type\_variable\_action"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ [['708637323',\ 'calefactor',\ 'igual',\ '1']]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00542}00542\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}\ PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00543}00543\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?id\ ?id\_action\_resource\ ?comparator\_action\ ?variable\_action\ ?type\_variable\_action}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00544}00544\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00545}00545\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00546}00546\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_object\ ?id.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00547}00547\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?id,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ osidDestino\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00548}00548\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ :Event\}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00549}00549\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UNION\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00550}00550\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_object\ ?id.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00551}00551\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?action\ :id\_action\_resource\ ?id\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00552}00552\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?action\ :comparator\_action\ ?comparator\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00553}00553\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?action\ :variable\_action\ ?variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00554}00554\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?action\ :type\_variable\_action\ ?type\_variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00555}00555\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?id,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ osidDestino\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00556}00556\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ rdf:type\ :Action}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00557}00557\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00558}00558\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00559}00559\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00560}00560\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00561}00561\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00562}00562\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00563}00563\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00565}00565\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00566}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af0b40fe4caaaf55e3165749e946ebc28}{00566}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_af0b40fe4caaaf55e3165749e946ebc28}{verificarContrato}}(self,\ osid,\ osidDestino):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00568}00568\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Verifica\ si\ existe\ un\ contrato\ ECA\ entre\ dos\ objetos.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00569}00569\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00570}00570\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00571}00571\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ osid:\ ID\ del\ objeto\ evento\ (origen)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00572}00572\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ osidDestino:\ ID\ del\ objeto\ acción\ (destino)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00573}00573\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00574}00574\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00575}00575\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Lista\ de\ diccionarios\ con\ los\ contratos\ encontrados}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00576}00576\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00577}00577\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00578}00578\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00579}00579\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00581}00581\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}osid"{}},\ \textcolor{stringliteral}{"{}osidDestino"{}},\ \textcolor{stringliteral}{"{}id\_action\_resource"{}},\ \textcolor{stringliteral}{"{}comparator\_action"{}},\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}variable\_action"{}},\ \textcolor{stringliteral}{"{}type\_variable\_action"{}},\ \textcolor{stringliteral}{"{}eca\_state"{}},\ \textcolor{stringliteral}{"{}name\_eca"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00583}00583\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00584}00584\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Consulta\ corregida:\ relaciona\ evento,\ condición\ y\ acción\ a\ través\ del\ ECA}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00585}00585\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00586}00586\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?osid\ ?osidDestino\ ?id\_action\_resource\ ?comparator\_action\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00587}00587\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?variable\_action\ ?type\_variable\_action\ ?eca\_state\ ?name\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00588}00588\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00589}00589\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#\ El\ ECA\ inicia\ con\ un\ evento}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00590}00590\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :StartsWith\ ?evento.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00591}00591\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00592}00592\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00593}00593\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00594}00594\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00595}00595\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#\ El\ evento\ tiene\ el\ objeto\ origen}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00596}00596\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_object\ ?osid.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00597}00597\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ (?osid\ =\ '"{}"{}"{}}\ +\ osid\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00598}00598\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ rdf:type\ :Event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00599}00599\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00600}00600\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#\ El\ evento\ verifica\ una\ condición}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00601}00601\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :Check\ ?condicion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00602}00602\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ rdf:type\ :Condition.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00603}00603\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00604}00604\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#\ La\ condición\ está\ relacionada\ con\ una\ acción}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00605}00605\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :isRelatedWith\ ?accion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00606}00606\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ rdf:type\ :Action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00607}00607\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00608}00608\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#\ La\ acción\ tiene\ el\ objeto\ destino}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00609}00609\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_object\ ?osidDestino.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00610}00610\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ (?osidDestino\ =\ '"{}"{}"{}}\ +\ osidDestino\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00611}00611\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_resource\ ?id\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00612}00612\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :comparator\_action\ ?comparator\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00613}00613\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :variable\_action\ ?variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00614}00614\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :type\_variable\_action\ ?type\_variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00615}00615\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00616}00616\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00617}00617\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00618}00618\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00619}00619\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00621}00621\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00622}00622\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00623}00623\ \ \ \ \ \textcolor{comment}{\#\#\ \ \ \ [[]]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00624}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ae6e38a79d6ff8592d38e5b1c0dd6d3b8}{00624}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ae6e38a79d6ff8592d38e5b1c0dd6d3b8}{listarDinamicEstado}}(self,\ eca\_state):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00625}00625\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00627}00627\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00628}00628\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}eca\_state"{}},\ \textcolor{stringliteral}{"{}name\_eca"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00629}00629\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00630}00630\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?eca\_state\ ?name\_eca\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00631}00631\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00632}00632\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00633}00633\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00634}00634\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?eca\_state,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ eca\_state\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00635}00635\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00636}00636\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00637}00637\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00638}00638\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00639}00639\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00641}00641\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00642}00642\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00643}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a1f385a08aae85e0f5437d8c8cae2d56f}{00643}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a1f385a08aae85e0f5437d8c8cae2d56f}{estadoEca}}(self,\ eca\_name):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00644}00644\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}eca\_state"{}},\ \textcolor{stringliteral}{"{}name\_eca"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00646}00646\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00647}00647\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?eca\_state\ ?name\_eca\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00648}00648\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00649}00649\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00650}00650\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00651}00651\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?name\_eca,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ eca\_name\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00652}00652\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00653}00653\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00654}00654\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00655}00655\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00656}00656\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00657}00657\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00658}00658\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00659}00659\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00660}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a71e66ec6bf92ebb403e7f5c788bc4455}{00660}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a71e66ec6bf92ebb403e7f5c788bc4455}{usuarioEca}}(self,\ eca\_name):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00661}00661\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00662}00662\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}user\_eca"{}},\ \textcolor{stringliteral}{"{}name\_eca"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00663}00663\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00664}00664\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?user\_eca\ ?name\_eca\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00665}00665\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00666}00666\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00667}00667\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :user\_eca\ ?user\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00668}00668\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?name\_eca,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ eca\_name\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00669}00669\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00670}00670\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00671}00671\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00672}00672\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00673}00673\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00674}00674\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00675}00675\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00676}00676\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00677}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a879715dce39563f461472456b3c33753}{00677}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a879715dce39563f461472456b3c33753}{listarEcasEvento}}(self,\ osid,\ eca\_state):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00678}00678\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00679}00679\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}eca\_state"{}},\ \textcolor{stringliteral}{"{}id\_event\_resource"{}},\ \textcolor{stringliteral}{"{}comparator\_condition"{}},\ \textcolor{stringliteral}{"{}variable\_condition"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00680}00680\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}type\_variable\_condition"{}},\ \textcolor{stringliteral}{"{}unit\_condition"{}},\ \textcolor{stringliteral}{"{}meaning\_condition"{}},\ \textcolor{stringliteral}{"{}ip\_action\_object"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00681}00681\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}osid\_object\_action"{}},\ \textcolor{stringliteral}{"{}name\_action\_object"{}},\ \textcolor{stringliteral}{"{}comparator\_action"{}},\ \textcolor{stringliteral}{"{}type\_variable\_action"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00682}00682\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}variable\_action"{}},\ \textcolor{stringliteral}{"{}meaning\_action"{}},\ \textcolor{stringliteral}{"{}id\_action\_resource"{}},\ \textcolor{stringliteral}{"{}name\_action\_resource"{}},\ \textcolor{stringliteral}{"{}name\_eca"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00683}00683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}name\_event\_object"{}},\ \textcolor{stringliteral}{"{}name\_event\_resource"{}},\ \textcolor{stringliteral}{"{}user\_eca"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00684}00684\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ [['708637323',\ 'calefactor',\ 'igual',\ '1']]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00685}00685\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00686}00686\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?eca\_state\ ?id\_event\_resource\ ?comparator\_condition\ ?variable\_condition\ ?type\_variable\_condition\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00687}00687\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unit\_condition\ ?meaning\_condition\ ?ip\_action\_object\ ?osid\_object\_action\ ?name\_action\_object\ ?comparator\_action}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00688}00688\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?type\_variable\_action\ ?variable\_action\ ?meaning\_action\ ?id\_action\_resource\ ?name\_action\_resource\ ?name\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00689}00689\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?name\_event\_object\ ?name\_event\_resource}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00690}00690\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?user\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00691}00691\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00692}00692\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_resource\ ?id\_event\_resource.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00693}00693\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_object\ ?osid.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00694}00694\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_resource\ ?name\_event\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00695}00695\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_object\ ?name\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00696}00696\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?osid,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ osid\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00697}00697\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ rdf:type\ :Event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00698}00698\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00699}00699\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00700}00700\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OPTIONAL\{?eca\ :user\_eca\ ?user\_eca\}.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00701}00701\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?eca\_state,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ eca\_state\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00702}00702\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00703}00703\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :comparator\_condition\ ?comparator\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00704}00704\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :variable\_condition\ ?variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00705}00705\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :type\_variable\_condition\ ?type\_variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00706}00706\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :unit\_condition\ ?unit\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00707}00707\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :meaning\_condition\ ?meaning\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00708}00708\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ rdf:type\ :Condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00709}00709\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_object\ ?osid\_object\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00710}00710\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_object\ ?name\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00711}00711\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :ip\_action\_object\ ?ip\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00712}00712\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :comparator\_action\ ?comparator\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00713}00713\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :type\_variable\_action\ ?type\_variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00714}00714\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :variable\_action\ ?variable\_action.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00715}00715\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :meaning\_action\ ?meaning\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00716}00716\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_resource\ ?id\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00717}00717\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_resource\ ?name\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00718}00718\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ rdf:type\ :Action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00719}00719\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :StartsWith\ ?evento.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00720}00720\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :Check\ ?condicion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00721}00721\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ ?isRelatedWith\ ?accion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00722}00722\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00723}00723\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00724}00724\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00725}00725\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00726}00726\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00727}00727\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00728}00728\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00729}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a6d033c8483f9e0545dfe94ac94594778}{00729}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a6d033c8483f9e0545dfe94ac94594778}{listarEcasEventoSegunUsuario}}(self,\ osid,\ state\_eca,\ usuario\_eca):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00730}00730\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00731}00731\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{"{}eca\_state"{}},\ \textcolor{stringliteral}{"{}id\_event\_resource"{}},\ \textcolor{stringliteral}{"{}comparator\_condition"{}},\ \textcolor{stringliteral}{"{}variable\_condition"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00732}00732\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}type\_variable\_condition"{}},\ \textcolor{stringliteral}{"{}unit\_condition"{}},\ \textcolor{stringliteral}{"{}meaning\_condition"{}},\ \textcolor{stringliteral}{"{}ip\_action\_object"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00733}00733\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}osid\_object\_action"{}},\ \textcolor{stringliteral}{"{}name\_action\_object"{}},\ \textcolor{stringliteral}{"{}comparator\_action"{}},\ \textcolor{stringliteral}{"{}type\_variable\_action"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00734}00734\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}variable\_action"{}},\ \textcolor{stringliteral}{"{}meaning\_action"{}},\ \textcolor{stringliteral}{"{}id\_action\_resource"{}},\ \textcolor{stringliteral}{"{}name\_action\_resource"{}},\ \textcolor{stringliteral}{"{}name\_eca"{}},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00735}00735\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}name\_event\_object"{}},\ \textcolor{stringliteral}{"{}name\_event\_resource"{}},\ \textcolor{stringliteral}{"{}user\_eca"{}}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00736}00736\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ [['708637323',\ 'calefactor',\ 'igual',\ '1']]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00737}00737\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00738}00738\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?eca\_state\ ?id\_event\_resource\ ?comparator\_condition\ ?variable\_condition\ ?type\_variable\_condition\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00739}00739\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?unit\_condition\ ?meaning\_condition\ ?ip\_action\_object\ ?osid\_object\_action\ ?name\_action\_object\ ?comparator\_action}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00740}00740\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?type\_variable\_action\ ?variable\_action\ ?meaning\_action\ ?id\_action\_resource\ ?name\_action\_resource\ ?name\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00741}00741\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?name\_event\_object\ ?name\_event\_resource}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00742}00742\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?user\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00743}00743\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{\ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00744}00744\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00745}00745\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00746}00746\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :user\_eca\ ?user\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00747}00747\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?user\_eca,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ usuario\_eca\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00748}00748\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?eca\_state,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ state\_eca\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00749}00749\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.\ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00750}00750\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_resource\ ?id\_event\_resource.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00751}00751\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_object\ ?osid.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00752}00752\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_resource\ ?name\_event\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00753}00753\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_object\ ?name\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00754}00754\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?osid,\ '"{}"{}"{}}\ +\ osid\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00755}00755\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ rdf:type\ :Event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00756}00756\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00757}00757\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :comparator\_condition\ ?comparator\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00758}00758\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :variable\_condition\ ?variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00759}00759\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :type\_variable\_condition\ ?type\_variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00760}00760\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :unit\_condition\ ?unit\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00761}00761\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :meaning\_condition\ ?meaning\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00762}00762\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ rdf:type\ :Condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00763}00763\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_object\ ?osid\_object\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00764}00764\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_object\ ?name\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00765}00765\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :ip\_action\_object\ ?ip\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00766}00766\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :comparator\_action\ ?comparator\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00767}00767\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :type\_variable\_action\ ?type\_variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00768}00768\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :variable\_action\ ?variable\_action.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00769}00769\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :meaning\_action\ ?meaning\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00770}00770\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_resource\ ?id\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00771}00771\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_resource\ ?name\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00772}00772\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ rdf:type\ :Action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00773}00773\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :StartsWith\ ?evento.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00774}00774\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00775}00775\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :Check\ ?condicion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00776}00776\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ ?isRelatedWith\ ?accion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00777}00777\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00778}00778\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00779}00779\ \ \ \ \ \ \ \ \ listaDic\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00780}00780\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00781}00781\ \ \ \ \ \ \ \ \ \ \ \ \ listaDic.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(item,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00782}00782\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ listaDic}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00783}00783\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00784}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_afc9a6fd950a7641d575983c5cbc25f9b}{00784}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_afc9a6fd950a7641d575983c5cbc25f9b}{listarEcas}}(self):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00785}00785\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00786}00786\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ keys=['name\_eca','eca\_state','id\_event\_resource',\ 'ip\_event\_object','comparator\_condition','variable\_condition','type\_variable\_condition','unit\_condition','meaning\_condition','ip\_action\_object','osid\_object\_action','name\_action\_object'\ ,'comparator\_action','type\_variable\_action','variable\_action','meaning\_action','id\_action\_resource','name\_action\_resource']}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00787}00787\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'name\_eca'},\ \textcolor{stringliteral}{'eca\_state'},\ \textcolor{stringliteral}{'user\_eca'},\ \textcolor{stringliteral}{'osid\_object\_event'},\ \textcolor{stringliteral}{'ip\_event\_object'},\ \textcolor{stringliteral}{'name\_event\_object'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00788}00788\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'id\_event\_resource'},\ \textcolor{stringliteral}{'name\_event\_resource'},\ \textcolor{stringliteral}{'comparator\_condition'},\ \textcolor{stringliteral}{'variable\_condition'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00789}00789\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'type\_variable\_condition'},\ \textcolor{stringliteral}{'unit\_condition'},\ \textcolor{stringliteral}{'meaning\_condition'},\ \textcolor{stringliteral}{'osid\_object\_action'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00790}00790\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'ip\_action\_object'},\ \textcolor{stringliteral}{'name\_action\_object'},\ \textcolor{stringliteral}{'id\_action\_resource'},\ \textcolor{stringliteral}{'name\_action\_resource'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00791}00791\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'comparator\_action'},\ \textcolor{stringliteral}{'variable\_action'},\ \textcolor{stringliteral}{'type\_variable\_action'},\ \textcolor{stringliteral}{'unit\_action'},\ \textcolor{stringliteral}{'meaning\_action'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00792}00792\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00793}00793\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?name\_eca\ ?eca\_state\ ?user\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00794}00794\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?osid\_object\_event\ ?ip\_event\_object\ ?name\_event\_object}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00795}00795\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?id\_event\_resource\ ?name\_event\_resource}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00796}00796\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?comparator\_condition\ ?variable\_condition\ ?type\_variable\_condition\ ?unit\_condition\ ?meaning\_condition}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00797}00797\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?osid\_object\_action\ ?ip\_action\_object\ \ ?name\_action\_object}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00798}00798\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?id\_action\_resource\ ?name\_action\_resource\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00799}00799\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?comparator\_action\ ?variable\_action\ ?type\_variable\_action\ \ ?unit\_action\ ?meaning\_action\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00800}00800\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00801}00801\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00802}00802\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00803}00803\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OPTIONAL\{?eca\ :user\_eca\ ?user\_eca\}.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00804}00804\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00805}00805\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_object\ ?osid\_object\_event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00806}00806\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :ip\_event\_object\ ?ip\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00807}00807\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_resource\ ?id\_event\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00808}00808\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_object\ ?name\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00809}00809\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ rdf:type\ :Event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00810}00810\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :comparator\_condition\ ?comparator\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00811}00811\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :variable\_condition\ ?variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00812}00812\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :type\_variable\_condition\ ?type\_variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00813}00813\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :unit\_condition\ ?unit\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00814}00814\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :meaning\_condition\ ?meaning\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00815}00815\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ rdf:type\ :Condition.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00816}00816\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_object\ ?osid\_object\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00817}00817\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_object\ ?name\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00818}00818\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :ip\_action\_object\ ?ip\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00819}00819\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :comparator\_action\ ?comparator\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00820}00820\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :type\_variable\_action\ ?type\_variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00821}00821\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :variable\_action\ ?variable\_action.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00822}00822\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :meaning\_action\ ?meaning\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00823}00823\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_resource\ ?id\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00824}00824\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :unit\_action\ ?unit\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00825}00825\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_resource\ ?name\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00826}00826\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ rdf:type\ :Action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00827}00827\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :StartsWith\ ?evento.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00828}00828\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :Check\ ?condicion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00829}00829\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ ?isRelatedWith\ ?accion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00830}00830\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00831}00831\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00832}00832\ \ \ \ \ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00833}00833\ \ \ \ \ \ \ \ \ \ \ \ \ diccionarioEcas\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00834}00834\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ eca\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00835}00835\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ diccionarioEcas.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(eca,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00836}00836\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionarioEcas}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00837}00837\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00838}00838\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}Error\ en\ listarontologios\ ontologias\ pck"{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00839}00839\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00840}00840\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00841}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a0329e42f1668f12c67bbb39a61446c1a}{00841}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a0329e42f1668f12c67bbb39a61446c1a}{listarEcasUsuario}}(self,\ user\_eca):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00842}00842\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00843}00843\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ keys=['name\_eca','eca\_state','id\_event\_resource',\ 'ip\_event\_object','comparator\_condition','variable\_condition','type\_variable\_condition','unit\_condition','meaning\_condition','ip\_action\_object','osid\_object\_action','name\_action\_object'\ ,'comparator\_action','type\_variable\_action','variable\_action','meaning\_action','id\_action\_resource','name\_action\_resource']}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00844}00844\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'name\_eca'},\ \textcolor{stringliteral}{'eca\_state'},\ \textcolor{stringliteral}{'user\_eca'},\ \textcolor{stringliteral}{'osid\_object\_event'},\ \textcolor{stringliteral}{'ip\_event\_object'},\ \textcolor{stringliteral}{'name\_event\_object'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00845}00845\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'id\_event\_resource'},\ \textcolor{stringliteral}{'name\_event\_resource'},\ \textcolor{stringliteral}{'comparator\_condition'},\ \textcolor{stringliteral}{'variable\_condition'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00846}00846\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'type\_variable\_condition'},\ \textcolor{stringliteral}{'unit\_condition'},\ \textcolor{stringliteral}{'meaning\_condition'},\ \textcolor{stringliteral}{'osid\_object\_action'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00847}00847\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'ip\_action\_object'},\ \textcolor{stringliteral}{'name\_action\_object'},\ \textcolor{stringliteral}{'id\_action\_resource'},\ \textcolor{stringliteral}{'name\_action\_resource'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00848}00848\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'comparator\_action'},\ \textcolor{stringliteral}{'variable\_action'},\ \textcolor{stringliteral}{'type\_variable\_action'},\ \textcolor{stringliteral}{'unit\_action'},\ \textcolor{stringliteral}{'meaning\_action'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00849}00849\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00850}00850\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?name\_eca\ ?eca\_state\ ?user\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00851}00851\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?osid\_object\_event\ ?ip\_event\_object\ ?name\_event\_object}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00852}00852\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?id\_event\_resource\ ?name\_event\_resource}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00853}00853\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?comparator\_condition\ ?variable\_condition\ ?type\_variable\_condition\ ?unit\_condition\ ?meaning\_condition}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00854}00854\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?osid\_object\_action\ ?ip\_action\_object\ \ ?name\_action\_object}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00855}00855\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?id\_action\_resource\ ?name\_action\_resource\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00856}00856\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?comparator\_action\ ?variable\_action\ ?type\_variable\_action\ \ ?unit\_action\ ?meaning\_action\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00857}00857\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00858}00858\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00859}00859\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00860}00860\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :user\_eca\ ?user\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00861}00861\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?user\_eca,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ user\_eca\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00862}00862\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00863}00863\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00864}00864\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_object\ ?osid\_object\_event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00865}00865\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :ip\_event\_object\ ?ip\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00866}00866\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_resource\ ?id\_event\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00867}00867\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_object\ ?name\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00868}00868\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ rdf:type\ :Event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00869}00869\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00870}00870\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :comparator\_condition\ ?comparator\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00871}00871\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :variable\_condition\ ?variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00872}00872\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :type\_variable\_condition\ ?type\_variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00873}00873\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :unit\_condition\ ?unit\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00874}00874\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :meaning\_condition\ ?meaning\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00875}00875\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ rdf:type\ :Condition.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00876}00876\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00877}00877\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_object\ ?osid\_object\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00878}00878\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_object\ ?name\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00879}00879\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :ip\_action\_object\ ?ip\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00880}00880\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :comparator\_action\ ?comparator\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00881}00881\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :type\_variable\_action\ ?type\_variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00882}00882\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :variable\_action\ ?variable\_action.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00883}00883\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :meaning\_action\ ?meaning\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00884}00884\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_resource\ ?id\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00885}00885\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :unit\_action\ ?unit\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00886}00886\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_resource\ ?name\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00887}00887\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ rdf:type\ :Action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00888}00888\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00889}00889\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :StartsWith\ ?evento.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00890}00890\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :Check\ ?condicion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00891}00891\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ ?isRelatedWith\ ?accion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00892}00892\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00893}00893\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00894}00894\ \ \ \ \ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00895}00895\ \ \ \ \ \ \ \ \ \ \ \ \ diccionarioEcas\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00896}00896\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ eca\ \textcolor{keywordflow}{in}\ resultadoConsulta:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00897}00897\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ diccionarioEcas.append(self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(eca,\ keys))}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00898}00898\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionarioEcas}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00899}00899\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00900}00900\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}Error\ en\ listarontologios\ ontologias\ pck"{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00901}00901\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00902}00902\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00903}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a83fc840bc41a0c73796947f0a6fdc0a6}{00903}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a83fc840bc41a0c73796947f0a6fdc0a6}{listarNombresEcasUsuario}}(self,\ user\_eca):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00904}00904\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00905}00905\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00906}00906\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?name\_eca\ ?eca\_state\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00907}00907\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00908}00908\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00909}00909\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00910}00910\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OPTIONAL\{?eca\ :user\_eca\ ?user\_eca\}.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00911}00911\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?user\_eca,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ user\_eca\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00912}00912\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00913}00913\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00914}00914\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00915}00915\ \ \ \ \ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00916}00916\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resultadoConsulta}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00917}00917\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00918}00918\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ \textcolor{stringliteral}{"{}Error\ en\ listarontologios\ ontologias\ pck"{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00919}00919\ \ \ \ \ \ \ \ \ \ \ \ \ print(\ e)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00920}00920\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00921}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a3612efd36f5844c857e60e8ffb927814}{00921}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a3612efd36f5844c857e60e8ffb927814}{getEca}}(self,\ nombreEca):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00922}00922\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00923}00923\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}\ =\ \mbox{\hyperlink{namespace_ontologia}{Ontologia}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00924}00924\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ keys=['name\_eca','eca\_state',\ 'user\_eca','id\_event\_resource',\ 'ip\_event\_object','comparator\_condition','variable\_condition','type\_variable\_condition','unit\_condition','meaning\_condition','ip\_action\_object','osid\_object\_action','name\_action\_object'\ ,'comparator\_action','type\_variable\_action','variable\_action','meaning\_action','id\_action\_resource','name\_action\_resource']}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00925}00925\ \ \ \ \ \ \ \ \ keys\ =\ [\textcolor{stringliteral}{'name\_eca'},\ \textcolor{stringliteral}{'eca\_state'},\ \textcolor{stringliteral}{'user\_eca'},\ \textcolor{stringliteral}{'osid\_object\_event'},\ \textcolor{stringliteral}{'ip\_event\_object'},\ \textcolor{stringliteral}{'name\_event\_object'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00926}00926\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'id\_event\_resource'},\ \textcolor{stringliteral}{'name\_event\_resource'},\ \textcolor{stringliteral}{'comparator\_condition'},\ \textcolor{stringliteral}{'variable\_condition'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00927}00927\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'type\_variable\_condition'},\ \textcolor{stringliteral}{'unit\_condition'},\ \textcolor{stringliteral}{'meaning\_condition'},\ \textcolor{stringliteral}{'osid\_object\_action'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00928}00928\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'ip\_action\_object'},\ \textcolor{stringliteral}{'name\_action\_object'},\ \textcolor{stringliteral}{'id\_action\_resource'},\ \textcolor{stringliteral}{'name\_action\_resource'},}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00929}00929\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'comparator\_action'},\ \textcolor{stringliteral}{'variable\_action'},\ \textcolor{stringliteral}{'type\_variable\_action'},\ \textcolor{stringliteral}{'unit\_action'},\ \textcolor{stringliteral}{'meaning\_action'}]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00930}00930\ \ \ \ \ \ \ \ \ query\ =\ \textcolor{stringliteral}{"{}"{}"{}PREFIX\ :\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00931}00931\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ DISTINCT\ ?name\_eca\ ?eca\_state\ ?user\_eca}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00932}00932\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?osid\_object\_event\ ?ip\_event\_object\ ?name\_event\_object}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00933}00933\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?id\_event\_resource\ ?name\_event\_resource}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00934}00934\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?comparator\_condition\ ?variable\_condition\ ?type\_variable\_condition\ ?unit\_condition\ ?meaning\_condition}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00935}00935\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?osid\_object\_action\ ?ip\_action\_object\ \ ?name\_action\_object}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00936}00936\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?id\_action\_resource\ ?name\_action\_resource\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00937}00937\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?comparator\_action\ ?variable\_action\ ?type\_variable\_action\ \ ?unit\_action\ ?meaning\_action\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00938}00938\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00939}00939\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :name\_eca\ ?name\_eca.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00940}00940\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FILTER\ regex(?name\_eca,\ "{}"{}"{}}\ +\ \textcolor{stringliteral}{"{}'"{}}\ +\ nombreEca\ +\ \textcolor{stringliteral}{"{}"{}"{}').}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00941}00941\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :state\_eca\ ?eca\_state.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00942}00942\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OPTIONAL\{?eca\ :user\_eca\ ?user\_eca\}.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00943}00943\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ rdf:type\ :Dinamic.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00944}00944\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_object\ ?osid\_object\_event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00945}00945\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :ip\_event\_object\ ?ip\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00946}00946\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :id\_event\_resource\ ?id\_event\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00947}00947\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_object\ ?name\_event\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00948}00948\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :name\_event\_resource\ ?name\_event\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00949}00949\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ rdf:type\ :Event.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00950}00950\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00951}00951\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :comparator\_condition\ ?comparator\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00952}00952\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :variable\_condition\ ?variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00953}00953\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :type\_variable\_condition\ ?type\_variable\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00954}00954\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :unit\_condition\ ?unit\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00955}00955\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :meaning\_condition\ ?meaning\_condition.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00956}00956\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ rdf:type\ :Condition.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00957}00957\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00958}00958\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_object\ ?osid\_object\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00959}00959\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_object\ ?name\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00960}00960\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :ip\_action\_object\ ?ip\_action\_object.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00961}00961\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :comparator\_action\ ?comparator\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00962}00962\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :type\_variable\_action\ ?type\_variable\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00963}00963\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :variable\_action\ ?variable\_action.\ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00964}00964\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :meaning\_action\ ?meaning\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00965}00965\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :id\_action\_resource\ ?id\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00966}00966\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :unit\_action\ ?unit\_action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00967}00967\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ :name\_action\_resource\ ?name\_action\_resource.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00968}00968\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?accion\ rdf:type\ :Action.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00969}00969\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00970}00970\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?eca\ :StartsWith\ ?evento.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00971}00971\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?evento\ :Check\ ?condicion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00972}00972\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?condicion\ :isRelatedWith\ ?accion.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00973}00973\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00974}00974\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#\#try:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00975}00975\ \ \ \ \ \ \ \ \ req\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.consultaDataProperty(query)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00976}00976\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#print()}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00977}00977\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#print(query)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00978}00978\ \ \ \ \ \ \ \ \ resultadoConsulta\ =\ req[0]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00979}00979\ \ \ \ \ \ \ \ \ diccionarioEcas\ =\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(resultadoConsulta,\ keys)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00980}00980\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionarioEcas}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00981}00981\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ except\ Exception\ as\ e:}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00982}00982\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ print(\ "{}Error\ en\ getECA\ ontologias\ pck"{})}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00983}00983\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ print(\ e)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00984}00984\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ return\ \{\}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00985}00985\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00986}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a269035dcda252ab2a4c463571ba8c91b}{00986}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a269035dcda252ab2a4c463571ba8c91b}{setServiceIntelligent}}(self,\ valorNuevo):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00987}00987\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ self.ontologia\ =\ Ontologia()}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00988}00988\ \ \ \ \ \ \ \ \ uri\ =\ \mbox{\hyperlink{namespace_uris_o_o_s}{UrisOOS}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00989}00989\ \ \ \ \ \ \ \ \ uriIndividuo\ =\ uri.individuoEstaddo}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00990}00990\ \ \ \ \ \ \ \ \ uriDataProperty\ =\ uri.dp\_service\_state}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00991}00991\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.actualizarDataProperty(uriIndividuo,\ uriDataProperty,\ valorNuevo)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00992}00992\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00993}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a75dad93bca8dd8c2804405f99b6913f7}{00993}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a75dad93bca8dd8c2804405f99b6913f7}{setEcaState}}(self,\ valorNuevo:str,\ nombreECA:str):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00994}00994\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ self.ontologia\ =\ Ontologia()}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00995}00995\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_affd04dae4721520b839260de7119f1c2}{consultarOntoActiva}}():}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00996}00996\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00997}00997\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ Exception(\textcolor{stringliteral}{"{}La\ ontología\ no\ está\ activa."{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00998}00998\ \ \ \ \ \ \ \ \ uri\ =\ \mbox{\hyperlink{namespace_uris_o_o_s}{UrisOOS}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l00999}00999\ \ \ \ \ \ \ \ \ uriIndividuo\ =\ uri.prefijo\ +\ nombreECA}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01000}01000\ \ \ \ \ \ \ \ \ uriDataProperty\ =\ uri.dp\_state\_eca}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01001}01001\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.actualizarDataProperty(uriIndividuo,\ uriDataProperty,\ valorNuevo)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01002}01002\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01003}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a5511062a254193d2b598cba0e3b4cd60}{01003}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_a5511062a254193d2b598cba0e3b4cd60}{setEcaListState}}(self,\ listaEcas):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01004}01004\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ self.ontologia\ =\ Ontologia()}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01005}01005\ \ \ \ \ \ \ \ \ uri\ =\ \mbox{\hyperlink{namespace_uris_o_o_s}{UrisOOS}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01006}01006\ \ \ \ \ \ \ \ \ lista\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01007}01007\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ listaEcas:\ \ \textcolor{comment}{\#\#[[nombreEca,\ valornuevo]]}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01008}01008\ \ \ \ \ \ \ \ \ \ \ \ \ uriIndividuo\ =\ uri.prefijo\ +\ item[0]\ \ \textcolor{comment}{\#\#nombreECA}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01009}01009\ \ \ \ \ \ \ \ \ \ \ \ \ uriDataProperty\ =\ uri.dp\_state\_eca}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01010}01010\ \ \ \ \ \ \ \ \ \ \ \ \ valorNuevo\ =\ item[1]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01011}01011\ \ \ \ \ \ \ \ \ \ \ \ \ lista.append([uriIndividuo,\ uriDataProperty,\ valorNuevo])}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01012}01012\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.actualizarListaDataProperty(lista)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01013}01013\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01014}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa11a7f79fdc9d8b42fa56e593e08bf71}{01014}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa11a7f79fdc9d8b42fa56e593e08bf71}{eliminarEca}}(self,\ nombreECA):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01015}01015\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ self.ontologia\ =\ Ontologia()}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01016}01016\ \ \ \ \ \ \ \ \ uri\ =\ \mbox{\hyperlink{namespace_uris_o_o_s}{UrisOOS}}()}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01017}01017\ \ \ \ \ \ \ \ \ uriIndividuoEca\ =\ uri.prefijo\ +\ nombreECA.replace(\textcolor{stringliteral}{"{}\ "{}},\ \textcolor{stringliteral}{"{}\_"{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01018}01018\ \ \ \ \ \ \ \ \ uriIndividuoEventoEca\ =\ uri.prefijo\ +\ nombreECA\ +\ \textcolor{stringliteral}{"{}evento"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01019}01019\ \ \ \ \ \ \ \ \ uriIndividuoCondicionEca\ =\ uri.prefijo\ +\ nombreECA\ +\ \textcolor{stringliteral}{"{}condicion"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01020}01020\ \ \ \ \ \ \ \ \ uriIndividuoAccionEca\ =\ uri.prefijo\ +\ nombreECA\ +\ \textcolor{stringliteral}{"{}accion"{}}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01021}01021\ \ \ \ \ \ \ \ \ listaIndividuos\ =\ []}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01022}01022\ \ \ \ \ \ \ \ \ listaIndividuos.append(uriIndividuoEca)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01023}01023\ \ \ \ \ \ \ \ \ listaIndividuos.append(uriIndividuoEventoEca)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01024}01024\ \ \ \ \ \ \ \ \ listaIndividuos.append(uriIndividuoCondicionEca)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01025}01025\ \ \ \ \ \ \ \ \ listaIndividuos.append(uriIndividuoAccionEca)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01026}01026\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_aa4a319baa0eef63ad6a7340bfcd06547}{ontologia}}.eliminarListaTodoIndividuo(listaIndividuos)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01027}01027\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01028}01028\ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01029}\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{01029}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{class_consultas_o_o_s_1_1_consultas_o_o_s_ad8bf4dc627e1a46fa973968024e22dd6}{pasarListaDiccionario}}(self,\ lista,\ keys):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01030}01030\ \ \ \ \ \ \ \ \ dicAux\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01031}01031\ \ \ \ \ \ \ \ \ i\ =\ 0\ \ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01032}01032\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key\ \textcolor{keywordflow}{in}\ keys:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01033}01033\ \ \ \ \ \ \ \ \ \ \ \ \ dicAux[key]\ =\ lista[i]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01034}01034\ \ \ \ \ \ \ \ \ \ \ \ \ i\ =\ i\ +\ 1}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01035}01035\ \ \ \ \ \ \ \ \ self.decodificar(dicAux)}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01036}01036\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dicAux}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01037}01037\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01038}01038\ \textcolor{comment}{\#\#Debido\ a\ que\ algunos\ datos\ tienen\ tildes,\ ennes,\ etc.\ se\ hace\ necesario\ este\ matodo}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01039}\mbox{\hyperlink{namespace_consultas_o_o_s_aa1a5ee3d75344e75dc7b533bd4e0b2d4}{01039}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespace_consultas_o_o_s_aa1a5ee3d75344e75dc7b533bd4e0b2d4}{decodificar}}(self,\ diccionario):}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01040}01040\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key\ \textcolor{keywordflow}{in}\ diccionario:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01041}01041\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01042}01042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ diccionario[key]\ =\ diccionario[key].decode(\textcolor{stringliteral}{"{}utf-\/8"{}})}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01043}01043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}:}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01044}01044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ diccionario[key]\ =\ diccionario[key]}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01045}01045\ }
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01046}01046\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ diccionario}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01047}01047\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01048}01048\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\ PLANTILLA\ DE\ LAS\ CONSULTAS\ A\ OOS\ \ \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01049}01049\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ \ \ \ \ \ \ \ query\ =\ "{}"{}"{}PREFIX\ \ oos:\ <http://semanticsearchiot.net/sswot/Ontologies\#>}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01050}01050\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SELECT\ ?}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01051}01051\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ \ \ \ \ \ \ \ \ \ \ \ \ \ WHERE\ \{}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01052}01052\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?entity\ oos:\ ?.}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01053}01053\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ \ \ \ \ \ \ \ \ \ \ \ \}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01054}01054\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ \ \ \ \ \ \ \ resultado\ =\ self.ontologia.consultaDataProperty(query)}}
+\DoxyCodeLine{\Hypertarget{_consultas_o_o_s_8py_source_l01055}01055\ \textcolor{comment}{\ \ \ \ \ \ \ \ \#\ \ \ \ \ \ \ \ pprint.pprint(resultado)}}
+
+\end{DoxyCode}

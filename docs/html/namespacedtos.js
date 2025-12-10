@@ -1,0 +1,26 @@
+var namespacedtos =
+[
+    [ "Unit", "classdtos_1_1_unit.html", "classdtos_1_1_unit" ],
+    [ "Datastream", "classdtos_1_1_datastream.html", "classdtos_1_1_datastream" ],
+    [ "DatastreamEstadoItem", "classdtos_1_1_datastream_estado_item.html", "classdtos_1_1_datastream_estado_item" ],
+    [ "Location", "classdtos_1_1_location.html", "classdtos_1_1_location" ],
+    [ "Feed", "classdtos_1_1_feed.html", "classdtos_1_1_feed" ],
+    [ "ObjectData", "classdtos_1_1_object_data.html", "classdtos_1_1_object_data" ],
+    [ "VariableValue", "classdtos_1_1_variable_value.html", "classdtos_1_1_variable_value" ],
+    [ "EventData", "classdtos_1_1_event_data.html", "classdtos_1_1_event_data" ],
+    [ "ConditionData", "classdtos_1_1_condition_data.html", "classdtos_1_1_condition_data" ],
+    [ "ActionData", "classdtos_1_1_action_data.html", "classdtos_1_1_action_data" ],
+    [ "ECAContract", "classdtos_1_1_e_c_a_contract.html", "classdtos_1_1_e_c_a_contract" ],
+    [ "MakeContractRequest", "classdtos_1_1_make_contract_request.html", "classdtos_1_1_make_contract_request" ],
+    [ "ECAResponse", "classdtos_1_1_e_c_a_response.html", "classdtos_1_1_e_c_a_response" ],
+    [ "SendDataResponse", "classdtos_1_1_send_data_response.html", null ],
+    [ "CommandActionData", "classdtos_1_1_command_action_data.html", "classdtos_1_1_command_action_data" ],
+    [ "SendCommandRequest", "classdtos_1_1_send_command_request.html", "classdtos_1_1_send_command_request" ],
+    [ "ECAStateRequest", "classdtos_1_1_e_c_a_state_request.html", "classdtos_1_1_e_c_a_state_request" ],
+    [ "ObjectMetadata", "classdtos_1_1_object_metadata.html", "classdtos_1_1_object_metadata" ],
+    [ "DataStream", "classdtos_1_1_data_stream.html", "classdtos_1_1_data_stream" ],
+    [ "PobladorPayloadDTO", "classdtos_1_1_poblador_payload_d_t_o.html", "classdtos_1_1_poblador_payload_d_t_o" ],
+    [ "EcaPayloadDTO", "classdtos_1_1_eca_payload_d_t_o.html", "classdtos_1_1_eca_payload_d_t_o" ],
+    [ "ECAStateListDTO", "classdtos_1_1_e_c_a_state_list_d_t_o.html", null ],
+    [ "RegistroInteraccionDTO", "classdtos_1_1_registro_interaccion_d_t_o.html", "classdtos_1_1_registro_interaccion_d_t_o" ]
+];

@@ -1,0 +1,759 @@
+\doxysection{\+\_\+typing\+\_\+extra.\+py}
+\hypertarget{__typing__extra_8py_source}{}\label{__typing__extra_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_typing\_extra.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_typing\_extra.py}}
+\mbox{\hyperlink{__typing__extra_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Logic\ for\ interacting\ with\ type\ annotations,\ mostly\ extensions,\ shims\ and\ hacks\ to\ wrap\ Python's\ typing\ module."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00005}00005\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00006}00006\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00007}00007\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00008}00008\ \textcolor{keyword}{import}\ types}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00009}00009\ \textcolor{keyword}{import}\ typing}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00010}00010\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ partial}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00011}00011\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ Callable,\ cast}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00013}00013\ \textcolor{keyword}{import}\ typing\_extensions}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00014}00014\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ deprecated,\ get\_args,\ get\_origin}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00015}00015\ \textcolor{keyword}{from}\ typing\_inspection\ \textcolor{keyword}{import}\ typing\_objects}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00016}00016\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacetyping__inspection_1_1introspection}{typing\_inspection.introspection}}\ \textcolor{keyword}{import}\ is\_union\_origin}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00018}00018\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1version}{pydantic.version}}\ \textcolor{keyword}{import}\ version\_short}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00020}00020\ \textcolor{keyword}{from}\ .\_namespace\_utils\ \textcolor{keyword}{import}\ GlobalsNamespace,\ MappingNamespace,\ NsResolver,\ get\_module\_ns\_of}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00022}00022\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 10):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00023}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aa17a793985242eb23b25e177bcd614d4}{00023}}\ \ \ \ \ NoneType\ =\ type(\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00024}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a1de812f438e3a8c14dbed15d4b24cb3d}{00024}}\ \ \ \ \ EllipsisType\ =\ type(Ellipsis)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00025}00025\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00026}00026\ \ \ \ \ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ EllipsisType\ \textcolor{keyword}{as}\ EllipsisType}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00027}00027\ \ \ \ \ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ NoneType\ \textcolor{keyword}{as}\ NoneType}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00029}00029\ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 14):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00030}00030\ \ \ \ \ \textcolor{keyword}{import}\ annotationlib}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00032}00032\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00033}00033\ \ \ \ \ \textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00035}00035\ \textcolor{comment}{\#\ As\ per\ https://typing-\/extensions.readthedocs.io/en/latest/\#runtime-\/use-\/of-\/types,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00036}00036\ \textcolor{comment}{\#\ always\ check\ for\ both\ \`{}typing`\ and\ \`{}typing\_extensions`\ variants\ of\ a\ typing\ construct.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00037}00037\ \textcolor{comment}{\#\ (this\ is\ implemented\ differently\ than\ the\ suggested\ approach\ in\ the\ \`{}typing\_extensions`}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00038}00038\ \textcolor{comment}{\#\ docs\ for\ performance).}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00041}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a69300f541061de4c1da5c97b1b46eb03}{00041}}\ \_t\_annotated\ =\ typing.Annotated}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00042}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a0b18795640831ce15828390854f8db51}{00042}}\ \_te\_annotated\ =\ typing\_extensions.Annotated}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00045}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a45180fdaefaf1c267b9a8bb0bd252272}{00045}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a45180fdaefaf1c267b9a8bb0bd252272}{is\_annotated}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00046}00046\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ whether\ the\ provided\ argument\ is\ a\ \`{}Annotated\`{}\ special\ form.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00047}00047\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ is\_annotated(Annotated[int,\ ...])}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00052}00052\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00053}00053\ \ \ \ \ origin\ =\ get\_origin(tp)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00054}00054\ \ \ \ \ \textcolor{keywordflow}{return}\ origin\ \textcolor{keywordflow}{is}\ \_t\_annotated\ \textcolor{keywordflow}{or}\ origin\ \textcolor{keywordflow}{is}\ \_te\_annotated}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00057}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a99661bd2b25e1ec6cd390822a1237d01}{00057}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a99661bd2b25e1ec6cd390822a1237d01}{annotated\_type}}(tp:\ Any,\ /)\ -\/>\ Any\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00058}00058\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ the\ type\ of\ the\ \`{}Annotated\`{}\ special\ form,\ or\ \`{}None\`{}."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00059}00059\ \ \ \ \ \textcolor{keywordflow}{return}\ tp.\_\_origin\_\_\ \textcolor{keywordflow}{if}\ typing\_objects.is\_annotated(get\_origin(tp))\ \textcolor{keywordflow}{else}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00062}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a0bcd572a093197300cfebb7754ff62e9}{00062}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a0bcd572a093197300cfebb7754ff62e9}{unpack\_type}}(tp:\ Any,\ /)\ -\/>\ Any\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00063}00063\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ the\ type\ wrapped\ by\ the\ \`{}Unpack\`{}\ special\ form,\ or\ \`{}None\`{}."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_args(tp)[0]\ \textcolor{keywordflow}{if}\ typing\_objects.is\_unpack(get\_origin(tp))\ \textcolor{keywordflow}{else}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00067}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a8e6c8626806dd47115d01e2d01f5b92f}{00067}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a8e6c8626806dd47115d01e2d01f5b92f}{is\_hashable}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00068}00068\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ whether\ the\ provided\ argument\ is\ the\ \`{}Hashable\`{}\ class.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00069}00069\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00070}00070\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00071}00071\ \textcolor{stringliteral}{\ \ \ \ is\_hashable(Hashable)}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00074}00074\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00075}00075\ \ \ \ \ \textcolor{comment}{\#\ \`{}get\_origin`\ is\ documented\ as\ normalizing\ any\ typing-\/module\ aliases\ to\ \`{}collections`\ classes,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00076}00076\ \ \ \ \ \textcolor{comment}{\#\ hence\ the\ second\ check:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00077}00077\ \ \ \ \ \textcolor{keywordflow}{return}\ tp\ \textcolor{keywordflow}{is}\ collections.abc.Hashable\ \textcolor{keywordflow}{or}\ get\_origin(tp)\ \textcolor{keywordflow}{is}\ collections.abc.Hashable}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00080}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a4d3b8918c37aab211b4ef4d7a99fa2e7}{00080}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a4d3b8918c37aab211b4ef4d7a99fa2e7}{is\_callable}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00081}00081\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ whether\ the\ provided\ argument\ is\ a\ \`{}Callable\`{},\ parametrized\ or\ not.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00082}00082\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ is\_callable(Callable[[int],\ str])}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00085}00085\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ is\_callable(typing.Callable)}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ is\_callable(collections.abc.Callable)}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00092}00092\ \ \ \ \ \textcolor{comment}{\#\ \`{}get\_origin`\ is\ documented\ as\ normalizing\ any\ typing-\/module\ aliases\ to\ \`{}collections`\ classes,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00093}00093\ \ \ \ \ \textcolor{comment}{\#\ hence\ the\ second\ check:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00094}00094\ \ \ \ \ \textcolor{keywordflow}{return}\ tp\ \textcolor{keywordflow}{is}\ collections.abc.Callable\ \textcolor{keywordflow}{or}\ get\_origin(tp)\ \textcolor{keywordflow}{is}\ collections.abc.Callable}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00097}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a551483d2f59054eef6e76af72fad463a}{00097}}\ \_classvar\_re\ =\ re.compile(\textcolor{stringliteral}{r'((\(\backslash\)w+\(\backslash\).)?Annotated\(\backslash\)[)?(\(\backslash\)w+\(\backslash\).)?ClassVar\(\backslash\)['})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00100}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab9b396ab22b04a47c0ba928be1bfc8b9}{00100}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab9b396ab22b04a47c0ba928be1bfc8b9}{is\_classvar\_annotation}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00101}00101\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ whether\ the\ provided\ argument\ represents\ a\ class\ variable\ annotation.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00102}00102\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ Although\ not\ explicitly\ stated\ by\ the\ typing\ specification,\ \`{}ClassVar\`{}\ can\ be\ used}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ inside\ \`{}Annotated\`{}\ and\ as\ such,\ this\ function\ checks\ for\ this\ specific\ scenario.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00105}00105\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ Because\ this\ function\ is\ used\ to\ detect\ class\ variables\ before\ evaluating\ forward\ references}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ (or\ because\ evaluation\ failed),\ we\ also\ implement\ a\ naive\ regex\ match\ implementation.\ This\ is}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ required\ because\ class\ variables\ are\ inspected\ before\ fields\ are\ collected,\ so\ we\ try\ to\ be}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ as\ accurate\ as\ possible.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00111}00111\ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_classvar(tp):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00114}00114\ \ \ \ \ origin\ =\ get\_origin(tp)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00116}00116\ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_classvar(origin):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00119}00119\ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_annotated(origin):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ annotated\_type\ =\ tp.\_\_origin\_\_}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_classvar(annotated\_type)\ \textcolor{keywordflow}{or}\ typing\_objects.is\_classvar(get\_origin(annotated\_type)):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00124}00124\ \ \ \ \ str\_ann:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00125}00125\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(tp,\ typing.ForwardRef):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ str\_ann\ =\ tp.\_\_forward\_arg\_\_}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00127}00127\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(tp,\ str):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ str\_ann\ =\ tp}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00130}00130\ \ \ \ \ \textcolor{keywordflow}{if}\ str\_ann\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ \_classvar\_re.match(str\_ann):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ stdlib\ dataclasses\ do\ something\ similar,\ although\ a\ bit\ more\ advanced}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (see\ \`{}dataclass.\_is\_type`).}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00135}00135\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00138}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a4551578118c732b7e7c5959bdf436db2}{00138}}\ \_t\_final\ =\ typing.Final}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00139}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a60e2512374d259218f84ad8ea0131770}{00139}}\ \_te\_final\ =\ typing\_extensions.Final}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00142}00142\ \textcolor{comment}{\#\ TODO\ implement\ \`{}is\_finalvar\_annotation`\ as\ Final\ can\ be\ wrapped\ with\ other\ special\ forms:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00143}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_af35ef9b72be371b28ca97eec76d32d93}{00143}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_af35ef9b72be371b28ca97eec76d32d93}{is\_finalvar}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00144}00144\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ whether\ the\ provided\ argument\ is\ a\ \`{}Final\`{}\ special\ form,\ parametrized\ or\ not.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00145}00145\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00146}00146\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00147}00147\ \textcolor{stringliteral}{\ \ \ \ is\_finalvar(Final[int])}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00148}00148\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ is\_finalvar(Final)}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00152}00152\ \ \ \ \ \textcolor{comment}{\#\ Final\ is\ not\ necessarily\ parametrized:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00153}00153\ \ \ \ \ \textcolor{keywordflow}{if}\ tp\ \textcolor{keywordflow}{is}\ \_t\_final\ \textcolor{keywordflow}{or}\ tp\ \textcolor{keywordflow}{is}\ \_te\_final:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00155}00155\ \ \ \ \ origin\ =\ get\_origin(tp)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00156}00156\ \ \ \ \ \textcolor{keywordflow}{return}\ origin\ \textcolor{keywordflow}{is}\ \_t\_final\ \textcolor{keywordflow}{or}\ origin\ \textcolor{keywordflow}{is}\ \_te\_final}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00158}00158\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00159}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a90c2647b3e7a0a710c63bcf4deaee47d}{00159}}\ \_NONE\_TYPES:\ tuple[Any,\ ...]\ =\ (\textcolor{keywordtype}{None},\ NoneType,\ typing.Literal[\textcolor{keywordtype}{None}],\ typing\_extensions.Literal[\textcolor{keywordtype}{None}])}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00162}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a3575d6caa222e84ee49c1fc448cc5376}{00162}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a3575d6caa222e84ee49c1fc448cc5376}{is\_none\_type}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00163}00163\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ whether\ the\ argument\ represents\ the\ \`{}None\`{}\ type\ as\ part\ of\ an\ annotation.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00164}00164\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00165}00165\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00166}00166\ \textcolor{stringliteral}{\ \ \ \ is\_none\_type(None)}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00167}00167\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00168}00168\ \textcolor{stringliteral}{\ \ \ \ is\_none\_type(NoneType)}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00169}00169\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00170}00170\ \textcolor{stringliteral}{\ \ \ \ is\_none\_type(Literal[None])}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00171}00171\ \textcolor{stringliteral}{\ \ \ \ \#>\ True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00172}00172\ \textcolor{stringliteral}{\ \ \ \ is\_none\_type(type[None])}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ \#>\ False}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00174}00174\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00175}00175\ \ \ \ \ \textcolor{keywordflow}{return}\ tp\ \textcolor{keywordflow}{in}\ \_NONE\_TYPES}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00178}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a0e8fffc7c696df6b8d92cc8697d87f29}{00178}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a0e8fffc7c696df6b8d92cc8697d87f29}{is\_namedtuple}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00179}00179\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ whether\ the\ provided\ argument\ is\ a\ named\ tuple\ class.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00180}00180\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ The\ class\ can\ be\ created\ using\ \`{}typing.NamedTuple\`{}\ or\ \`{}collections.namedtuple\`{}.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ Parametrized\ generic\ classes\ are\ *not*\ assumed\ to\ be\ named\ tuples.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00183}00183\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00184}00184\ \ \ \ \ \textcolor{keyword}{from}\ .\_utils\ \textcolor{keyword}{import}\ lenient\_issubclass\ \ \textcolor{comment}{\#\ circ.\ import}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00186}00186\ \ \ \ \ \textcolor{keywordflow}{return}\ lenient\_issubclass(tp,\ tuple)\ \textcolor{keywordflow}{and}\ hasattr(tp,\ \textcolor{stringliteral}{'\_fields'})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00189}00189\ \textcolor{comment}{\#\ TODO\ In\ 2.12,\ delete\ this\ export.\ It\ is\ currently\ defined\ only\ to\ not\ break}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00190}00190\ \textcolor{comment}{\#\ pydantic-\/settings\ which\ relies\ on\ it:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00191}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aeee38a8b46e718faf52906bd99858255}{00191}}\ origin\_is\_union\ =\ is\_union\_origin}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00194}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aef64776ff271e90da4465f923c8879c7}{00194}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aef64776ff271e90da4465f923c8879c7}{is\_generic\_alias}}(tp:\ Any,\ /)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{return}\ isinstance(tp,\ (types.GenericAlias,\ typing.\_GenericAlias))\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00198}00198\ \textcolor{comment}{\#\ TODO:\ Ideally,\ we\ should\ avoid\ relying\ on\ the\ private\ \`{}typing`\ constructs:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00200}00200\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 10):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00201}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a53a2f2bfacdeb0940d2f9c7a729cbb88}{00201}}\ \ \ \ \ WithArgsTypes:\ tuple[Any,\ ...]\ =\ (typing.\_GenericAlias,\ types.GenericAlias)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00202}00202\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00203}00203\ \ \ \ \ WithArgsTypes:\ tuple[Any,\ ...]\ =\ (typing.\_GenericAlias,\ types.GenericAlias,\ types.UnionType)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00206}00206\ \textcolor{comment}{\#\ Similarly,\ we\ shouldn't\ rely\ on\ this\ \`{}\_Final`\ class,\ which\ is\ even\ more\ private\ than\ \`{}\_GenericAlias`:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00207}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a7991f33a5bf97c4daedad2224688e557}{00207}}\ typing\_base:\ Any\ =\ typing.\_Final\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00210}00210\ \textcolor{comment}{\#\#\#\ Annotation\ evaluations\ functions:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00213}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a903c238cab7e5524554936975ea038f3}{00213}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a903c238cab7e5524554936975ea038f3}{parent\_frame\_namespace}}(*,\ parent\_depth:\ int\ =\ 2,\ force:\ bool\ =\ \textcolor{keyword}{False})\ -\/>\ dict[str,\ Any]\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00214}00214\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Fetch\ the\ local\ namespace\ of\ the\ parent\ frame\ where\ this\ function\ is\ called.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00215}00215\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00216}00216\ \textcolor{stringliteral}{\ \ \ \ Using\ this\ function\ is\ mostly\ useful\ to\ resolve\ forward\ annotations\ pointing\ to\ members\ defined\ in\ a\ local\ namespace,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00217}00217\ \textcolor{stringliteral}{\ \ \ \ such\ as\ assignments\ inside\ a\ function.\ Using\ the\ standard\ library\ tools,\ it\ is\ currently\ not\ possible\ to\ resolve}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00218}00218\ \textcolor{stringliteral}{\ \ \ \ such\ annotations:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00219}00219\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00220}00220\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}python\ \{lint="{}skip"{}\ test="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00221}00221\ \textcolor{stringliteral}{\ \ \ \ from\ typing\ import\ get\_type\_hints}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00222}00222\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00223}00223\ \textcolor{stringliteral}{\ \ \ \ def\ func()\ -\/>\ None:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00224}00224\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Alias\ =\ int}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00225}00225\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00226}00226\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ class\ C:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00227}00227\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ a:\ 'Alias'}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00228}00228\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00229}00229\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#\ Raises\ a\ \`{}NameError:\ 'Alias'\ is\ not\ defined\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00230}00230\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ get\_type\_hints(C)}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00231}00231\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00232}00232\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00233}00233\ \textcolor{stringliteral}{\ \ \ \ Pydantic\ uses\ this\ function\ when\ a\ Pydantic\ model\ is\ being\ defined\ to\ fetch\ the\ parent\ frame\ locals.\ However,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00234}00234\ \textcolor{stringliteral}{\ \ \ \ this\ only\ allows\ us\ to\ fetch\ the\ parent\ frame\ namespace\ and\ not\ other\ parents\ (e.g.\ a\ model\ defined\ in\ a\ function,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00235}00235\ \textcolor{stringliteral}{\ \ \ \ itself\ defined\ in\ another\ function).\ Inspecting\ the\ next\ outer\ frames\ (using\ \`{}f\_back\`{})\ is\ not\ reliable\ enough}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00236}00236\ \textcolor{stringliteral}{\ \ \ \ (see\ https://discuss.python.org/t/20659).}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00237}00237\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00238}00238\ \textcolor{stringliteral}{\ \ \ \ Because\ this\ function\ is\ mostly\ used\ to\ better\ resolve\ forward\ annotations,\ nothing\ is\ returned\ if\ the\ parent\ frame's}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00239}00239\ \textcolor{stringliteral}{\ \ \ \ code\ object\ is\ defined\ at\ the\ module\ level.\ In\ this\ case,\ the\ locals\ of\ the\ frame\ will\ be\ the\ same\ as\ the\ module}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00240}00240\ \textcolor{stringliteral}{\ \ \ \ globals\ where\ the\ class\ is\ defined\ (see\ \`{}\_namespace\_utils.get\_module\_ns\_of\`{}).\ However,\ if\ you\ still\ want\ to\ fetch}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00241}00241\ \textcolor{stringliteral}{\ \ \ \ the\ module\ globals\ (e.g.\ when\ rebuilding\ a\ model,\ where\ the\ frame\ where\ the\ rebuild\ call\ is\ performed\ might\ contain}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00242}00242\ \textcolor{stringliteral}{\ \ \ \ members\ that\ you\ want\ to\ use\ for\ forward\ annotations\ evaluation),\ you\ can\ use\ the\ \`{}force\`{}\ parameter.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00243}00243\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00244}00244\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00245}00245\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ parent\_depth:\ The\ depth\ at\ which\ to\ get\ the\ frame.\ Defaults\ to\ 2,\ meaning\ the\ parent\ frame\ where\ this\ function}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00246}00246\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ is\ called\ will\ be\ used.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00247}00247\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ force:\ Whether\ to\ always\ return\ the\ frame\ locals,\ even\ if\ the\ frame's\ code\ object\ is\ defined\ at\ the\ module\ level.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00248}00248\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00249}00249\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00250}00250\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ locals\ of\ the\ namespace,\ or\ \`{}None\`{}\ if\ it\ was\ skipped\ as\ per\ the\ described\ logic.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00251}00251\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00252}00252\ \ \ \ \ frame\ =\ sys.\_getframe(parent\_depth)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00253}00253\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00254}00254\ \ \ \ \ \textcolor{keywordflow}{if}\ frame.f\_code.co\_name.startswith(\textcolor{stringliteral}{'<generic\ parameters\ of'}):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ As\ \`{}parent\_frame\_namespace`\ is\ mostly\ called\ in\ \`{}ModelMetaclass.\_\_new\_\_`,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ parent\ frame\ can\ be\ the\ annotation\ scope\ if\ the\ PEP\ 695\ generic\ syntax\ is\ used.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (see\ https://docs.python.org/3/reference/executionmodel.html\#annotation-\/scopes,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ https://docs.python.org/3/reference/compound\_stmts.html\#generic-\/classes).}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ In\ this\ case,\ the\ code\ name\ is\ set\ to\ \`{}<generic\ parameters\ of\ MyClass>`,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ we\ need\ to\ skip\ this\ frame\ as\ it\ is\ irrelevant.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ frame\ =\ cast(types.FrameType,\ frame.f\_back)\ \ \textcolor{comment}{\#\ guaranteed\ to\ not\ be\ \`{}None`}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00263}00263\ \ \ \ \ \textcolor{comment}{\#\ note,\ we\ don't\ copy\ frame.f\_locals\ here\ (or\ during\ the\ last\ return\ call),\ because\ we\ don't\ expect\ the\ namespace\ to\ be}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00264}00264\ \ \ \ \ \textcolor{comment}{\#\ modified\ down\ the\ line\ if\ this\ becomes\ a\ problem,\ we\ could\ implement\ some\ sort\ of\ frozen\ mapping\ structure\ to\ enforce\ this.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00265}00265\ \ \ \ \ \textcolor{keywordflow}{if}\ force:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ frame.f\_locals}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00268}00268\ \ \ \ \ \textcolor{comment}{\#\ If\ either\ of\ the\ following\ conditions\ are\ true,\ the\ class\ is\ defined\ at\ the\ top\ module\ level.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00269}00269\ \ \ \ \ \textcolor{comment}{\#\ To\ better\ understand\ why\ we\ need\ both\ of\ these\ checks,\ see}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00270}00270\ \ \ \ \ \textcolor{comment}{\#\ https://github.com/pydantic/pydantic/pull/10113\#discussion\_r1714981531.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00271}00271\ \ \ \ \ \textcolor{keywordflow}{if}\ frame.f\_back\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{or}\ frame.f\_code.co\_name\ ==\ \textcolor{stringliteral}{'<module>'}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00274}00274\ \ \ \ \ \textcolor{keywordflow}{return}\ frame.f\_locals}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00277}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aab3a68826d073fef0b2a420c85f1ce2a}{00277}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aab3a68826d073fef0b2a420c85f1ce2a}{\_type\_convert}}(arg:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00278}00278\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Convert\ \`{}None\`{}\ to\ \`{}NoneType\`{}\ and\ strings\ to\ \`{}ForwardRef\`{}\ instances.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00279}00279\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00280}00280\ \textcolor{stringliteral}{\ \ \ \ This\ is\ a\ backport\ of\ the\ private\ \`{}typing.\_type\_convert\`{}\ function.\ When}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00281}00281\ \textcolor{stringliteral}{\ \ \ \ evaluating\ a\ type,\ \`{}ForwardRef.\_evaluate\`{}\ ends\ up\ being\ called,\ and\ is}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00282}00282\ \textcolor{stringliteral}{\ \ \ \ responsible\ for\ making\ this\ conversion.\ However,\ we\ still\ have\ to\ apply}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00283}00283\ \textcolor{stringliteral}{\ \ \ \ it\ for\ the\ first\ argument\ passed\ to\ our\ type\ evaluation\ functions,\ similarly}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00284}00284\ \textcolor{stringliteral}{\ \ \ \ to\ the\ \`{}typing.get\_type\_hints\`{}\ function.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00285}00285\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00286}00286\ \ \ \ \ \textcolor{keywordflow}{if}\ arg\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ NoneType}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00288}00288\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(arg,\ str):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Like\ \`{}typing.get\_type\_hints`,\ assume\ the\ arg\ can\ be\ in\ any\ context,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ hence\ the\ proper\ \`{}is\_argument`\ and\ \`{}is\_class`\ args:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a11c62f214b0382d7471ad77300288e40}{\_make\_forward\_ref}}(arg,\ is\_argument=\textcolor{keyword}{False},\ is\_class=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00292}00292\ \ \ \ \ \textcolor{keywordflow}{return}\ arg}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00294}00294\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00295}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a26db667a0b46a87a4f1102feadb33c44}{00295}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a26db667a0b46a87a4f1102feadb33c44}{safe\_get\_annotations}}(cls:\ type[Any])\ -\/>\ dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00296}00296\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ annotations\ for\ the\ provided\ class,\ accounting\ for\ potential\ deferred\ forward\ references.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00297}00297\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00298}00298\ \textcolor{stringliteral}{\ \ \ \ Starting\ with\ Python\ 3.14,\ accessing\ the\ \`{}\_\_annotations\_\_\`{}\ attribute\ might\ raise\ a\ \`{}NameError\`{}\ if}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00299}00299\ \textcolor{stringliteral}{\ \ \ \ a\ referenced\ symbol\ isn't\ defined\ yet.\ In\ this\ case,\ we\ return\ the\ annotation\ in\ the\ *forward\ ref*}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00300}00300\ \textcolor{stringliteral}{\ \ \ \ format.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00301}00301\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00302}00302\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 14):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ annotationlib.get\_annotations(cls,\ format=annotationlib.Format.FORWARDREF)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00304}00304\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cls.\_\_dict\_\_.get(\textcolor{stringliteral}{'\_\_annotations\_\_'},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00308}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a1cb290529bac465420babead796f7ddb}{00308}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a1cb290529bac465420babead796f7ddb}{get\_model\_type\_hints}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00309}00309\ \ \ \ \ obj:\ type[BaseModel],}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00310}00310\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00311}00311\ \ \ \ \ ns\_resolver:\ NsResolver\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00312}00312\ )\ -\/>\ dict[str,\ tuple[Any,\ bool]]:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00313}00313\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Collect\ annotations\ from\ a\ Pydantic\ model\ class,\ including\ those\ from\ parent\ classes.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00314}00314\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00315}00315\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00316}00316\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ obj:\ The\ Pydantic\ model\ to\ inspect.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00317}00317\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ns\_resolver:\ A\ namespace\ resolver\ instance\ to\ use.\ Defaults\ to\ an\ empty\ instance.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00318}00318\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00319}00319\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00320}00320\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ A\ dictionary\ mapping\ annotation\ names\ to\ a\ two-\/tuple:\ the\ first\ element\ is\ the\ evaluated}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00321}00321\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ type\ or\ the\ original\ annotation\ if\ a\ \`{}NameError\`{}\ occurred,\ the\ second\ element\ is\ a\ boolean}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00322}00322\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ indicating\ if\ whether\ the\ evaluation\ succeeded.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00323}00323\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00324}00324\ \ \ \ \ hints:\ dict[str,\ Any]\ |\ dict[str,\ tuple[Any,\ bool]]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00325}00325\ \ \ \ \ ns\_resolver\ =\ ns\_resolver\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver}{NsResolver}}()}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00327}00327\ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ reversed(obj.\_\_mro\_\_):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00328}00328\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ Python\ 3.14,\ we\ could\ also\ use\ \`{}Format.VALUE`\ and\ pass\ the\ globals/locals}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ from\ the\ ns\_resolver,\ but\ we\ want\ to\ be\ able\ to\ know\ which\ specific\ field\ failed}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ evaluate:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ ann\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a26db667a0b46a87a4f1102feadb33c44}{safe\_get\_annotations}}(base)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ ann:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00335}00335\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ ns\_resolver.push(base):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ globalns,\ localns\ =\ ns\_resolver.types\_namespace}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ ann.items():}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name.startswith(\textcolor{stringliteral}{'\_'}):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ private\ attributes,\ we\ only\ need\ the\ annotation\ to\ detect\ the\ \`{}ClassVar`\ special\ form.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ this\ reason,\ we\ still\ try\ to\ evaluate\ it,\ but\ we\ also\ catch\ any\ possible\ exception\ (on}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ top\ of\ the\ \`{}NameError`s\ caught\ in\ \`{}try\_eval\_type`)\ that\ could\ happen\ so\ that\ users\ are\ free}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ use\ any\ kind\ of\ forward\ annotation\ for\ private\ fields\ (e.g.\ circular\ imports,\ new\ typing}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ syntax,\ etc).}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hints[name]\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a5e006ee81f2e61286fbae800a51a85b2}{try\_eval\_type}}(value,\ globalns,\ localns)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hints[name]\ =\ (value,\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hints[name]\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a5e006ee81f2e61286fbae800a51a85b2}{try\_eval\_type}}(value,\ globalns,\ localns)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00351}00351\ \ \ \ \ \textcolor{keywordflow}{return}\ hints}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00352}00352\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00353}00353\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00354}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aa9da33fec8cf619921d6eaf2f851eafc}{00354}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aa9da33fec8cf619921d6eaf2f851eafc}{get\_cls\_type\_hints}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00355}00355\ \ \ \ \ obj:\ type[Any],}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00356}00356\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00357}00357\ \ \ \ \ ns\_resolver:\ NsResolver\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00358}00358\ )\ -\/>\ dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00359}00359\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Collect\ annotations\ from\ a\ class,\ including\ those\ from\ parent\ classes.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00360}00360\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00361}00361\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00362}00362\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ obj:\ The\ class\ to\ inspect.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00363}00363\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ns\_resolver:\ A\ namespace\ resolver\ instance\ to\ use.\ Defaults\ to\ an\ empty\ instance.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00364}00364\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00365}00365\ \ \ \ \ hints:\ dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00366}00366\ \ \ \ \ ns\_resolver\ =\ ns\_resolver\ \textcolor{keywordflow}{or}\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__namespace__utils_1_1_ns_resolver}{NsResolver}}()}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00367}00367\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00368}00368\ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ reversed(obj.\_\_mro\_\_):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ Python\ 3.14,\ we\ could\ also\ use\ \`{}Format.VALUE`\ and\ pass\ the\ globals/locals}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ from\ the\ ns\_resolver,\ but\ we\ want\ to\ be\ able\ to\ know\ which\ specific\ field\ failed}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ to\ evaluate:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ ann\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a26db667a0b46a87a4f1102feadb33c44}{safe\_get\_annotations}}(base)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ ann:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ ns\_resolver.push(base):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ globalns,\ localns\ =\ ns\_resolver.types\_namespace}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ ann.items():}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hints[name]\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ac9c3af1324526675b9c24dccce4aab9f}{eval\_type}}(value,\ globalns,\ localns)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00381}00381\ \ \ \ \ \textcolor{keywordflow}{return}\ hints}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00384}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a5e006ee81f2e61286fbae800a51a85b2}{00384}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a5e006ee81f2e61286fbae800a51a85b2}{try\_eval\_type}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00385}00385\ \ \ \ \ value:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00386}00386\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00387}00387\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00388}00388\ )\ -\/>\ tuple[Any,\ bool]:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00389}00389\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Try\ evaluating\ the\ annotation\ using\ the\ provided\ namespaces.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00390}00390\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00391}00391\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00392}00392\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ value:\ The\ value\ to\ evaluate.\ If\ \`{}None\`{},\ it\ will\ be\ replaced\ by\ \`{}type[None]\`{}.\ If\ an\ instance}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00393}00393\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ of\ \`{}str\`{},\ it\ will\ be\ converted\ to\ a\ \`{}ForwardRef\`{}.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00394}00394\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ localns:\ The\ global\ namespace\ to\ use\ during\ annotation\ evaluation.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00395}00395\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ globalns:\ The\ local\ namespace\ to\ use\ during\ annotation\ evaluation.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00396}00396\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00397}00397\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00398}00398\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ A\ two-\/tuple\ containing\ the\ possibly\ evaluated\ type\ and\ a\ boolean\ indicating}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00399}00399\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ whether\ the\ evaluation\ succeeded\ or\ not.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00400}00400\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00401}00401\ \ \ \ \ value\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aab3a68826d073fef0b2a420c85f1ce2a}{\_type\_convert}}(value)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00402}00402\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00403}00403\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00404}00404\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{eval\_type\_backport}}(value,\ globalns,\ localns),\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00405}00405\ \ \ \ \ \textcolor{keywordflow}{except}\ NameError:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value,\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00407}00407\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00408}00408\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00409}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ac9c3af1324526675b9c24dccce4aab9f}{00409}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ac9c3af1324526675b9c24dccce4aab9f}{eval\_type}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00410}00410\ \ \ \ \ value:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00411}00411\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00412}00412\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00413}00413\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00414}00414\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Evaluate\ the\ annotation\ using\ the\ provided\ namespaces.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00415}00415\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00416}00416\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00417}00417\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ value:\ The\ value\ to\ evaluate.\ If\ \`{}None\`{},\ it\ will\ be\ replaced\ by\ \`{}type[None]\`{}.\ If\ an\ instance}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00418}00418\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ of\ \`{}str\`{},\ it\ will\ be\ converted\ to\ a\ \`{}ForwardRef\`{}.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00419}00419\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ localns:\ The\ global\ namespace\ to\ use\ during\ annotation\ evaluation.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00420}00420\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ globalns:\ The\ local\ namespace\ to\ use\ during\ annotation\ evaluation.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00421}00421\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00422}00422\ \ \ \ \ value\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aab3a68826d073fef0b2a420c85f1ce2a}{\_type\_convert}}(value)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00423}00423\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{eval\_type\_backport}}(value,\ globalns,\ localns)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00424}00424\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00425}00425\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00426}00426\ \textcolor{preprocessor}{@deprecated}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00427}00427\ \ \ \ \ \textcolor{stringliteral}{'\`{}eval\_type\_lenient`\ is\ deprecated,\ use\ \`{}try\_eval\_type`\ instead.'},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00428}00428\ \ \ \ \ category=\textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00429}00429\ )}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00430}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aaea229040f97397636138d4d06fd40db}{00430}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_aaea229040f97397636138d4d06fd40db}{eval\_type\_lenient}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00431}00431\ \ \ \ \ value:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00432}00432\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00433}00433\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00434}00434\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00435}00435\ \ \ \ \ ev,\ \_\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a5e006ee81f2e61286fbae800a51a85b2}{try\_eval\_type}}(value,\ globalns,\ localns)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00436}00436\ \ \ \ \ \textcolor{keywordflow}{return}\ ev}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00437}00437\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00438}00438\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00439}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{00439}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{eval\_type\_backport}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00440}00440\ \ \ \ \ value:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00441}00441\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00442}00442\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00443}00443\ \ \ \ \ type\_params:\ tuple[Any,\ ...]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00444}00444\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00445}00445\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}An\ enhanced\ version\ of\ \`{}typing.\_eval\_type\`{}\ which\ will\ fall\ back\ to\ using\ the\ \`{}eval\_type\_backport\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00446}00446\ \textcolor{stringliteral}{\ \ \ \ package\ if\ it's\ installed\ to\ let\ older\ Python\ versions\ use\ newer\ typing\ constructs.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00447}00447\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00448}00448\ \textcolor{stringliteral}{\ \ \ \ Specifically,\ this\ transforms\ \`{}X\ |\ Y\`{}\ into\ \`{}typing.Union[X,\ Y]\`{}\ and\ \`{}list[X]\`{}\ into\ \`{}typing.List[X]\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00449}00449\ \textcolor{stringliteral}{\ \ \ \ (as\ well\ as\ all\ the\ types\ made\ generic\ in\ PEP\ 585)\ if\ the\ original\ syntax\ is\ not\ supported\ in\ the}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00450}00450\ \textcolor{stringliteral}{\ \ \ \ current\ Python\ version.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00451}00451\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00452}00452\ \textcolor{stringliteral}{\ \ \ \ This\ function\ will\ also\ display\ a\ helpful\ error\ if\ the\ value\ passed\ fails\ to\ evaluate.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00453}00453\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00454}00454\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a45406bee2532b7faa887ba41b710db1f}{\_eval\_type\_backport}}(value,\ globalns,\ localns,\ type\_params)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00456}00456\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'Unable\ to\ evaluate\ type\ annotation'}\ \textcolor{keywordflow}{in}\ str(e):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ it\ is\ a\ \`{}TypeError`\ and\ value\ isn't\ a\ \`{}ForwardRef`,\ it\ would\ have\ failed\ during\ annotation\ definition.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Thus\ we\ assert\ here\ for\ type\ checking\ purposes:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(value,\ typing.ForwardRef)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00463}00463\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00464}00464\ \ \ \ \ \ \ \ \ message\ =\ f\textcolor{stringliteral}{'Unable\ to\ evaluate\ type\ annotation\ \{value.\_\_forward\_arg\_\_!r\}.'}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 11):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ e.add\_note(message)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(message)\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00470}00470\ \ \ \ \ \textcolor{keywordflow}{except}\ RecursionError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TODO\ ideally\ recursion\ errors\ should\ be\ checked\ in\ \`{}eval\_type`\ above,\ but\ \`{}eval\_type\_backport`}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ is\ used\ directly\ in\ some\ places.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ message\ =\ (}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}If\ you\ made\ use\ of\ an\ implicit\ recursive\ type\ alias\ (e.g.\ \`{}MyType\ =\ list['MyType']),\ "{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'consider\ using\ PEP\ 695\ type\ aliases\ instead.\ For\ more\ details,\ refer\ to\ the\ documentation:\ '}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'https://docs.pydantic.dev/\{version\_short()\}/concepts/types/\#named-\/recursive-\/types'}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00477}00477\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 11):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ e.add\_note(message)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RecursionError(f\textcolor{stringliteral}{'\{e.args[0]\}\(\backslash\)n\{message\}'})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00483}00483\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00484}00484\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00485}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a45406bee2532b7faa887ba41b710db1f}{00485}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a45406bee2532b7faa887ba41b710db1f}{\_eval\_type\_backport}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00486}00486\ \ \ \ \ value:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00487}00487\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00488}00488\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00489}00489\ \ \ \ \ type\_params:\ tuple[Any,\ ...]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00490}00490\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00491}00491\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a61ca1a81adf03010552a02b18dd032c5}{\_eval\_type}}(value,\ globalns,\ localns,\ type\_params)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00493}00493\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00494}00494\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (isinstance(value,\ typing.ForwardRef)\ \textcolor{keywordflow}{and}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a92994be9acf5744dee7747fc8c1508bc}{is\_backport\_fixable\_error}}(e)):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00496}00496\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ eval\_type\_backport\ \textcolor{keyword}{import}\ eval\_type\_backport}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unable\ to\ evaluate\ type\ annotation\ \{value.\_\_forward\_arg\_\_!r\}.\ If\ you\ are\ making\ use\ '}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'of\ the\ new\ typing\ syntax\ (unions\ using\ \`{}|`\ since\ Python\ 3.10\ or\ builtins\ subscripting\ '}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00503}00503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'since\ Python\ 3.9),\ you\ should\ either\ replace\ the\ use\ of\ new\ syntax\ with\ the\ existing\ '}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\`{}typing`\ constructs\ or\ install\ the\ \`{}eval\_type\_backport`\ package.'}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00506}00506\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{eval\_type\_backport}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ value,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ \ \ \ \ globalns,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ \ \ \ \ localns,\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportArgumentType],\ waiting\ on\ a\ new\ \`{}eval\_type\_backport`\ release.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ try\_default=\textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00513}00513\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00514}00514\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00515}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a61ca1a81adf03010552a02b18dd032c5}{00515}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a61ca1a81adf03010552a02b18dd032c5}{\_eval\_type}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00516}00516\ \ \ \ \ value:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00517}00517\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00518}00518\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00519}00519\ \ \ \ \ type\_params:\ tuple[Any,\ ...]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00520}00520\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00521}00521\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 14):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Starting\ in\ 3.14,\ \`{}\_eval\_type()`\ does\ *not*\ apply\ \`{}\_type\_convert()`}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00523}00523\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ anymore.\ This\ means\ the\ \`{}None`\ -\/>\ \`{}type(None)`\ conversion\ does\ not\ apply:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ evaluated\ =\ typing.\_eval\_type(\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ \ \ \ \ value,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ \ \ \ \ globalns,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00527}00527\ \ \ \ \ \ \ \ \ \ \ \ \ localns,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ type\_params=type\_params,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ evaluated\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ evaluated\ =\ type(\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evaluated}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00533}00533\ \ \ \ \ \textcolor{keywordflow}{elif}\ sys.version\_info\ >=\ (3,\ 13):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ typing.\_eval\_type(\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ value,\ globalns,\ localns,\ type\_params=type\_params}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00536}00536\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00537}00537\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00538}00538\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ typing.\_eval\_type(\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00539}00539\ \ \ \ \ \ \ \ \ \ \ \ \ value,\ globalns,\ localns}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00540}00540\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00541}00541\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00542}00542\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00543}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a92994be9acf5744dee7747fc8c1508bc}{00543}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a92994be9acf5744dee7747fc8c1508bc}{is\_backport\_fixable\_error}}(e:\ TypeError)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00544}00544\ \ \ \ \ msg\ =\ str(e)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00545}00545\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00546}00546\ \ \ \ \ \textcolor{keywordflow}{return}\ sys.version\_info\ <\ (3,\ 10)\ \textcolor{keywordflow}{and}\ msg.startswith(\textcolor{stringliteral}{'unsupported\ operand\ type(s)\ for\ |:\ '})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00547}00547\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00548}00548\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00549}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ad01a7e54e574e426e80d34c0e11664f5}{00549}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ad01a7e54e574e426e80d34c0e11664f5}{get\_function\_type\_hints}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00550}00550\ \ \ \ \ function:\ Callable[...,\ Any],}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00551}00551\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00552}00552\ \ \ \ \ include\_keys:\ set[str]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00553}00553\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00554}00554\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00555}00555\ )\ -\/>\ dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00556}00556\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ type\ hints\ for\ a\ function.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00557}00557\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00558}00558\ \textcolor{stringliteral}{\ \ \ \ This\ is\ similar\ to\ the\ \`{}typing.get\_type\_hints\`{}\ function,\ with\ a\ few\ differences:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00559}00559\ \textcolor{stringliteral}{\ \ \ \ -\/\ Support\ \`{}functools.partial\`{}\ by\ using\ the\ underlying\ \`{}func\`{}\ attribute.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00560}00560\ \textcolor{stringliteral}{\ \ \ \ -\/\ Do\ not\ wrap\ type\ annotation\ of\ a\ parameter\ with\ \`{}Optional\`{}\ if\ it\ has\ a\ default\ value\ of\ \`{}None\`{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00561}00561\ \textcolor{stringliteral}{\ \ \ \ \ \ (related\ bug:\ https://github.com/python/cpython/issues/90353,\ only\ fixed\ in\ 3.11+).}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00562}00562\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00563}00563\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(function,\ partial):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ annotations\ =\ function.func.\_\_annotations\_\_}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00566}00566\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ annotations\ =\ function.\_\_annotations\_\_}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00568}00568\ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00569}00569\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Some\ functions\ (e.g.\ builtins)\ don't\ have\ annotations:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00570}00570\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00571}00571\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00572}00572\ \ \ \ \ \textcolor{keywordflow}{if}\ globalns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ globalns\ =\ get\_module\_ns\_of(function)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00574}00574\ \ \ \ \ type\_params:\ tuple[Any,\ ...]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00575}00575\ \ \ \ \ \textcolor{keywordflow}{if}\ localns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00576}00576\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ localns\ was\ specified,\ it\ is\ assumed\ to\ already\ contain\ type\ params.\ This\ is\ because}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00577}00577\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Pydantic\ has\ more\ advanced\ logic\ to\ do\ so\ (see\ \`{}\_namespace\_utils.ns\_for\_function`).}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00578}00578\ \ \ \ \ \ \ \ \ type\_params\ =\ getattr(function,\ \textcolor{stringliteral}{'\_\_type\_params\_\_'},\ ())}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00579}00579\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00580}00580\ \ \ \ \ type\_hints\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00581}00581\ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ annotations.items():}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ include\_keys\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ name\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ include\_keys:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00583}00583\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00584}00584\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00585}00585\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ NoneType}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00586}00586\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(value,\ str):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a11c62f214b0382d7471ad77300288e40}{\_make\_forward\_ref}}(value)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00588}00588\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00589}00589\ \ \ \ \ \ \ \ \ type\_hints[name]\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{eval\_type\_backport}}(value,\ globalns,\ localns,\ type\_params)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00590}00590\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00591}00591\ \ \ \ \ \textcolor{keywordflow}{return}\ type\_hints}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00592}00592\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00593}00593\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00594}00594\ \textcolor{comment}{\#\ TODO\ use\ typing.ForwardRef\ directly\ when\ we\ stop\ supporting\ 3.9:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00595}00595\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 9,\ 8)\ \textcolor{keywordflow}{or}\ (3,\ 10)\ <=\ sys.version\_info\ <\ (3,\ 10,\ 1):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00596}00596\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00597}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ae593fb76bf8880044e563bf38b30d9b4}{00597}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a11c62f214b0382d7471ad77300288e40}{\_make\_forward\_ref}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00598}00598\ \ \ \ \ \ \ \ \ arg:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00599}00599\ \ \ \ \ \ \ \ \ is\_argument:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00600}00600\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00601}00601\ \ \ \ \ \ \ \ \ is\_class:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00602}00602\ \ \ \ \ )\ -\/>\ typing.ForwardRef:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00603}00603\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Wrapper\ for\ ForwardRef\ that\ accounts\ for\ the\ \`{}is\_class\`{}\ argument\ missing\ in\ older\ versions.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00604}00604\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ \`{}module\`{}\ argument\ is\ omitted\ as\ it\ breaks\ <3.9.8,\ =3.10.0\ and\ isn't\ used\ in\ the\ calls\ below.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00605}00605\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00606}00606\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ See\ https://github.com/python/cpython/pull/28560\ for\ some\ background.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00607}00607\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ backport\ happened\ on\ 3.9.8,\ see:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00608}00608\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ https://github.com/pydantic/pydantic/discussions/6244\#discussioncomment-\/6275458,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00609}00609\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ on\ 3.10.1\ for\ the\ 3.10\ branch,\ see:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00610}00610\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ https://github.com/pydantic/pydantic/issues/6912}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00611}00611\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00612}00612\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Implemented\ as\ EAFP\ with\ memory.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00613}00613\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00614}00614\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ typing.ForwardRef(arg,\ is\_argument)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportCallIssue]}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00615}00615\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00616}00616\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00617}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a11c62f214b0382d7471ad77300288e40}{00617}}\ \ \ \ \ \_make\_forward\_ref\ =\ typing.ForwardRef\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAssignmentType]}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00618}00618\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00619}00619\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00620}00620\ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 10):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00621}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_af9ba279b2237d6f69b9f7272595c98fb}{00621}}\ \ \ \ \ get\_type\_hints\ =\ typing.get\_type\_hints}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00622}00622\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00623}00623\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00624}00624\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00625}00625\ \textcolor{stringliteral}{\ \ \ \ For\ older\ versions\ of\ python,\ we\ have\ a\ custom\ implementation\ of\ \`{}get\_type\_hints\`{}\ which\ is\ a\ close\ as\ possible\ to}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00626}00626\ \textcolor{stringliteral}{\ \ \ \ the\ implementation\ in\ CPython\ 3.10.8.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00627}00627\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00628}00628\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00629}00629\ \ \ \ \ \textcolor{preprocessor}{@typing.no\_type\_check}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00630}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab2b3e02aeaab5f00fae0d35d7ddfebda}{00630}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_af9ba279b2237d6f69b9f7272595c98fb}{get\_type\_hints}}(\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00631}00631\ \ \ \ \ \ \ \ \ obj:\ Any,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00632}00632\ \ \ \ \ \ \ \ \ globalns:\ dict[str,\ Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00633}00633\ \ \ \ \ \ \ \ \ localns:\ dict[str,\ Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00634}00634\ \ \ \ \ \ \ \ \ include\_extras:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00635}00635\ \ \ \ \ )\ -\/>\ dict[str,\ Any]:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00636}00636\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Taken\ verbatim\ from\ python\ 3.10.8\ unchanged,\ except:}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00637}00637\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ type\ annotations\ of\ the\ function\ definition\ above.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00638}00638\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ prefixing\ \`{}typing.\`{}\ where\ appropriate}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00639}00639\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ Use\ \`{}\_make\_forward\_ref\`{}\ instead\ of\ \`{}typing.ForwardRef\`{}\ to\ handle\ the\ \`{}is\_class\`{}\ argument.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00640}00640\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00641}00641\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ https://github.com/python/cpython/blob/aaaf5174241496afca7ce4d4584570190ff972fe/Lib/typing.py\#L1773-\/L1875}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00642}00642\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00643}00643\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ DO\ NOT\ CHANGE\ THIS\ METHOD\ UNLESS\ ABSOLUTELY\ NECESSARY.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00644}00644\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ======================================================}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00645}00645\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00646}00646\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Return\ type\ hints\ for\ an\ object.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00647}00647\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00648}00648\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ is\ often\ the\ same\ as\ obj.\_\_annotations\_\_,\ but\ it\ handles}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00649}00649\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ forward\ references\ encoded\ as\ string\ literals,\ adds\ Optional[t]\ if\ a}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00650}00650\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ default\ value\ equal\ to\ None\ is\ set\ and\ recursively\ replaces\ all}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00651}00651\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 'Annotated[T,\ ...]'\ with\ 'T'\ (unless\ 'include\_extras=True').}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00652}00652\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00653}00653\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ argument\ may\ be\ a\ module,\ class,\ method,\ or\ function.\ The\ annotations}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00654}00654\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ are\ returned\ as\ a\ dictionary.\ For\ classes,\ annotations\ include\ also}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00655}00655\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ inherited\ members.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00656}00656\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00657}00657\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ TypeError\ is\ raised\ if\ the\ argument\ is\ not\ of\ a\ type\ that\ can\ contain}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00658}00658\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ annotations,\ and\ an\ empty\ dictionary\ is\ returned\ if\ no\ annotations\ are}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00659}00659\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ present.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00660}00660\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00661}00661\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ BEWARE\ -\/-\/\ the\ behavior\ of\ globalns\ and\ localns\ is\ counterintuitive}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00662}00662\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ (unless\ you\ are\ familiar\ with\ how\ eval()\ and\ exec()\ work).\ \ The}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00663}00663\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ search\ order\ is\ locals\ first,\ then\ globals.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00664}00664\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00665}00665\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ If\ no\ dict\ arguments\ are\ passed,\ an\ attempt\ is\ made\ to\ use\ the}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00666}00666\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ globals\ from\ obj\ (or\ the\ respective\ module's\ globals\ for\ classes),}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00667}00667\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ and\ these\ are\ also\ used\ as\ the\ locals.\ \ If\ the\ object\ does\ not\ appear}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00668}00668\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ to\ have\ globals,\ an\ empty\ dictionary\ is\ used.\ \ For\ classes,\ the\ search}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00669}00669\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ order\ is\ globals\ first\ then\ locals.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00670}00670\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00671}00671\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ If\ one\ dict\ argument\ is\ passed,\ it\ is\ used\ for\ both\ globals\ and}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00672}00672\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ locals.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00673}00673\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00674}00674\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/\ If\ two\ dict\ arguments\ are\ passed,\ they\ specify\ globals\ and}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00675}00675\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ locals,\ respectively.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00676}00676\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00677}00677\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ getattr(obj,\ \textcolor{stringliteral}{'\_\_no\_type\_check\_\_'},\ \textcolor{keywordtype}{None}):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00678}00678\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00679}00679\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Classes\ require\ a\ special\ treatment.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00680}00680\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(obj,\ type):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00681}00681\ \ \ \ \ \ \ \ \ \ \ \ \ hints\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00682}00682\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ reversed(obj.\_\_mro\_\_):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00683}00683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ globalns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00684}00684\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ base\_globals\ =\ getattr(sys.modules.get(base.\_\_module\_\_,\ \textcolor{keywordtype}{None}),\ \textcolor{stringliteral}{'\_\_dict\_\_'},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00685}00685\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00686}00686\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ base\_globals\ =\ globalns}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00687}00687\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ann\ =\ base.\_\_dict\_\_.get(\textcolor{stringliteral}{'\_\_annotations\_\_'},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00688}00688\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ann,\ types.GetSetDescriptorType):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00689}00689\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ann\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00690}00690\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ base\_locals\ =\ dict(vars(base))\ \textcolor{keywordflow}{if}\ localns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ localns}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00691}00691\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ localns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ globalns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00692}00692\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ surprising,\ but\ required.\ \ Before\ Python\ 3.10,}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00693}00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ get\_type\_hints\ only\ evaluated\ the\ globalns\ of}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00694}00694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ a\ class.\ \ To\ maintain\ backwards\ compatibility,\ we\ reverse}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00695}00695\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ globalns\ and\ localns\ order\ so\ that\ eval()\ looks\ into}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00696}00696\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ *base\_globals*\ first\ rather\ than\ *base\_locals*.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00697}00697\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ only\ affects\ ForwardRefs.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00698}00698\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ base\_globals,\ base\_locals\ =\ base\_locals,\ base\_globals}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00699}00699\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ ann.items():}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00700}00700\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00701}00701\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ type(\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00702}00702\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ str):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00703}00703\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a11c62f214b0382d7471ad77300288e40}{\_make\_forward\_ref}}(value,\ is\_argument=\textcolor{keyword}{False},\ is\_class=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00704}00704\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00705}00705\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{eval\_type\_backport}}(value,\ base\_globals,\ base\_locals)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00706}00706\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hints[name]\ =\ value}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00707}00707\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ include\_extras\ \textcolor{keywordflow}{and}\ hasattr(typing,\ \textcolor{stringliteral}{'\_strip\_annotations'}):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00708}00708\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00709}00709\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ k:\ typing.\_strip\_annotations(t)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00710}00710\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ k,\ t\ \textcolor{keywordflow}{in}\ hints.items()}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00711}00711\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00712}00712\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00713}00713\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ hints}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00714}00714\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00715}00715\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ globalns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00716}00716\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(obj,\ types.ModuleType):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ globalns\ =\ obj.\_\_dict\_\_}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00718}00718\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00719}00719\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nsobj\ =\ obj}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00720}00720\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Find\ globalns\ for\ the\ unwrapped\ object.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00721}00721\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ hasattr(nsobj,\ \textcolor{stringliteral}{'\_\_wrapped\_\_'}):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00722}00722\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nsobj\ =\ nsobj.\_\_wrapped\_\_}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00723}00723\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ globalns\ =\ getattr(nsobj,\ \textcolor{stringliteral}{'\_\_globals\_\_'},\ \{\})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00724}00724\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ localns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00725}00725\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ localns\ =\ globalns}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00726}00726\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ localns\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00727}00727\ \ \ \ \ \ \ \ \ \ \ \ \ localns\ =\ globalns}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00728}00728\ \ \ \ \ \ \ \ \ hints\ =\ getattr(obj,\ \textcolor{stringliteral}{'\_\_annotations\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00729}00729\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hints\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00730}00730\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Return\ empty\ annotations\ for\ something\ that\ \_could\_\ have\ them.}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00731}00731\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(obj,\ typing.\_allowed\_types):\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00732}00732\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00733}00733\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00734}00734\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'\{obj!r\}\ is\ not\ a\ module,\ class,\ method,\ or\ function.'})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00735}00735\ \ \ \ \ \ \ \ \ defaults\ =\ typing.\_get\_defaults(obj)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00736}00736\ \ \ \ \ \ \ \ \ hints\ =\ dict(hints)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00737}00737\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ hints.items():}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00738}00738\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00739}00739\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ type(\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00740}00740\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ str):}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00741}00741\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ class-\/level\ forward\ refs\ were\ handled\ above,\ this\ must\ be\ either}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00742}00742\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ a\ module-\/level\ annotation\ or\ a\ function\ argument\ annotation}}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00743}00743\ }
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00744}00744\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_a11c62f214b0382d7471ad77300288e40}{\_make\_forward\_ref}}(}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00745}00745\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value,}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00746}00746\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ is\_argument=\textcolor{keywordflow}{not}\ isinstance(obj,\ types.ModuleType),}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00747}00747\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ is\_class=\textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00748}00748\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00749}00749\ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__typing__extra_ab7290a6cd837bb3d1ec1a618507eaea4}{eval\_type\_backport}}(value,\ globalns,\ localns)}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00750}00750\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{in}\ defaults\ \textcolor{keywordflow}{and}\ defaults[name]\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00751}00751\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ value\ =\ typing.Optional[value]}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00752}00752\ \ \ \ \ \ \ \ \ \ \ \ \ hints[name]\ =\ value}
+\DoxyCodeLine{\Hypertarget{__typing__extra_8py_source_l00753}00753\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ hints\ \textcolor{keywordflow}{if}\ include\_extras\ \textcolor{keywordflow}{else}\ \{k:\ typing.\_strip\_annotations(t)\ \textcolor{keywordflow}{for}\ k,\ t\ \textcolor{keywordflow}{in}\ hints.items()\}\ \ \textcolor{comment}{\#\ type:\ ignore}}
+
+\end{DoxyCode}

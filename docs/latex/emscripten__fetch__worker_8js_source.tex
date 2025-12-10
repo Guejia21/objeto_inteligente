@@ -1,0 +1,116 @@
+\doxysection{emscripten\+\_\+fetch\+\_\+worker.\+js}
+\hypertarget{emscripten__fetch__worker_8js_source}{}\label{emscripten__fetch__worker_8js_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/urllib3/contrib/emscripten/emscripten\_fetch\_worker.js@{micro\_gestion\_objetos/venv/Lib/site-\/packages/urllib3/contrib/emscripten/emscripten\_fetch\_worker.js}}
+\mbox{\hyperlink{emscripten__fetch__worker_8js}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00001}00001\ let\ Status\ =\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00002}00002\ \ \ SUCCESS\_HEADER:\ -\/1,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00003}00003\ \ \ SUCCESS\_EOF:\ -\/2,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00004}00004\ \ \ ERROR\_TIMEOUT:\ -\/3,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00005}00005\ \ \ ERROR\_EXCEPTION:\ -\/4,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00006}00006\ \};}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00008}00008\ let\ connections\ =\ \{\};}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00009}00009\ let\ nextConnectionID\ =\ 1;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00010}00010\ const\ encoder\ =\ new\ TextEncoder();}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00012}00012\ self.addEventListener("{}message"{},\ async\ function\ (event)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00013}00013\ \ \ if\ (event.data.close)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00014}00014\ \ \ \ \ let\ connectionID\ =\ event.data.close;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00015}00015\ \ \ \ \ delete\ connections[connectionID];}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00016}00016\ \ \ \ \ return;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00017}00017\ \ \ \}\ else\ if\ (event.data.getMore)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00018}00018\ \ \ \ \ let\ connectionID\ =\ event.data.getMore;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00019}00019\ \ \ \ \ let\ \{\ curOffset,\ value,\ reader,\ intBuffer,\ byteBuffer\ \}\ =}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00020}00020\ \ \ \ \ \ \ connections[connectionID];}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00021}00021\ \ \ \ \ //\ if\ we\ still\ have\ some\ in\ buffer,\ then\ just\ send\ it\ back\ straight\ away}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00022}00022\ \ \ \ \ if\ (!value\ ||\ curOffset\ >=\ value.length)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00023}00023\ \ \ \ \ \ \ //\ read\ another\ buffer\ if\ required}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00024}00024\ \ \ \ \ \ \ try\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00025}00025\ \ \ \ \ \ \ \ \ let\ readResponse\ =\ await\ reader.read();}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00027}00027\ \ \ \ \ \ \ \ \ if\ (readResponse.done)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ //\ read\ everything\ -\/\ clear\ connection\ and\ return}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ delete\ connections[connectionID];}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ Atomics.store(intBuffer,\ 0,\ Status.SUCCESS\_EOF);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ Atomics.notify(intBuffer,\ 0);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ //\ finished\ reading\ successfully}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ //\ return\ from\ event\ handler}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ return;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00035}00035\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00036}00036\ \ \ \ \ \ \ \ \ curOffset\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00037}00037\ \ \ \ \ \ \ \ \ connections[connectionID].value\ =\ readResponse.value;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00038}00038\ \ \ \ \ \ \ \ \ value\ =\ readResponse.value;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00039}00039\ \ \ \ \ \ \ \}\ catch\ (error)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00040}00040\ \ \ \ \ \ \ \ \ console.log("{}Request\ exception:"{},\ error);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00041}00041\ \ \ \ \ \ \ \ \ let\ errorBytes\ =\ encoder.encode(error.message);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00042}00042\ \ \ \ \ \ \ \ \ let\ written\ =\ errorBytes.length;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00043}00043\ \ \ \ \ \ \ \ \ byteBuffer.set(errorBytes);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00044}00044\ \ \ \ \ \ \ \ \ intBuffer[1]\ =\ written;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00045}00045\ \ \ \ \ \ \ \ \ Atomics.store(intBuffer,\ 0,\ Status.ERROR\_EXCEPTION);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00046}00046\ \ \ \ \ \ \ \ \ Atomics.notify(intBuffer,\ 0);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00047}00047\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00048}00048\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00050}00050\ \ \ \ \ //\ send\ as\ much\ buffer\ as\ we\ can}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00051}00051\ \ \ \ \ let\ curLen\ =\ value.length\ -\/\ curOffset;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00052}00052\ \ \ \ \ if\ (curLen\ >\ byteBuffer.length)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00053}00053\ \ \ \ \ \ \ curLen\ =\ byteBuffer.length;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00054}00054\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00055}00055\ \ \ \ \ byteBuffer.set(value.subarray(curOffset,\ curOffset\ +\ curLen),\ 0);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00057}00057\ \ \ \ \ Atomics.store(intBuffer,\ 0,\ curLen);\ //\ store\ current\ length\ in\ bytes}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00058}00058\ \ \ \ \ Atomics.notify(intBuffer,\ 0);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00059}00059\ \ \ \ \ curOffset\ +=\ curLen;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00060}00060\ \ \ \ \ connections[connectionID].curOffset\ =\ curOffset;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00062}00062\ \ \ \ \ return;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00063}00063\ \ \ \}\ else\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00064}00064\ \ \ \ \ //\ start\ fetch}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00065}00065\ \ \ \ \ let\ connectionID\ =\ nextConnectionID;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00066}00066\ \ \ \ \ nextConnectionID\ +=\ 1;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00067}00067\ \ \ \ \ const\ intBuffer\ =\ new\ Int32Array(event.data.buffer);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00068}00068\ \ \ \ \ const\ byteBuffer\ =\ new\ Uint8Array(event.data.buffer,\ 8);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00069}00069\ \ \ \ \ try\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00070}00070\ \ \ \ \ \ \ const\ response\ =\ await\ fetch(event.data.url,\ event.data.fetchParams);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00071}00071\ \ \ \ \ \ \ //\ return\ the\ headers\ first\ via\ textencoder}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00072}00072\ \ \ \ \ \ \ var\ headers\ =\ [];}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00073}00073\ \ \ \ \ \ \ for\ (const\ pair\ of\ response.headers.entries())\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00074}00074\ \ \ \ \ \ \ \ \ headers.push([pair[0],\ pair[1]]);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00075}00075\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00076}00076\ \ \ \ \ \ \ let\ headerObj\ =\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00077}00077\ \ \ \ \ \ \ \ \ headers:\ headers,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00078}00078\ \ \ \ \ \ \ \ \ status:\ response.status,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00079}00079\ \ \ \ \ \ \ \ \ connectionID,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00080}00080\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00081}00081\ \ \ \ \ \ \ const\ headerText\ =\ JSON.stringify(headerObj);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00082}00082\ \ \ \ \ \ \ let\ headerBytes\ =\ encoder.encode(headerText);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00083}00083\ \ \ \ \ \ \ let\ written\ =\ headerBytes.length;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00084}00084\ \ \ \ \ \ \ byteBuffer.set(headerBytes);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00085}00085\ \ \ \ \ \ \ intBuffer[1]\ =\ written;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00086}00086\ \ \ \ \ \ \ //\ make\ a\ connection}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00087}00087\ \ \ \ \ \ \ connections[connectionID]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00088}00088\ \ \ \ \ \ \ \ \ reader:\ response.body.getReader(),}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00089}00089\ \ \ \ \ \ \ \ \ intBuffer:\ intBuffer,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00090}00090\ \ \ \ \ \ \ \ \ byteBuffer:\ byteBuffer,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00091}00091\ \ \ \ \ \ \ \ \ value:\ undefined,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00092}00092\ \ \ \ \ \ \ \ \ curOffset:\ 0,}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00093}00093\ \ \ \ \ \ \ \};}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00094}00094\ \ \ \ \ \ \ //\ set\ header\ ready}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00095}00095\ \ \ \ \ \ \ Atomics.store(intBuffer,\ 0,\ Status.SUCCESS\_HEADER);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00096}00096\ \ \ \ \ \ \ Atomics.notify(intBuffer,\ 0);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00097}00097\ \ \ \ \ \ \ //\ all\ fetching\ after\ this\ goes\ through\ a\ new\ postmessage\ call\ with\ getMore}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00098}00098\ \ \ \ \ \ \ //\ this\ allows\ for\ parallel\ requests}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00099}00099\ \ \ \ \ \}\ catch\ (error)\ \{}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00100}00100\ \ \ \ \ \ \ console.log("{}Request\ exception:"{},\ error);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00101}00101\ \ \ \ \ \ \ let\ errorBytes\ =\ encoder.encode(error.message);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00102}00102\ \ \ \ \ \ \ let\ written\ =\ errorBytes.length;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00103}00103\ \ \ \ \ \ \ byteBuffer.set(errorBytes);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00104}00104\ \ \ \ \ \ \ intBuffer[1]\ =\ written;}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00105}00105\ \ \ \ \ \ \ Atomics.store(intBuffer,\ 0,\ Status.ERROR\_EXCEPTION);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00106}00106\ \ \ \ \ \ \ Atomics.notify(intBuffer,\ 0);}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00107}00107\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00108}00108\ \ \ \}}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00109}00109\ \});}
+\DoxyCodeLine{\Hypertarget{emscripten__fetch__worker_8js_source_l00110}00110\ self.postMessage(\{\ inited:\ true\ \});}
+
+\end{DoxyCode}

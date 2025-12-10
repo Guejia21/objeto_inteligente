@@ -1,0 +1,187 @@
+\doxysection{personalizacion\+\_\+controller.\+py}
+\hypertarget{personalizacion__controller_8py_source}{}\label{personalizacion__controller_8py_source}\index{microservicio\_personalizacion/app/application/controllers/personalizacion\_controller.py@{microservicio\_personalizacion/app/application/controllers/personalizacion\_controller.py}}
+\mbox{\hyperlink{personalizacion__controller_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00001}\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00002}00002\ \textcolor{stringliteral}{\ \ \ \ @file\ personalizacion\_controller.py}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00003}00003\ \textcolor{stringliteral}{\ \ \ \ @brief\ Controlador\ REST\ para\ gestión\ de\ preferencias\ e\ interacciones\ de\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00004}00004\ \textcolor{stringliteral}{\ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00005}00005\ \textcolor{stringliteral}{\ \ \ \ Proporciona\ endpoints\ para:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00006}00006\ \textcolor{stringliteral}{\ \ \ \ -\/\ Crear\ preferencias/contratos\ ECA\ para\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00007}00007\ \textcolor{stringliteral}{\ \ \ \ -\/\ Recibir\ y\ cargar\ ontologías\ de\ perfil\ de\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00008}00008\ \textcolor{stringliteral}{\ \ \ \ -\/\ Notificar\ salida\ de\ usuario\ (desactivar\ ECAs)}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00009}00009\ \textcolor{stringliteral}{\ \ \ \ -\/\ Registrar\ interacciones\ usuario-\/objeto}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00010}00010\ \textcolor{stringliteral}{\ \ \ \ -\/\ Health\ check\ del\ servicio}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00011}00011\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00012}00012\ \textcolor{stringliteral}{\ \ \ \ @note\ El\ microservicio\ integra\ con\ micro\_gestion\_conocimiento\ y\ micro\_automatizacion.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00013}00013\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00014}00014\ \textcolor{stringliteral}{\ \ \ \ @author\ \ NexTech}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00015}00015\ \textcolor{stringliteral}{\ \ \ \ @version\ 1.0}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00016}00016\ \textcolor{stringliteral}{\ \ \ \ @date\ 2025-\/01-\/10}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00017}00017\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00018}00018\ \textcolor{stringliteral}{\ \ \ \ @see\ PersonalizacionService\ Para\ lógica\ de\ negocio}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00019}00019\ \textcolor{stringliteral}{\ \ \ \ @see\ micro\_gestion\_conocimiento\ Para\ ontologías}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00020}00020\ \textcolor{stringliteral}{\ \ \ \ @see\ micro\_automatizacion\ Para\ ECAs}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00021}00021\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00023}00023\ \textcolor{keyword}{from}\ fastapi\ \textcolor{keyword}{import}\ APIRouter,\ Depends,\ HTTPException,\ Query,\ File,\ Form,\ UploadFile}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00024}00024\ \textcolor{keyword}{import}\ json}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00025}00025\ \textcolor{keyword}{from}\ application.dtos.request\_dtos\ \textcolor{keyword}{import}\ CrearPreferenciaRequest,\ MakeContractRequest,\ RegistroInteraccionDTO}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00026}00026\ \textcolor{keyword}{from}\ domain.services.personalizacion\_service\ \textcolor{keyword}{import}\ PersonalizacionService}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00027}00027\ \textcolor{keyword}{from}\ infrastructure.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00028}00028\ \textcolor{keyword}{from}\ deps\ \textcolor{keyword}{import}\ get\_personalizacion\_service}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00032}\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_a154e3756c89ab16af42620612f3de040}{00032}}\ router\ =\ \mbox{\hyperlink{classfastapi_1_1routing_1_1_a_p_i_router}{APIRouter}}(prefix=\textcolor{stringliteral}{"{}/personalizacion"{}},\ tags=[\textcolor{stringliteral}{"{}Gestión\ de\ Personalización\ de\ Usuario"{}}])}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00033}00033\ \textcolor{stringliteral}{"{}"{}"{}@var\ router\ Router\ principal\ para\ endpoints\ de\ personalización."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00034}00034\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00035}00035\ \textcolor{preprocessor}{@router.post("{}/CrearPreferencia"{})}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00036}\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_a892611f9f49670f35cdbd570095b6960}{00036}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_a892611f9f49670f35cdbd570095b6960}{crear\_preferencia}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00037}00037\ \ \ \ \ data:MakeContractRequest,}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00038}00038\ \ \ \ \ personalizacion\_service:\ PersonalizacionService\ =\ Depends(get\_personalizacion\_service)}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00039}00039\ ):}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00040}00040\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00041}00041\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @brief\ Crea\ una\ nueva\ preferencia/contrato\ ECA\ para\ el\ usuario\ actual.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00042}00042\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ data\ DTO\ MakeContractRequest\ con\ definición\ del\ contrato\ ECA.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ personalizacion\_service\ Servicio\ de\ personalización\ (inyectado).}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @return\ JSONResponse\ con\ status\ 200\ si\ exitoso,\ o\ error\ 400/500.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @exception\ HTTPException\ Si\ email\ no\ coincide\ o\ hay\ error\ en\ micro\_automatizacion.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Crea\ una\ regla\ ECA\ (contrato)\ que\ automatiza\ comportamientos\ del\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00052}00052\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00053}00053\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Flujo:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00054}00054\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 1.\ Verifica\ que\ el\ email\ del\ DTO\ coincida\ con\ el\ usuario\ actual}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00055}00055\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 2.\ Envía\ solicitud\ al\ microservicio\ micro\_automatizacion}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00056}00056\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 3.\ Registra\ la\ preferencia\ en\ ontología\ de\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00057}00057\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00058}00058\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @see\ PersonalizacionService.crear\_preferencia()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00059}00059\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @see\ micro\_automatizacion\ Para\ implementación\ de\ ECAs}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00060}00060\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00061}00061\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ await\ personalizacion\_service.crear\_preferencia(data)}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00063}00063\ \ \ \ \ \textcolor{keywordflow}{except}\ HTTPException:}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ inesperado\ en\ CrearPreferencia:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classfastapi_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=500,\ detail=\textcolor{stringliteral}{"{}Error\ interno\ del\ servidor"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00070}00070\ \textcolor{preprocessor}{@router.post("{}/RecibirOntologia"{})}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00071}\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_a48b29fa9bd067de558e7e52065de6457}{00071}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_a48b29fa9bd067de558e7e52065de6457}{recibir\_ontologia}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00072}00072\ \ \ \ \ file:\ UploadFile\ =\ File(...,\ description=\textcolor{stringliteral}{"{}Archivo\ de\ ontología\ (.owl)"{}}),}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00073}00073\ \ \ \ \ nombre:\ str\ =\ Form(...,\ description=\textcolor{stringliteral}{"{}Nombre\ de\ la\ ontología"{}}),}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00074}00074\ \ \ \ \ ipCoordinador:\ str\ =\ Form(...,\ description=\textcolor{stringliteral}{"{}IP\ del\ coordinador"{}}),}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00075}00075\ \ \ \ \ personalizacion\_service:\ PersonalizacionService\ =\ Depends(get\_personalizacion\_service)}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00076}00076\ ):}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00077}00077\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @brief\ Recibe\ y\ carga\ ontología\ de\ perfil\ de\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ file\ Archivo\ .owl\ con\ ontología\ del\ usuario.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ nombre\ Identificador\ de\ la\ ontología.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ ipCoordinador\ IP\ del\ coordinador\ (para\ tracking/notificación).}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ personalizacion\_service\ Servicio\ de\ personalización.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00085}00085\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @return\ JSONResponse\ con\ status\ 200\ si\ exitoso,\ o\ error\ 400/500.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @exception\ HTTPException\ Si\ hay\ error\ en\ procesamiento\ o\ envío.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Endpoint\ de\ integración:\ recibe\ ontología\ del\ coordinador\ y\ la\ envía}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ al\ microservicio\ micro\_gestion\_conocimiento\ para\ población.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Flujo:}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 1.\ Valida\ que\ el\ archivo\ sea\ .owl}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 2.\ Envía\ al\ microservicio\ de\ ontologías}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 3.\ Guarda\ IP\ del\ coordinador\ para\ tracking}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 4.\ Activa\ ECAs\ del\ usuario}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @see\ PersonalizacionService.recibir\_ontologia()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @see\ micro\_gestion\_conocimiento\ Para\ carga\ de\ ontologías}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00102}00102\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ await\ personalizacion\_service.recibir\_ontologia(file,nombre,ipCoordinador)\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}\ Error\ procesando\ ontología:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classfastapi_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=500,\ detail=\textcolor{stringliteral}{"{}Error\ interno\ del\ servidor"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00108}00108\ \textcolor{preprocessor}{@router.post("{}/NotificarSalidaDeUsuario"{})}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00109}\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_a429b450a48f045b0b0143521a67ae7af}{00109}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_a429b450a48f045b0b0143521a67ae7af}{notificar\_salida\_usuario}}(\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00110}00110\ \ \ \ \ personalizacion\_service:\ PersonalizacionService\ =\ Depends(get\_personalizacion\_service)}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00111}00111\ ):}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00112}00112\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @brief\ Notifica\ la\ salida\ del\ usuario\ y\ desactiva\ sus\ ECAs.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00114}00114\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00115}00115\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ personalizacion\_service\ Servicio\ de\ personalización.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00116}00116\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00117}00117\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @return\ JSONResponse\ con\ status\ 200\ si\ exitoso,\ o\ error\ 500.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00119}00119\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @exception\ HTTPException\ Si\ hay\ error\ coordinando\ desactivación.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00121}00121\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Implementa\ HU-\/2\ (Historia\ de\ Usuario\ 2):\ cuando\ el\ usuario\ se\ desconecta,}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ desactiva\ todas\ sus\ reglas\ ECAs\ en\ el\ microservicio\ de\ automatización.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00125}00125\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @note\ Operación\ de\ coordinación\ inter-\/servicios.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00126}00126\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00127}00127\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @see\ PersonalizacionService.desactivarEcasUsuarioActual()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @see\ micro\_automatizacion\ Para\ desactivación\ de\ ECAs}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00129}00129\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00130}00130\ \ \ \ \ \textcolor{keywordflow}{try}:\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ personalizacion\_service.desactivarEcasUsuarioActual()}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00132}00132\ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}\ Error\ notificando\ salida\ de\ usuario:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classfastapi_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=500,\ detail=\textcolor{stringliteral}{"{}Error\ interno\ del\ servidor"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00136}00136\ \textcolor{preprocessor}{@router.post("{}/RegistroInteraccionUsuarioObjeto"{})}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00137}\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_aeb80e12c70c9905b4a7a3b87ee505bd4}{00137}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_aeb80e12c70c9905b4a7a3b87ee505bd4}{registro\_interaccion\_usuario\_objeto}}(data:\ RegistroInteraccionDTO,\ personalizacion\_service:\ PersonalizacionService\ =\ Depends(get\_personalizacion\_service)):}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00138}00138\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00139}00139\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @brief\ Registra\ una\ interacción\ entre\ usuario\ y\ objeto\ inteligente.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00140}00140\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ data\ DTO\ RegistroInteraccionDTO\ con\ evento\ de\ interacción.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ personalizacion\_service\ Servicio\ de\ personalización.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00143}00143\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00144}00144\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @return\ JSONResponse\ con\ status\ 200\ si\ exitoso,\ o\ error\ 500.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00145}00145\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00146}00146\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @exception\ HTTPException\ Si\ hay\ error\ al\ registrar\ interacción.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00147}00147\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00148}00148\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Registra\ eventos\ de\ interacción\ (p.\ ej.\ usuario\ accede\ a\ objeto,}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ modifica\ preferencias,\ etc.)\ para\ crear\ historial\ y\ base\ para}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ personalización\ e\ inferencia\ de\ patrones.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00153}00153\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @see\ PersonalizacionService.registroInteraccionUsuarioObjeto()}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00154}00154\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00155}00155\ \ \ \ \ \textcolor{keywordflow}{try}:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ personalizacion\_service.registroInteraccionUsuarioObjeto(data)\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00157}00157\ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ registrando\ interacción:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classfastapi_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=500,\ detail=\textcolor{stringliteral}{"{}Error\ interno\ del\ servidor"{}})}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00161}00161\ \textcolor{preprocessor}{@router.get("{}/health"{})}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00162}\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_aa601f56d2df7723a033d1ff86144e976}{00162}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceapp_1_1application_1_1controllers_1_1personalizacion__controller_aa601f56d2df7723a033d1ff86144e976}{health\_check}}(}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00163}00163\ \ \ \ \ personalizacion\_service:\ PersonalizacionService\ =\ Depends(get\_personalizacion\_service)}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00164}00164\ ):}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00165}00165\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00166}00166\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @brief\ Health\ check\ /\ status\ del\ microservicio.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00167}00167\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00168}00168\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @param\ personalizacion\_service\ Servicio\ de\ personalización.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00169}00169\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00170}00170\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @return\ JSON\ con\ status:\ 'healthy'\ o\ 'degraded',\ nombre\ y\ versión\ del\ servicio.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00171}00171\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00172}00172\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ @details}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Endpoint\ para\ monitoreo\ y\ orquestación\ de\ contenedores.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00174}00174\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Verifica\ que\ el\ servicio\ esté\ disponible.}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00175}00175\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00176}00176\ \ \ \ \ status\ =\ \textcolor{stringliteral}{"{}healthy"{}}\ \textcolor{keywordflow}{if}\ personalizacion\_service\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}degraded"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00177}00177\ \ \ \ \ \textcolor{keywordflow}{return}\ \{}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}status"{}}:\ status,}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}service"{}}:\ \textcolor{stringliteral}{"{}microservicio\_personalizacion"{}},}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}version"{}}:\ \textcolor{stringliteral}{"{}1.0.0"{}}}
+\DoxyCodeLine{\Hypertarget{personalizacion__controller_8py_source_l00181}00181\ \ \ \ \ \}}
+
+\end{DoxyCode}

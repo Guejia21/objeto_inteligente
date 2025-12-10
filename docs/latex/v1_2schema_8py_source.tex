@@ -1,0 +1,1169 @@
+\doxysection{schema.\+py}
+\hypertarget{v1_2schema_8py_source}{}\label{v1_2schema_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/schema.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/schema.py}}
+\mbox{\hyperlink{v1_2schema_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema}{00001}}\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00002}00002\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00003}00003\ \textcolor{keyword}{from}\ collections\ \textcolor{keyword}{import}\ defaultdict}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00004}00004\ \textcolor{keyword}{from}\ dataclasses\ \textcolor{keyword}{import}\ is\_dataclass}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00005}00005\ \textcolor{keyword}{from}\ datetime\ \textcolor{keyword}{import}\ date,\ datetime,\ time,\ timedelta}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00006}00006\ \textcolor{keyword}{from}\ decimal\ \textcolor{keyword}{import}\ Decimal}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00007}00007\ \textcolor{keyword}{from}\ enum\ \textcolor{keyword}{import}\ Enum}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00008}00008\ \textcolor{keyword}{from}\ ipaddress\ \textcolor{keyword}{import}\ IPv4Address,\ IPv4Interface,\ IPv4Network,\ IPv6Address,\ IPv6Interface,\ IPv6Network}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00009}00009\ \textcolor{keyword}{from}\ pathlib\ \textcolor{keyword}{import}\ Path}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00010}00010\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00011}00011\ \ \ \ \ TYPE\_CHECKING,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00012}00012\ \ \ \ \ Any,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00013}00013\ \ \ \ \ Callable,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00014}00014\ \ \ \ \ Dict,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00015}00015\ \ \ \ \ ForwardRef,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00016}00016\ \ \ \ \ FrozenSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00017}00017\ \ \ \ \ Generic,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00018}00018\ \ \ \ \ Iterable,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00019}00019\ \ \ \ \ List,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00020}00020\ \ \ \ \ Optional,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00021}00021\ \ \ \ \ Pattern,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00022}00022\ \ \ \ \ Sequence,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00023}00023\ \ \ \ \ Set,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00024}00024\ \ \ \ \ Tuple,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00025}00025\ \ \ \ \ Type,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00026}00026\ \ \ \ \ TypeVar,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00027}00027\ \ \ \ \ Union,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00028}00028\ \ \ \ \ cast,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00029}00029\ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00030}00030\ \textcolor{keyword}{from}\ uuid\ \textcolor{keyword}{import}\ UUID}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00032}00032\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ Annotated,\ Literal}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00034}00034\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1fields}{pydantic.v1.fields}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00035}00035\ \ \ \ \ MAPPING\_LIKE\_SHAPES,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00036}00036\ \ \ \ \ SHAPE\_DEQUE,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00037}00037\ \ \ \ \ SHAPE\_FROZENSET,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00038}00038\ \ \ \ \ SHAPE\_GENERIC,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00039}00039\ \ \ \ \ SHAPE\_ITERABLE,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00040}00040\ \ \ \ \ SHAPE\_LIST,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00041}00041\ \ \ \ \ SHAPE\_SEQUENCE,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00042}00042\ \ \ \ \ SHAPE\_SET,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00043}00043\ \ \ \ \ SHAPE\_SINGLETON,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00044}00044\ \ \ \ \ SHAPE\_TUPLE,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00045}00045\ \ \ \ \ SHAPE\_TUPLE\_ELLIPSIS,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00046}00046\ \ \ \ \ FieldInfo,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00047}00047\ \ \ \ \ ModelField,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00048}00048\ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00049}00049\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1json}{pydantic.v1.json}}\ \textcolor{keyword}{import}\ pydantic\_encoder}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00050}00050\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1networks}{pydantic.v1.networks}}\ \textcolor{keyword}{import}\ AnyUrl,\ EmailStr}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00051}00051\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1types}{pydantic.v1.types}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00052}00052\ \ \ \ \ ConstrainedDecimal,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00053}00053\ \ \ \ \ ConstrainedFloat,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00054}00054\ \ \ \ \ ConstrainedFrozenSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00055}00055\ \ \ \ \ ConstrainedInt,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00056}00056\ \ \ \ \ ConstrainedList,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00057}00057\ \ \ \ \ ConstrainedSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00058}00058\ \ \ \ \ ConstrainedStr,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00059}00059\ \ \ \ \ SecretBytes,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00060}00060\ \ \ \ \ SecretStr,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00061}00061\ \ \ \ \ StrictBytes,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00062}00062\ \ \ \ \ StrictStr,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00063}00063\ \ \ \ \ conbytes,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00064}00064\ \ \ \ \ condecimal,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00065}00065\ \ \ \ \ confloat,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00066}00066\ \ \ \ \ confrozenset,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00067}00067\ \ \ \ \ conint,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00068}00068\ \ \ \ \ conlist,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00069}00069\ \ \ \ \ conset,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00070}00070\ \ \ \ \ constr,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00071}00071\ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00072}00072\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing}{pydantic.v1.typing}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00073}00073\ \ \ \ \ all\_literal\_values,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00074}00074\ \ \ \ \ get\_args,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00075}00075\ \ \ \ \ get\_origin,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00076}00076\ \ \ \ \ get\_sub\_types,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00077}00077\ \ \ \ \ is\_callable\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00078}00078\ \ \ \ \ is\_literal\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00079}00079\ \ \ \ \ is\_namedtuple,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00080}00080\ \ \ \ \ is\_none\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00081}00081\ \ \ \ \ is\_union,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00082}00082\ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00083}00083\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1utils}{pydantic.v1.utils}}\ \textcolor{keyword}{import}\ ROOT\_KEY,\ get\_model,\ lenient\_issubclass}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00085}00085\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00086}00086\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1dataclasses}{pydantic.v1.dataclasses}}\ \textcolor{keyword}{import}\ Dataclass}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00087}00087\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1main}{pydantic.v1.main}}\ \textcolor{keyword}{import}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00089}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a77d416b7a1505e3c4348cdc3108a9111}{00089}}\ default\_prefix\ =\ \textcolor{stringliteral}{'\#/definitions/'}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00090}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a45300e8762ca77ca25d632bddfe65d17}{00090}}\ default\_ref\_template\ =\ \textcolor{stringliteral}{'\#/definitions/\{model\}'}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00092}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a38cf70ba6a92a9a11519c3b391531562}{00092}}\ TypeModelOrEnum\ =\ Union[Type[\textcolor{stringliteral}{'BaseModel'}],\ Type[Enum]]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00093}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a4e09ccd41882dceec2697c5ec244abd4}{00093}}\ TypeModelSet\ =\ Set[TypeModelOrEnum]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00096}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ae5c4de23840082adfe3871779fc1bc05}{00096}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ae5c4de23840082adfe3871779fc1bc05}{\_apply\_modify\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00097}00097\ \ \ \ \ modify\_schema:\ Callable[...,\ \textcolor{keywordtype}{None}],\ field:\ Optional[ModelField],\ field\_schema:\ Dict[str,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00098}00098\ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00099}00099\ \ \ \ \ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ signature}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00101}00101\ \ \ \ \ sig\ =\ signature(modify\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00102}00102\ \ \ \ \ args\ =\ set(sig.parameters.keys())}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00103}00103\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'field'}\ \textcolor{keywordflow}{in}\ args\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{'kwargs'}\ \textcolor{keywordflow}{in}\ args:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ modify\_schema(field\_schema,\ field=field)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00105}00105\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ modify\_schema(field\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00109}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af1605d68b9d7ea9b424a8c1d813e0d4b}{00109}}\ \textcolor{keyword}{def\ }schema(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00110}00110\ \ \ \ \ models:\ Sequence[Union[Type[\textcolor{stringliteral}{'BaseModel'}],\ Type[\textcolor{stringliteral}{'Dataclass'}]]],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00111}00111\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00112}00112\ \ \ \ \ by\_alias:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00113}00113\ \ \ \ \ title:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00114}00114\ \ \ \ \ description:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00115}00115\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00116}00116\ \ \ \ \ ref\_template:\ str\ =\ default\_ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00117}00117\ )\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00118}00118\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00119}00119\ \textcolor{stringliteral}{\ \ \ \ Process\ a\ list\ of\ models\ and\ generate\ a\ single\ JSON\ Schema\ with\ all\ of\ them\ defined\ in\ the\ \`{}\`{}definitions\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ top-\/level\ JSON\ key,\ including\ their\ sub-\/models.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00121}00121\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ :param\ models:\ a\ list\ of\ models\ to\ include\ in\ the\ generated\ JSON\ Schema}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ :param\ by\_alias:\ generate\ the\ schemas\ using\ the\ aliases\ defined,\ if\ any}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ :param\ title:\ title\ for\ the\ generated\ schema\ that\ includes\ the\ definitions}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00125}00125\ \textcolor{stringliteral}{\ \ \ \ :param\ description:\ description\ for\ the\ generated\ schema}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00126}00126\ \textcolor{stringliteral}{\ \ \ \ :param\ ref\_prefix:\ the\ JSON\ Pointer\ prefix\ for\ schema\ references\ with\ \`{}\`{}\$ref\`{}\`{},\ if\ None,\ will\ be\ set\ to\ the}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00127}00127\ \textcolor{stringliteral}{\ \ \ \ \ \ default\ of\ \`{}\`{}\#/definitions/\`{}\`{}.\ Update\ it\ if\ you\ want\ the\ schemas\ to\ reference\ the\ definitions\ somewhere}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ \ \ else,\ e.g.\ for\ OpenAPI\ use\ \`{}\`{}\#/components/schemas/\`{}\`{}.\ The\ resulting\ generated\ schemas\ will\ still\ be\ at\ the}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00129}00129\ \textcolor{stringliteral}{\ \ \ \ \ \ top-\/level\ key\ \`{}\`{}definitions\`{}\`{},\ so\ you\ can\ extract\ them\ from\ there.\ But\ all\ the\ references\ will\ have\ the\ set}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00130}00130\ \textcolor{stringliteral}{\ \ \ \ \ \ prefix.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00131}00131\ \textcolor{stringliteral}{\ \ \ \ :param\ ref\_template:\ Use\ a\ \`{}\`{}string.format()\`{}\`{}\ template\ for\ \`{}\`{}\$ref\`{}\`{}\ instead\ of\ a\ prefix.\ This\ can\ be\ useful}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00132}00132\ \textcolor{stringliteral}{\ \ \ \ \ \ for\ references\ that\ cannot\ be\ represented\ by\ \`{}\`{}ref\_prefix\`{}\`{}\ such\ as\ a\ definition\ stored\ in\ another\ file.\ For}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00133}00133\ \textcolor{stringliteral}{\ \ \ \ \ \ a\ sibling\ json\ file\ in\ a\ \`{}\`{}/schemas\`{}\`{}\ directory\ use\ \`{}\`{}"{}/schemas/\$\{model\}.json\#"{}\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00134}00134\ \textcolor{stringliteral}{\ \ \ \ :return:\ dict\ with\ the\ JSON\ Schema\ with\ a\ \`{}\`{}definitions\`{}\`{}\ top-\/level\ key\ including\ the\ schema\ definitions\ for}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00135}00135\ \textcolor{stringliteral}{\ \ \ \ \ \ the\ models\ and\ sub-\/models\ passed\ in\ \`{}\`{}models\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00136}00136\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00137}00137\ \ \ \ \ clean\_models\ =\ [get\_model(model)\ \textcolor{keywordflow}{for}\ model\ \textcolor{keywordflow}{in}\ models]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00138}00138\ \ \ \ \ flat\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_afa7208a83530a8ec66437d5890b8f814}{get\_flat\_models\_from\_models}}(clean\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00139}00139\ \ \ \ \ model\_name\_map\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_abb46ad06afd31a630a2dd723a7bff0e3}{get\_model\_name\_map}}(flat\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00140}00140\ \ \ \ \ definitions\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00141}00141\ \ \ \ \ output\_schema:\ Dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00142}00142\ \ \ \ \ \textcolor{keywordflow}{if}\ title:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ output\_schema[\textcolor{stringliteral}{'title'}]\ =\ title}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00144}00144\ \ \ \ \ \textcolor{keywordflow}{if}\ description:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ output\_schema[\textcolor{stringliteral}{'description'}]\ =\ description}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00146}00146\ \ \ \ \ \textcolor{keywordflow}{for}\ model\ \textcolor{keywordflow}{in}\ clean\_models:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ m\_schema,\ m\_definitions,\ m\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af35f332620e82b46dc3716d336931da2}{model\_process\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ model,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ definitions.update(m\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ model\_name\ =\ model\_name\_map[model]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ definitions[model\_name]\ =\ m\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00157}00157\ \ \ \ \ \textcolor{keywordflow}{if}\ definitions:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ output\_schema[\textcolor{stringliteral}{'definitions'}]\ =\ definitions}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00159}00159\ \ \ \ \ \textcolor{keywordflow}{return}\ output\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00162}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ada8725ffaa77dbd5ba12919e52700978}{00162}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ada8725ffaa77dbd5ba12919e52700978}{model\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00163}00163\ \ \ \ \ model:\ Union[Type[\textcolor{stringliteral}{'BaseModel'}],\ Type[\textcolor{stringliteral}{'Dataclass'}]],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00164}00164\ \ \ \ \ by\_alias:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00165}00165\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00166}00166\ \ \ \ \ ref\_template:\ str\ =\ default\_ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00167}00167\ )\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00168}00168\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00169}00169\ \textcolor{stringliteral}{\ \ \ \ Generate\ a\ JSON\ Schema\ for\ one\ model.\ With\ all\ the\ sub-\/models\ defined\ in\ the\ \`{}\`{}definitions\`{}\`{}\ top-\/level}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00170}00170\ \textcolor{stringliteral}{\ \ \ \ JSON\ key.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00171}00171\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00172}00172\ \textcolor{stringliteral}{\ \ \ \ :param\ model:\ a\ Pydantic\ model\ (a\ class\ that\ inherits\ from\ BaseModel)}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ :param\ by\_alias:\ generate\ the\ schemas\ using\ the\ aliases\ defined,\ if\ any}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00174}00174\ \textcolor{stringliteral}{\ \ \ \ :param\ ref\_prefix:\ the\ JSON\ Pointer\ prefix\ for\ schema\ references\ with\ \`{}\`{}\$ref\`{}\`{},\ if\ None,\ will\ be\ set\ to\ the}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00175}00175\ \textcolor{stringliteral}{\ \ \ \ \ \ default\ of\ \`{}\`{}\#/definitions/\`{}\`{}.\ Update\ it\ if\ you\ want\ the\ schemas\ to\ reference\ the\ definitions\ somewhere}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00176}00176\ \textcolor{stringliteral}{\ \ \ \ \ \ else,\ e.g.\ for\ OpenAPI\ use\ \`{}\`{}\#/components/schemas/\`{}\`{}.\ The\ resulting\ generated\ schemas\ will\ still\ be\ at\ the}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00177}00177\ \textcolor{stringliteral}{\ \ \ \ \ \ top-\/level\ key\ \`{}\`{}definitions\`{}\`{},\ so\ you\ can\ extract\ them\ from\ there.\ But\ all\ the\ references\ will\ have\ the\ set}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00178}00178\ \textcolor{stringliteral}{\ \ \ \ \ \ prefix.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00179}00179\ \textcolor{stringliteral}{\ \ \ \ :param\ ref\_template:\ Use\ a\ \`{}\`{}string.format()\`{}\`{}\ template\ for\ \`{}\`{}\$ref\`{}\`{}\ instead\ of\ a\ prefix.\ This\ can\ be\ useful\ for}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00180}00180\ \textcolor{stringliteral}{\ \ \ \ \ \ references\ that\ cannot\ be\ represented\ by\ \`{}\`{}ref\_prefix\`{}\`{}\ such\ as\ a\ definition\ stored\ in\ another\ file.\ For\ a}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ \ \ sibling\ json\ file\ in\ a\ \`{}\`{}/schemas\`{}\`{}\ directory\ use\ \`{}\`{}"{}/schemas/\$\{model\}.json\#"{}\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ :return:\ dict\ with\ the\ JSON\ Schema\ for\ the\ passed\ \`{}\`{}model\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00183}00183\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00184}00184\ \ \ \ \ model\ =\ get\_model(model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00185}00185\ \ \ \ \ flat\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aeda1bb0c53d768b6b96ebb3248dd5107}{get\_flat\_models\_from\_model}}(model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00186}00186\ \ \ \ \ model\_name\_map\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_abb46ad06afd31a630a2dd723a7bff0e3}{get\_model\_name\_map}}(flat\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00187}00187\ \ \ \ \ model\_name\ =\ model\_name\_map[model]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00188}00188\ \ \ \ \ m\_schema,\ m\_definitions,\ nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af35f332620e82b46dc3716d336931da2}{model\_process\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ model,\ by\_alias=by\_alias,\ model\_name\_map=model\_name\_map,\ ref\_prefix=ref\_prefix,\ ref\_template=ref\_template}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00190}00190\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00191}00191\ \ \ \ \ \textcolor{keywordflow}{if}\ model\_name\ \textcolor{keywordflow}{in}\ nested\_models:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ model\_name\ is\ in\ Nested\ models,\ it\ has\ circular\ references}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ m\_definitions[model\_name]\ =\ m\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ m\_schema\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a044b24dafe5dd690889a1ef22bbf67ea}{get\_schema\_ref}}(model\_name,\ ref\_prefix,\ ref\_template,\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00195}00195\ \ \ \ \ \textcolor{keywordflow}{if}\ m\_definitions:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ m\_schema.update(\{\textcolor{stringliteral}{'definitions'}:\ m\_definitions\})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00197}00197\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00199}00199\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00200}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a085485590e216879d83d4581c389caa1}{00200}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a085485590e216879d83d4581c389caa1}{get\_field\_info\_schema}}(field:\ ModelField,\ schema\_overrides:\ bool\ =\ \textcolor{keyword}{False})\ -\/>\ Tuple[Dict[str,\ Any],\ bool]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00201}00201\ \ \ \ \ \textcolor{comment}{\#\ If\ no\ title\ is\ explicitly\ set,\ we\ don't\ set\ title\ in\ the\ schema\ for\ enums.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00202}00202\ \ \ \ \ \textcolor{comment}{\#\ The\ behaviour\ is\ the\ same\ as\ \`{}BaseModel`\ reference,\ where\ the\ default\ title}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00203}00203\ \ \ \ \ \textcolor{comment}{\#\ is\ in\ the\ definitions\ part\ of\ the\ schema.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00204}00204\ \ \ \ \ schema\_:\ Dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{if}\ field.field\_info.title\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ lenient\_issubclass(field.type\_,\ Enum):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ schema\_[\textcolor{stringliteral}{'title'}]\ =\ field.field\_info.title\ \textcolor{keywordflow}{or}\ field.alias.title().replace(\textcolor{stringliteral}{'\_'},\ \textcolor{stringliteral}{'\ '})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{if}\ field.field\_info.title:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ schema\_overrides\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00211}00211\ \ \ \ \ \textcolor{keywordflow}{if}\ field.field\_info.description:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ schema\_[\textcolor{stringliteral}{'description'}]\ =\ field.field\_info.description}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ schema\_overrides\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00215}00215\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ field.required\ \textcolor{keywordflow}{and}\ field.default\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ is\_callable\_type(field.outer\_type\_):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ schema\_[\textcolor{stringliteral}{'default'}]\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aec25df6929d6a5074b37de352ca25bd1}{encode\_default}}(field.default)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ schema\_overrides\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00219}00219\ \ \ \ \ \textcolor{keywordflow}{return}\ schema\_,\ schema\_overrides}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00220}00220\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00222}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a143b45ba59ca329472ebe1f79c84664c}{00222}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a143b45ba59ca329472ebe1f79c84664c}{field\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00223}00223\ \ \ \ \ field:\ ModelField,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00224}00224\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00225}00225\ \ \ \ \ by\_alias:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00226}00226\ \ \ \ \ model\_name\_map:\ Dict[TypeModelOrEnum,\ str],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00227}00227\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00228}00228\ \ \ \ \ ref\_template:\ str\ =\ default\_ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00229}00229\ \ \ \ \ known\_models:\ Optional[TypeModelSet]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00230}00230\ )\ -\/>\ Tuple[Dict[str,\ Any],\ Dict[str,\ Any],\ Set[str]]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00231}00231\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00232}00232\ \textcolor{stringliteral}{\ \ \ \ Process\ a\ Pydantic\ field\ and\ return\ a\ tuple\ with\ a\ JSON\ Schema\ for\ it\ as\ the\ first\ item.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00233}00233\ \textcolor{stringliteral}{\ \ \ \ Also\ return\ a\ dictionary\ of\ definitions\ with\ models\ as\ keys\ and\ their\ schemas\ as\ values.\ If\ the\ passed\ field}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00234}00234\ \textcolor{stringliteral}{\ \ \ \ is\ a\ model\ and\ has\ sub-\/models,\ and\ those\ sub-\/models\ don't\ have\ overrides\ (as\ \`{}\`{}title\`{}\`{},\ \`{}\`{}default\`{}\`{},\ etc),\ they}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00235}00235\ \textcolor{stringliteral}{\ \ \ \ will\ be\ included\ in\ the\ definitions\ and\ referenced\ in\ the\ schema\ instead\ of\ included\ recursively.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00236}00236\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00237}00237\ \textcolor{stringliteral}{\ \ \ \ :param\ field:\ a\ Pydantic\ \`{}\`{}ModelField\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00238}00238\ \textcolor{stringliteral}{\ \ \ \ :param\ by\_alias:\ use\ the\ defined\ alias\ (if\ any)\ in\ the\ returned\ schema}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00239}00239\ \textcolor{stringliteral}{\ \ \ \ :param\ model\_name\_map:\ used\ to\ generate\ the\ JSON\ Schema\ references\ to\ other\ models\ included\ in\ the\ definitions}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00240}00240\ \textcolor{stringliteral}{\ \ \ \ :param\ ref\_prefix:\ the\ JSON\ Pointer\ prefix\ to\ use\ for\ references\ to\ other\ schemas,\ if\ None,\ the\ default\ of}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00241}00241\ \textcolor{stringliteral}{\ \ \ \ \ \ \#/definitions/\ will\ be\ used}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00242}00242\ \textcolor{stringliteral}{\ \ \ \ :param\ ref\_template:\ Use\ a\ \`{}\`{}string.format()\`{}\`{}\ template\ for\ \`{}\`{}\$ref\`{}\`{}\ instead\ of\ a\ prefix.\ This\ can\ be\ useful\ for}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00243}00243\ \textcolor{stringliteral}{\ \ \ \ \ \ references\ that\ cannot\ be\ represented\ by\ \`{}\`{}ref\_prefix\`{}\`{}\ such\ as\ a\ definition\ stored\ in\ another\ file.\ For\ a}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00244}00244\ \textcolor{stringliteral}{\ \ \ \ \ \ sibling\ json\ file\ in\ a\ \`{}\`{}/schemas\`{}\`{}\ directory\ use\ \`{}\`{}"{}/schemas/\$\{model\}.json\#"{}\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00245}00245\ \textcolor{stringliteral}{\ \ \ \ :param\ known\_models:\ used\ to\ solve\ circular\ references}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00246}00246\ \textcolor{stringliteral}{\ \ \ \ :return:\ tuple\ of\ the\ schema\ for\ this\ field\ and\ additional\ definitions}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00247}00247\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00248}00248\ \ \ \ \ s,\ schema\_overrides\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a085485590e216879d83d4581c389caa1}{get\_field\_info\_schema}}(field)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00249}00249\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00250}00250\ \ \ \ \ validation\_schema\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a909fd2b9d3635e2cf96be73e3b0fbc4d}{get\_field\_schema\_validations}}(field)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00251}00251\ \ \ \ \ \textcolor{keywordflow}{if}\ validation\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ s.update(validation\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ schema\_overrides\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00255}00255\ \ \ \ \ f\_schema,\ f\_definitions,\ f\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a4e385cef02d641ae49fca102d65adedd}{field\_type\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ field,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ schema\_overrides=schema\_overrides,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ known\_models=known\_models\ \textcolor{keywordflow}{or}\ set(),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00263}00263\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00265}00265\ \ \ \ \ \textcolor{comment}{\#\ \$ref\ will\ only\ be\ returned\ when\ there\ are\ no\ schema\_overrides}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00266}00266\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'\$ref'}\ \textcolor{keywordflow}{in}\ f\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\_schema,\ f\_definitions,\ f\_nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ s.update(f\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ s,\ f\_definitions,\ f\_nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00273}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ab1557d12b18aef489c745889c513f6fe}{00273}}\ numeric\_types\ =\ (int,\ float,\ Decimal)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00274}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a5014aa87ebcfcdae19bd3edf83d44384}{00274}}\ \_str\_types\_attrs:\ Tuple[Tuple[str,\ Union[type,\ Tuple[type,\ ...]],\ str],\ ...]\ =\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00275}00275\ \ \ \ \ (\textcolor{stringliteral}{'max\_length'},\ numeric\_types,\ \textcolor{stringliteral}{'maxLength'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00276}00276\ \ \ \ \ (\textcolor{stringliteral}{'min\_length'},\ numeric\_types,\ \textcolor{stringliteral}{'minLength'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00277}00277\ \ \ \ \ (\textcolor{stringliteral}{'regex'},\ str,\ \textcolor{stringliteral}{'pattern'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00278}00278\ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00279}00279\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00280}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_afb1588105dd79c02cf4127b9501dadc6}{00280}}\ \_numeric\_types\_attrs:\ Tuple[Tuple[str,\ Union[type,\ Tuple[type,\ ...]],\ str],\ ...]\ =\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00281}00281\ \ \ \ \ (\textcolor{stringliteral}{'gt'},\ numeric\_types,\ \textcolor{stringliteral}{'exclusiveMinimum'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00282}00282\ \ \ \ \ (\textcolor{stringliteral}{'lt'},\ numeric\_types,\ \textcolor{stringliteral}{'exclusiveMaximum'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00283}00283\ \ \ \ \ (\textcolor{stringliteral}{'ge'},\ numeric\_types,\ \textcolor{stringliteral}{'minimum'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00284}00284\ \ \ \ \ (\textcolor{stringliteral}{'le'},\ numeric\_types,\ \textcolor{stringliteral}{'maximum'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00285}00285\ \ \ \ \ (\textcolor{stringliteral}{'multiple\_of'},\ numeric\_types,\ \textcolor{stringliteral}{'multipleOf'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00286}00286\ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00289}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a909fd2b9d3635e2cf96be73e3b0fbc4d}{00289}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a909fd2b9d3635e2cf96be73e3b0fbc4d}{get\_field\_schema\_validations}}(field:\ ModelField)\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00290}00290\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00291}00291\ \textcolor{stringliteral}{\ \ \ \ Get\ the\ JSON\ Schema\ validation\ keywords\ for\ a\ \`{}\`{}field\`{}\`{}\ with\ an\ annotation\ of}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00292}00292\ \textcolor{stringliteral}{\ \ \ \ a\ Pydantic\ \`{}\`{}FieldInfo\`{}\`{}\ with\ validation\ arguments.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00293}00293\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00294}00294\ \ \ \ \ f\_schema:\ Dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00295}00295\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00296}00296\ \ \ \ \ \textcolor{keywordflow}{if}\ lenient\_issubclass(field.type\_,\ Enum):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ schema\ is\ already\ updated\ by\ \`{}enum\_process\_schema`;\ just\ update\ with\ field\ extra}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field.field\_info.extra:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema.update(field.field\_info.extra)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00302}00302\ \ \ \ \ \textcolor{keywordflow}{if}\ lenient\_issubclass(field.type\_,\ (str,\ bytes)):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ attr\_name,\ t,\ keyword\ \textcolor{keywordflow}{in}\ \_str\_types\_attrs:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ attr\ =\ getattr(field.field\_info,\ attr\_name,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(attr,\ t):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema[keyword]\ =\ attr}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00307}00307\ \ \ \ \ \textcolor{keywordflow}{if}\ lenient\_issubclass(field.type\_,\ numeric\_types)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ issubclass(field.type\_,\ bool):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ attr\_name,\ t,\ keyword\ \textcolor{keywordflow}{in}\ \_numeric\_types\_attrs:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ attr\ =\ getattr(field.field\_info,\ attr\_name,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(attr,\ t):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema[keyword]\ =\ attr}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00312}00312\ \ \ \ \ \textcolor{keywordflow}{if}\ field.field\_info\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ field.field\_info.const:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ f\_schema[\textcolor{stringliteral}{'const'}]\ =\ field.default}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00314}00314\ \ \ \ \ \textcolor{keywordflow}{if}\ field.field\_info.extra:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ f\_schema.update(field.field\_info.extra)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00316}00316\ \ \ \ \ modify\_schema\ =\ getattr(field.outer\_type\_,\ \textcolor{stringliteral}{'\_\_modify\_schema\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00317}00317\ \ \ \ \ \textcolor{keywordflow}{if}\ modify\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ae5c4de23840082adfe3871779fc1bc05}{\_apply\_modify\_schema}}(modify\_schema,\ field,\ f\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00319}00319\ \ \ \ \ \textcolor{keywordflow}{return}\ f\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00320}00320\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00322}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_abb46ad06afd31a630a2dd723a7bff0e3}{00322}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_abb46ad06afd31a630a2dd723a7bff0e3}{get\_model\_name\_map}}(unique\_models:\ TypeModelSet)\ -\/>\ Dict[TypeModelOrEnum,\ str]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00323}00323\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00324}00324\ \textcolor{stringliteral}{\ \ \ \ Process\ a\ set\ of\ models\ and\ generate\ unique\ names\ for\ them\ to\ be\ used\ as\ keys\ in\ the\ JSON\ Schema}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00325}00325\ \textcolor{stringliteral}{\ \ \ \ definitions.\ By\ default\ the\ names\ are\ the\ same\ as\ the\ class\ name.\ But\ if\ two\ models\ in\ different\ Python}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00326}00326\ \textcolor{stringliteral}{\ \ \ \ modules\ have\ the\ same\ name\ (e.g.\ "{}users.Model"{}\ and\ "{}items.Model"{}),\ the\ generated\ names\ will\ be}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00327}00327\ \textcolor{stringliteral}{\ \ \ \ based\ on\ the\ Python\ module\ path\ for\ those\ conflicting\ models\ to\ prevent\ name\ collisions.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00328}00328\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00329}00329\ \textcolor{stringliteral}{\ \ \ \ :param\ unique\_models:\ a\ Python\ set\ of\ models}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00330}00330\ \textcolor{stringliteral}{\ \ \ \ :return:\ dict\ mapping\ models\ to\ names}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00331}00331\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00332}00332\ \ \ \ \ name\_model\_map\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00333}00333\ \ \ \ \ conflicting\_names:\ Set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00334}00334\ \ \ \ \ \textcolor{keywordflow}{for}\ model\ \textcolor{keywordflow}{in}\ unique\_models:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ model\_name\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a0852e5630819c67e4f94b861cf913633}{normalize\_name}}(model.\_\_name\_\_)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ model\_name\ \textcolor{keywordflow}{in}\ conflicting\_names:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a9a6ed3513ddbdd7783e99282aac0e4d3}{get\_long\_model\_name}}(model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ name\_model\_map[model\_name]\ =\ model}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ model\_name\ \textcolor{keywordflow}{in}\ name\_model\_map:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ conflicting\_names.add(model\_name)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ conflicting\_model\ =\ name\_model\_map.pop(model\_name)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ name\_model\_map[\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a9a6ed3513ddbdd7783e99282aac0e4d3}{get\_long\_model\_name}}(conflicting\_model)]\ =\ conflicting\_model}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ name\_model\_map[\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a9a6ed3513ddbdd7783e99282aac0e4d3}{get\_long\_model\_name}}(model)]\ =\ model}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ name\_model\_map[model\_name]\ =\ model}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00346}00346\ \ \ \ \ \textcolor{keywordflow}{return}\ \{v:\ k\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ name\_model\_map.items()\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00348}00348\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00349}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aeda1bb0c53d768b6b96ebb3248dd5107}{00349}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aeda1bb0c53d768b6b96ebb3248dd5107}{get\_flat\_models\_from\_model}}(model:\ Type[\textcolor{stringliteral}{'BaseModel'}],\ known\_models:\ Optional[TypeModelSet]\ =\ \textcolor{keywordtype}{None})\ -\/>\ TypeModelSet:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00350}00350\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00351}00351\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ single\ \`{}\`{}model\`{}\`{}\ and\ generate\ a\ set\ with\ itself\ and\ all\ the\ sub-\/models\ in\ the\ tree.\ I.e.\ if\ you\ pass}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00352}00352\ \textcolor{stringliteral}{\ \ \ \ model\ \`{}\`{}Foo\`{}\`{}\ (subclass\ of\ Pydantic\ \`{}\`{}BaseModel\`{}\`{})\ as\ \`{}\`{}model\`{}\`{},\ and\ it\ has\ a\ field\ of\ type\ \`{}\`{}Bar\`{}\`{}\ (also}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00353}00353\ \textcolor{stringliteral}{\ \ \ \ subclass\ of\ \`{}\`{}BaseModel\`{}\`{})\ and\ that\ model\ \`{}\`{}Bar\`{}\`{}\ has\ a\ field\ of\ type\ \`{}\`{}Baz\`{}\`{}\ (also\ subclass\ of\ \`{}\`{}BaseModel\`{}\`{}),}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00354}00354\ \textcolor{stringliteral}{\ \ \ \ the\ return\ value\ will\ be\ \`{}\`{}set([Foo,\ Bar,\ Baz])\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00355}00355\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00356}00356\ \textcolor{stringliteral}{\ \ \ \ :param\ model:\ a\ Pydantic\ \`{}\`{}BaseModel\`{}\`{}\ subclass}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00357}00357\ \textcolor{stringliteral}{\ \ \ \ :param\ known\_models:\ used\ to\ solve\ circular\ references}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00358}00358\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ set\ with\ the\ initial\ model\ and\ all\ its\ sub-\/models}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00359}00359\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00360}00360\ \ \ \ \ known\_models\ =\ known\_models\ \textcolor{keywordflow}{or}\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00361}00361\ \ \ \ \ flat\_models:\ TypeModelSet\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00362}00362\ \ \ \ \ flat\_models.add(model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00363}00363\ \ \ \ \ known\_models\ |=\ flat\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00364}00364\ \ \ \ \ fields\ =\ cast(Sequence[ModelField],\ model.\_\_fields\_\_.values())}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00365}00365\ \ \ \ \ flat\_models\ |=\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37a858129de8fba34d7a868de19e2e6e}{get\_flat\_models\_from\_fields}}(fields,\ known\_models=known\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00366}00366\ \ \ \ \ \textcolor{keywordflow}{return}\ flat\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00367}00367\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00369}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a64092ecea8ee7d1b9cf182f1fc9bd7b1}{00369}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a64092ecea8ee7d1b9cf182f1fc9bd7b1}{get\_flat\_models\_from\_field}}(field:\ ModelField,\ known\_models:\ TypeModelSet)\ -\/>\ TypeModelSet:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00370}00370\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00371}00371\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ single\ Pydantic\ \`{}\`{}ModelField\`{}\`{}\ (from\ a\ model)\ that\ could\ have\ been\ declared\ as\ a\ subclass\ of\ BaseModel}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00372}00372\ \textcolor{stringliteral}{\ \ \ \ (so,\ it\ could\ be\ a\ submodel),\ and\ generate\ a\ set\ with\ its\ model\ and\ all\ the\ sub-\/models\ in\ the\ tree.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00373}00373\ \textcolor{stringliteral}{\ \ \ \ I.e.\ if\ you\ pass\ a\ field\ that\ was\ declared\ to\ be\ of\ type\ \`{}\`{}Foo\`{}\`{}\ (subclass\ of\ BaseModel)\ as\ \`{}\`{}field\`{}\`{},\ and\ that}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00374}00374\ \textcolor{stringliteral}{\ \ \ \ model\ \`{}\`{}Foo\`{}\`{}\ has\ a\ field\ of\ type\ \`{}\`{}Bar\`{}\`{}\ (also\ subclass\ of\ \`{}\`{}BaseModel\`{}\`{})\ and\ that\ model\ \`{}\`{}Bar\`{}\`{}\ has\ a\ field\ of}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00375}00375\ \textcolor{stringliteral}{\ \ \ \ type\ \`{}\`{}Baz\`{}\`{}\ (also\ subclass\ of\ \`{}\`{}BaseModel\`{}\`{}),\ the\ return\ value\ will\ be\ \`{}\`{}set([Foo,\ Bar,\ Baz])\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00376}00376\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00377}00377\ \textcolor{stringliteral}{\ \ \ \ :param\ field:\ a\ Pydantic\ \`{}\`{}ModelField\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00378}00378\ \textcolor{stringliteral}{\ \ \ \ :param\ known\_models:\ used\ to\ solve\ circular\ references}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00379}00379\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ set\ with\ the\ model\ used\ in\ the\ declaration\ for\ this\ field,\ if\ any,\ and\ all\ its\ sub-\/models}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00380}00380\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00381}00381\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1main}{pydantic.v1.main}}\ \textcolor{keyword}{import}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00382}00382\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00383}00383\ \ \ \ \ flat\_models:\ TypeModelSet\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00384}00384\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00385}00385\ \ \ \ \ field\_type\ =\ field.type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00386}00386\ \ \ \ \ \textcolor{keywordflow}{if}\ lenient\_issubclass(getattr(field\_type,\ \textcolor{stringliteral}{'\_\_pydantic\_model\_\_'},\ \textcolor{keywordtype}{None}),\ BaseModel):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ field\_type\ =\ field\_type.\_\_pydantic\_model\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00388}00388\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00389}00389\ \ \ \ \ \textcolor{keywordflow}{if}\ field.sub\_fields\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ lenient\_issubclass(field\_type,\ BaseModel):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ flat\_models\ |=\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37a858129de8fba34d7a868de19e2e6e}{get\_flat\_models\_from\_fields}}(field.sub\_fields,\ known\_models=known\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00391}00391\ \ \ \ \ \textcolor{keywordflow}{elif}\ lenient\_issubclass(field\_type,\ BaseModel)\ \textcolor{keywordflow}{and}\ field\_type\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ known\_models:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ flat\_models\ |=\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aeda1bb0c53d768b6b96ebb3248dd5107}{get\_flat\_models\_from\_model}}(field\_type,\ known\_models=known\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00393}00393\ \ \ \ \ \textcolor{keywordflow}{elif}\ lenient\_issubclass(field\_type,\ Enum):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ flat\_models.add(field\_type)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00395}00395\ \ \ \ \ \textcolor{keywordflow}{return}\ flat\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00398}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37a858129de8fba34d7a868de19e2e6e}{00398}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37a858129de8fba34d7a868de19e2e6e}{get\_flat\_models\_from\_fields}}(fields:\ Sequence[ModelField],\ known\_models:\ TypeModelSet)\ -\/>\ TypeModelSet:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00399}00399\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00400}00400\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ list\ of\ Pydantic\ \ \`{}\`{}ModelField\`{}\`{}s\ (from\ a\ model)\ that\ could\ have\ been\ declared\ as\ subclasses\ of\ \`{}\`{}BaseModel\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00401}00401\ \textcolor{stringliteral}{\ \ \ \ (so,\ any\ of\ them\ could\ be\ a\ submodel),\ and\ generate\ a\ set\ with\ their\ models\ and\ all\ the\ sub-\/models\ in\ the\ tree.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00402}00402\ \textcolor{stringliteral}{\ \ \ \ I.e.\ if\ you\ pass\ a\ the\ fields\ of\ a\ model\ \`{}\`{}Foo\`{}\`{}\ (subclass\ of\ \`{}\`{}BaseModel\`{}\`{})\ as\ \`{}\`{}fields\`{}\`{},\ and\ on\ of\ them\ has\ a}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00403}00403\ \textcolor{stringliteral}{\ \ \ \ field\ of\ type\ \`{}\`{}Bar\`{}\`{}\ (also\ subclass\ of\ \`{}\`{}BaseModel\`{}\`{})\ and\ that\ model\ \`{}\`{}Bar\`{}\`{}\ has\ a\ field\ of\ type\ \`{}\`{}Baz\`{}\`{}\ (also}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00404}00404\ \textcolor{stringliteral}{\ \ \ \ subclass\ of\ \`{}\`{}BaseModel\`{}\`{}),\ the\ return\ value\ will\ be\ \`{}\`{}set([Foo,\ Bar,\ Baz])\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00405}00405\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00406}00406\ \textcolor{stringliteral}{\ \ \ \ :param\ fields:\ a\ list\ of\ Pydantic\ \`{}\`{}ModelField\`{}\`{}s}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00407}00407\ \textcolor{stringliteral}{\ \ \ \ :param\ known\_models:\ used\ to\ solve\ circular\ references}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00408}00408\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ set\ with\ any\ model\ declared\ in\ the\ fields,\ and\ all\ their\ sub-\/models}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00409}00409\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00410}00410\ \ \ \ \ flat\_models:\ TypeModelSet\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00411}00411\ \ \ \ \ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00412}00412\ \ \ \ \ \ \ \ \ flat\_models\ |=\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a64092ecea8ee7d1b9cf182f1fc9bd7b1}{get\_flat\_models\_from\_field}}(field,\ known\_models=known\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00413}00413\ \ \ \ \ \textcolor{keywordflow}{return}\ flat\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00414}00414\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00416}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_afa7208a83530a8ec66437d5890b8f814}{00416}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_afa7208a83530a8ec66437d5890b8f814}{get\_flat\_models\_from\_models}}(models:\ Sequence[Type[\textcolor{stringliteral}{'BaseModel'}]])\ -\/>\ TypeModelSet:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00417}00417\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00418}00418\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ list\ of\ \`{}\`{}models\`{}\`{}\ and\ generate\ a\ set\ with\ them\ and\ all\ their\ sub-\/models\ in\ their\ trees.\ I.e.\ if\ you\ pass}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00419}00419\ \textcolor{stringliteral}{\ \ \ \ a\ list\ of\ two\ models,\ \`{}\`{}Foo\`{}\`{}\ and\ \`{}\`{}Bar\`{}\`{},\ both\ subclasses\ of\ Pydantic\ \`{}\`{}BaseModel\`{}\`{}\ as\ models,\ and\ \`{}\`{}Bar\`{}\`{}\ has}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00420}00420\ \textcolor{stringliteral}{\ \ \ \ a\ field\ of\ type\ \`{}\`{}Baz\`{}\`{}\ (also\ subclass\ of\ \`{}\`{}BaseModel\`{}\`{}),\ the\ return\ value\ will\ be\ \`{}\`{}set([Foo,\ Bar,\ Baz])\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00421}00421\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00422}00422\ \ \ \ \ flat\_models:\ TypeModelSet\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00423}00423\ \ \ \ \ \textcolor{keywordflow}{for}\ model\ \textcolor{keywordflow}{in}\ models:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ flat\_models\ |=\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aeda1bb0c53d768b6b96ebb3248dd5107}{get\_flat\_models\_from\_model}}(model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00425}00425\ \ \ \ \ \textcolor{keywordflow}{return}\ flat\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00426}00426\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00427}00427\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00428}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a9a6ed3513ddbdd7783e99282aac0e4d3}{00428}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a9a6ed3513ddbdd7783e99282aac0e4d3}{get\_long\_model\_name}}(model:\ TypeModelOrEnum)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00429}00429\ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{'\{model.\_\_module\_\_\}\_\_\{model.\_\_qualname\_\_\}'}.replace(\textcolor{stringliteral}{'.'},\ \textcolor{stringliteral}{'\_\_'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00430}00430\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00431}00431\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00432}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a4e385cef02d641ae49fca102d65adedd}{00432}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a4e385cef02d641ae49fca102d65adedd}{field\_type\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00433}00433\ \ \ \ \ field:\ ModelField,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00434}00434\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00435}00435\ \ \ \ \ by\_alias:\ bool,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00436}00436\ \ \ \ \ model\_name\_map:\ Dict[TypeModelOrEnum,\ str],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00437}00437\ \ \ \ \ ref\_template:\ str,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00438}00438\ \ \ \ \ schema\_overrides:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00439}00439\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00440}00440\ \ \ \ \ known\_models:\ TypeModelSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00441}00441\ )\ -\/>\ Tuple[Dict[str,\ Any],\ Dict[str,\ Any],\ Set[str]]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00442}00442\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00443}00443\ \textcolor{stringliteral}{\ \ \ \ Used\ by\ \`{}\`{}field\_schema()\`{}\`{},\ you\ probably\ should\ be\ using\ that\ function.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00444}00444\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00445}00445\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ single\ \`{}\`{}field\`{}\`{}\ and\ generate\ the\ schema\ for\ its\ type\ only,\ not\ including\ additional}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00446}00446\ \textcolor{stringliteral}{\ \ \ \ information\ as\ title,\ etc.\ Also\ return\ additional\ schema\ definitions,\ from\ sub-\/models.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00447}00447\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00448}00448\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1main}{pydantic.v1.main}}\ \textcolor{keyword}{import}\ BaseModel\ \ \textcolor{comment}{\#\ noqa:\ F811}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00449}00449\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00450}00450\ \ \ \ \ definitions\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00451}00451\ \ \ \ \ nested\_models:\ Set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00452}00452\ \ \ \ \ f\_schema:\ Dict[str,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00453}00453\ \ \ \ \ \textcolor{keywordflow}{if}\ field.shape\ \textcolor{keywordflow}{in}\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ SHAPE\_LIST,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ SHAPE\_TUPLE\_ELLIPSIS,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00456}00456\ \ \ \ \ \ \ \ \ SHAPE\_SEQUENCE,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ SHAPE\_SET,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ SHAPE\_FROZENSET,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00459}00459\ \ \ \ \ \ \ \ \ SHAPE\_ITERABLE,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ SHAPE\_DEQUE,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00461}00461\ \ \ \ \ \}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ items\_schema,\ f\_definitions,\ f\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a460a43ffebaffd19e79dfc4daa085bd9}{field\_singleton\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00463}00463\ \ \ \ \ \ \ \ \ \ \ \ \ field,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00464}00464\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ definitions.update(f\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ nested\_models.update(f\_nested\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ f\_schema\ =\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},\ \textcolor{stringliteral}{'items'}:\ items\_schema\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field.shape\ \textcolor{keywordflow}{in}\ \{SHAPE\_SET,\ SHAPE\_FROZENSET\}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema[\textcolor{stringliteral}{'uniqueItems'}]\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00475}00475\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00476}00476\ \ \ \ \ \textcolor{keywordflow}{elif}\ field.shape\ \textcolor{keywordflow}{in}\ MAPPING\_LIKE\_SHAPES:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00477}00477\ \ \ \ \ \ \ \ \ f\_schema\ =\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'object'}\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ key\_field\ =\ cast(ModelField,\ field.key\_field)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ regex\ =\ getattr(key\_field.type\_,\ \textcolor{stringliteral}{'regex'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ items\_schema,\ f\_definitions,\ f\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a460a43ffebaffd19e79dfc4daa085bd9}{field\_singleton\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ field,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ definitions.update(f\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ nested\_models.update(f\_nested\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ regex:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Dict\ keys\ have\ a\ regex\ pattern}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ items\_schema\ might\ be\ a\ schema\ or\ empty\ dict,\ add\ it\ either\ way}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema[\textcolor{stringliteral}{'patternProperties'}]\ =\ \{ConstrainedStr.\_get\_pattern(regex):\ items\_schema\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00494}00494\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ items\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ The\ dict\ values\ are\ not\ simply\ Any,\ so\ they\ need\ a\ schema}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema[\textcolor{stringliteral}{'additionalProperties'}]\ =\ items\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00497}00497\ \ \ \ \ \textcolor{keywordflow}{elif}\ field.shape\ ==\ SHAPE\_TUPLE\ \textcolor{keywordflow}{or}\ (field.shape\ ==\ SHAPE\_GENERIC\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ issubclass(field.type\_,\ BaseModel)):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ sub\_schema\ =\ []}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ sub\_fields\ =\ cast(List[ModelField],\ field.sub\_fields)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sf\ \textcolor{keywordflow}{in}\ sub\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ sf\_schema,\ sf\_definitions,\ sf\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a4e385cef02d641ae49fca102d65adedd}{field\_type\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sf,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00503}00503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ \ \ \ \ definitions.update(sf\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ \ \ \ \ nested\_models.update(sf\_nested\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ sub\_schema.append(sf\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00512}00512\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00513}00513\ \ \ \ \ \ \ \ \ sub\_fields\_len\ =\ len(sub\_fields)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00514}00514\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field.shape\ ==\ SHAPE\_GENERIC:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \ \ \ \ all\_of\_schemas\ =\ sub\_schema[0]\ \textcolor{keywordflow}{if}\ sub\_fields\_len\ ==\ 1\ \textcolor{keywordflow}{else}\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},\ \textcolor{stringliteral}{'items'}:\ sub\_schema\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00516}00516\ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema\ =\ \{\textcolor{stringliteral}{'allOf'}:\ [all\_of\_schemas]\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00517}00517\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00518}00518\ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00520}00520\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'minItems'}:\ sub\_fields\_len,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'maxItems'}:\ sub\_fields\_len,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00523}00523\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sub\_fields\_len\ >=\ 1:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema[\textcolor{stringliteral}{'items'}]\ =\ sub\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00525}00525\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ field.shape\ \textcolor{keywordflow}{in}\ \{SHAPE\_SINGLETON,\ SHAPE\_GENERIC\},\ field.shape}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00527}00527\ \ \ \ \ \ \ \ \ f\_schema,\ f\_definitions,\ f\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a460a43ffebaffd19e79dfc4daa085bd9}{field\_singleton\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ field,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ schema\_overrides=schema\_overrides,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00535}00535\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00536}00536\ \ \ \ \ \ \ \ \ definitions.update(f\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00537}00537\ \ \ \ \ \ \ \ \ nested\_models.update(f\_nested\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00538}00538\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00539}00539\ \ \ \ \ \textcolor{comment}{\#\ check\ field\ type\ to\ avoid\ repeated\ calls\ to\ the\ same\ \_\_modify\_schema\_\_\ method}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00540}00540\ \ \ \ \ \textcolor{keywordflow}{if}\ field.type\_\ !=\ field.outer\_type\_:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field.shape\ ==\ SHAPE\_GENERIC:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00542}00542\ \ \ \ \ \ \ \ \ \ \ \ \ field\_type\ =\ field.type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00544}00544\ \ \ \ \ \ \ \ \ \ \ \ \ field\_type\ =\ field.outer\_type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ modify\_schema\ =\ getattr(field\_type,\ \textcolor{stringliteral}{'\_\_modify\_schema\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00546}00546\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ modify\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00547}00547\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ae5c4de23840082adfe3871779fc1bc05}{\_apply\_modify\_schema}}(modify\_schema,\ field,\ f\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00548}00548\ \ \ \ \ \textcolor{keywordflow}{return}\ f\_schema,\ definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00549}00549\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00550}00550\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00551}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af35f332620e82b46dc3716d336931da2}{00551}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af35f332620e82b46dc3716d336931da2}{model\_process\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00552}00552\ \ \ \ \ model:\ TypeModelOrEnum,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00553}00553\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00554}00554\ \ \ \ \ by\_alias:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00555}00555\ \ \ \ \ model\_name\_map:\ Dict[TypeModelOrEnum,\ str],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00556}00556\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00557}00557\ \ \ \ \ ref\_template:\ str\ =\ default\_ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00558}00558\ \ \ \ \ known\_models:\ Optional[TypeModelSet]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00559}00559\ \ \ \ \ field:\ Optional[ModelField]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00560}00560\ )\ -\/>\ Tuple[Dict[str,\ Any],\ Dict[str,\ Any],\ Set[str]]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00561}00561\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00562}00562\ \textcolor{stringliteral}{\ \ \ \ Used\ by\ \`{}\`{}model\_schema()\`{}\`{},\ you\ probably\ should\ be\ using\ that\ function.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00563}00563\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00564}00564\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ single\ \`{}\`{}model\`{}\`{}\ and\ generate\ its\ schema.\ Also\ return\ additional\ schema\ definitions,\ from\ sub-\/models.\ The}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00565}00565\ \textcolor{stringliteral}{\ \ \ \ sub-\/models\ of\ the\ returned\ schema\ will\ be\ referenced,\ but\ their\ definitions\ will\ not\ be\ included\ in\ the\ schema.\ All}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00566}00566\ \textcolor{stringliteral}{\ \ \ \ the\ definitions\ are\ returned\ as\ the\ second\ value.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00567}00567\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00568}00568\ \ \ \ \ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ getdoc,\ signature}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00569}00569\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00570}00570\ \ \ \ \ known\_models\ =\ known\_models\ \textcolor{keywordflow}{or}\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00571}00571\ \ \ \ \ \textcolor{keywordflow}{if}\ lenient\_issubclass(model,\ Enum):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00572}00572\ \ \ \ \ \ \ \ \ model\ =\ cast(Type[Enum],\ model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ s\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a41af3271d8b4a90a26fa751433c59315}{enum\_process\_schema}}(model,\ field=field)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00574}00574\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ s,\ \{\},\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00575}00575\ \ \ \ \ model\ =\ cast(Type[\textcolor{stringliteral}{'BaseModel'}],\ model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00576}00576\ \ \ \ \ s\ =\ \{\textcolor{stringliteral}{'title'}:\ model.\_\_config\_\_.title\ \textcolor{keywordflow}{or}\ model.\_\_name\_\_\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00577}00577\ \ \ \ \ doc\ =\ getdoc(model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00578}00578\ \ \ \ \ \textcolor{keywordflow}{if}\ doc:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00579}00579\ \ \ \ \ \ \ \ \ s[\textcolor{stringliteral}{'description'}]\ =\ doc}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00580}00580\ \ \ \ \ known\_models.add(model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00581}00581\ \ \ \ \ m\_schema,\ m\_definitions,\ nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a576c4e93e66916489138e89f961aecbf}{model\_type\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ model,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00583}00583\ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00584}00584\ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00585}00585\ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00586}00586\ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00587}00587\ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00588}00588\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00589}00589\ \ \ \ \ s.update(m\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00590}00590\ \ \ \ \ schema\_extra\ =\ model.\_\_config\_\_.schema\_extra}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00591}00591\ \ \ \ \ \textcolor{keywordflow}{if}\ callable(schema\_extra):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00592}00592\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(signature(schema\_extra).parameters)\ ==\ 1:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00593}00593\ \ \ \ \ \ \ \ \ \ \ \ \ schema\_extra(s)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00594}00594\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00595}00595\ \ \ \ \ \ \ \ \ \ \ \ \ schema\_extra(s,\ model)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00596}00596\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00597}00597\ \ \ \ \ \ \ \ \ s.update(schema\_extra)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00598}00598\ \ \ \ \ \textcolor{keywordflow}{return}\ s,\ m\_definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00599}00599\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00600}00600\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00601}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a576c4e93e66916489138e89f961aecbf}{00601}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a576c4e93e66916489138e89f961aecbf}{model\_type\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00602}00602\ \ \ \ \ model:\ Type[\textcolor{stringliteral}{'BaseModel'}],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00603}00603\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00604}00604\ \ \ \ \ by\_alias:\ bool,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00605}00605\ \ \ \ \ model\_name\_map:\ Dict[TypeModelOrEnum,\ str],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00606}00606\ \ \ \ \ ref\_template:\ str,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00607}00607\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00608}00608\ \ \ \ \ known\_models:\ TypeModelSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00609}00609\ )\ -\/>\ Tuple[Dict[str,\ Any],\ Dict[str,\ Any],\ Set[str]]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00610}00610\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00611}00611\ \textcolor{stringliteral}{\ \ \ \ You\ probably\ should\ be\ using\ \`{}\`{}model\_schema()\`{}\`{},\ this\ function\ is\ indirectly\ used\ by\ that\ function.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00612}00612\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00613}00613\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ single\ \`{}\`{}model\`{}\`{}\ and\ generate\ the\ schema\ for\ its\ type\ only,\ not\ including\ additional}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00614}00614\ \textcolor{stringliteral}{\ \ \ \ information\ as\ title,\ etc.\ Also\ return\ additional\ schema\ definitions,\ from\ sub-\/models.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00615}00615\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00616}00616\ \ \ \ \ properties\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00617}00617\ \ \ \ \ required\ =\ []}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00618}00618\ \ \ \ \ definitions:\ Dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00619}00619\ \ \ \ \ nested\_models:\ Set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00620}00620\ \ \ \ \ \textcolor{keywordflow}{for}\ k,\ f\ \textcolor{keywordflow}{in}\ model.\_\_fields\_\_.items():}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00621}00621\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00622}00622\ \ \ \ \ \ \ \ \ \ \ \ \ f\_schema,\ f\_definitions,\ f\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a143b45ba59ca329472ebe1f79c84664c}{field\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00623}00623\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00624}00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00627}00627\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00628}00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00629}00629\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00630}00630\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ SkipField\ \textcolor{keyword}{as}\ skip:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00631}00631\ \ \ \ \ \ \ \ \ \ \ \ \ warnings.warn(skip.message,\ UserWarning)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00632}00632\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00633}00633\ \ \ \ \ \ \ \ \ definitions.update(f\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00634}00634\ \ \ \ \ \ \ \ \ nested\_models.update(f\_nested\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00635}00635\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ by\_alias:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00636}00636\ \ \ \ \ \ \ \ \ \ \ \ \ properties[f.alias]\ =\ f\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00637}00637\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ f.required:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00638}00638\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ required.append(f.alias)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00639}00639\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ properties[k]\ =\ f\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ f.required:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00642}00642\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ required.append(k)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00643}00643\ \ \ \ \ \textcolor{keywordflow}{if}\ ROOT\_KEY\ \textcolor{keywordflow}{in}\ properties:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00644}00644\ \ \ \ \ \ \ \ \ out\_schema\ =\ properties[ROOT\_KEY]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ out\_schema[\textcolor{stringliteral}{'title'}]\ =\ model.\_\_config\_\_.title\ \textcolor{keywordflow}{or}\ model.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00646}00646\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00647}00647\ \ \ \ \ \ \ \ \ out\_schema\ =\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'object'},\ \textcolor{stringliteral}{'properties'}:\ properties\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00648}00648\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ required:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00649}00649\ \ \ \ \ \ \ \ \ \ \ \ \ out\_schema[\textcolor{stringliteral}{'required'}]\ =\ required}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00650}00650\ \ \ \ \ \textcolor{keywordflow}{if}\ model.\_\_config\_\_.extra\ ==\ \textcolor{stringliteral}{'forbid'}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00651}00651\ \ \ \ \ \ \ \ \ out\_schema[\textcolor{stringliteral}{'additionalProperties'}]\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00652}00652\ \ \ \ \ \textcolor{keywordflow}{return}\ out\_schema,\ definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00653}00653\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00654}00654\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00655}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a41af3271d8b4a90a26fa751433c59315}{00655}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a41af3271d8b4a90a26fa751433c59315}{enum\_process\_schema}}(enum:\ Type[Enum],\ *,\ field:\ Optional[ModelField]\ =\ \textcolor{keywordtype}{None})\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00656}00656\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00657}00657\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ single\ \`{}enum\`{}\ and\ generate\ its\ schema.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00658}00658\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00659}00659\ \textcolor{stringliteral}{\ \ \ \ This\ is\ similar\ to\ the\ \`{}model\_process\_schema\`{}\ function,\ but\ applies\ to\ \`{}\`{}Enum\`{}\`{}\ objects.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00660}00660\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00661}00661\ \ \ \ \ \textcolor{keyword}{import}\ inspect}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00662}00662\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00663}00663\ \ \ \ \ schema\_:\ Dict[str,\ Any]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00664}00664\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'title'}:\ enum.\_\_name\_\_,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00665}00665\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Python\ assigns\ all\ enums\ a\ default\ docstring\ value\ of\ 'An\ enumeration',\ so}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00666}00666\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ all\ enums\ will\ have\ a\ description\ field\ even\ if\ not\ explicitly\ provided.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00667}00667\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'description'}:\ inspect.cleandoc(enum.\_\_doc\_\_\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{'An\ enumeration.'}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00668}00668\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Add\ enum\ values\ and\ the\ enum\ field\ type\ to\ the\ schema.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00669}00669\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'enum'}:\ [item.value\ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ cast(Iterable[Enum],\ enum)],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00670}00670\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00671}00671\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00672}00672\ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37d9cf3d1fa1b73d9fabe76d42ca841a}{add\_field\_type\_to\_schema}}(enum,\ schema\_)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00673}00673\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00674}00674\ \ \ \ \ modify\_schema\ =\ getattr(enum,\ \textcolor{stringliteral}{'\_\_modify\_schema\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00675}00675\ \ \ \ \ \textcolor{keywordflow}{if}\ modify\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00676}00676\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ae5c4de23840082adfe3871779fc1bc05}{\_apply\_modify\_schema}}(modify\_schema,\ field,\ schema\_)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00677}00677\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00678}00678\ \ \ \ \ \textcolor{keywordflow}{return}\ schema\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00679}00679\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00680}00680\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00681}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a21cb5357ace0ab92f28fec91025a9a0c}{00681}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a21cb5357ace0ab92f28fec91025a9a0c}{field\_singleton\_sub\_fields\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00682}00682\ \ \ \ \ field:\ ModelField,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00683}00683\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00684}00684\ \ \ \ \ by\_alias:\ bool,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00685}00685\ \ \ \ \ model\_name\_map:\ Dict[TypeModelOrEnum,\ str],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00686}00686\ \ \ \ \ ref\_template:\ str,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00687}00687\ \ \ \ \ schema\_overrides:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00688}00688\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00689}00689\ \ \ \ \ known\_models:\ TypeModelSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00690}00690\ )\ -\/>\ Tuple[Dict[str,\ Any],\ Dict[str,\ Any],\ Set[str]]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00691}00691\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00692}00692\ \textcolor{stringliteral}{\ \ \ \ This\ function\ is\ indirectly\ used\ by\ \`{}\`{}field\_schema()\`{}\`{},\ you\ probably\ should\ be\ using\ that\ function.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00693}00693\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00694}00694\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ list\ of\ Pydantic\ \`{}\`{}ModelField\`{}\`{}\ from\ the\ declaration\ of\ a\ type\ with\ parameters,\ and\ generate\ their}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00695}00695\ \textcolor{stringliteral}{\ \ \ \ schema.\ I.e.,\ fields\ used\ as\ "{}type\ parameters"{},\ like\ \`{}\`{}str\`{}\`{}\ and\ \`{}\`{}int\`{}\`{}\ in\ \`{}\`{}Tuple[str,\ int]\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00696}00696\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00697}00697\ \ \ \ \ sub\_fields\ =\ cast(List[ModelField],\ field.sub\_fields)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00698}00698\ \ \ \ \ definitions\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00699}00699\ \ \ \ \ nested\_models:\ Set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00700}00700\ \ \ \ \ \textcolor{keywordflow}{if}\ len(sub\_fields)\ ==\ 1:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00701}00701\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a4e385cef02d641ae49fca102d65adedd}{field\_type\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00702}00702\ \ \ \ \ \ \ \ \ \ \ \ \ sub\_fields[0],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00703}00703\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00704}00704\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00705}00705\ \ \ \ \ \ \ \ \ \ \ \ \ schema\_overrides=schema\_overrides,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00706}00706\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00707}00707\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00708}00708\ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00709}00709\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00710}00710\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00711}00711\ \ \ \ \ \ \ \ \ s:\ Dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00712}00712\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ https://github.com/OAI/OpenAPI-\/Specification/blob/master/versions/3.0.2.md\#discriminator-\/object}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00713}00713\ \ \ \ \ \ \ \ \ field\_has\_discriminator:\ bool\ =\ field.discriminator\_key\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00714}00714\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field\_has\_discriminator:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00715}00715\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ field.sub\_fields\_mapping\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00716}00716\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00717}00717\ \ \ \ \ \ \ \ \ \ \ \ \ discriminator\_models\_refs:\ Dict[str,\ Union[str,\ Dict[str,\ Any]]]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00718}00718\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00719}00719\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ discriminator\_value,\ sub\_field\ \textcolor{keywordflow}{in}\ field.sub\_fields\_mapping.items():}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00720}00720\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(discriminator\_value,\ Enum):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00721}00721\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ discriminator\_value\ =\ str(discriminator\_value.value)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00722}00722\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ sub\_field\ is\ either\ a\ \`{}BaseModel`\ or\ directly\ an\ \`{}Annotated`\ \`{}Union`\ of\ many}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00723}00723\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_union(get\_origin(sub\_field.type\_)):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00724}00724\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sub\_models\ =\ get\_sub\_types(sub\_field.type\_)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00725}00725\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ discriminator\_models\_refs[discriminator\_value]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00726}00726\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map[sub\_model]:\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a044b24dafe5dd690889a1ef22bbf67ea}{get\_schema\_ref}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00727}00727\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map[sub\_model],\ ref\_prefix,\ ref\_template,\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00728}00728\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00729}00729\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sub\_model\ \textcolor{keywordflow}{in}\ sub\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00730}00730\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00731}00731\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00732}00732\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sub\_field\_type\ =\ sub\_field.type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00733}00733\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(sub\_field\_type,\ \textcolor{stringliteral}{'\_\_pydantic\_model\_\_'}):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00734}00734\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sub\_field\_type\ =\ sub\_field\_type.\_\_pydantic\_model\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00735}00735\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00736}00736\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ discriminator\_model\_name\ =\ model\_name\_map[sub\_field\_type]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00737}00737\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ discriminator\_model\_ref\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a044b24dafe5dd690889a1ef22bbf67ea}{get\_schema\_ref}}(discriminator\_model\_name,\ ref\_prefix,\ ref\_template,\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00738}00738\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ discriminator\_models\_refs[discriminator\_value]\ =\ discriminator\_model\_ref[\textcolor{stringliteral}{'\$ref'}]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00739}00739\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00740}00740\ \ \ \ \ \ \ \ \ \ \ \ \ s[\textcolor{stringliteral}{'discriminator'}]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00741}00741\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'propertyName'}:\ field.discriminator\_alias\ \textcolor{keywordflow}{if}\ by\_alias\ \textcolor{keywordflow}{else}\ field.discriminator\_key,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00742}00742\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'mapping'}:\ discriminator\_models\_refs,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00743}00743\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00744}00744\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00745}00745\ \ \ \ \ \ \ \ \ sub\_field\_schemas\ =\ []}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00746}00746\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sf\ \textcolor{keywordflow}{in}\ sub\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00747}00747\ \ \ \ \ \ \ \ \ \ \ \ \ sub\_schema,\ sub\_definitions,\ sub\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a4e385cef02d641ae49fca102d65adedd}{field\_type\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00748}00748\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sf,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00749}00749\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00750}00750\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00751}00751\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ schema\_overrides=schema\_overrides,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00752}00752\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00753}00753\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00754}00754\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00755}00755\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00756}00756\ \ \ \ \ \ \ \ \ \ \ \ \ definitions.update(sub\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00757}00757\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ schema\_overrides\ \textcolor{keywordflow}{and}\ \textcolor{stringliteral}{'allOf'}\ \textcolor{keywordflow}{in}\ sub\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00758}00758\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ if\ the\ sub\_field\ is\ a\ referenced\ schema\ we\ only\ need\ the\ referenced}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00759}00759\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ object.\ Otherwise\ we\ will\ end\ up\ with\ several\ allOf\ inside\ anyOf/oneOf.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00760}00760\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ See\ https://github.com/pydantic/pydantic/issues/1209}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00761}00761\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sub\_schema\ =\ sub\_schema[\textcolor{stringliteral}{'allOf'}][0]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00762}00762\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00763}00763\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sub\_schema.keys()\ ==\ \{\textcolor{stringliteral}{'discriminator'},\ \textcolor{stringliteral}{'oneOf'}\}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00764}00764\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ don't\ want\ discriminator\ information\ inside\ oneOf\ choices,\ this\ is\ dealt\ with\ elsewhere}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00765}00765\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sub\_schema.pop(\textcolor{stringliteral}{'discriminator'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00766}00766\ \ \ \ \ \ \ \ \ \ \ \ \ sub\_field\_schemas.append(sub\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00767}00767\ \ \ \ \ \ \ \ \ \ \ \ \ nested\_models.update(sub\_nested\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00768}00768\ \ \ \ \ \ \ \ \ s[\textcolor{stringliteral}{'oneOf'}\ \textcolor{keywordflow}{if}\ field\_has\_discriminator\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'anyOf'}]\ =\ sub\_field\_schemas}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00769}00769\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ s,\ definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00770}00770\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00772}00772\ \textcolor{comment}{\#\ Order\ is\ important,\ e.g.\ subclasses\ of\ str\ must\ go\ before\ str}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00773}00773\ \textcolor{comment}{\#\ this\ is\ used\ only\ for\ standard\ library\ types,\ custom\ types\ should\ use\ \_\_modify\_schema\_\_\ instead}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00774}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af73de6125ab5061a98dd882840193719}{00774}}\ field\_class\_to\_schema:\ Tuple[Tuple[Any,\ Dict[str,\ Any]],\ ...]\ =\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00775}00775\ \ \ \ \ (Path,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'path'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00776}00776\ \ \ \ \ (datetime,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'date-\/time'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00777}00777\ \ \ \ \ (date,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'date'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00778}00778\ \ \ \ \ (time,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'time'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00779}00779\ \ \ \ \ (timedelta,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'number'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'time-\/delta'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00780}00780\ \ \ \ \ (IPv4Network,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'ipv4network'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00781}00781\ \ \ \ \ (IPv6Network,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'ipv6network'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00782}00782\ \ \ \ \ (IPv4Interface,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'ipv4interface'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00783}00783\ \ \ \ \ (IPv6Interface,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'ipv6interface'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00784}00784\ \ \ \ \ (IPv4Address,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'ipv4'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00785}00785\ \ \ \ \ (IPv6Address,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'ipv6'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00786}00786\ \ \ \ \ (Pattern,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'regex'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00787}00787\ \ \ \ \ (str,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00788}00788\ \ \ \ \ (bytes,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'binary'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00789}00789\ \ \ \ \ (bool,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'boolean'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00790}00790\ \ \ \ \ (int,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'integer'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00791}00791\ \ \ \ \ (float,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'number'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00792}00792\ \ \ \ \ (Decimal,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'number'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00793}00793\ \ \ \ \ (UUID,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'uuid'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00794}00794\ \ \ \ \ (dict,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'object'}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00795}00795\ \ \ \ \ (list,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},\ \textcolor{stringliteral}{'items'}:\ \{\}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00796}00796\ \ \ \ \ (tuple,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},\ \textcolor{stringliteral}{'items'}:\ \{\}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00797}00797\ \ \ \ \ (set,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},\ \textcolor{stringliteral}{'items'}:\ \{\},\ \textcolor{stringliteral}{'uniqueItems'}:\ \textcolor{keyword}{True}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00798}00798\ \ \ \ \ (frozenset,\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},\ \textcolor{stringliteral}{'items'}:\ \{\},\ \textcolor{stringliteral}{'uniqueItems'}:\ \textcolor{keyword}{True}\}),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00799}00799\ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00800}00800\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00801}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a9f4bf1706c3eea47f2cdb18b5bec448d}{00801}}\ json\_scheme\ =\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'string'},\ \textcolor{stringliteral}{'format'}:\ \textcolor{stringliteral}{'json-\/string'}\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00802}00802\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00803}00803\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00804}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37d9cf3d1fa1b73d9fabe76d42ca841a}{00804}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37d9cf3d1fa1b73d9fabe76d42ca841a}{add\_field\_type\_to\_schema}}(field\_type:\ Any,\ schema\_:\ Dict[str,\ Any])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00805}00805\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00806}00806\ \textcolor{stringliteral}{\ \ \ \ Update\ the\ given\ \`{}schema\`{}\ with\ the\ type-\/specific\ metadata\ for\ the\ given\ \`{}field\_type\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00807}00807\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00808}00808\ \textcolor{stringliteral}{\ \ \ \ This\ function\ looks\ through\ \`{}field\_class\_to\_schema\`{}\ for\ a\ class\ that\ matches\ the\ given\ \`{}field\_type\`{},}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00809}00809\ \textcolor{stringliteral}{\ \ \ \ and\ then\ modifies\ the\ given\ \`{}schema\`{}\ with\ the\ information\ from\ that\ type.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00810}00810\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00811}00811\ \ \ \ \ \textcolor{keywordflow}{for}\ type\_,\ t\_schema\ \textcolor{keywordflow}{in}\ field\_class\_to\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00812}00812\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Fallback\ for\ \`{}typing.Pattern`\ and\ \`{}re.Pattern`\ as\ they\ are\ not\ a\ valid\ class}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00813}00813\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ lenient\_issubclass(field\_type,\ type\_)\ \textcolor{keywordflow}{or}\ field\_type\ \textcolor{keywordflow}{is}\ type\_\ \textcolor{keywordflow}{is}\ Pattern:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00814}00814\ \ \ \ \ \ \ \ \ \ \ \ \ schema\_.update(t\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00815}00815\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00816}00816\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00817}00817\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00818}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a044b24dafe5dd690889a1ef22bbf67ea}{00818}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a044b24dafe5dd690889a1ef22bbf67ea}{get\_schema\_ref}}(name:\ str,\ ref\_prefix:\ Optional[str],\ ref\_template:\ str,\ schema\_overrides:\ bool)\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00819}00819\ \ \ \ \ \textcolor{keywordflow}{if}\ ref\_prefix:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00820}00820\ \ \ \ \ \ \ \ \ schema\_ref\ =\ \{\textcolor{stringliteral}{'\$ref'}:\ ref\_prefix\ +\ name\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00821}00821\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00822}00822\ \ \ \ \ \ \ \ \ schema\_ref\ =\ \{\textcolor{stringliteral}{'\$ref'}:\ ref\_template.format(model=name)\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00823}00823\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\textcolor{stringliteral}{'allOf'}:\ [schema\_ref]\}\ \textcolor{keywordflow}{if}\ schema\_overrides\ \textcolor{keywordflow}{else}\ schema\_ref}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00824}00824\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00825}00825\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00826}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a460a43ffebaffd19e79dfc4daa085bd9}{00826}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a460a43ffebaffd19e79dfc4daa085bd9}{field\_singleton\_schema}}(\ \ \textcolor{comment}{\#\ noqa:\ C901\ (ignore\ complexity)}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00827}00827\ \ \ \ \ field:\ ModelField,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00828}00828\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00829}00829\ \ \ \ \ by\_alias:\ bool,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00830}00830\ \ \ \ \ model\_name\_map:\ Dict[TypeModelOrEnum,\ str],}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00831}00831\ \ \ \ \ ref\_template:\ str,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00832}00832\ \ \ \ \ schema\_overrides:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00833}00833\ \ \ \ \ ref\_prefix:\ Optional[str]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00834}00834\ \ \ \ \ known\_models:\ TypeModelSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00835}00835\ )\ -\/>\ Tuple[Dict[str,\ Any],\ Dict[str,\ Any],\ Set[str]]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00836}00836\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00837}00837\ \textcolor{stringliteral}{\ \ \ \ This\ function\ is\ indirectly\ used\ by\ \`{}\`{}field\_schema()\`{}\`{},\ you\ should\ probably\ be\ using\ that\ function.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00838}00838\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00839}00839\ \textcolor{stringliteral}{\ \ \ \ Take\ a\ single\ Pydantic\ \`{}\`{}ModelField\`{}\`{},\ and\ return\ its\ schema\ and\ any\ additional\ definitions\ from\ sub-\/models.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00840}00840\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00841}00841\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1main}{pydantic.v1.main}}\ \textcolor{keyword}{import}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00842}00842\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00843}00843\ \ \ \ \ definitions:\ Dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00844}00844\ \ \ \ \ nested\_models:\ Set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00845}00845\ \ \ \ \ field\_type\ =\ field.type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00846}00846\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00847}00847\ \ \ \ \ \textcolor{comment}{\#\ Recurse\ into\ this\ field\ if\ it\ contains\ sub\_fields\ and\ is\ NOT\ a}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00848}00848\ \ \ \ \ \textcolor{comment}{\#\ BaseModel\ OR\ that\ BaseModel\ is\ a\ const}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00849}00849\ \ \ \ \ \textcolor{keywordflow}{if}\ field.sub\_fields\ \textcolor{keywordflow}{and}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00850}00850\ \ \ \ \ \ \ \ \ (field.field\_info\ \textcolor{keywordflow}{and}\ field.field\_info.const)\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ lenient\_issubclass(field\_type,\ BaseModel)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00851}00851\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00852}00852\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a21cb5357ace0ab92f28fec91025a9a0c}{field\_singleton\_sub\_fields\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00853}00853\ \ \ \ \ \ \ \ \ \ \ \ \ field,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00854}00854\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00855}00855\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00856}00856\ \ \ \ \ \ \ \ \ \ \ \ \ schema\_overrides=schema\_overrides,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00857}00857\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00859}00859\ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00860}00860\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00861}00861\ \ \ \ \ \textcolor{keywordflow}{if}\ field\_type\ \textcolor{keywordflow}{is}\ Any\ \textcolor{keywordflow}{or}\ field\_type\ \textcolor{keywordflow}{is}\ object\ \textcolor{keywordflow}{or}\ field\_type.\_\_class\_\_\ ==\ TypeVar\ \textcolor{keywordflow}{or}\ get\_origin(field\_type)\ \textcolor{keywordflow}{is}\ type:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00862}00862\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\},\ definitions,\ nested\_models\ \ \textcolor{comment}{\#\ no\ restrictions}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00863}00863\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_none\_type(field\_type):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00864}00864\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'null'}\},\ definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00865}00865\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_callable\_type(field\_type):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00866}00866\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1schema_1_1_skip_field}{SkipField}}(f\textcolor{stringliteral}{'Callable\ \{field.name\}\ was\ excluded\ from\ schema\ since\ JSON\ schema\ has\ no\ equivalent\ type.'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00867}00867\ \ \ \ \ f\_schema:\ Dict[str,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00868}00868\ \ \ \ \ \textcolor{keywordflow}{if}\ field.field\_info\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ field.field\_info.const:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00869}00869\ \ \ \ \ \ \ \ \ f\_schema[\textcolor{stringliteral}{'const'}]\ =\ field.default}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00870}00870\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00871}00871\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_literal\_type(field\_type):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00872}00872\ \ \ \ \ \ \ \ \ values\ =\ tuple(x.value\ \textcolor{keywordflow}{if}\ isinstance(x,\ Enum)\ \textcolor{keywordflow}{else}\ x\ \textcolor{keywordflow}{for}\ x\ \textcolor{keywordflow}{in}\ all\_literal\_values(field\_type))}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00873}00873\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00874}00874\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(\{v.\_\_class\_\_\ \textcolor{keywordflow}{for}\ v\ \textcolor{keywordflow}{in}\ values\})\ >\ 1:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00875}00875\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a143b45ba59ca329472ebe1f79c84664c}{field\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00876}00876\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a6cc715eb4e79a7160e1bd0e889793457}{multitypes\_literal\_field\_for\_schema}}(values,\ field),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00877}00877\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00878}00878\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00879}00879\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00880}00880\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00881}00881\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00882}00882\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00883}00883\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00884}00884\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ All\ values\ have\ the\ same\ type}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00885}00885\ \ \ \ \ \ \ \ \ field\_type\ =\ values[0].\_\_class\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00886}00886\ \ \ \ \ \ \ \ \ f\_schema[\textcolor{stringliteral}{'enum'}]\ =\ list(values)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00887}00887\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37d9cf3d1fa1b73d9fabe76d42ca841a}{add\_field\_type\_to\_schema}}(field\_type,\ f\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00888}00888\ \ \ \ \ \textcolor{keywordflow}{elif}\ lenient\_issubclass(field\_type,\ Enum):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00889}00889\ \ \ \ \ \ \ \ \ enum\_name\ =\ model\_name\_map[field\_type]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00890}00890\ \ \ \ \ \ \ \ \ f\_schema,\ schema\_overrides\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a085485590e216879d83d4581c389caa1}{get\_field\_info\_schema}}(field,\ schema\_overrides)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00891}00891\ \ \ \ \ \ \ \ \ f\_schema.update(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a044b24dafe5dd690889a1ef22bbf67ea}{get\_schema\_ref}}(enum\_name,\ ref\_prefix,\ ref\_template,\ schema\_overrides))}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00892}00892\ \ \ \ \ \ \ \ \ definitions[enum\_name]\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a41af3271d8b4a90a26fa751433c59315}{enum\_process\_schema}}(field\_type,\ field=field)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00893}00893\ \ \ \ \ \textcolor{keywordflow}{elif}\ is\_namedtuple(field\_type):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00894}00894\ \ \ \ \ \ \ \ \ sub\_schema,\ *\_\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af35f332620e82b46dc3716d336931da2}{model\_process\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00895}00895\ \ \ \ \ \ \ \ \ \ \ \ \ field\_type.\_\_pydantic\_model\_\_,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00896}00896\ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00897}00897\ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00898}00898\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00899}00899\ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00900}00900\ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00901}00901\ \ \ \ \ \ \ \ \ \ \ \ \ field=field,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00902}00902\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00903}00903\ \ \ \ \ \ \ \ \ items\_schemas\ =\ list(sub\_schema[\textcolor{stringliteral}{'properties'}].values())}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00904}00904\ \ \ \ \ \ \ \ \ f\_schema.update(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00905}00905\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00906}00906\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'type'}:\ \textcolor{stringliteral}{'array'},}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00907}00907\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'items'}:\ items\_schemas,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00908}00908\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'minItems'}:\ len(items\_schemas),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00909}00909\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'maxItems'}:\ len(items\_schemas),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00910}00910\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00911}00911\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00912}00912\ \ \ \ \ \textcolor{keywordflow}{elif}\ \textcolor{keywordflow}{not}\ hasattr(field\_type,\ \textcolor{stringliteral}{'\_\_pydantic\_model\_\_'}):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00913}00913\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a37d9cf3d1fa1b73d9fabe76d42ca841a}{add\_field\_type\_to\_schema}}(field\_type,\ f\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00914}00914\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00915}00915\ \ \ \ \ \ \ \ \ modify\_schema\ =\ getattr(field\_type,\ \textcolor{stringliteral}{'\_\_modify\_schema\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00916}00916\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ modify\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00917}00917\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ae5c4de23840082adfe3871779fc1bc05}{\_apply\_modify\_schema}}(modify\_schema,\ field,\ f\_schema)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00918}00918\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00919}00919\ \ \ \ \ \textcolor{keywordflow}{if}\ f\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00920}00920\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\_schema,\ definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00921}00921\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00922}00922\ \ \ \ \ \textcolor{comment}{\#\ Handle\ dataclass-\/based\ models}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00923}00923\ \ \ \ \ \textcolor{keywordflow}{if}\ lenient\_issubclass(getattr(field\_type,\ \textcolor{stringliteral}{'\_\_pydantic\_model\_\_'},\ \textcolor{keywordtype}{None}),\ BaseModel):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00924}00924\ \ \ \ \ \ \ \ \ field\_type\ =\ field\_type.\_\_pydantic\_model\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00925}00925\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00926}00926\ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(field\_type,\ BaseModel):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00927}00927\ \ \ \ \ \ \ \ \ model\_name\ =\ model\_name\_map[field\_type]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00928}00928\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field\_type\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ known\_models:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00929}00929\ \ \ \ \ \ \ \ \ \ \ \ \ sub\_schema,\ sub\_definitions,\ sub\_nested\_models\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_af35f332620e82b46dc3716d336931da2}{model\_process\_schema}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00930}00930\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ field\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00931}00931\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ by\_alias=by\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00932}00932\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_name\_map=model\_name\_map,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00933}00933\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_prefix=ref\_prefix,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00934}00934\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ref\_template=ref\_template,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00935}00935\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ known\_models=known\_models,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00936}00936\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ field=field,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00937}00937\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00938}00938\ \ \ \ \ \ \ \ \ \ \ \ \ definitions.update(sub\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00939}00939\ \ \ \ \ \ \ \ \ \ \ \ \ definitions[model\_name]\ =\ sub\_schema}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00940}00940\ \ \ \ \ \ \ \ \ \ \ \ \ nested\_models.update(sub\_nested\_models)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00941}00941\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00942}00942\ \ \ \ \ \ \ \ \ \ \ \ \ nested\_models.add(model\_name)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00943}00943\ \ \ \ \ \ \ \ \ schema\_ref\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a044b24dafe5dd690889a1ef22bbf67ea}{get\_schema\_ref}}(model\_name,\ ref\_prefix,\ ref\_template,\ schema\_overrides)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00944}00944\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ schema\_ref,\ definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00945}00945\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00946}00946\ \ \ \ \ \textcolor{comment}{\#\ For\ generics\ with\ no\ args}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00947}00947\ \ \ \ \ args\ =\ get\_args(field\_type)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00948}00948\ \ \ \ \ \textcolor{keywordflow}{if}\ args\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ args\ \textcolor{keywordflow}{and}\ Generic\ \textcolor{keywordflow}{in}\ field\_type.\_\_bases\_\_:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00949}00949\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\_schema,\ definitions,\ nested\_models}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00950}00950\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00951}00951\ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(f\textcolor{stringliteral}{'Value\ not\ declarable\ with\ JSON\ Schema,\ field:\ \{field\}'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00952}00952\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00953}00953\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00954}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a6cc715eb4e79a7160e1bd0e889793457}{00954}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a6cc715eb4e79a7160e1bd0e889793457}{multitypes\_literal\_field\_for\_schema}}(values:\ Tuple[Any,\ ...],\ field:\ ModelField)\ -\/>\ ModelField:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00955}00955\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00956}00956\ \textcolor{stringliteral}{\ \ \ \ To\ support\ \`{}Literal\`{}\ with\ values\ of\ different\ types,\ we\ split\ it\ into\ multiple\ \`{}Literal\`{}\ with\ same\ type}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00957}00957\ \textcolor{stringliteral}{\ \ \ \ e.g.\ \`{}Literal['qwe',\ 'asd',\ 1,\ 2]\`{}\ becomes\ \`{}Union[Literal['qwe',\ 'asd'],\ Literal[1,\ 2]]\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00958}00958\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00959}00959\ \ \ \ \ literal\_distinct\_types\ =\ defaultdict(list)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00960}00960\ \ \ \ \ \textcolor{keywordflow}{for}\ v\ \textcolor{keywordflow}{in}\ values:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00961}00961\ \ \ \ \ \ \ \ \ literal\_distinct\_types[v.\_\_class\_\_].append(v)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00962}00962\ \ \ \ \ distinct\_literals\ =\ (Literal[tuple(same\_type\_values)]\ \textcolor{keywordflow}{for}\ same\_type\_values\ \textcolor{keywordflow}{in}\ literal\_distinct\_types.values())}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00963}00963\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00964}00964\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1fields_1_1_model_field}{ModelField}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00965}00965\ \ \ \ \ \ \ \ \ name=field.name,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00966}00966\ \ \ \ \ \ \ \ \ type\_=Union[tuple(distinct\_literals)],\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00967}00967\ \ \ \ \ \ \ \ \ class\_validators=field.class\_validators,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00968}00968\ \ \ \ \ \ \ \ \ model\_config=field.model\_config,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00969}00969\ \ \ \ \ \ \ \ \ default=field.default,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00970}00970\ \ \ \ \ \ \ \ \ required=field.required,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00971}00971\ \ \ \ \ \ \ \ \ alias=field.alias,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00972}00972\ \ \ \ \ \ \ \ \ field\_info=field.field\_info,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00973}00973\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00974}00974\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00975}00975\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00976}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aec25df6929d6a5074b37de352ca25bd1}{00976}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aec25df6929d6a5074b37de352ca25bd1}{encode\_default}}(dft:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00977}00977\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1main}{pydantic.v1.main}}\ \textcolor{keyword}{import}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00978}00978\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00979}00979\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(dft,\ BaseModel)\ \textcolor{keywordflow}{or}\ is\_dataclass(dft):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00980}00980\ \ \ \ \ \ \ \ \ dft\ =\ cast(\textcolor{stringliteral}{'dict[str,\ Any]'},\ pydantic\_encoder(dft))}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00981}00981\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00982}00982\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(dft,\ dict):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00983}00983\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aec25df6929d6a5074b37de352ca25bd1}{encode\_default}}(k):\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aec25df6929d6a5074b37de352ca25bd1}{encode\_default}}(v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ dft.items()\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00984}00984\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(dft,\ Enum):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00985}00985\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dft.value}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00986}00986\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(dft,\ (int,\ float,\ str)):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00987}00987\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dft}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00988}00988\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(dft,\ (list,\ tuple)):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00989}00989\ \ \ \ \ \ \ \ \ t\ =\ dft.\_\_class\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00990}00990\ \ \ \ \ \ \ \ \ seq\_args\ =\ (\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aec25df6929d6a5074b37de352ca25bd1}{encode\_default}}(v)\ \textcolor{keywordflow}{for}\ v\ \textcolor{keywordflow}{in}\ dft)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00991}00991\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacet}{t}}(*seq\_args)\ \textcolor{keywordflow}{if}\ is\_namedtuple(t)\ \textcolor{keywordflow}{else}\ \mbox{\hyperlink{namespacet}{t}}(seq\_args)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00992}00992\ \ \ \ \ \textcolor{keywordflow}{elif}\ dft\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00993}00993\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00994}00994\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00995}00995\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pydantic\_encoder(dft)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00996}00996\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00997}00997\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00998}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_aae474cddbd5ce833975abb3dde048cad}{00998}}\ \_map\_types\_constraint:\ Dict[Any,\ Callable[...,\ type]]\ =\ \{int:\ conint,\ float:\ confloat,\ Decimal:\ condecimal\}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l00999}00999\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01000}01000\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01001}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ad436a56e986536783b4b8f779a45fde1}{01001}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_ad436a56e986536783b4b8f779a45fde1}{get\_annotation\_from\_field\_info}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01002}01002\ \ \ \ \ annotation:\ Any,\ field\_info:\ FieldInfo,\ field\_name:\ str,\ validate\_assignment:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01003}01003\ )\ -\/>\ Type[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01004}01004\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01005}01005\ \textcolor{stringliteral}{\ \ \ \ Get\ an\ annotation\ with\ validation\ implemented\ for\ numbers\ and\ strings\ based\ on\ the\ field\_info.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01006}01006\ \textcolor{stringliteral}{\ \ \ \ :param\ annotation:\ an\ annotation\ from\ a\ field\ specification,\ as\ \`{}\`{}str\`{}\`{},\ \`{}\`{}ConstrainedStr\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01007}01007\ \textcolor{stringliteral}{\ \ \ \ :param\ field\_info:\ an\ instance\ of\ FieldInfo,\ possibly\ with\ declarations\ for\ validations\ and\ JSON\ Schema}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01008}01008\ \textcolor{stringliteral}{\ \ \ \ :param\ field\_name:\ name\ of\ the\ field\ for\ use\ in\ error\ messages}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01009}01009\ \textcolor{stringliteral}{\ \ \ \ :param\ validate\_assignment:\ default\ False,\ flag\ for\ BaseModel\ Config\ value\ of\ validate\_assignment}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01010}01010\ \textcolor{stringliteral}{\ \ \ \ :return:\ the\ same\ \`{}\`{}annotation\`{}\`{}\ if\ unmodified\ or\ a\ new\ annotation\ with\ validation\ in\ place}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01011}01011\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01012}01012\ \ \ \ \ constraints\ =\ field\_info.get\_constraints()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01013}01013\ \ \ \ \ used\_constraints:\ Set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01014}01014\ \ \ \ \ \textcolor{keywordflow}{if}\ constraints:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01015}01015\ \ \ \ \ \ \ \ \ annotation,\ used\_constraints\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a233ad4212b547e919249c343b07461ff}{get\_annotation\_with\_constraints}}(annotation,\ field\_info)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01016}01016\ \ \ \ \ \textcolor{keywordflow}{if}\ validate\_assignment:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01017}01017\ \ \ \ \ \ \ \ \ used\_constraints.add(\textcolor{stringliteral}{'allow\_mutation'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01018}01018\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01019}01019\ \ \ \ \ unused\_constraints\ =\ constraints\ -\/\ used\_constraints}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01020}01020\ \ \ \ \ \textcolor{keywordflow}{if}\ unused\_constraints:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01021}01021\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01022}01022\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'On\ field\ "{}\{field\_name\}"{}\ the\ following\ field\ constraints\ are\ set\ but\ not\ enforced:\ '}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01023}01023\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\{"{},\ "{}.join(unused\_constraints)\}.\ '}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01024}01024\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\(\backslash\)nFor\ more\ details\ see\ https://docs.pydantic.dev/usage/schema/\#unenforced-\/field-\/constraints'}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01025}01025\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01026}01026\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01027}01027\ \ \ \ \ \textcolor{keywordflow}{return}\ annotation}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01028}01028\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01029}01029\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01030}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a233ad4212b547e919249c343b07461ff}{01030}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a233ad4212b547e919249c343b07461ff}{get\_annotation\_with\_constraints}}(annotation:\ Any,\ field\_info:\ FieldInfo)\ -\/>\ Tuple[Type[Any],\ Set[str]]:\ \ \textcolor{comment}{\#\ noqa:\ C901}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01031}01031\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01032}01032\ \textcolor{stringliteral}{\ \ \ \ Get\ an\ annotation\ with\ used\ constraints\ implemented\ for\ numbers\ and\ strings\ based\ on\ the\ field\_info.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01033}01033\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01034}01034\ \textcolor{stringliteral}{\ \ \ \ :param\ annotation:\ an\ annotation\ from\ a\ field\ specification,\ as\ \`{}\`{}str\`{}\`{},\ \`{}\`{}ConstrainedStr\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01035}01035\ \textcolor{stringliteral}{\ \ \ \ :param\ field\_info:\ an\ instance\ of\ FieldInfo,\ possibly\ with\ declarations\ for\ validations\ and\ JSON\ Schema}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01036}01036\ \textcolor{stringliteral}{\ \ \ \ :return:\ the\ same\ \`{}\`{}annotation\`{}\`{}\ if\ unmodified\ or\ a\ new\ annotation\ along\ with\ the\ used\ constraints.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01037}01037\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01038}01038\ \ \ \ \ used\_constraints:\ Set[str]\ =\ set()}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01039}01039\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01040}01040\ \ \ \ \ \textcolor{keyword}{def\ }go(type\_:\ Any)\ -\/>\ Type[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01041}01041\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01042}01042\ \ \ \ \ \ \ \ \ \ \ \ \ is\_literal\_type(type\_)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01043}01043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ isinstance(type\_,\ ForwardRef)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01044}01044\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ lenient\_issubclass(type\_,\ (ConstrainedList,\ ConstrainedSet,\ ConstrainedFrozenSet))}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01045}01045\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01046}01046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01047}01047\ \ \ \ \ \ \ \ \ origin\ =\ get\_origin(type\_)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01048}01048\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ origin\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01049}01049\ \ \ \ \ \ \ \ \ \ \ \ \ args:\ Tuple[Any,\ ...]\ =\ get\_args(type\_)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01050}01050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ any(isinstance(a,\ ForwardRef)\ \textcolor{keywordflow}{for}\ a\ \textcolor{keywordflow}{in}\ args):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01051}01051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ forward\ refs\ cause\ infinite\ recursion\ below}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01052}01052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01053}01053\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01054}01054\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ origin\ \textcolor{keywordflow}{is}\ Annotated:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01055}01055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ go(args[0])}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01056}01056\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_union(origin):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01057}01057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Union[tuple(go(a)\ \textcolor{keywordflow}{for}\ a\ \textcolor{keywordflow}{in}\ args)]\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01058}01058\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01059}01059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(origin,\ List)\ \textcolor{keywordflow}{and}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01060}01060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ field\_info.min\_items\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01061}01061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ field\_info.max\_items\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01062}01062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ field\_info.unique\_items\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01063}01063\ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01064}01064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ used\_constraints.update(\{\textcolor{stringliteral}{'min\_items'},\ \textcolor{stringliteral}{'max\_items'},\ \textcolor{stringliteral}{'unique\_items'}\})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01065}01065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1types_ab7f73f986910f3c04e210fc9e6ac51c2}{conlist}}(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01066}01066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ go(args[0]),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01067}01067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ min\_items=field\_info.min\_items,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01068}01068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ max\_items=field\_info.max\_items,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01069}01069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ unique\_items=field\_info.unique\_items,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01070}01070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01071}01071\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01072}01072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(origin,\ Set)\ \textcolor{keywordflow}{and}\ (field\_info.min\_items\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{or}\ field\_info.max\_items\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01073}01073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ used\_constraints.update(\{\textcolor{stringliteral}{'min\_items'},\ \textcolor{stringliteral}{'max\_items'}\})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01074}01074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1types_a4f21e581b2ef0c4182a5a6d86e240bc6}{conset}}(go(args[0]),\ min\_items=field\_info.min\_items,\ max\_items=field\_info.max\_items)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01075}01075\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01076}01076\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(origin,\ FrozenSet)\ \textcolor{keywordflow}{and}\ (field\_info.min\_items\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{or}\ field\_info.max\_items\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01077}01077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ used\_constraints.update(\{\textcolor{stringliteral}{'min\_items'},\ \textcolor{stringliteral}{'max\_items'}\})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01078}01078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1types_a184e11af9049d64114708295bbf8e702}{confrozenset}}(go(args[0]),\ min\_items=field\_info.min\_items,\ max\_items=field\_info.max\_items)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01079}01079\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01080}01080\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ t\ \textcolor{keywordflow}{in}\ (Tuple,\ List,\ Set,\ FrozenSet,\ Sequence):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01081}01081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(origin,\ t):\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01082}01082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ t[tuple(go(a)\ \textcolor{keywordflow}{for}\ a\ \textcolor{keywordflow}{in}\ args)]\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01083}01083\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01084}01084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(origin,\ Dict):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01085}01085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Dict[args[0],\ go(args[1])]\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01086}01086\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01087}01087\ \ \ \ \ \ \ \ \ attrs:\ Optional[Tuple[str,\ ...]]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01088}01088\ \ \ \ \ \ \ \ \ constraint\_func:\ Optional[Callable[...,\ type]]\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01089}01089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(type\_,\ type):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01090}01090\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(type\_,\ (SecretStr,\ SecretBytes)):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01091}01091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attrs\ =\ (\textcolor{stringliteral}{'max\_length'},\ \textcolor{stringliteral}{'min\_length'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01092}01092\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01093}01093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }constraint\_func(**kw:\ Any)\ -\/>\ Type[Any]:\ \ \textcolor{comment}{\#\ noqa:\ F811}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01094}01094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type(type\_.\_\_name\_\_,\ (type\_,),\ kw)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01095}01095\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01096}01096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ issubclass(type\_,\ str)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ issubclass(type\_,\ (EmailStr,\ AnyUrl)):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01097}01097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attrs\ =\ (\textcolor{stringliteral}{'max\_length'},\ \textcolor{stringliteral}{'min\_length'},\ \textcolor{stringliteral}{'regex'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01098}01098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(type\_,\ StrictStr):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01099}01099\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01100}01100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }constraint\_func(**kw:\ Any)\ -\/>\ Type[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01101}01101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type(type\_.\_\_name\_\_,\ (type\_,),\ kw)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01102}01102\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01103}01103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01104}01104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ constraint\_func\ =\ constr}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01105}01105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ issubclass(type\_,\ bytes):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01106}01106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attrs\ =\ (\textcolor{stringliteral}{'max\_length'},\ \textcolor{stringliteral}{'min\_length'},\ \textcolor{stringliteral}{'regex'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01107}01107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(type\_,\ StrictBytes):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01108}01108\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01109}01109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }constraint\_func(**kw:\ Any)\ -\/>\ Type[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01110}01110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type(type\_.\_\_name\_\_,\ (type\_,),\ kw)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01111}01111\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01112}01112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01113}01113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ constraint\_func\ =\ conbytes}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01114}01114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ issubclass(type\_,\ numeric\_types)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ issubclass(}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01115}01115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ type\_,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01116}01116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01117}01117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ConstrainedInt,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01118}01118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ConstrainedFloat,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01119}01119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ConstrainedDecimal,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01120}01120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ConstrainedList,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01121}01121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ConstrainedSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01122}01122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ConstrainedFrozenSet,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01123}01123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bool,}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01124}01124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01125}01125\ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01126}01126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Is\ numeric\ type}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01127}01127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attrs\ =\ (\textcolor{stringliteral}{'gt'},\ \textcolor{stringliteral}{'lt'},\ \textcolor{stringliteral}{'ge'},\ \textcolor{stringliteral}{'le'},\ \textcolor{stringliteral}{'multiple\_of'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01128}01128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(type\_,\ float):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01129}01129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attrs\ +=\ (\textcolor{stringliteral}{'allow\_inf\_nan'},)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01130}01130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(type\_,\ Decimal):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01131}01131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attrs\ +=\ (\textcolor{stringliteral}{'max\_digits'},\ \textcolor{stringliteral}{'decimal\_places'})}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01132}01132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ numeric\_type\ =\ next(t\ \textcolor{keywordflow}{for}\ t\ \textcolor{keywordflow}{in}\ numeric\_types\ \textcolor{keywordflow}{if}\ issubclass(type\_,\ t))\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01133}01133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ constraint\_func\ =\ \_map\_types\_constraint[numeric\_type]}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01134}01134\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01135}01135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ attrs:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01136}01136\ \ \ \ \ \ \ \ \ \ \ \ \ used\_constraints.update(set(attrs))}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01137}01137\ \ \ \ \ \ \ \ \ \ \ \ \ kwargs\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01138}01138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attr\_name:\ attr}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01139}01139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ attr\_name,\ attr\ \textcolor{keywordflow}{in}\ ((attr\_name,\ getattr(field\_info,\ attr\_name))\ \textcolor{keywordflow}{for}\ attr\_name\ \textcolor{keywordflow}{in}\ attrs)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01140}01140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ attr\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01141}01141\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01142}01142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ kwargs:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01143}01143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ constraint\_func\ =\ cast(Callable[...,\ type],\ constraint\_func)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01144}01144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ constraint\_func(**kwargs)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01145}01145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01146}01146\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01147}01147\ \ \ \ \ \textcolor{keywordflow}{return}\ go(annotation),\ used\_constraints}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01148}01148\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01149}01149\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01150}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a0852e5630819c67e4f94b861cf913633}{01150}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema_a0852e5630819c67e4f94b861cf913633}{normalize\_name}}(name:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01151}01151\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01152}01152\ \textcolor{stringliteral}{\ \ \ \ Normalizes\ the\ given\ name.\ This\ can\ be\ applied\ to\ either\ a\ model\ *or*\ enum.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01153}01153\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01154}01154\ \ \ \ \ \textcolor{keywordflow}{return}\ re.sub(\textcolor{stringliteral}{r'[\string^a-\/zA-\/Z0-\/9.\(\backslash\)-\/\_]'},\ \textcolor{stringliteral}{'\_'},\ name)}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01155}01155\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01156}01156\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01157}\mbox{\hyperlink{classpydantic_1_1v1_1_1schema_1_1_skip_field}{01157}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1schema_1_1_skip_field}{SkipField}}(Exception):}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01158}01158\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01159}01159\ \textcolor{stringliteral}{\ \ \ \ Utility\ exception\ used\ to\ exclude\ fields\ from\ schema.}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01160}01160\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01161}01161\ }
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01162}01162\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ message:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2schema_8py_source_l01163}\mbox{\hyperlink{classpydantic_1_1v1_1_1schema_1_1_skip_field_a22bb264f4f8dd82354f90bdab3e00f0f}{01163}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1schema_1_1_skip_field_a22bb264f4f8dd82354f90bdab3e00f0f}{message}}\ =\ message}
+
+\end{DoxyCode}

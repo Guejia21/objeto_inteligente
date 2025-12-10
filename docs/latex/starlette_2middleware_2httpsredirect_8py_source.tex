@@ -1,0 +1,25 @@
+\doxysection{httpsredirect.\+py}
+\hypertarget{starlette_2middleware_2httpsredirect_8py_source}{}\label{starlette_2middleware_2httpsredirect_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/middleware/httpsredirect.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/middleware/httpsredirect.py}}
+\mbox{\hyperlink{starlette_2middleware_2httpsredirect_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00001}\mbox{\hyperlink{namespacestarlette_1_1middleware_1_1httpsredirect}{00001}}\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1datastructures}{starlette.datastructures}}\ \textcolor{keyword}{import}\ URL}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00002}00002\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1responses}{starlette.responses}}\ \textcolor{keyword}{import}\ RedirectResponse}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1types}{starlette.types}}\ \textcolor{keyword}{import}\ ASGIApp,\ Receive,\ Scope,\ Send}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00006}\mbox{\hyperlink{classstarlette_1_1middleware_1_1httpsredirect_1_1_h_t_t_p_s_redirect_middleware}{00006}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1middleware_1_1httpsredirect_1_1_h_t_t_p_s_redirect_middleware}{HTTPSRedirectMiddleware}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00007}00007\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ app:\ ASGIApp)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00008}\mbox{\hyperlink{classstarlette_1_1middleware_1_1httpsredirect_1_1_h_t_t_p_s_redirect_middleware_aa987fc9ffe3b3c74a8c8e9b4d1350aaa}{00008}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1httpsredirect_1_1_h_t_t_p_s_redirect_middleware_aa987fc9ffe3b3c74a8c8e9b4d1350aaa}{app}}\ =\ app}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00010}00010\ \ \ \ \ \textcolor{keyword}{async\ def\ }\_\_call\_\_(self,\ scope:\ Scope,\ receive:\ Receive,\ send:\ Send)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00011}00011\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ scope[\textcolor{stringliteral}{"{}type"{}}]\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{"{}http"{}},\ \textcolor{stringliteral}{"{}websocket"{}})\ \textcolor{keywordflow}{and}\ scope[\textcolor{stringliteral}{"{}scheme"{}}]\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{"{}http"{}},\ \textcolor{stringliteral}{"{}ws"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00012}00012\ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}(scope=scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00013}00013\ \ \ \ \ \ \ \ \ \ \ \ \ redirect\_scheme\ =\ \{\textcolor{stringliteral}{"{}http"{}}:\ \textcolor{stringliteral}{"{}https"{}},\ \textcolor{stringliteral}{"{}ws"{}}:\ \textcolor{stringliteral}{"{}wss"{}}\}[url.scheme]}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00014}00014\ \ \ \ \ \ \ \ \ \ \ \ \ netloc\ =\ url.hostname\ \textcolor{keywordflow}{if}\ url.port\ \textcolor{keywordflow}{in}\ (80,\ 443)\ \textcolor{keywordflow}{else}\ url.netloc}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ url.replace(scheme=redirect\_scheme,\ netloc=netloc)}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00016}00016\ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_redirect_response}{RedirectResponse}}(url,\ status\_code=307)}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ \ \ \ \ await\ response(scope,\ receive,\ send)}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2middleware_2httpsredirect_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1httpsredirect_1_1_h_t_t_p_s_redirect_middleware_aa987fc9ffe3b3c74a8c8e9b4d1350aaa}{app}}(scope,\ receive,\ send)}
+
+\end{DoxyCode}

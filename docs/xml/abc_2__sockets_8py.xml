@@ -1,0 +1,430 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="abc_2__sockets_8py" kind="file" language="Python">
+    <compoundname>_sockets.py</compoundname>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute" prot="public">anyio::abc::_sockets::SocketAttribute</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider" prot="protected">anyio::abc::_sockets::_SocketProvider</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_socket_stream" prot="public">anyio::abc::_sockets::SocketStream</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream" prot="public">anyio::abc::_sockets::UNIXSocketStream</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener" prot="public">anyio::abc::_sockets::SocketListener</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_u_d_p_socket" prot="public">anyio::abc::_sockets::UDPSocket</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_d_p_socket" prot="public">anyio::abc::_sockets::ConnectedUDPSocket</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_datagram_socket" prot="public">anyio::abc::_sockets::UNIXDatagramSocket</innerclass>
+    <innerclass refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_n_i_x_datagram_socket" prot="public">anyio::abc::_sockets::ConnectedUNIXDatagramSocket</innerclass>
+    <innernamespace refid="namespaceanyio">anyio</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1abc">anyio::abc</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1abc_1_1__sockets">anyio::abc::_sockets</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespaceanyio_1_1abc_1_1__sockets" refkind="compound"><highlight class="keyword">from</highlight><highlight class="normal"><sp/>__future__<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>annotations</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>errno</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>socket</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>sys</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>abc<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>abstractmethod</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacecollections_1_1abc" kindref="compound">collections.abc</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Callable,<sp/>Collection,<sp/>Mapping</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>contextlib<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>AsyncExitStack</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>io<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>IOBase</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>ipaddress<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>IPv4Address,<sp/>IPv6Address</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>socket<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>AddressFamily</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Any,<sp/>TypeVar,<sp/>Union</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>.._core._eventloop<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>get_async_backend</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>.._core._typedattr<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>(</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/>TypedAttributeProvider,</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/>TypedAttributeSet,</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/>typed_attribute,</highlight></codeline>
+<codeline lineno="19"><highlight class="normal">)</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>._streams<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>ByteStream,<sp/>Listener,<sp/>UnreliableObjectStream</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>._tasks<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TaskGroup</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>sys.version_info<sp/>&gt;=<sp/>(3,<sp/>10):</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TypeAlias</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing_extensions<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TypeAlias</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28" refid="namespaceanyio_1_1abc_1_1__sockets_1a6803573a4836e9f379ca9b9c4aadec76" refkind="member"><highlight class="normal">IPAddressType:<sp/>TypeAlias<sp/>=<sp/>Union[str,<sp/>IPv4Address,<sp/>IPv6Address]</highlight></codeline>
+<codeline lineno="29" refid="namespaceanyio_1_1abc_1_1__sockets_1a75ca2fa86f7f94638565df318fd45a88" refkind="member"><highlight class="normal">IPSockAddrType:<sp/>TypeAlias<sp/>=<sp/>tuple[str,<sp/>int]</highlight></codeline>
+<codeline lineno="30" refid="namespaceanyio_1_1abc_1_1__sockets_1adf889ee48c023489682b5f7d57140304" refkind="member"><highlight class="normal">SockAddrType:<sp/>TypeAlias<sp/>=<sp/>Union[IPSockAddrType,<sp/>str]</highlight></codeline>
+<codeline lineno="31" refid="namespaceanyio_1_1abc_1_1__sockets_1a1a1a3ff944260dd3e37da8bdc45f1a16" refkind="member"><highlight class="normal">UDPPacketType:<sp/>TypeAlias<sp/>=<sp/>tuple[bytes,<sp/>IPSockAddrType]</highlight></codeline>
+<codeline lineno="32" refid="namespaceanyio_1_1abc_1_1__sockets_1ad6212c1c75113e0e68764a384500b50d" refkind="member"><highlight class="normal">UNIXDatagramPacketType:<sp/>TypeAlias<sp/>=<sp/>tuple[bytes,<sp/>str]</highlight></codeline>
+<codeline lineno="33" refid="namespaceanyio_1_1abc_1_1__sockets_1a00e83d266f607ab77b7a9be913345101" refkind="member"><highlight class="normal">T_Retval<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&quot;T_Retval&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36" refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int,</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/>sock_type:<sp/>socket.SocketKind,</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/>addr_family:<sp/>socket.AddressFamily<sp/>=<sp/>socket.AF_UNSPEC,</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>*,</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/>require_connected:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>require_bound:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="43"><highlight class="normal">)<sp/>-&gt;<sp/>socket.socket:</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>isinstance(sock_or_fd,<sp/>int):</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/>socket.socket(fileno=sock_or_fd)</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>OSError<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>exc:</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>exc.errno<sp/>==<sp/>errno.ENOTSOCK:</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>ValueError(</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;the<sp/>file<sp/>descriptor<sp/>does<sp/>not<sp/>refer<sp/>to<sp/>a<sp/>socket&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)<sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>exc</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">elif</highlight><highlight class="normal"><sp/>require_connected:</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>ValueError(</highlight><highlight class="stringliteral">&quot;the<sp/>socket<sp/>must<sp/>be<sp/>connected&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>exc</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">elif</highlight><highlight class="normal"><sp/>require_bound:</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>ValueError(</highlight><highlight class="stringliteral">&quot;the<sp/>socket<sp/>must<sp/>be<sp/>bound<sp/>to<sp/>a<sp/>local<sp/>address&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>exc</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">elif</highlight><highlight class="normal"><sp/>isinstance(sock_or_fd,<sp/>socket.socket):</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/>sock_or_fd</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>TypeError(</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>f</highlight><highlight class="stringliteral">&quot;expected<sp/>an<sp/>int<sp/>or<sp/>socket,<sp/>got<sp/>{type(sock_or_fd).__qualname__}<sp/>instead&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>require_connected:</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock.getpeername()</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>OSError<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>exc:</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>ValueError(</highlight><highlight class="stringliteral">&quot;the<sp/>socket<sp/>must<sp/>be<sp/>connected&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>exc</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>require_bound:</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>sock.family<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>(socket.AF_INET,<sp/>socket.AF_INET6):</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>bound_addr<sp/>=<sp/>sock.getsockname()[1]</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>bound_addr<sp/>=<sp/>sock.getsockname()</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>OSError:</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>bound_addr<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/>bound_addr:</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>ValueError(</highlight><highlight class="stringliteral">&quot;the<sp/>socket<sp/>must<sp/>be<sp/>bound<sp/>to<sp/>a<sp/>local<sp/>address&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>addr_family<sp/>!=<sp/>socket.AF_UNSPEC<sp/></highlight><highlight class="keywordflow">and</highlight><highlight class="normal"><sp/>sock.family<sp/>!=<sp/>addr_family:</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>ValueError(</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>f</highlight><highlight class="stringliteral">&quot;address<sp/>family<sp/>mismatch:<sp/>expected<sp/>{addr_family.name},<sp/>got<sp/>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>f</highlight><highlight class="stringliteral">&quot;{sock.family.name}&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>sock.type<sp/>!=<sp/>sock_type:</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>ValueError(</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>f</highlight><highlight class="stringliteral">&quot;socket<sp/>type<sp/>mismatch:<sp/>expected<sp/>{sock_type.name},<sp/>got<sp/>{sock.type.name}&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>BaseException:</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>Avoid<sp/>ResourceWarning<sp/>from<sp/>the<sp/>locally<sp/>constructed<sp/>socket<sp/>object</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>isinstance(sock_or_fd,<sp/>int):</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock.detach()</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>sock.setblocking(</highlight><highlight class="keyword">False</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>sock</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight></codeline>
+<codeline lineno="105" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute" kindref="compound">SocketAttribute</ref>(<ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_set" kindref="compound">TypedAttributeSet</ref>):</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="107"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>attribute::<sp/>family</highlight></codeline>
+<codeline lineno="108"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:type:<sp/>socket.AddressFamily</highlight></codeline>
+<codeline lineno="109"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="110"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>the<sp/>address<sp/>family<sp/>of<sp/>the<sp/>underlying<sp/>socket</highlight></codeline>
+<codeline lineno="111"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="112"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>attribute::<sp/>local_address</highlight></codeline>
+<codeline lineno="113"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:type:<sp/>tuple[str,<sp/>int]<sp/>|<sp/>str</highlight></codeline>
+<codeline lineno="114"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="115"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>the<sp/>local<sp/>address<sp/>the<sp/>underlying<sp/>socket<sp/>is<sp/>connected<sp/>to</highlight></codeline>
+<codeline lineno="116"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="117"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>attribute::<sp/>local_port</highlight></codeline>
+<codeline lineno="118"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:type:<sp/>int</highlight></codeline>
+<codeline lineno="119"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="120"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>for<sp/>IP<sp/>based<sp/>sockets,<sp/>the<sp/>local<sp/>port<sp/>the<sp/>underlying<sp/>socket<sp/>is<sp/>bound<sp/>to</highlight></codeline>
+<codeline lineno="121"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="122"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>attribute::<sp/>raw_socket</highlight></codeline>
+<codeline lineno="123"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:type:<sp/>socket.socket</highlight></codeline>
+<codeline lineno="124"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="125"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>the<sp/>underlying<sp/>stdlib<sp/>socket<sp/>object</highlight></codeline>
+<codeline lineno="126"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="127"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>attribute::<sp/>remote_address</highlight></codeline>
+<codeline lineno="128"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:type:<sp/>tuple[str,<sp/>int]<sp/>|<sp/>str</highlight></codeline>
+<codeline lineno="129"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="130"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>the<sp/>remote<sp/>address<sp/>the<sp/>underlying<sp/>socket<sp/>is<sp/>connected<sp/>to</highlight></codeline>
+<codeline lineno="131"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="132"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>attribute::<sp/>remote_port</highlight></codeline>
+<codeline lineno="133"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:type:<sp/>int</highlight></codeline>
+<codeline lineno="134"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="135"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>for<sp/>IP<sp/>based<sp/>sockets,<sp/>the<sp/>remote<sp/>port<sp/>the<sp/>underlying<sp/>socket<sp/>is<sp/>connected<sp/>to</highlight></codeline>
+<codeline lineno="136"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"></highlight></codeline>
+<codeline lineno="138" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute_1a1f15bfa86db3d5471c4f4a0c5246350c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>family:<sp/>AddressFamily<sp/>=<sp/>typed_attribute()</highlight></codeline>
+<codeline lineno="139" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute_1a463fc0e2f49d3d6b7696b06bca8d215d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>local_address:<sp/>SockAddrType<sp/>=<sp/>typed_attribute()</highlight></codeline>
+<codeline lineno="140" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute_1a8849fdedd726c70f802fd50440fcb50e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>local_port:<sp/>int<sp/>=<sp/>typed_attribute()</highlight></codeline>
+<codeline lineno="141" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute_1ab7060c6ae62f3a81dfc566826f4f89bf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>raw_socket:<sp/>socket.socket<sp/>=<sp/>typed_attribute()</highlight></codeline>
+<codeline lineno="142" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute_1a5825f07d50046d0b6d6160357989567c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>remote_address:<sp/>SockAddrType<sp/>=<sp/>typed_attribute()</highlight></codeline>
+<codeline lineno="143" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_attribute_1a172b119fd06934bb54fc635df3e6db46" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>remote_port:<sp/>int<sp/>=<sp/>typed_attribute()</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"></highlight></codeline>
+<codeline lineno="145"><highlight class="normal"></highlight></codeline>
+<codeline lineno="146" refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider" kindref="compound">_SocketProvider</ref>(<ref refid="classanyio_1_1__core_1_1__typedattr_1_1_typed_attribute_provider" kindref="compound">TypedAttributeProvider</ref>):</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="148" refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1a798dbfe3c875d978c70ac15674405ea2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1a798dbfe3c875d978c70ac15674405ea2" kindref="member">extra_attributes</ref>(self)<sp/>-&gt;<sp/>Mapping[Any,<sp/>Callable[[],<sp/>Any]]:</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>.._core._sockets<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>convert_ipv6_sockaddr<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>convert</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"></highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>attributes:<sp/>dict[Any,<sp/>Callable[[],<sp/>Any]]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>SocketAttribute.family:<sp/></highlight><highlight class="keyword">lambda</highlight><highlight class="normal">:<sp/>self.<ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" kindref="member">_raw_socket</ref>.family,</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>SocketAttribute.local_address:<sp/></highlight><highlight class="keyword">lambda</highlight><highlight class="normal">:<sp/>convert(</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" kindref="member">_raw_socket</ref>.getsockname()</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>),</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>SocketAttribute.raw_socket:<sp/></highlight><highlight class="keyword">lambda</highlight><highlight class="normal">:<sp/>self.<ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" kindref="member">_raw_socket</ref>,</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>peername:<sp/>tuple[str,<sp/>int]<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/>=<sp/>convert(self.<ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" kindref="member">_raw_socket</ref>.getpeername())</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>OSError:</highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>peername<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="162"><highlight class="normal"></highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>Provide<sp/>the<sp/>remote<sp/>address<sp/>for<sp/>connected<sp/>sockets</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="164"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>peername<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>attributes[SocketAttribute.remote_address]<sp/>=<sp/></highlight><highlight class="keyword">lambda</highlight><highlight class="normal">:<sp/>peername</highlight></codeline>
+<codeline lineno="166"><highlight class="normal"></highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>Provide<sp/>local<sp/>and<sp/>remote<sp/>ports<sp/>for<sp/>IP<sp/>based<sp/>sockets</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>self.<ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" kindref="member">_raw_socket</ref>.family<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>(AddressFamily.AF_INET,<sp/>AddressFamily.AF_INET6):</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>attributes[SocketAttribute.local_port]<sp/>=<sp/>(</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">lambda</highlight><highlight class="normal">:<sp/>self.<ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" kindref="member">_raw_socket</ref>.getsockname()[1]</highlight></codeline>
+<codeline lineno="171"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>peername<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>remote_port<sp/>=<sp/>peername[1]</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>attributes[SocketAttribute.remote_port]<sp/>=<sp/></highlight><highlight class="keyword">lambda</highlight><highlight class="normal">:<sp/>remote_port</highlight></codeline>
+<codeline lineno="175"><highlight class="normal"></highlight></codeline>
+<codeline lineno="176"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>attributes</highlight></codeline>
+<codeline lineno="177"><highlight class="normal"></highlight></codeline>
+<codeline lineno="178"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@abstractmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="180" refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1___socket_provider_1ad9fa0dc12c942415657052411cf55596" kindref="member">_raw_socket</ref>(self)<sp/>-&gt;<sp/>socket.socket:</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">pass</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="182"><highlight class="normal"></highlight></codeline>
+<codeline lineno="183"><highlight class="normal"></highlight></codeline>
+<codeline lineno="184" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_stream" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal">SocketStream(ByteStream,<sp/>_SocketProvider):</highlight></codeline>
+<codeline lineno="185"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="186"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Transports<sp/>bytes<sp/>over<sp/>a<sp/>socket.</highlight></codeline>
+<codeline lineno="187"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="188"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Supports<sp/>all<sp/>relevant<sp/>extra<sp/>attributes<sp/>from<sp/>:class:`~SocketAttribute`.</highlight></codeline>
+<codeline lineno="189"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="190"><highlight class="normal"></highlight></codeline>
+<codeline lineno="191"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@classmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="192" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_stream_1a1a4c9025d9536a35e22631b2d34fb949" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_socket_stream_1a1a4c9025d9536a35e22631b2d34fb949" kindref="member">from_socket</ref>(cls,<sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int)<sp/>-&gt;<sp/>SocketStream:</highlight></codeline>
+<codeline lineno="193"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="194"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Wrap<sp/>an<sp/>existing<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor<sp/>as<sp/>a<sp/>socket<sp/>stream.</highlight></codeline>
+<codeline lineno="195"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="196"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>newly<sp/>created<sp/>socket<sp/>wrapper<sp/>takes<sp/>ownership<sp/>of<sp/>the<sp/>socket<sp/>being<sp/>passed<sp/>in.</highlight></codeline>
+<codeline lineno="197"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>existing<sp/>socket<sp/>must<sp/>already<sp/>be<sp/>connected.</highlight></codeline>
+<codeline lineno="198"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="199"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>sock_or_fd:<sp/>a<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor</highlight></codeline>
+<codeline lineno="200"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>socket<sp/>stream</highlight></codeline>
+<codeline lineno="201"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="202"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="203"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(sock_or_fd,<sp/>socket.SOCK_STREAM,<sp/>require_connected=</highlight><highlight class="keyword">True</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="204"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>get_async_backend().wrap_stream_socket(sock)</highlight></codeline>
+<codeline lineno="205"><highlight class="normal"></highlight></codeline>
+<codeline lineno="206"><highlight class="normal"></highlight></codeline>
+<codeline lineno="207" refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream" kindref="compound">UNIXSocketStream</ref>(<ref refid="classanyio_1_1abc_1_1__sockets_1_1_socket_stream" kindref="compound">SocketStream</ref>):</highlight></codeline>
+<codeline lineno="208"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@classmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="209" refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream_1a063df7bfbeef7cd725659c40f06272e1" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream_1a063df7bfbeef7cd725659c40f06272e1" kindref="member">from_socket</ref>(cls,<sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int)<sp/>-&gt;<sp/>UNIXSocketStream:</highlight></codeline>
+<codeline lineno="210"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="211"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Wrap<sp/>an<sp/>existing<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor<sp/>as<sp/>a<sp/>UNIX<sp/>socket<sp/>stream.</highlight></codeline>
+<codeline lineno="212"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="213"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>newly<sp/>created<sp/>socket<sp/>wrapper<sp/>takes<sp/>ownership<sp/>of<sp/>the<sp/>socket<sp/>being<sp/>passed<sp/>in.</highlight></codeline>
+<codeline lineno="214"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>existing<sp/>socket<sp/>must<sp/>already<sp/>be<sp/>connected.</highlight></codeline>
+<codeline lineno="215"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="216"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>sock_or_fd:<sp/>a<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor</highlight></codeline>
+<codeline lineno="217"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>UNIX<sp/>socket<sp/>stream</highlight></codeline>
+<codeline lineno="218"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="219"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(</highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock_or_fd,<sp/>socket.SOCK_STREAM,<sp/>socket.AF_UNIX,<sp/>require_connected=</highlight><highlight class="keyword">True</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="222"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>get_async_backend().wrap_unix_stream_socket(sock)</highlight></codeline>
+<codeline lineno="224"><highlight class="normal"></highlight></codeline>
+<codeline lineno="225"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@abstractmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="226" refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream_1afee8bc90d0cf627a3a761e151ccc9d83" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream_1afee8bc90d0cf627a3a761e151ccc9d83" kindref="member">send_fds</ref>(self,<sp/>message:<sp/>bytes,<sp/>fds:<sp/>Collection[int<sp/>|<sp/>IOBase])<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="227"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="228"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Send<sp/>file<sp/>descriptors<sp/>along<sp/>with<sp/>a<sp/>message<sp/>to<sp/>the<sp/>peer.</highlight></codeline>
+<codeline lineno="229"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="230"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>message:<sp/>a<sp/>non-empty<sp/>bytestring</highlight></codeline>
+<codeline lineno="231"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>fds:<sp/>a<sp/>collection<sp/>of<sp/>files<sp/>(either<sp/>numeric<sp/>file<sp/>descriptors<sp/>or<sp/>open<sp/>file</highlight></codeline>
+<codeline lineno="232"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>or<sp/>socket<sp/>objects)</highlight></codeline>
+<codeline lineno="233"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="234"><highlight class="normal"></highlight></codeline>
+<codeline lineno="235"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@abstractmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="236" refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream_1a44c851789ea11b91f9fba61bc0492709" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_socket_stream_1a44c851789ea11b91f9fba61bc0492709" kindref="member">receive_fds</ref>(self,<sp/>msglen:<sp/>int,<sp/>maxfds:<sp/>int)<sp/>-&gt;<sp/>tuple[bytes,<sp/>list[int]]:</highlight></codeline>
+<codeline lineno="237"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="238"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Receive<sp/>file<sp/>descriptors<sp/>along<sp/>with<sp/>a<sp/>message<sp/>from<sp/>the<sp/>peer.</highlight></codeline>
+<codeline lineno="239"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="240"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>msglen:<sp/>length<sp/>of<sp/>the<sp/>message<sp/>to<sp/>expect<sp/>from<sp/>the<sp/>peer</highlight></codeline>
+<codeline lineno="241"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>maxfds:<sp/>maximum<sp/>number<sp/>of<sp/>file<sp/>descriptors<sp/>to<sp/>expect<sp/>from<sp/>the<sp/>peer</highlight></codeline>
+<codeline lineno="242"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>tuple<sp/>of<sp/>(message,<sp/>file<sp/>descriptors)</highlight></codeline>
+<codeline lineno="243"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="244"><highlight class="normal"></highlight></codeline>
+<codeline lineno="245"><highlight class="normal"></highlight></codeline>
+<codeline lineno="246" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener" kindref="compound">SocketListener</ref>(<ref refid="classanyio_1_1abc_1_1__streams_1_1_listener" kindref="compound">Listener</ref>[SocketStream],<sp/>_SocketProvider):</highlight></codeline>
+<codeline lineno="247"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="248"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Listens<sp/>to<sp/>incoming<sp/>socket<sp/>connections.</highlight></codeline>
+<codeline lineno="249"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="250"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Supports<sp/>all<sp/>relevant<sp/>extra<sp/>attributes<sp/>from<sp/>:class:`~SocketAttribute`.</highlight></codeline>
+<codeline lineno="251"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="252"><highlight class="normal"></highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@classmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="254" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener_1ac5e3c9ca414722318464bcf06e6a3129" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener_1ac5e3c9ca414722318464bcf06e6a3129" kindref="member">from_socket</ref>(</highlight></codeline>
+<codeline lineno="255"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cls,</highlight></codeline>
+<codeline lineno="256"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int,</highlight></codeline>
+<codeline lineno="257"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/>SocketListener:</highlight></codeline>
+<codeline lineno="258"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="259"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Wrap<sp/>an<sp/>existing<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor<sp/>as<sp/>a<sp/>socket<sp/>listener.</highlight></codeline>
+<codeline lineno="260"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="261"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>newly<sp/>created<sp/>listener<sp/>takes<sp/>ownership<sp/>of<sp/>the<sp/>socket<sp/>being<sp/>passed<sp/>in.</highlight></codeline>
+<codeline lineno="262"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="263"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>sock_or_fd:<sp/>a<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor</highlight></codeline>
+<codeline lineno="264"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>socket<sp/>listener</highlight></codeline>
+<codeline lineno="265"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="266"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="267"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(sock_or_fd,<sp/>socket.SOCK_STREAM,<sp/>require_bound=</highlight><highlight class="keyword">True</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="268"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>get_async_backend().wrap_listener_socket(sock)</highlight></codeline>
+<codeline lineno="269"><highlight class="normal"></highlight></codeline>
+<codeline lineno="270"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@abstractmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="271" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener_1aa9c57794abd8687af81bbcd8e5ca4293" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener_1aa9c57794abd8687af81bbcd8e5ca4293" kindref="member">accept</ref>(self)<sp/>-&gt;<sp/>SocketStream:</highlight></codeline>
+<codeline lineno="272"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Accept<sp/>an<sp/>incoming<sp/>connection.&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="273"><highlight class="normal"></highlight></codeline>
+<codeline lineno="274" refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener_1ae77179ad4c6d4d509e89e372504a96cb" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_socket_listener_1ae77179ad4c6d4d509e89e372504a96cb" kindref="member">serve</ref>(</highlight></codeline>
+<codeline lineno="275"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self,</highlight></codeline>
+<codeline lineno="276"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>handler:<sp/>Callable[[SocketStream],<sp/>Any],</highlight></codeline>
+<codeline lineno="277"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>task_group:<sp/>TaskGroup<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="278"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="279"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>..<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>create_task_group</highlight></codeline>
+<codeline lineno="280"><highlight class="normal"></highlight></codeline>
+<codeline lineno="281"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">with</highlight><highlight class="normal"><sp/>AsyncExitStack()<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>stack:</highlight></codeline>
+<codeline lineno="282"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>task_group<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="283"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>task_group<sp/>=<sp/>await<sp/>stack.enter_async_context(create_task_group())</highlight></codeline>
+<codeline lineno="284"><highlight class="normal"></highlight></codeline>
+<codeline lineno="285"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">True</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="286"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stream<sp/>=<sp/>await<sp/>self.accept()</highlight></codeline>
+<codeline lineno="287"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>task_group.start_soon(handler,<sp/>stream)</highlight></codeline>
+<codeline lineno="288"><highlight class="normal"></highlight></codeline>
+<codeline lineno="289"><highlight class="normal"></highlight></codeline>
+<codeline lineno="290" refid="classanyio_1_1abc_1_1__sockets_1_1_u_d_p_socket" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_d_p_socket" kindref="compound">UDPSocket</ref>(<ref refid="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_stream" kindref="compound">UnreliableObjectStream</ref>[UDPPacketType],<sp/>_SocketProvider):</highlight></codeline>
+<codeline lineno="291"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="292"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Represents<sp/>an<sp/>unconnected<sp/>UDP<sp/>socket.</highlight></codeline>
+<codeline lineno="293"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="294"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Supports<sp/>all<sp/>relevant<sp/>extra<sp/>attributes<sp/>from<sp/>:class:`~SocketAttribute`.</highlight></codeline>
+<codeline lineno="295"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="296"><highlight class="normal"></highlight></codeline>
+<codeline lineno="297"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@classmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="298" refid="classanyio_1_1abc_1_1__sockets_1_1_u_d_p_socket_1a24b3a0c082132669f56ea517d0662d08" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_d_p_socket_1a24b3a0c082132669f56ea517d0662d08" kindref="member">from_socket</ref>(cls,<sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int)<sp/>-&gt;<sp/>UDPSocket:</highlight></codeline>
+<codeline lineno="299"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="300"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Wrap<sp/>an<sp/>existing<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor<sp/>as<sp/>a<sp/>UDP<sp/>socket.</highlight></codeline>
+<codeline lineno="301"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="302"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>newly<sp/>created<sp/>socket<sp/>wrapper<sp/>takes<sp/>ownership<sp/>of<sp/>the<sp/>socket<sp/>being<sp/>passed<sp/>in.</highlight></codeline>
+<codeline lineno="303"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>existing<sp/>socket<sp/>must<sp/>be<sp/>bound<sp/>to<sp/>a<sp/>local<sp/>address.</highlight></codeline>
+<codeline lineno="304"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="305"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>sock_or_fd:<sp/>a<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor</highlight></codeline>
+<codeline lineno="306"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>UDP<sp/>socket</highlight></codeline>
+<codeline lineno="307"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="308"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="309"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(sock_or_fd,<sp/>socket.SOCK_DGRAM,<sp/>require_bound=</highlight><highlight class="keyword">True</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="310"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>get_async_backend().wrap_udp_socket(sock)</highlight></codeline>
+<codeline lineno="311"><highlight class="normal"></highlight></codeline>
+<codeline lineno="312" refid="classanyio_1_1abc_1_1__sockets_1_1_u_d_p_socket_1a99acda9ad63f25f30b741a2f68dda726" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_d_p_socket_1a99acda9ad63f25f30b741a2f68dda726" kindref="member">sendto</ref>(self,<sp/>data:<sp/>bytes,<sp/>host:<sp/>str,<sp/>port:<sp/>int)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="313"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="314"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Alias<sp/>for<sp/>:meth:`~.UnreliableObjectSendStream.send`<sp/>((data,<sp/>(host,<sp/>port))).</highlight></codeline>
+<codeline lineno="315"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="316"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="317"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>self.<ref refid="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream_1a89fd94eaf55c2edda1dca022ffcd2860" kindref="member">send</ref>((data,<sp/>(host,<sp/>port)))</highlight></codeline>
+<codeline lineno="318"><highlight class="normal"></highlight></codeline>
+<codeline lineno="319"><highlight class="normal"></highlight></codeline>
+<codeline lineno="320" refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_d_p_socket" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_d_p_socket" kindref="compound">ConnectedUDPSocket</ref>(<ref refid="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_stream" kindref="compound">UnreliableObjectStream</ref>[bytes],<sp/>_SocketProvider):</highlight></codeline>
+<codeline lineno="321"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="322"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Represents<sp/>an<sp/>connected<sp/>UDP<sp/>socket.</highlight></codeline>
+<codeline lineno="323"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="324"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Supports<sp/>all<sp/>relevant<sp/>extra<sp/>attributes<sp/>from<sp/>:class:`~SocketAttribute`.</highlight></codeline>
+<codeline lineno="325"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="326"><highlight class="normal"></highlight></codeline>
+<codeline lineno="327"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@classmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="328" refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_d_p_socket_1a48f5c99c2cb01de3e5471cb366c75e4b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_d_p_socket_1a48f5c99c2cb01de3e5471cb366c75e4b" kindref="member">from_socket</ref>(cls,<sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int)<sp/>-&gt;<sp/>ConnectedUDPSocket:</highlight></codeline>
+<codeline lineno="329"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="330"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Wrap<sp/>an<sp/>existing<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor<sp/>as<sp/>a<sp/>connected<sp/>UDP<sp/>socket.</highlight></codeline>
+<codeline lineno="331"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="332"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>newly<sp/>created<sp/>socket<sp/>wrapper<sp/>takes<sp/>ownership<sp/>of<sp/>the<sp/>socket<sp/>being<sp/>passed<sp/>in.</highlight></codeline>
+<codeline lineno="333"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>existing<sp/>socket<sp/>must<sp/>already<sp/>be<sp/>connected.</highlight></codeline>
+<codeline lineno="334"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="335"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>sock_or_fd:<sp/>a<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor</highlight></codeline>
+<codeline lineno="336"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>connected<sp/>UDP<sp/>socket</highlight></codeline>
+<codeline lineno="337"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="338"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="339"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(</highlight></codeline>
+<codeline lineno="340"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock_or_fd,</highlight></codeline>
+<codeline lineno="341"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>socket.SOCK_DGRAM,</highlight></codeline>
+<codeline lineno="342"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_connected=</highlight><highlight class="keyword">True</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="343"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="344"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>get_async_backend().wrap_connected_udp_socket(sock)</highlight></codeline>
+<codeline lineno="345"><highlight class="normal"></highlight></codeline>
+<codeline lineno="346"><highlight class="normal"></highlight></codeline>
+<codeline lineno="347" refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_datagram_socket" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_datagram_socket" kindref="compound">UNIXDatagramSocket</ref>(</highlight></codeline>
+<codeline lineno="348"><highlight class="normal"><sp/><sp/><sp/><sp/>UnreliableObjectStream[UNIXDatagramPacketType],<sp/>_SocketProvider</highlight></codeline>
+<codeline lineno="349"><highlight class="normal">):</highlight></codeline>
+<codeline lineno="350"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="351"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Represents<sp/>an<sp/>unconnected<sp/>Unix<sp/>datagram<sp/>socket.</highlight></codeline>
+<codeline lineno="352"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="353"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Supports<sp/>all<sp/>relevant<sp/>extra<sp/>attributes<sp/>from<sp/>:class:`~SocketAttribute`.</highlight></codeline>
+<codeline lineno="354"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="355"><highlight class="normal"></highlight></codeline>
+<codeline lineno="356"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@classmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="357" refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_datagram_socket_1a502df0fee20062e8f2ecf4448a76ce59" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_datagram_socket_1a502df0fee20062e8f2ecf4448a76ce59" kindref="member">from_socket</ref>(</highlight></codeline>
+<codeline lineno="358"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cls,</highlight></codeline>
+<codeline lineno="359"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int,</highlight></codeline>
+<codeline lineno="360"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/>UNIXDatagramSocket:</highlight></codeline>
+<codeline lineno="361"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="362"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Wrap<sp/>an<sp/>existing<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor<sp/>as<sp/>a<sp/>UNIX<sp/>datagram</highlight></codeline>
+<codeline lineno="363"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>socket.</highlight></codeline>
+<codeline lineno="364"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="365"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>newly<sp/>created<sp/>socket<sp/>wrapper<sp/>takes<sp/>ownership<sp/>of<sp/>the<sp/>socket<sp/>being<sp/>passed<sp/>in.</highlight></codeline>
+<codeline lineno="366"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="367"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>sock_or_fd:<sp/>a<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor</highlight></codeline>
+<codeline lineno="368"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>UNIX<sp/>datagram<sp/>socket</highlight></codeline>
+<codeline lineno="369"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="370"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="371"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(sock_or_fd,<sp/>socket.SOCK_DGRAM,<sp/>socket.AF_UNIX)</highlight></codeline>
+<codeline lineno="372"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>get_async_backend().wrap_unix_datagram_socket(sock)</highlight></codeline>
+<codeline lineno="373"><highlight class="normal"></highlight></codeline>
+<codeline lineno="374" refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_datagram_socket_1a4db96518de741b64eac4f68957318ade" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_u_n_i_x_datagram_socket_1a4db96518de741b64eac4f68957318ade" kindref="member">sendto</ref>(self,<sp/>data:<sp/>bytes,<sp/>path:<sp/>str)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="375"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Alias<sp/>for<sp/>:meth:`~.UnreliableObjectSendStream.send`<sp/>((data,<sp/>path)).&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="376"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>self.<ref refid="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_send_stream_1a89fd94eaf55c2edda1dca022ffcd2860" kindref="member">send</ref>((data,<sp/>path))</highlight></codeline>
+<codeline lineno="377"><highlight class="normal"></highlight></codeline>
+<codeline lineno="378"><highlight class="normal"></highlight></codeline>
+<codeline lineno="379" refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_n_i_x_datagram_socket" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_n_i_x_datagram_socket" kindref="compound">ConnectedUNIXDatagramSocket</ref>(<ref refid="classanyio_1_1abc_1_1__streams_1_1_unreliable_object_stream" kindref="compound">UnreliableObjectStream</ref>[bytes],<sp/>_SocketProvider):</highlight></codeline>
+<codeline lineno="380"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="381"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Represents<sp/>a<sp/>connected<sp/>Unix<sp/>datagram<sp/>socket.</highlight></codeline>
+<codeline lineno="382"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="383"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Supports<sp/>all<sp/>relevant<sp/>extra<sp/>attributes<sp/>from<sp/>:class:`~SocketAttribute`.</highlight></codeline>
+<codeline lineno="384"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="385"><highlight class="normal"></highlight></codeline>
+<codeline lineno="386"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@classmethod</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="387" refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_n_i_x_datagram_socket_1a7f2e4d1d6d3b08188b141362a10de706" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1abc_1_1__sockets_1_1_connected_u_n_i_x_datagram_socket_1a7f2e4d1d6d3b08188b141362a10de706" kindref="member">from_socket</ref>(</highlight></codeline>
+<codeline lineno="388"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cls,</highlight></codeline>
+<codeline lineno="389"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock_or_fd:<sp/>socket.socket<sp/>|<sp/>int,</highlight></codeline>
+<codeline lineno="390"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/>ConnectedUNIXDatagramSocket:</highlight></codeline>
+<codeline lineno="391"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="392"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Wrap<sp/>an<sp/>existing<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor<sp/>as<sp/>a<sp/>connected<sp/>UNIX<sp/>datagram</highlight></codeline>
+<codeline lineno="393"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>socket.</highlight></codeline>
+<codeline lineno="394"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="395"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>newly<sp/>created<sp/>socket<sp/>wrapper<sp/>takes<sp/>ownership<sp/>of<sp/>the<sp/>socket<sp/>being<sp/>passed<sp/>in.</highlight></codeline>
+<codeline lineno="396"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>existing<sp/>socket<sp/>must<sp/>already<sp/>be<sp/>connected.</highlight></codeline>
+<codeline lineno="397"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="398"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:param<sp/>sock_or_fd:<sp/>a<sp/>socket<sp/>object<sp/>or<sp/>file<sp/>descriptor</highlight></codeline>
+<codeline lineno="399"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:return:<sp/>a<sp/>connected<sp/>UNIX<sp/>datagram<sp/>socket</highlight></codeline>
+<codeline lineno="400"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="401"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="402"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock<sp/>=<sp/><ref refid="namespaceanyio_1_1abc_1_1__sockets_1a930fa346248eb9c9ecbd545f966a54f7" kindref="member">_validate_socket</ref>(</highlight></codeline>
+<codeline lineno="403"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sock_or_fd,<sp/>socket.SOCK_DGRAM,<sp/>socket.AF_UNIX,<sp/>require_connected=</highlight><highlight class="keyword">True</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="404"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="405"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>get_async_backend().wrap_connected_unix_datagram_socket(sock)</highlight></codeline>
+    </programlisting>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/anyio/abc/_sockets.py"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,58 @@
+\doxysection{authentication.\+py}
+\hypertarget{middleware_2authentication_8py_source}{}\label{middleware_2authentication_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/middleware/authentication.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/middleware/authentication.py}}
+\mbox{\hyperlink{middleware_2authentication_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00001}\mbox{\hyperlink{namespacestarlette_1_1middleware_1_1authentication}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00003}00003\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Callable}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00005}00005\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1authentication}{starlette.authentication}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00006}00006\ \ \ \ \ AuthCredentials,}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00007}00007\ \ \ \ \ AuthenticationBackend,}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00008}00008\ \ \ \ \ AuthenticationError,}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00009}00009\ \ \ \ \ UnauthenticatedUser,}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00010}00010\ )}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00011}00011\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1requests}{starlette.requests}}\ \textcolor{keyword}{import}\ HTTPConnection}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00012}00012\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1responses}{starlette.responses}}\ \textcolor{keyword}{import}\ PlainTextResponse,\ Response}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00013}00013\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1types}{starlette.types}}\ \textcolor{keyword}{import}\ ASGIApp,\ Receive,\ Scope,\ Send}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00016}\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware}{00016}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware}{AuthenticationMiddleware}}:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00017}00017\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ app:\ ASGIApp,}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ backend:\ AuthenticationBackend,}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00021}00021\ \ \ \ \ \ \ \ \ on\_error:\ Callable[[HTTPConnection,\ AuthenticationError],\ Response]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00022}00022\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00023}\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_ad656a332f115f9062590bd7a8d4c0b32}{00023}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_ad656a332f115f9062590bd7a8d4c0b32}{app}}\ =\ app}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00024}\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_abb31e94b8a7d6e7ff9a417310245d756}{00024}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_abb31e94b8a7d6e7ff9a417310245d756}{backend}}\ =\ backend}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00025}\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_a63f8f314c8eaba99f974c993515fc0b0}{00025}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_a63f8f314c8eaba99f974c993515fc0b0}{on\_error}}:\ Callable[[HTTPConnection,\ AuthenticationError],\ Response]\ =\ (}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ on\_error\ \textcolor{keywordflow}{if}\ on\_error\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_a3b5cf194a210b7cfb9ee88079f32380a}{default\_on\_error}}}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00029}00029\ \ \ \ \ \textcolor{keyword}{async\ def\ }\_\_call\_\_(self,\ scope:\ Scope,\ receive:\ Receive,\ send:\ Send)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ scope[\textcolor{stringliteral}{"{}type"{}}]\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ [\textcolor{stringliteral}{"{}http"{}},\ \textcolor{stringliteral}{"{}websocket"{}}]:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_ad656a332f115f9062590bd7a8d4c0b32}{app}}(scope,\ receive,\ send)}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ conn\ =\ \mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection}{HTTPConnection}}(scope)}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ auth\_result\ =\ await\ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_abb31e94b8a7d6e7ff9a417310245d756}{backend}}.authenticate(conn)}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AuthenticationError\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_a63f8f314c8eaba99f974c993515fc0b0}{on\_error}}(conn,\ exc)}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ scope[\textcolor{stringliteral}{"{}type"{}}]\ ==\ \textcolor{stringliteral}{"{}websocket"{}}:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ send(\{\textcolor{stringliteral}{"{}type"{}}:\ \textcolor{stringliteral}{"{}websocket.close"{}},\ \textcolor{stringliteral}{"{}code"{}}:\ 1000\})}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ response(scope,\ receive,\ send)}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ auth\_result\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ auth\_result\ =\ \mbox{\hyperlink{classstarlette_1_1authentication_1_1_auth_credentials}{AuthCredentials}}(),\ \mbox{\hyperlink{classstarlette_1_1authentication_1_1_unauthenticated_user}{UnauthenticatedUser}}()}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ scope[\textcolor{stringliteral}{"{}auth"{}}],\ scope[\textcolor{stringliteral}{"{}user"{}}]\ =\ auth\_result}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ await\ self.\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_ad656a332f115f9062590bd7a8d4c0b32}{app}}(scope,\ receive,\ send)}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00050}00050\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00051}\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_a3b5cf194a210b7cfb9ee88079f32380a}{00051}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1middleware_1_1authentication_1_1_authentication_middleware_a3b5cf194a210b7cfb9ee88079f32380a}{default\_on\_error}}(conn:\ HTTPConnection,\ exc:\ Exception)\ -\/>\ Response:}
+\DoxyCodeLine{\Hypertarget{middleware_2authentication_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_plain_text_response}{PlainTextResponse}}(str(exc),\ status\_code=400)}
+
+\end{DoxyCode}
