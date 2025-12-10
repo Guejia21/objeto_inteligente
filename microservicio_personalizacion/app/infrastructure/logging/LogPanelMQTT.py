@@ -14,7 +14,7 @@ class LogPanelMQTT(ILogPanelMQTT):
         if not cls._instance:
             cls._instance = super(LogPanelMQTT, cls).__new__(cls, *args, **kwargs)
             cls._instance.client = mqtt.Client(
-                client_id="P1", 
+                client_id="micro_personalizacion", 
                 callback_api_version=CallbackAPIVersion.VERSION1
             )
             try:
