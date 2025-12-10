@@ -1,4 +1,0 @@
-var dir_34fc974a756873a51a88c9282018cf29 =
-[
-    [ "__init__.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pkg__resources_2__vendor_2pyparsing_2diagram_2____init_____8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pkg__resources_2__vendor_2pyparsing_2diagram_2____init_____8py" ]
-];

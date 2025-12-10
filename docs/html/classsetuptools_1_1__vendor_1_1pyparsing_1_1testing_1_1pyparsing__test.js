@@ -1,6 +1,0 @@
-var classsetuptools_1_1__vendor_1_1pyparsing_1_1testing_1_1pyparsing__test =
-[
-    [ "reset_pyparsing_context", "classsetuptools_1_1__vendor_1_1pyparsing_1_1testing_1_1pyparsing__test_1_1reset__pyparsing__context.html", "classsetuptools_1_1__vendor_1_1pyparsing_1_1testing_1_1pyparsing__test_1_1reset__pyparsing__context" ],
-    [ "TestParseResultsAsserts", "classsetuptools_1_1__vendor_1_1pyparsing_1_1testing_1_1pyparsing__test_1_1_test_parse_results_asserts.html", "classsetuptools_1_1__vendor_1_1pyparsing_1_1testing_1_1pyparsing__test_1_1_test_parse_results_asserts" ],
-    [ "with_line_numbers", "classsetuptools_1_1__vendor_1_1pyparsing_1_1testing_1_1pyparsing__test.html#a70fe9da63e67ae5861787b7aa6417e7d", null ]
-];

@@ -1,4 +1,0 @@
-var namespaceuvicorn_1_1protocols_1_1websockets_1_1websockets__sansio__impl =
-[
-    [ "WebSocketsSansIOProtocol", "classuvicorn_1_1protocols_1_1websockets_1_1websockets__sansio__impl_1_1_web_sockets_sans_i_o_protocol.html", "classuvicorn_1_1protocols_1_1websockets_1_1websockets__sansio__impl_1_1_web_sockets_sans_i_o_protocol" ]
-];

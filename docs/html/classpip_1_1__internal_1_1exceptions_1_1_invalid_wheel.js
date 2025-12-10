@@ -1,5 +1,0 @@
-var classpip_1_1__internal_1_1exceptions_1_1_invalid_wheel =
-[
-    [ "location", "classpip_1_1__internal_1_1exceptions_1_1_invalid_wheel.html#ad26fc15b38f8f6e6eed20de27ee94c83", null ],
-    [ "name", "classpip_1_1__internal_1_1exceptions_1_1_invalid_wheel.html#a6249b04e2fc49ae17040942c28b65ff3", null ]
-];

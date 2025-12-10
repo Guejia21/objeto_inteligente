@@ -1,4 +1,0 @@
-var classanyio_1_1abc_1_1__sockets_1_1_connected_u_n_i_x_datagram_socket =
-[
-    [ "from_socket", "classanyio_1_1abc_1_1__sockets_1_1_connected_u_n_i_x_datagram_socket.html#a7f2e4d1d6d3b08188b141362a10de706", null ]
-];

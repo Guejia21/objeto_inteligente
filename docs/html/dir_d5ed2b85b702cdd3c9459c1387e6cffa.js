@@ -1,5 +1,0 @@
-var dir_d5ed2b85b702cdd3c9459c1387e6cffa =
-[
-    [ "__init__.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2pyproject__hooks_2__in__process_2____init_____8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2pyproject__hooks_2__in__process_2____init_____8py" ],
-    [ "_in_process.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2pyproject__hooks_2__in__process_2__in__process_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2pyproject__hooks_2__in__process_2__in__process_8py" ]
-];
