@@ -1,0 +1,169 @@
+\doxysection{\+\_\+tasks.\+py}
+\hypertarget{__core_2__tasks_8py_source}{}\label{__core_2__tasks_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_tasks.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_tasks.py}}
+\mbox{\hyperlink{__core_2__tasks_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00001}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00003}00003\ \textcolor{keyword}{import}\ math}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00004}00004\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Generator}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00005}00005\ \textcolor{keyword}{from}\ contextlib\ \textcolor{keyword}{import}\ contextmanager}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00006}00006\ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ TracebackType}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00008}00008\ \textcolor{keyword}{from}\ ..abc.\_tasks\ \textcolor{keyword}{import}\ TaskGroup,\ TaskStatus}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00009}00009\ \textcolor{keyword}{from}\ .\_eventloop\ \textcolor{keyword}{import}\ get\_async\_backend}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00012}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status}{00012}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status}{\_IgnoredTaskStatus}}(\mbox{\hyperlink{classanyio_1_1abc_1_1__tasks_1_1_task_status}{TaskStatus}}[object]):}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00013}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status_aef08e545a9ed5c48992e0d48d453f5c9}{00013}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status_aef08e545a9ed5c48992e0d48d453f5c9}{started}}(self,\ value:\ object\ =\ \textcolor{keywordtype}{None})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00014}00014\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00017}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a3f0687b4553e81058f9bd51956d9f2f4}{00017}}\ TASK\_STATUS\_IGNORED\ =\ \mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1___ignored_task_status}{\_IgnoredTaskStatus}}()}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00020}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope}{00020}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope}{CancelScope}}:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00021}00021\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ Wraps\ a\ unit\ of\ work\ that\ can\ be\ made\ separately\ cancellable.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00023}00023\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ :param\ deadline:\ The\ time\ (clock\ value)\ when\ this\ scope\ is\ cancelled\ automatically}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ :param\ shield:\ \`{}\`{}True\`{}\`{}\ to\ shield\ the\ cancel\ scope\ from\ external\ cancellation}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00028}00028\ \ \ \ \ \textcolor{keyword}{def\ }\_\_new\_\_(}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ cls,\ *,\ deadline:\ float\ =\ math.inf,\ shield:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00030}00030\ \ \ \ \ )\ -\/>\ CancelScope:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().create\_cancel\_scope(shield=shield,\ deadline=deadline)}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00033}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a93ae679df189067691549dbc84ac7b59}{00033}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a93ae679df189067691549dbc84ac7b59}{cancel}}(self,\ reason:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00035}00035\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Cancel\ this\ scope\ immediately.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00036}00036\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00037}00037\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :param\ reason:\ a\ message\ describing\ the\ reason\ for\ the\ cancellation}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00038}00038\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00039}00039\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00042}00042\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00043}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_aa545f8886e54238a143870d7878fae15}{00043}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_aa545f8886e54238a143870d7878fae15}{deadline}}(self)\ -\/>\ float:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ time\ (clock\ value)\ when\ this\ scope\ is\ cancelled\ automatically.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00046}00046\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Will\ be\ \`{}\`{}float('inf')\`{}\`{}\ if\ no\ timeout\ has\ been\ set.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00048}00048\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00052}00052\ \ \ \ \ \textcolor{preprocessor}{@deadline.setter}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00053}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a14d41ebdb11e3dfdc7adb845321594f7}{00053}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_aa545f8886e54238a143870d7878fae15}{deadline}}(self,\ value:\ float)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00056}00056\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00057}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a4db6c6c5c0c8a367f061db338152d688}{00057}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a4db6c6c5c0c8a367f061db338152d688}{cancel\_called}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}\`{}\`{}True\`{}\`{}\ if\ :meth:\`{}cancel\`{}\ has\ been\ called."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00061}00061\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00062}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_af055ba83d8f509c63e718fdd512e9e76}{00062}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_af055ba83d8f509c63e718fdd512e9e76}{cancelled\_caught}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00064}00064\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}True\`{}\`{}\ if\ this\ scope\ suppressed\ a\ cancellation\ exception\ it\ itself\ raised.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00065}00065\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ is\ typically\ used\ to\ check\ if\ any\ work\ was\ interrupted,\ or\ to\ see\ if\ the}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00067}00067\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ scope\ was\ cancelled\ due\ to\ its\ deadline\ being\ reached.\ The\ value\ will,\ however,}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00068}00068\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ only\ be\ \`{}\`{}True\`{}\`{}\ if\ the\ cancellation\ was\ triggered\ by\ the\ scope\ itself\ (and\ not}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00069}00069\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ an\ outer\ scope).}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00070}00070\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00071}00071\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00074}00074\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00075}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a8841118ceac67bdfa4ade6c51aaa2d25}{00075}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a8841118ceac67bdfa4ade6c51aaa2d25}{shield}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00077}00077\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}True\`{}\`{}\ if\ this\ scope\ is\ shielded\ from\ external\ cancellation.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00078}00078\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ While\ a\ scope\ is\ shielded,\ it\ will\ not\ receive\ cancellations\ from\ outside.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00080}00080\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00084}00084\ \ \ \ \ \textcolor{preprocessor}{@shield.setter}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00085}\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_aafaaa39d03bbc72b4d0c53c95bb61067}{00085}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope_a8841118ceac67bdfa4ade6c51aaa2d25}{shield}}(self,\ value:\ bool)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00088}00088\ \ \ \ \ \textcolor{keyword}{def\ }\_\_enter\_\_(self)\ -\/>\ CancelScope:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00091}00091\ \ \ \ \ \textcolor{keyword}{def\ }\_\_exit\_\_(}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ exc\_type:\ type[BaseException]\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ exc\_val:\ BaseException\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ exc\_tb:\ TracebackType\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00096}00096\ \ \ \ \ )\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ NotImplementedError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00100}00100\ \textcolor{preprocessor}{@contextmanager}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00101}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a178020a9e90b692f4ae9090b38970a5c}{00101}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a178020a9e90b692f4ae9090b38970a5c}{fail\_after}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00102}00102\ \ \ \ \ delay:\ float\ |\ \textcolor{keywordtype}{None},\ shield:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00103}00103\ )\ -\/>\ Generator[CancelScope,\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00104}00104\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ context\ manager\ which\ raises\ a\ :class:\`{}TimeoutError\`{}\ if\ does\ not\ finish\ in}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ time.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00107}00107\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ :param\ delay:\ maximum\ allowed\ time\ (in\ seconds)\ before\ raising\ the\ exception,\ or}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}None\`{}\`{}\ to\ disable\ the\ timeout}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ :param\ shield:\ \`{}\`{}True\`{}\`{}\ to\ shield\ the\ cancel\ scope\ from\ external\ cancellation}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ context\ manager\ that\ yields\ a\ cancel\ scope}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ :rtype:\ :class:\`{}\string~typing.ContextManager\`{}\(\backslash\)\(\backslash\)[:class:\`{}\string~anyio.CancelScope\`{}\(\backslash\)\(\backslash\)]}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00113}00113\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00114}00114\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00115}00115\ \ \ \ \ current\_time\ =\ get\_async\_backend().current\_time}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00116}00116\ \ \ \ \ deadline\ =\ (current\_time()\ +\ delay)\ \textcolor{keywordflow}{if}\ delay\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ math.inf}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00117}00117\ \ \ \ \ \textcolor{keyword}{with}\ get\_async\_backend().create\_cancel\_scope(}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ deadline=deadline,\ shield=shield}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00119}00119\ \ \ \ \ )\ \textcolor{keyword}{as}\ cancel\_scope:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ cancel\_scope}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00122}00122\ \ \ \ \ \textcolor{keywordflow}{if}\ cancel\_scope.cancelled\_caught\ \textcolor{keywordflow}{and}\ current\_time()\ >=\ cancel\_scope.deadline:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TimeoutError}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00126}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_ab6d51d80c12c44a3d9782f7574b06120}{00126}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_ab6d51d80c12c44a3d9782f7574b06120}{move\_on\_after}}(delay:\ float\ |\ \textcolor{keywordtype}{None},\ shield:\ bool\ =\ \textcolor{keyword}{False})\ -\/>\ CancelScope:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00127}00127\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00128}00128\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ cancel\ scope\ with\ a\ deadline\ that\ expires\ after\ the\ given\ delay.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00129}00129\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00130}00130\ \textcolor{stringliteral}{\ \ \ \ :param\ delay:\ maximum\ allowed\ time\ (in\ seconds)\ before\ exiting\ the\ context\ block,\ or}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00131}00131\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}None\`{}\`{}\ to\ disable\ the\ timeout}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00132}00132\ \textcolor{stringliteral}{\ \ \ \ :param\ shield:\ \`{}\`{}True\`{}\`{}\ to\ shield\ the\ cancel\ scope\ from\ external\ cancellation}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00133}00133\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ cancel\ scope}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00134}00134\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00135}00135\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00136}00136\ \ \ \ \ deadline\ =\ (}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ (get\_async\_backend().current\_time()\ +\ delay)\ \textcolor{keywordflow}{if}\ delay\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ math.inf}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00138}00138\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00139}00139\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().create\_cancel\_scope(deadline=deadline,\ shield=shield)}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00142}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a352153ab7f94439abbc38122b7bba602}{00142}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a352153ab7f94439abbc38122b7bba602}{current\_effective\_deadline}}()\ -\/>\ float:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00143}00143\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00144}00144\ \textcolor{stringliteral}{\ \ \ \ Return\ the\ nearest\ deadline\ among\ all\ the\ cancel\ scopes\ effective\ for\ the\ current}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00145}00145\ \textcolor{stringliteral}{\ \ \ \ task.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00146}00146\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00147}00147\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ clock\ value\ from\ the\ event\ loop's\ internal\ clock\ (or\ \`{}\`{}float('inf')\`{}\`{}\ if}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00148}00148\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ there\ is\ no\ deadline\ in\ effect,\ or\ \`{}\`{}float('-\/inf')\`{}\`{}\ if\ the\ current\ scope\ has}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ been\ cancelled)}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ :rtype:\ float}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00151}00151\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00153}00153\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a352153ab7f94439abbc38122b7bba602}{current\_effective\_deadline}}()}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00156}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a0125af94932bdce29d507173c8c54d1a}{00156}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a0125af94932bdce29d507173c8c54d1a}{create\_task\_group}}()\ -\/>\ TaskGroup:}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00157}00157\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ task\ group.}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00159}00159\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00160}00160\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ task\ group}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00161}00161\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00162}00162\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__tasks_8py_source_l00163}00163\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__tasks_a0125af94932bdce29d507173c8c54d1a}{create\_task\_group}}()}
+
+\end{DoxyCode}

@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="classpydantic_1_1types_1_1_tag" kind="class" language="Python" prot="public">
+    <compoundname>pydantic::types::Tag</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><verbatim>Provides a way to specify the expected tag to use for a case of a (callable) discriminated union.
+
+Also provides a way to label a union case in error messages.
+
+When using a callable `Discriminator`, attach a `Tag` to each case in the `Union` to specify the tag that
+should be used to identify that case. For example, in the below example, the `Tag` is used to specify that
+if `get_discriminator_value` returns `&apos;apple&apos;`, the input should be validated as an `ApplePie`, and if it
+returns `&apos;pumpkin&apos;`, the input should be validated as a `PumpkinPie`.
+
+The primary role of the `Tag` here is to map the return value from the callable `Discriminator` function to
+the appropriate member of the `Union` in question.
+
+```python
+from typing import Annotated, Any, Literal, Union
+
+from pydantic import BaseModel, Discriminator, Tag
+
+class Pie(BaseModel):
+    time_to_cook: int
+    num_ingredients: int
+
+class ApplePie(Pie):
+    fruit: Literal[&apos;apple&apos;] = &apos;apple&apos;
+
+class PumpkinPie(Pie):
+    filling: Literal[&apos;pumpkin&apos;] = &apos;pumpkin&apos;
+
+def get_discriminator_value(v: Any) -&gt; str:
+    if isinstance(v, dict):
+        return v.get(&apos;fruit&apos;, v.get(&apos;filling&apos;))
+    return getattr(v, &apos;fruit&apos;, getattr(v, &apos;filling&apos;, None))
+
+class ThanksgivingDinner(BaseModel):
+    dessert: Annotated[
+        Union[
+            Annotated[ApplePie, Tag(&apos;apple&apos;)],
+            Annotated[PumpkinPie, Tag(&apos;pumpkin&apos;)],
+        ],
+        Discriminator(get_discriminator_value),
+    ]
+
+apple_variation = ThanksgivingDinner.model_validate(
+    {&apos;dessert&apos;: {&apos;fruit&apos;: &apos;apple&apos;, &apos;time_to_cook&apos;: 60, &apos;num_ingredients&apos;: 8}}
+)
+print(repr(apple_variation))
+&apos;&apos;&apos;
+ThanksgivingDinner(dessert=ApplePie(time_to_cook=60, num_ingredients=8, fruit=&apos;apple&apos;))
+&apos;&apos;&apos;
+
+pumpkin_variation = ThanksgivingDinner.model_validate(
+    {
+        &apos;dessert&apos;: {
+            &apos;filling&apos;: &apos;pumpkin&apos;,
+            &apos;time_to_cook&apos;: 40,
+            &apos;num_ingredients&apos;: 6,
+        }
+    }
+)
+print(repr(pumpkin_variation))
+&apos;&apos;&apos;
+ThanksgivingDinner(dessert=PumpkinPie(time_to_cook=40, num_ingredients=6, filling=&apos;pumpkin&apos;))
+&apos;&apos;&apos;
+```
+
+!!! note
+    You must specify a `Tag` for every case in a `Tag` that is associated with a
+    callable `Discriminator`. Failing to do so will result in a `PydanticUserError` with code
+    [`callable-discriminator-no-tag`](../errors/usage_errors.md#callable-discriminator-no-tag).
+
+See the [Discriminated Unions] concepts docs for more details on how to use `Tag`s.
+
+[Discriminated Unions]: ../concepts/unions.md#discriminated-unions
+</verbatim> </para>
+    </detaileddescription>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/pydantic/types.py" line="2890" column="1" bodyfile="micro_gestion_objetos/venv/Lib/site-packages/pydantic/types.py" bodystart="2890" bodyend="2974"/>
+    <listofallmembers>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

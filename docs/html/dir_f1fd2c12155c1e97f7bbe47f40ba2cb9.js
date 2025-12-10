@@ -1,0 +1,25 @@
+var dir_f1fd2c12155c1e97f7bbe47f40ba2cb9 =
+[
+    [ "cli", "dir_675a6b98e9e3d372bc7bcd2ce3429605.html", "dir_675a6b98e9e3d372bc7bcd2ce3429605" ],
+    [ "commands", "dir_7955b935f81aee4639043ebc619001a7.html", "dir_7955b935f81aee4639043ebc619001a7" ],
+    [ "distributions", "dir_534e840574381c5d915c4c644de0ad03.html", "dir_534e840574381c5d915c4c644de0ad03" ],
+    [ "index", "dir_886efa277c91bc5e6aa6b3317f1249d4.html", "dir_886efa277c91bc5e6aa6b3317f1249d4" ],
+    [ "locations", "dir_5e21f9ae196d52c95e46a8ba9cda3aa9.html", "dir_5e21f9ae196d52c95e46a8ba9cda3aa9" ],
+    [ "metadata", "dir_4c1b2427a5af00bd4276fd15ba160e2a.html", "dir_4c1b2427a5af00bd4276fd15ba160e2a" ],
+    [ "models", "dir_e17687df1e472844a3634030de79ef99.html", "dir_e17687df1e472844a3634030de79ef99" ],
+    [ "network", "dir_8a3cec8a26866acdeb932632850a03e1.html", "dir_8a3cec8a26866acdeb932632850a03e1" ],
+    [ "operations", "dir_72be7f1eda9218d8e77316ae730e9720.html", "dir_72be7f1eda9218d8e77316ae730e9720" ],
+    [ "req", "dir_4c38d0a5b991ca5d16c98ba14117b769.html", "dir_4c38d0a5b991ca5d16c98ba14117b769" ],
+    [ "resolution", "dir_48c533559a024429abb095449a6ca654.html", "dir_48c533559a024429abb095449a6ca654" ],
+    [ "utils", "dir_b3354facb14d59d0a6ccec0e2b658a44.html", "dir_b3354facb14d59d0a6ccec0e2b658a44" ],
+    [ "vcs", "dir_c45c57c612a1f9c1fef3188a2315ab98.html", "dir_c45c57c612a1f9c1fef3188a2315ab98" ],
+    [ "__init__.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2____init_____8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2____init_____8py" ],
+    [ "build_env.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2build__env_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2build__env_8py" ],
+    [ "cache.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2cache_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2cache_8py" ],
+    [ "configuration.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2configuration_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2configuration_8py" ],
+    [ "exceptions.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2exceptions_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2exceptions_8py" ],
+    [ "main.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2main_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2main_8py" ],
+    [ "pyproject.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2pyproject_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2pyproject_8py" ],
+    [ "self_outdated_check.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2self__outdated__check_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2self__outdated__check_8py" ],
+    [ "wheel_builder.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2wheel__builder_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2wheel__builder_8py" ]
+];

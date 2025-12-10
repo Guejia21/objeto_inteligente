@@ -1,0 +1,26 @@
+var dir_89f904cc9d19b773d33157487b8daaf1 =
+[
+    [ "__init__.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2____init_____8py.html", null ],
+    [ "_framework_compat.py", "__framework__compat_8py.html", "__framework__compat_8py" ],
+    [ "bdist.py", "bdist_8py.html", "bdist_8py" ],
+    [ "bdist_dumb.py", "bdist__dumb_8py.html", "bdist__dumb_8py" ],
+    [ "bdist_rpm.py", "__distutils_2command_2bdist__rpm_8py.html", "__distutils_2command_2bdist__rpm_8py" ],
+    [ "build.py", "__distutils_2command_2build_8py.html", "__distutils_2command_2build_8py" ],
+    [ "build_clib.py", "__distutils_2command_2build__clib_8py.html", "__distutils_2command_2build__clib_8py" ],
+    [ "build_ext.py", "__distutils_2command_2build__ext_8py.html", "__distutils_2command_2build__ext_8py" ],
+    [ "build_py.py", "__distutils_2command_2build__py_8py.html", "__distutils_2command_2build__py_8py" ],
+    [ "build_scripts.py", "build__scripts_8py.html", "build__scripts_8py" ],
+    [ "check.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2check_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2check_8py" ],
+    [ "clean.py", "clean_8py.html", "clean_8py" ],
+    [ "config.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2config_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2config_8py" ],
+    [ "install.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2install_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2install_8py" ],
+    [ "install_data.py", "install__data_8py.html", "install__data_8py" ],
+    [ "install_egg_info.py", "__distutils_2command_2install__egg__info_8py.html", "__distutils_2command_2install__egg__info_8py" ],
+    [ "install_headers.py", "install__headers_8py.html", "install__headers_8py" ],
+    [ "install_lib.py", "__distutils_2command_2install__lib_8py.html", "__distutils_2command_2install__lib_8py" ],
+    [ "install_scripts.py", "__distutils_2command_2install__scripts_8py.html", "__distutils_2command_2install__scripts_8py" ],
+    [ "py37compat.py", "py37compat_8py.html", "py37compat_8py" ],
+    [ "register.py", "__distutils_2command_2register_8py.html", "__distutils_2command_2register_8py" ],
+    [ "sdist.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2sdist_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__distutils_2command_2sdist_8py" ],
+    [ "upload.py", "__distutils_2command_2upload_8py.html", "__distutils_2command_2upload_8py" ]
+];

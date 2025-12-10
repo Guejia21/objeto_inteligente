@@ -1,0 +1,407 @@
+\doxysection{unixccompiler.\+py}
+\hypertarget{unixccompiler_8py_source}{}\label{unixccompiler_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/unixccompiler.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/unixccompiler.py}}
+\mbox{\hyperlink{unixccompiler_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}distutils.unixccompiler}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00002}00002\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00003}00003\ \textcolor{stringliteral}{Contains\ the\ UnixCCompiler\ class,\ a\ subclass\ of\ CCompiler\ that\ handles}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00004}00004\ \textcolor{stringliteral}{the\ "{}typical"{}\ Unix-\/style\ command-\/line\ C\ compiler:}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00005}00005\ \textcolor{stringliteral}{\ \ *\ macros\ defined\ with\ -\/Dname[=value]}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00006}00006\ \textcolor{stringliteral}{\ \ *\ macros\ undefined\ with\ -\/Uname}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00007}00007\ \textcolor{stringliteral}{\ \ *\ include\ search\ directories\ specified\ with\ -\/Idir}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00008}00008\ \textcolor{stringliteral}{\ \ *\ libraries\ specified\ with\ -\/lllib}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00009}00009\ \textcolor{stringliteral}{\ \ *\ library\ search\ directories\ specified\ with\ -\/Ldir}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00010}00010\ \textcolor{stringliteral}{\ \ *\ compile\ handled\ by\ 'cc'\ (or\ similar)\ executable\ with\ -\/c\ option:}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00011}00011\ \textcolor{stringliteral}{\ \ \ \ compiles\ .c\ to\ .o}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00012}00012\ \textcolor{stringliteral}{\ \ *\ link\ static\ library\ handled\ by\ 'ar'\ command\ (possibly\ with\ 'ranlib')}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00013}00013\ \textcolor{stringliteral}{\ \ *\ link\ shared\ library\ handled\ by\ 'cc\ -\/shared'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00014}00014\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00016}00016\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00017}00017\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00018}00018\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00019}00019\ \textcolor{keyword}{import}\ shlex}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00020}00020\ \textcolor{keyword}{import}\ itertools}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00022}00022\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ sysconfig}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00023}00023\ \textcolor{keyword}{from}\ distutils.dep\_util\ \textcolor{keyword}{import}\ newer}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00024}00024\ \textcolor{keyword}{from}\ distutils.ccompiler\ \textcolor{keyword}{import}\ CCompiler,\ gen\_preprocess\_options,\ gen\_lib\_options}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00025}00025\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ DistutilsExecError,\ CompileError,\ LibError,\ LinkError}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00026}00026\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00027}00027\ \textcolor{keyword}{from}\ .\_macos\_compat\ \textcolor{keyword}{import}\ compiler\_fixup}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00029}00029\ \textcolor{comment}{\#\ XXX\ Things\ not\ currently\ handled:}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00030}00030\ \textcolor{comment}{\#\ \ \ *\ optimization/debug/warning\ flags;\ we\ just\ use\ whatever's\ in\ Python's}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00031}00031\ \textcolor{comment}{\#\ \ \ \ \ Makefile\ and\ live\ with\ it.\ \ Is\ this\ adequate?\ \ If\ not,\ we\ might}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00032}00032\ \textcolor{comment}{\#\ \ \ \ \ have\ to\ have\ a\ bunch\ of\ subclasses\ GNUCCompiler,\ SGICCompiler,}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00033}00033\ \textcolor{comment}{\#\ \ \ \ \ SunCCompiler,\ and\ I\ suspect\ down\ that\ road\ lies\ madness.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00034}00034\ \textcolor{comment}{\#\ \ \ *\ even\ if\ we\ don't\ know\ a\ warning\ flag\ from\ an\ optimization\ flag,}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00035}00035\ \textcolor{comment}{\#\ \ \ \ \ we\ need\ some\ way\ for\ outsiders\ to\ feed\ preprocessor/compiler/linker}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00036}00036\ \textcolor{comment}{\#\ \ \ \ \ flags\ in\ to\ us\ -\/-\/\ eg.\ a\ sysadmin\ might\ want\ to\ mandate\ certain\ flags}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00037}00037\ \textcolor{comment}{\#\ \ \ \ \ via\ a\ site\ config\ file,\ or\ a\ user\ might\ want\ to\ set\ something\ for}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00038}00038\ \textcolor{comment}{\#\ \ \ \ \ compiling\ this\ module\ distribution\ only\ via\ the\ setup.py\ command}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00039}00039\ \textcolor{comment}{\#\ \ \ \ \ line,\ whatever.\ \ As\ long\ as\ these\ options\ come\ from\ something\ on\ the}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00040}00040\ \textcolor{comment}{\#\ \ \ \ \ current\ system,\ they\ can\ be\ as\ system-\/dependent\ as\ they\ like,\ and\ we}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00041}00041\ \textcolor{comment}{\#\ \ \ \ \ should\ just\ happily\ stuff\ them\ into\ the\ preprocessor/compiler/linker}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00042}00042\ \textcolor{comment}{\#\ \ \ \ \ options\ and\ carry\ on.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00045}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_a56a8274c3866a89c8401a19264d89fd7}{00045}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_a56a8274c3866a89c8401a19264d89fd7}{\_split\_env}}(cmd):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00046}00046\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ For\ macOS,\ split\ command\ into\ 'env'\ portion\ (if\ any)}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ and\ the\ rest\ of\ the\ linker\ command.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00049}00049\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_split\_env(['a',\ 'b',\ 'c'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ ([],\ ['a',\ 'b',\ 'c'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00052}00052\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_split\_env(['/usr/bin/env',\ 'A=3',\ 'gcc'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00053}00053\ \textcolor{stringliteral}{\ \ \ \ (['/usr/bin/env',\ 'A=3'],\ ['gcc'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00054}00054\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00055}00055\ \ \ \ \ pivot\ =\ 0}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.basename(cmd[0])\ ==\ \textcolor{stringliteral}{"{}env"{}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ pivot\ =\ 1}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{stringliteral}{'='}\ \textcolor{keywordflow}{in}\ cmd[pivot]:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ pivot\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00060}00060\ \ \ \ \ \textcolor{keywordflow}{return}\ cmd[:pivot],\ cmd[pivot:]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00063}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_aea3fa287bac88eb41ecd1f6b65f5e1c2}{00063}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_aea3fa287bac88eb41ecd1f6b65f5e1c2}{\_split\_aix}}(cmd):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00064}00064\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00065}00065\ \textcolor{stringliteral}{\ \ \ \ AIX\ platforms\ prefix\ the\ compiler\ with\ the\ ld\_so\_aix}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ script,\ so\ split\ that\ from\ the\ linker\ command.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00067}00067\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00068}00068\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_split\_aix(['a',\ 'b',\ 'c'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00069}00069\ \textcolor{stringliteral}{\ \ \ \ ([],\ ['a',\ 'b',\ 'c'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00070}00070\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_split\_aix(['/bin/foo/ld\_so\_aix',\ 'gcc'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00071}00071\ \textcolor{stringliteral}{\ \ \ \ (['/bin/foo/ld\_so\_aix'],\ ['gcc'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00073}00073\ \ \ \ \ pivot\ =\ os.path.basename(cmd[0])\ ==\ \textcolor{stringliteral}{'ld\_so\_aix'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00074}00074\ \ \ \ \ \textcolor{keywordflow}{return}\ cmd[:pivot],\ cmd[pivot:]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00077}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_ab50ee40e8b5a3a9cc71c96cfd9f60fdb}{00077}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_ab50ee40e8b5a3a9cc71c96cfd9f60fdb}{\_linker\_params}}(linker\_cmd,\ compiler\_cmd):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00078}00078\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ The\ linker\ command\ usually\ begins\ with\ the\ compiler}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ command\ (possibly\ multiple\ elements),\ followed\ by\ zero\ or\ more}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ params\ for\ shared\ library\ building.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00082}00082\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ If\ the\ LDSHARED\ env\ variable\ overrides\ the\ linker\ command,}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ however,\ the\ commands\ may\ not\ match.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00085}00085\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ Return\ the\ best\ guess\ of\ the\ linker\ parameters\ by\ stripping}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ the\ linker\ command.\ If\ the\ compiler\ command\ does\ not}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ match\ the\ linker\ command,\ assume\ the\ linker\ command\ is}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ just\ the\ first\ element.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00090}00090\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_linker\_params('gcc\ foo\ bar'.split(),\ ['gcc'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ ['foo',\ 'bar']}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_linker\_params('gcc\ foo\ bar'.split(),\ ['other'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ ['foo',\ 'bar']}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_linker\_params('ccache\ gcc\ foo\ bar'.split(),\ 'ccache\ gcc'.split())}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ ['foo',\ 'bar']}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ >>>\ \_linker\_params(['gcc'],\ ['gcc'])}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ []}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00100}00100\ \ \ \ \ c\_len\ =\ len(compiler\_cmd)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00101}00101\ \ \ \ \ pivot\ =\ c\_len\ \textcolor{keywordflow}{if}\ linker\_cmd[:c\_len]\ ==\ compiler\_cmd\ \textcolor{keywordflow}{else}\ 1}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00102}00102\ \ \ \ \ \textcolor{keywordflow}{return}\ linker\_cmd[pivot:]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00105}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler}{00105}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler}{UnixCCompiler}}(CCompiler):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00107}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a5d1216aa0d1e8027e707f28af0444b8c}{00107}}\ \ \ \ \ compiler\_type\ =\ \textcolor{stringliteral}{'unix'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00109}00109\ \ \ \ \ \textcolor{comment}{\#\ These\ are\ used\ by\ CCompiler\ in\ two\ places:\ the\ constructor\ sets}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00110}00110\ \ \ \ \ \textcolor{comment}{\#\ instance\ attributes\ 'preprocessor',\ 'compiler',\ etc.\ from\ them,\ and}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00111}00111\ \ \ \ \ \textcolor{comment}{\#\ 'set\_executable()'\ allows\ any\ of\ these\ to\ be\ set.\ \ The\ defaults\ here}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00112}00112\ \ \ \ \ \textcolor{comment}{\#\ are\ pretty\ generic;\ they\ will\ probably\ have\ to\ be\ set\ by\ an\ outsider}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00113}00113\ \ \ \ \ \textcolor{comment}{\#\ (eg.\ using\ information\ discovered\ by\ the\ sysconfig\ about\ building}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00114}00114\ \ \ \ \ \textcolor{comment}{\#\ Python\ extensions).}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00115}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a3f72bfe9747333694e99751865447c4e}{00115}}\ \ \ \ \ executables\ =\ \{}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'preprocessor'}:\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'compiler'}:\ [\textcolor{stringliteral}{"{}cc"{}}],}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'compiler\_so'}:\ [\textcolor{stringliteral}{"{}cc"{}}],}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'compiler\_cxx'}:\ [\textcolor{stringliteral}{"{}cc"{}}],}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'linker\_so'}:\ [\textcolor{stringliteral}{"{}cc"{}},\ \textcolor{stringliteral}{"{}-\/shared"{}}],}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'linker\_exe'}:\ [\textcolor{stringliteral}{"{}cc"{}}],}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'archiver'}:\ [\textcolor{stringliteral}{"{}ar"{}},\ \textcolor{stringliteral}{"{}-\/cr"{}}],}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'ranlib'}:\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00124}00124\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00126}00126\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.platform[:6]\ ==\ \textcolor{stringliteral}{"{}darwin"{}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ executables[\textcolor{stringliteral}{'ranlib'}]\ =\ [\textcolor{stringliteral}{"{}ranlib"{}}]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00129}00129\ \ \ \ \ \textcolor{comment}{\#\ Needed\ for\ the\ filename\ generation\ methods\ provided\ by\ the\ base}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00130}00130\ \ \ \ \ \textcolor{comment}{\#\ class,\ CCompiler.\ \ NB.\ whoever\ instantiates/uses\ a\ particular}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00131}00131\ \ \ \ \ \textcolor{comment}{\#\ UnixCCompiler\ instance\ should\ set\ 'shared\_lib\_ext'\ -\/-\/\ we\ set\ a}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00132}00132\ \ \ \ \ \textcolor{comment}{\#\ reasonable\ common\ default\ here,\ but\ it's\ not\ necessarily\ used\ on\ all}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00133}00133\ \ \ \ \ \textcolor{comment}{\#\ Unices!}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00135}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a0a73adce3da0a52aa4c32f2998464d38}{00135}}\ \ \ \ \ src\_extensions\ =\ [\textcolor{stringliteral}{"{}.c"{}},\ \textcolor{stringliteral}{"{}.C"{}},\ \textcolor{stringliteral}{"{}.cc"{}},\ \textcolor{stringliteral}{"{}.cxx"{}},\ \textcolor{stringliteral}{"{}.cpp"{}},\ \textcolor{stringliteral}{"{}.m"{}}]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00136}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_ac7866cf8384f2d2f2cb99b7777f8cb39}{00136}}\ \ \ \ \ obj\_extension\ =\ \textcolor{stringliteral}{"{}.o"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00137}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_ac96dc9f094155ec0d138f6de3dd85757}{00137}}\ \ \ \ \ static\_lib\_extension\ =\ \textcolor{stringliteral}{"{}.a"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00138}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a86ebf8a08f445802e750d3756f6da500}{00138}}\ \ \ \ \ shared\_lib\_extension\ =\ \textcolor{stringliteral}{"{}.so"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00139}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a0d903497b1d40cbcde7812bb101020a3}{00139}}\ \ \ \ \ dylib\_lib\_extension\ =\ \textcolor{stringliteral}{"{}.dylib"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00140}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_aa4b97ed993b2469c92220d836d163193}{00140}}\ \ \ \ \ xcode\_stub\_lib\_extension\ =\ \textcolor{stringliteral}{"{}.tbd"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00141}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a15261383c55c4619cb30cfd958b4a66b}{00141}}\ \ \ \ \ static\_lib\_format\ =\ shared\_lib\_format\ =\ dylib\_lib\_format\ =\ \textcolor{stringliteral}{"{}lib\%s\%s"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00142}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a55504f296a1f1209ad5fde4783fb86ce}{00142}}\ \ \ \ \ xcode\_stub\_lib\_format\ =\ dylib\_lib\_format}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00143}00143\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.platform\ ==\ \textcolor{stringliteral}{"{}cygwin"{}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00144}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_abda27d7120043e8af05f0fcf827bb21b}{00144}}\ \ \ \ \ \ \ \ \ exe\_extension\ =\ \textcolor{stringliteral}{"{}.exe"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00146}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_ae1f52a49624a192b41b3586f9113d6fa}{00146}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_ae1f52a49624a192b41b3586f9113d6fa}{preprocess}}(}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ source,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ output\_file=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ macros=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ include\_dirs=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ extra\_preargs=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ extra\_postargs=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00154}00154\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ fixed\_args\ =\ self.\_fix\_compile\_args(\textcolor{keywordtype}{None},\ macros,\ include\_dirs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ ignore,\ macros,\ include\_dirs\ =\ fixed\_args}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ pp\_opts\ =\ gen\_preprocess\_options(macros,\ include\_dirs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ pp\_args\ =\ self.preprocessor\ +\ pp\_opts}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ output\_file:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ pp\_args.extend([\textcolor{stringliteral}{'-\/o'},\ output\_file])}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ extra\_preargs:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ pp\_args[:0]\ =\ extra\_preargs}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ extra\_postargs:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ pp\_args.extend(extra\_postargs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ pp\_args.append(source)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ reasons\ to\ preprocess:}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/\ force\ is\ indicated}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/\ output\ is\ directed\ to\ stdout}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/\ source\ file\ is\ newer\ than\ the\ target}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ preprocess\ =\ self.force\ \textcolor{keywordflow}{or}\ output\_file\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{or}\ newer(source,\ output\_file)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ preprocess:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ output\_file:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ self.mkpath(os.path.dirname(output\_file))}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn(pp\_args)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ CompileError(msg)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00183}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a46637fc77b6fc4eac2678e277fba18fe}{00183}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a46637fc77b6fc4eac2678e277fba18fe}{\_compile}}(self,\ obj,\ src,\ ext,\ cc\_args,\ extra\_postargs,\ pp\_opts):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ compiler\_so\ =\ compiler\_fixup(self.compiler\_so,\ cc\_args\ +\ extra\_postargs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn(compiler\_so\ +\ cc\_args\ +\ [src,\ \textcolor{stringliteral}{'-\/o'},\ obj]\ +\ extra\_postargs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ CompileError(msg)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00190}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a0ba22327abb7825739432e0a60737090}{00190}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a0ba22327abb7825739432e0a60737090}{create\_static\_lib}}(}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ self,\ objects,\ output\_libname,\ output\_dir=None,\ debug=0,\ target\_lang=None}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00192}00192\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ objects,\ output\_dir\ =\ self.\_fix\_object\_args(objects,\ output\_dir)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ output\_filename\ =\ self.library\_filename(output\_libname,\ output\_dir=output\_dir)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\_need\_link(objects,\ output\_filename):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ self.mkpath(os.path.dirname(output\_filename))}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00199}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a488599d819a22bbc2bdd0b5a640c2d34}{00199}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn(self.archiver\ +\ [output\_filename]\ +\ objects\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a488599d819a22bbc2bdd0b5a640c2d34}{objects}})}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00200}00200\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Not\ many\ Unices\ required\ ranlib\ anymore\ -\/-\/\ SunOS\ 4.x\ is,\ I}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ think\ the\ only\ major\ Unix\ that\ does.\ \ Maybe\ we\ need\ some}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ platform\ intelligence\ here\ to\ skip\ ranlib\ if\ it's\ not}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ needed\ -\/-\/\ or\ maybe\ Python's\ configure\ script\ took\ care\ of}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ it\ for\ us,\ hence\ the\ check\ for\ leading\ colon.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00206}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_aec4b1c0f6017e0368e3d540962066bad}{00206}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_aec4b1c0f6017e0368e3d540962066bad}{ranlib}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_aec4b1c0f6017e0368e3d540962066bad}{ranlib}}\ +\ [output\_filename])}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ LibError(msg)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}skipping\ \%s\ (up-\/to-\/date)"{}},\ output\_filename)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00214}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a77a8b7a9acb4b236ba8cfc5c2f8dac7d}{00214}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a77a8b7a9acb4b236ba8cfc5c2f8dac7d}{link}}(}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ target\_desc,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ objects,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ output\_filename,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ output\_dir=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ libraries=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ library\_dirs=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ runtime\_library\_dirs=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ export\_symbols=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ debug=0,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ extra\_preargs=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ extra\_postargs=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ build\_temp=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ target\_lang=None,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00229}00229\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ objects,\ output\_dir\ =\ self.\_fix\_object\_args(objects,\ output\_dir)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ fixed\_args\ =\ self.\_fix\_lib\_args(libraries,\ library\_dirs,\ runtime\_library\_dirs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ libraries,\ library\_dirs,\ runtime\_library\_dirs\ =\ fixed\_args}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00233}00233\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ lib\_opts\ =\ gen\_lib\_options(self,\ library\_dirs,\ runtime\_library\_dirs,\ libraries)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(output\_dir,\ (str,\ type(\textcolor{keywordtype}{None}))):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(\textcolor{stringliteral}{"{}'output\_dir'\ must\ be\ a\ string\ or\ None"{}})}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ output\_dir\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ output\_filename\ =\ os.path.join(output\_dir,\ output\_filename)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\_need\_link(objects,\ output\_filename):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args\ =\ objects\ +\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a488599d819a22bbc2bdd0b5a640c2d34}{objects}}\ +\ lib\_opts\ +\ [\textcolor{stringliteral}{'-\/o'},\ output\_filename]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ debug:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args[:0]\ =\ [\textcolor{stringliteral}{'-\/g'}]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ extra\_preargs:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args[:0]\ =\ extra\_preargs}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ extra\_postargs:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ld\_args.extend(extra\_postargs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ self.mkpath(os.path.dirname(output\_filename))}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Select\ a\ linker\ based\ on\ context:\ linker\_exe\ when}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ building\ an\ executable\ or\ linker\_so\ (with\ shared\ options)}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ when\ building\ a\ shared\ library.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ building\_exe\ =\ target\_desc\ ==\ CCompiler.EXECUTABLE}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ linker\ =\ (self.linker\_exe\ \textcolor{keywordflow}{if}\ building\_exe\ \textcolor{keywordflow}{else}\ self.linker\_so)[:]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ target\_lang\ ==\ \textcolor{stringliteral}{"{}c++"{}}\ \textcolor{keywordflow}{and}\ self.compiler\_cxx:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ env,\ linker\_ne\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_a56a8274c3866a89c8401a19264d89fd7}{\_split\_env}}(linker)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ aix,\ linker\_na\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_aea3fa287bac88eb41ecd1f6b65f5e1c2}{\_split\_aix}}(linker\_ne)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_,\ compiler\_cxx\_ne\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_a56a8274c3866a89c8401a19264d89fd7}{\_split\_env}}(self.compiler\_cxx)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_,\ linker\_exe\_ne\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_a56a8274c3866a89c8401a19264d89fd7}{\_split\_env}}(self.linker\_exe)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ params\ =\ \mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1unixccompiler_ab50ee40e8b5a3a9cc71c96cfd9f60fdb}{\_linker\_params}}(linker\_na,\ linker\_exe\_ne)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ linker\ =\ env\ +\ aix\ +\ compiler\_cxx\_ne\ +\ params}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ linker\ =\ compiler\_fixup(linker,\ ld\_args)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.spawn(linker\ +\ ld\_args)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ DistutilsExecError\ \textcolor{keyword}{as}\ msg:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ LinkError(msg)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ log.debug(\textcolor{stringliteral}{"{}skipping\ \%s\ (up-\/to-\/date)"{}},\ output\_filename)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00273}00273\ \ \ \ \ \textcolor{comment}{\#\ -\/-\/\ Miscellaneous\ methods\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00274}00274\ \ \ \ \ \textcolor{comment}{\#\ These\ are\ all\ used\ by\ the\ 'gen\_lib\_options()\ function,\ in}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00275}00275\ \ \ \ \ \textcolor{comment}{\#\ ccompiler.py.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00277}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a304d19641fa95918e49409e7bb3d0d5d}{00277}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a304d19641fa95918e49409e7bb3d0d5d}{library\_dir\_option}}(self,\ dir):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}-\/L"{}}\ +\ dir}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00279}00279\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00280}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_adb3dd162b77d4d0a14e5029f6fd1a762}{00280}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_adb3dd162b77d4d0a14e5029f6fd1a762}{\_is\_gcc}}(self):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ cc\_var\ =\ sysconfig.get\_config\_var(\textcolor{stringliteral}{"{}CC"{}})}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ compiler\ =\ os.path.basename(shlex.split(cc\_var)[0])}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}gcc"{}}\ \textcolor{keywordflow}{in}\ compiler\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}g++"{}}\ \textcolor{keywordflow}{in}\ compiler}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00284}00284\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00285}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_ada62c8d21ab70789d099796d89404aa7}{00285}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_ada62c8d21ab70789d099796d89404aa7}{runtime\_library\_dir\_option}}(self,\ dir):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ Hackish,\ at\ the\ very\ least.\ \ See\ Python\ bug\ \#445902:}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ http://sourceforge.net/tracker/index.php}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ ?func=detail\&aid=445902\&group\_id=5470\&atid=105470}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Linkers\ on\ different\ platforms\ need\ different\ options\ to}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ specify\ that\ directories\ need\ to\ be\ added\ to\ the\ list\ of}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ directories\ searched\ for\ dependencies\ when\ a\ dynamic\ library}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ is\ sought.\ \ GCC\ on\ GNU\ systems\ (Linux,\ FreeBSD,\ ...)\ has\ to}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ be\ told\ to\ pass\ the\ -\/R\ option\ through\ to\ the\ linker,\ whereas}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ other\ compilers\ and\ gcc\ on\ other\ systems\ just\ know\ this.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Other\ compilers\ may\ need\ something\ slightly\ different.\ \ At}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ this\ time,\ there's\ no\ way\ to\ determine\ this\ information\ from}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ configuration\ data\ stored\ in\ the\ Python\ installation,\ so}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ use\ this\ hack.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sys.platform[:6]\ ==\ \textcolor{stringliteral}{"{}darwin"{}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ get\_macosx\_target\_ver,\ split\_version}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ macosx\_target\_ver\ =\ get\_macosx\_target\_ver()}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ macosx\_target\_ver\ \textcolor{keywordflow}{and}\ split\_version(macosx\_target\_ver)\ >=\ [10,\ 5]:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}-\/Wl,-\/rpath,"{}}\ +\ dir}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:\ \ \textcolor{comment}{\#\ no\ support\ for\ -\/rpath\ on\ earlier\ macOS\ versions}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}-\/L"{}}\ +\ dir}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ sys.platform[:7]\ ==\ \textcolor{stringliteral}{"{}freebsd"{}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}-\/Wl,-\/rpath="{}}\ +\ dir}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ sys.platform[:5]\ ==\ \textcolor{stringliteral}{"{}hp-\/ux"{}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}-\/Wl,+s"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_adb3dd162b77d4d0a14e5029f6fd1a762}{\_is\_gcc}}()\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}+s"{}},}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}-\/L"{}}\ +\ dir,}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ all\ compilers,\ \`{}-\/Wl`\ is\ the\ presumed\ way\ to}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ pass\ a\ compiler\ option\ to\ the\ linker\ and\ \`{}-\/R`\ is}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ way\ to\ pass\ an\ RPATH.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sysconfig.get\_config\_var(\textcolor{stringliteral}{"{}GNULD"{}})\ ==\ \textcolor{stringliteral}{"{}yes"{}}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ GNU\ ld\ needs\ an\ extra\ option\ to\ get\ a\ RUNPATH}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ instead\ of\ just\ an\ RPATH.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}-\/Wl,-\/-\/enable-\/new-\/dtags,-\/R"{}}\ +\ dir}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}-\/Wl,-\/R"{}}\ +\ dir}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00325}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a6390d54a74bce0cb3f8d5efb995858c5}{00325}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a6390d54a74bce0cb3f8d5efb995858c5}{library\_option}}(self,\ lib):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}-\/l"{}}\ +\ lib}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00327}00327\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00328}00328\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00329}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a29227d69371405fb5a9bc4862ecd21e4}{00329}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a29227d69371405fb5a9bc4862ecd21e4}{\_library\_root}}(dir):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00331}00331\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ macOS\ users\ can\ specify\ an\ alternate\ SDK\ using'-\/isysroot'.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00332}00332\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Calculate\ the\ SDK\ root\ if\ it\ is\ specified.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00333}00333\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00334}00334\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Note\ that,\ as\ of\ Xcode\ 7,\ Apple\ SDKs\ may\ contain\ textual\ stub}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00335}00335\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ libraries\ with\ .tbd\ extensions\ rather\ than\ the\ normal\ .dylib}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00336}00336\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ shared\ libraries\ installed\ in\ /.\ \ The\ Apple\ compiler\ tool}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00337}00337\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ chain\ handles\ this\ transparently\ but\ it\ can\ cause\ problems}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00338}00338\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ for\ programs\ that\ are\ being\ built\ with\ an\ SDK\ and\ searching}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00339}00339\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ for\ specific\ libraries.\ \ Callers\ of\ find\_library\_file\ need\ to}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00340}00340\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ keep\ in\ mind\ that\ the\ base\ filename\ of\ the\ returned\ SDK\ library}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00341}00341\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ file\ might\ have\ a\ different\ extension\ from\ that\ of\ the\ library}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00342}00342\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ file\ installed\ on\ the\ running\ system,\ for\ example:}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00343}00343\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ /Applications/Xcode.app/Contents/Developer/Platforms/}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00344}00344\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00345}00345\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ usr/lib/libedit.tbd}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00346}00346\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ vs}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00347}00347\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ /usr/lib/libedit.dylib}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00348}00348\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ cflags\ =\ sysconfig.get\_config\_var(\textcolor{stringliteral}{'CFLAGS'})}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ match\ =\ re.search(\textcolor{stringliteral}{r'-\/isysroot\(\backslash\)s*(\(\backslash\)S+)'},\ cflags)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00351}00351\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ apply\_root\ =\ (}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ sys.platform\ ==\ \textcolor{stringliteral}{'darwin'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ match}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ (}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dir.startswith(\textcolor{stringliteral}{'/System/'})}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ (dir.startswith(\textcolor{stringliteral}{'/usr/'})\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ dir.startswith(\textcolor{stringliteral}{'/usr/local/'}))}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00360}00360\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.join(match.group(1),\ dir[1:])\ \textcolor{keywordflow}{if}\ apply\_root\ \textcolor{keywordflow}{else}\ dir}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00362}00362\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00363}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a1deb6fd711d4b115d02520bab1ec3e0c}{00363}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a1deb6fd711d4b115d02520bab1ec3e0c}{find\_library\_file}}(self,\ dirs,\ lib,\ debug=0):}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{r"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00365}00365\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Second-\/guess\ the\ linker\ with\ not\ much\ hard}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00366}00366\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ data\ to\ go\ on:\ GCC\ seems\ to\ prefer\ the\ shared\ library,\ so}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00367}00367\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ assume\ that\ *all*\ Unix\ C\ compilers\ do,}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00368}00368\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ignoring\ even\ GCC's\ "{}-\/static"{}\ option.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00369}00369\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00370}00370\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ compiler\ =\ UnixCCompiler()}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00371}00371\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ compiler.\_library\_root\ =\ lambda\ dir:\ dir}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00372}00372\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ monkeypatch\ =\ getfixture('monkeypatch')}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00373}00373\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ monkeypatch.setattr(os.path,\ 'exists',\ lambda\ d:\ 'existing'\ in\ d)}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00374}00374\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ dirs\ =\ ('/foo/bar/missing',\ '/foo/bar/existing')}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00375}00375\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ compiler.find\_library\_file(dirs,\ 'abc').replace('\(\backslash\)\(\backslash\)',\ '/')}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00376}00376\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ '/foo/bar/existing/libabc.dylib'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00377}00377\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ compiler.find\_library\_file(reversed(dirs),\ 'abc').replace('\(\backslash\)\(\backslash\)',\ '/')}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00378}00378\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ '/foo/bar/existing/libabc.dylib'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00379}00379\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ monkeypatch.setattr(os.path,\ 'exists',}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00380}00380\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ...\ \ \ \ \ lambda\ d:\ 'existing'\ in\ d\ and\ '.a'\ in\ d)}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00381}00381\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ compiler.find\_library\_file(dirs,\ 'abc').replace('\(\backslash\)\(\backslash\)',\ '/')}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00382}00382\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ '/foo/bar/existing/libabc.a'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00383}00383\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ >>>\ compiler.find\_library\_file(reversed(dirs),\ 'abc').replace('\(\backslash\)\(\backslash\)',\ '/')}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00384}00384\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ '/foo/bar/existing/libabc.a'}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00385}00385\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00386}00386\ \ \ \ \ \ \ \ \ lib\_names\ =\ (}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ self.library\_filename(lib,\ lib\_type=type)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ type\ \textcolor{keywordflow}{in}\ \textcolor{stringliteral}{'dylib\ xcode\_stub\ shared\ static'}.split()}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00390}00390\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ roots\ =\ map(self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1unixccompiler_1_1_unix_c_compiler_a29227d69371405fb5a9bc4862ecd21e4}{\_library\_root}},\ dirs)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ searched\ =\ (}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ os.path.join(root,\ lib\_name)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ root,\ lib\_name\ \textcolor{keywordflow}{in}\ itertools.product(roots,\ lib\_names)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ found\ =\ filter(os.path.exists,\ searched)}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00399}00399\ }
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Return\ None\ if\ it\ could\ not\ be\ found\ in\ any\ dir.}}
+\DoxyCodeLine{\Hypertarget{unixccompiler_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ next(found,\ \textcolor{keywordtype}{None})}
+
+\end{DoxyCode}

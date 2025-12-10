@@ -1,3 +1,26 @@
+"""
+    @file consultas_service.py
+    @brief Servicios de aplicación para consultas sobre la base de conocimiento.
+    @details
+    Proporciona servicios para consultar propiedades, estados y reglas ECAs
+    desde la ontología OOS instanciada.
+    
+    Clases:
+    - ConsultasService: consultas sobre el objeto inteligente (propiedades OWL)
+    - ConsultasOntologiaUsuarioService: consultas sobre perfil de usuario
+    
+    @note Las consultas se delegan a interfaces de adaptador (IConsultas, IConsultasPerfilUsuario)
+          que encapsulan la lógica de SPARQL y razonamiento OWL.
+    
+    @author Sistema Objeto Inteligente
+    @version 1.0
+    @date 2025-01-10
+    
+    @see IConsultas Para adaptador de consultas de objeto
+    @see IConsultasPerfilUsuario Para adaptador de consultas de usuario
+    @see docs/diagrams/flow_diagrams.md Para diagramas de procesos
+"""
+
 from typing import Any, List
 
 from fastapi.responses import JSONResponse
@@ -6,11 +29,52 @@ from infraestructure.logging.Logging import logger
 from infraestructure.interfaces.IConsultas import IConsultasOOS
 
 class ConsultasService:
-    """Servicio de Consultas para la Ontología OOS."""
+    """
+        @class ConsultasService
+        @brief Servicio de Consultas para la Ontología OOS (Object Oriented Semantics).
+        
+        @details
+        Implementa consultas de alto nivel sobre la base de conocimiento.
+        Las consultas se delegan a un adaptador IConsultasOOS que encapsula
+        la lógica de SPARQL, razonamiento y acceso a la ontología.
+        
+        Responsabilidades:
+        - Consultar propiedades del objeto inteligente (id, title, estado, etc.)
+        - Consultar y modificar reglas ECA (Event-Condition-Action)
+        - Verificar estado activo de la ontología
+        - Logging de consultas
+        
+        Patrón: Service + Adapter (IConsultasOOS)
+        
+        @note Las consultas son mayormente síncronas; si requieren razonamiento
+              costoso, considerar asyncio.to_thread() en el controlador.
+        
+        @see IConsultasOOS Para implementación de adaptador
+        @see consultas.py Para endpoints REST
+        
+        @author NexTech
+        @date 2025-01-10
+    """
     def __init__(self, gestion_base_conocimiento: IConsultasOOS):
+        """
+            @brief Constructor del servicio de consultas.
+            
+            @param gestion_base_conocimiento Instancia del adaptador IConsultasOOS.
+        """
         self.gestion_base_conocimiento = gestion_base_conocimiento
     def consultarOntoActiva(self):
-        """Verifica que la ontología instanciada esté disponible; lanza excepción si no lo está."""
+        """
+            @brief Verifica que la ontología instanciada esté disponible.
+            
+            @return True si la ontología está activa, False si no.
+            
+            @exception RuntimeError Si hay error al verificar disponibilidad.
+            
+            @details
+            Consulta al adaptador si la ontología está cargada en memoria
+            y disponible para consultas. Si no está activa, registra warning
+            en logs.
+        """
         if not self.gestion_base_conocimiento.consultarOntoActiva():
             logger.warning("La ontología no está activa o disponible.")
             return False

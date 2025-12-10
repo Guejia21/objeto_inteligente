@@ -1,0 +1,864 @@
+\doxysection{\+\_\+decorators.\+py}
+\hypertarget{__decorators_8py_source}{}\label{__decorators_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_decorators.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_decorators.py}}
+\mbox{\hyperlink{__decorators_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Logic\ related\ to\ validators\ applied\ to\ models\ etc.\ via\ the\ \`{}@field\_validator\`{}\ and\ \`{}@model\_validator\`{}\ decorators."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations\ \textcolor{keyword}{as}\ \_annotations}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00005}00005\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00006}00006\ \textcolor{keyword}{import}\ types}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00007}00007\ \textcolor{keyword}{from}\ collections\ \textcolor{keyword}{import}\ deque}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00008}00008\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Iterable}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00009}00009\ \textcolor{keyword}{from}\ dataclasses\ \textcolor{keyword}{import}\ dataclass,\ field}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00010}00010\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ cached\_property,\ partial,\ partialmethod}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00011}00011\ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ Parameter,\ Signature,\ isdatadescriptor,\ ismethoddescriptor,\ signature}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00012}00012\ \textcolor{keyword}{from}\ itertools\ \textcolor{keyword}{import}\ islice}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00013}00013\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ Callable,\ ClassVar,\ Generic,\ Literal,\ TypeVar,\ Union}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00015}00015\ \textcolor{keyword}{from}\ pydantic\_core\ \textcolor{keyword}{import}\ PydanticUndefined,\ PydanticUndefinedType,\ core\_schema}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00016}00016\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ TypeAlias,\ is\_typeddict}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00018}00018\ \textcolor{keyword}{from}\ ..errors\ \textcolor{keyword}{import}\ PydanticUserError}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00019}00019\ \textcolor{keyword}{from}\ .\_core\_utils\ \textcolor{keyword}{import}\ get\_type\_ref}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00020}00020\ \textcolor{keyword}{from}\ .\_internal\_dataclass\ \textcolor{keyword}{import}\ slots\_true}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00021}00021\ \textcolor{keyword}{from}\ .\_namespace\_utils\ \textcolor{keyword}{import}\ GlobalsNamespace,\ MappingNamespace}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00022}00022\ \textcolor{keyword}{from}\ .\_typing\_extra\ \textcolor{keyword}{import}\ get\_function\_type\_hints}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00023}00023\ \textcolor{keyword}{from}\ .\_utils\ \textcolor{keyword}{import}\ can\_be\_positional}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00025}00025\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00026}00026\ \ \ \ \ \textcolor{keyword}{from}\ ..fields\ \textcolor{keyword}{import}\ ComputedFieldInfo}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00027}00027\ \ \ \ \ \textcolor{keyword}{from}\ ..functional\_validators\ \textcolor{keyword}{import}\ FieldValidatorModes}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00028}00028\ \ \ \ \ \textcolor{keyword}{from}\ .\_config\ \textcolor{keyword}{import}\ ConfigWrapper}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00031}00031\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00032}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_validator_decorator_info}{00032}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_validator_decorator_info}{ValidatorDecoratorInfo}}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00033}00033\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ container\ for\ data\ from\ \`{}@validator\`{}\ so\ that\ we\ can\ access\ it}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00034}00034\ \textcolor{stringliteral}{\ \ \ \ while\ building\ the\ pydantic-\/core\ schema.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00035}00035\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00036}00036\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00037}00037\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decorator\_repr:\ A\ class\ variable\ representing\ the\ decorator\ string,\ '@validator'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00038}00038\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ fields:\ A\ tuple\ of\ field\ names\ the\ validator\ should\ be\ called\ on.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00039}00039\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ proposed\ validator\ mode.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00040}00040\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ each\_item:\ For\ complex\ objects\ (sets,\ lists\ etc.)\ whether\ to\ validate\ individual}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00041}00041\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ elements\ rather\ than\ the\ whole\ object.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00042}00042\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ always:\ Whether\ this\ method\ and\ other\ validators\ should\ be\ called\ even\ if\ the\ value\ is\ missing.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ check\_fields:\ Whether\ to\ check\ that\ the\ fields\ actually\ exist\ on\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00046}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_validator_decorator_info_acfe8d1cbcdaec21148abe5f1969afc8a}{00046}}\ \ \ \ \ decorator\_repr:\ ClassVar[str]\ =\ \textcolor{stringliteral}{'@validator'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00048}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_validator_decorator_info_a822d32d169bce2428a48e328231c920b}{00048}}\ \ \ \ \ fields:\ tuple[str,\ ...]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00049}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_validator_decorator_info_a455bacdc3aa7eb5022818bac15f7bb01}{00049}}\ \ \ \ \ mode:\ Literal[\textcolor{stringliteral}{'before'},\ \textcolor{stringliteral}{'after'}]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00050}00050\ \ \ \ \ each\_item:\ bool}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00051}00051\ \ \ \ \ always:\ bool}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00052}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_validator_decorator_info_a4cf4117c657fb94bbef59d1285a294bd}{00052}}\ \ \ \ \ check\_fields:\ bool\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00055}00055\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00056}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_validator_decorator_info}{00056}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_validator_decorator_info}{FieldValidatorDecoratorInfo}}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00057}00057\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ container\ for\ data\ from\ \`{}@field\_validator\`{}\ so\ that\ we\ can\ access\ it}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00058}00058\ \textcolor{stringliteral}{\ \ \ \ while\ building\ the\ pydantic-\/core\ schema.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00059}00059\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00060}00060\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00061}00061\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decorator\_repr:\ A\ class\ variable\ representing\ the\ decorator\ string,\ '@field\_validator'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00062}00062\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ fields:\ A\ tuple\ of\ field\ names\ the\ validator\ should\ be\ called\ on.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00063}00063\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ proposed\ validator\ mode.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00064}00064\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ check\_fields:\ Whether\ to\ check\ that\ the\ fields\ actually\ exist\ on\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00065}00065\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ json\_schema\_input\_type:\ The\ input\ type\ of\ the\ function.\ This\ is\ only\ used\ to\ generate}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ the\ appropriate\ JSON\ Schema\ (in\ validation\ mode)\ and\ can\ only\ specified}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00067}00067\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ when\ \`{}mode\`{}\ is\ either\ \`{}'before'\`{},\ \`{}'plain'\`{}\ or\ \`{}'wrap'\`{}.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00068}00068\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00070}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_validator_decorator_info_ae9c67b4f53f954252d806ce79750d8b8}{00070}}\ \ \ \ \ decorator\_repr:\ ClassVar[str]\ =\ \textcolor{stringliteral}{'@field\_validator'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00072}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_validator_decorator_info_ad7590a75668e30453d89b164d797b0ff}{00072}}\ \ \ \ \ fields:\ tuple[str,\ ...]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00073}00073\ \ \ \ \ mode:\ FieldValidatorModes}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00074}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_validator_decorator_info_a44e6b5215453daf188e68d6e64543b82}{00074}}\ \ \ \ \ check\_fields:\ bool\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00075}00075\ \ \ \ \ json\_schema\_input\_type:\ Any}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00078}00078\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00079}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_root_validator_decorator_info}{00079}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_root_validator_decorator_info}{RootValidatorDecoratorInfo}}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00080}00080\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ container\ for\ data\ from\ \`{}@root\_validator\`{}\ so\ that\ we\ can\ access\ it}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ while\ building\ the\ pydantic-\/core\ schema.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00082}00082\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decorator\_repr:\ A\ class\ variable\ representing\ the\ decorator\ string,\ '@root\_validator'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00085}00085\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ proposed\ validator\ mode.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00088}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_root_validator_decorator_info_a5708df7c60050ed8229860432ec6eb49}{00088}}\ \ \ \ \ decorator\_repr:\ ClassVar[str]\ =\ \textcolor{stringliteral}{'@root\_validator'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00089}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_root_validator_decorator_info_a6669cb48ceb23435a71f2dbf075e9078}{00089}}\ \ \ \ \ mode:\ Literal[\textcolor{stringliteral}{'before'},\ \textcolor{stringliteral}{'after'}]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00092}00092\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00093}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_serializer_decorator_info}{00093}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_serializer_decorator_info}{FieldSerializerDecoratorInfo}}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00094}00094\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ container\ for\ data\ from\ \`{}@field\_serializer\`{}\ so\ that\ we\ can\ access\ it}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ while\ building\ the\ pydantic-\/core\ schema.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00096}00096\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decorator\_repr:\ A\ class\ variable\ representing\ the\ decorator\ string,\ '@field\_serializer'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ fields:\ A\ tuple\ of\ field\ names\ the\ serializer\ should\ be\ called\ on.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ proposed\ serializer\ mode.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ return\_type:\ The\ type\ of\ the\ serializer's\ return\ value.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ when\_used:\ The\ serialization\ condition.\ Accepts\ a\ string\ with\ values\ \`{}'always'\`{},\ \`{}'unless-\/none'\`{},\ \`{}'json'\`{},}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ and\ \`{}'json-\/unless-\/none'\`{}.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ check\_fields:\ Whether\ to\ check\ that\ the\ fields\ actually\ exist\ on\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00107}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_serializer_decorator_info_a1507d99c2c9fd5d647800feef244bd04}{00107}}\ \ \ \ \ decorator\_repr:\ ClassVar[str]\ =\ \textcolor{stringliteral}{'@field\_serializer'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00108}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_serializer_decorator_info_a85b573602164daa8a3a122f533268535}{00108}}\ \ \ \ \ fields:\ tuple[str,\ ...]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00109}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_serializer_decorator_info_a36de212f874cfb2d6799fb16521c811d}{00109}}\ \ \ \ \ mode:\ Literal[\textcolor{stringliteral}{'plain'},\ \textcolor{stringliteral}{'wrap'}]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00110}00110\ \ \ \ \ return\_type:\ Any}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00111}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_serializer_decorator_info_a13922ec8864fcb4e2fd12d78494cdde5}{00111}}\ \ \ \ \ when\_used:\ core\_schema.WhenUsed}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00112}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_serializer_decorator_info_ab397901033d53da6da757d5a587b155c}{00112}}\ \ \ \ \ check\_fields:\ bool\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00115}00115\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00116}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_serializer_decorator_info}{00116}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_serializer_decorator_info}{ModelSerializerDecoratorInfo}}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00117}00117\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ container\ for\ data\ from\ \`{}@model\_serializer\`{}\ so\ that\ we\ can\ access\ it}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ while\ building\ the\ pydantic-\/core\ schema.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00119}00119\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00121}00121\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decorator\_repr:\ A\ class\ variable\ representing\ the\ decorator\ string,\ '@model\_serializer'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ proposed\ serializer\ mode.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00123}00123\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ return\_type:\ The\ type\ of\ the\ serializer's\ return\ value.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00124}00124\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ when\_used:\ The\ serialization\ condition.\ Accepts\ a\ string\ with\ values\ \`{}'always'\`{},\ \`{}'unless-\/none'\`{},\ \`{}'json'\`{},}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00125}00125\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ and\ \`{}'json-\/unless-\/none'\`{}.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00126}00126\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00128}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_serializer_decorator_info_aa8b52df099edb77027b6353ab98fefce}{00128}}\ \ \ \ \ decorator\_repr:\ ClassVar[str]\ =\ \textcolor{stringliteral}{'@model\_serializer'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00129}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_serializer_decorator_info_a5a21edca688cdbb0904b0526f421f2da}{00129}}\ \ \ \ \ mode:\ Literal[\textcolor{stringliteral}{'plain'},\ \textcolor{stringliteral}{'wrap'}]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00130}00130\ \ \ \ \ return\_type:\ Any}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00131}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_serializer_decorator_info_af58490a4aff13e6d6ae5257efd42144d}{00131}}\ \ \ \ \ when\_used:\ core\_schema.WhenUsed}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00133}00133\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00134}00134\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00135}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_validator_decorator_info}{00135}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_validator_decorator_info}{ModelValidatorDecoratorInfo}}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00136}00136\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ container\ for\ data\ from\ \`{}@model\_validator\`{}\ so\ that\ we\ can\ access\ it}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00137}00137\ \textcolor{stringliteral}{\ \ \ \ while\ building\ the\ pydantic-\/core\ schema.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00138}00138\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00139}00139\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00140}00140\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decorator\_repr:\ A\ class\ variable\ representing\ the\ decorator\ string,\ '@model\_validator'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ proposed\ serializer\ mode.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00144}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_validator_decorator_info_a96d8ec13423eefd3fb0b3c8c35528e53}{00144}}\ \ \ \ \ decorator\_repr:\ ClassVar[str]\ =\ \textcolor{stringliteral}{'@model\_validator'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00145}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_validator_decorator_info_a68b31f46ba4cfa2df2d8387c5524c81e}{00145}}\ \ \ \ \ mode:\ Literal[\textcolor{stringliteral}{'wrap'},\ \textcolor{stringliteral}{'before'},\ \textcolor{stringliteral}{'after'}]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00148}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_model_validator_decorator_info_a78a81e7b0be395dc9108656e843616fe}{00148}}\ DecoratorInfo:\ TypeAlias\ =\ \textcolor{stringliteral}{"{}"{}"{}Union[}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ ValidatorDecoratorInfo,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ FieldValidatorDecoratorInfo,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ RootValidatorDecoratorInfo,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ FieldSerializerDecoratorInfo,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00153}00153\ \textcolor{stringliteral}{\ \ \ \ ModelSerializerDecoratorInfo,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00154}00154\ \textcolor{stringliteral}{\ \ \ \ ModelValidatorDecoratorInfo,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ ComputedFieldInfo,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00156}00156\ \textcolor{stringliteral}{]"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00158}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_af032c0644a62eb719c04068d072e012e}{00158}}\ ReturnType\ =\ TypeVar(\textcolor{stringliteral}{'ReturnType'})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00159}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a9261455a29c3480758acb335df662e50}{00159}}\ DecoratedType:\ TypeAlias\ =\ (}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00160}00160\ \ \ \ \ \textcolor{stringliteral}{'Union[classmethod[Any,\ Any,\ ReturnType],\ staticmethod[Any,\ ReturnType],\ Callable[...,\ ReturnType],\ property]'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00161}00161\ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00163}00163\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00164}00164\ \textcolor{preprocessor}{@dataclass}\ \ \textcolor{comment}{\#\ can't\ use\ slots\ here\ since\ we\ set\ attributes\ on\ \`{}\_\_post\_init\_\_`}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00165}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy}{00165}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy}{PydanticDescriptorProxy}}(Generic[ReturnType]):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00166}00166\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Wrap\ a\ classmethod,\ staticmethod,\ property\ or\ unbound\ function}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00167}00167\ \textcolor{stringliteral}{\ \ \ \ and\ act\ as\ a\ descriptor\ that\ allows\ us\ to\ detect\ decorated\ items}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00168}00168\ \textcolor{stringliteral}{\ \ \ \ from\ the\ class'\ attributes.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00169}00169\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00170}00170\ \textcolor{stringliteral}{\ \ \ \ This\ class'\ \_\_get\_\_\ returns\ the\ wrapped\ item's\ \_\_get\_\_\ result,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00171}00171\ \textcolor{stringliteral}{\ \ \ \ which\ makes\ it\ transparent\ for\ classmethods\ and\ staticmethods.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00172}00172\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00174}00174\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ wrapped:\ The\ decorator\ that\ has\ to\ be\ wrapped.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00175}00175\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decorator\_info:\ The\ decorator\ info.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00176}00176\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ shim:\ A\ wrapper\ function\ to\ wrap\ V1\ style\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00177}00177\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00178}00178\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00179}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{00179}}\ \ \ \ \ wrapped:\ DecoratedType[ReturnType]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00180}00180\ \ \ \ \ decorator\_info:\ DecoratorInfo}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00181}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_adcf2c6473b7bafb6d0e23e4bad146d46}{00181}}\ \ \ \ \ shim:\ Callable[[Callable[...,\ Any]],\ Callable[...,\ Any]]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00183}00183\ \ \ \ \ \textcolor{keyword}{def\ }\_\_post\_init\_\_(self):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ attr\ \textcolor{keywordflow}{in}\ \textcolor{stringliteral}{'setter'},\ \textcolor{stringliteral}{'deleter'}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}},\ attr):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\ =\ partial(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_a4888149bce73b56a1fd3143644b227ee}{\_call\_wrapped\_attr}},\ name=attr)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setattr(self,\ attr,\ f)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00189}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_a4888149bce73b56a1fd3143644b227ee}{00189}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_a4888149bce73b56a1fd3143644b227ee}{\_call\_wrapped\_attr}}(self,\ func:\ Callable[[Any],\ \textcolor{keywordtype}{None}],\ *,\ name:\ str)\ -\/>\ PydanticDescriptorProxy[ReturnType]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}}\ =\ getattr(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}},\ name)(func)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}},\ property):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ update\ ComputedFieldInfo.wrapped\_property}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ ..fields\ \textcolor{keyword}{import}\ ComputedFieldInfo}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00195}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_a68e424982c26848842871b7dbd027433}{00195}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_a68e424982c26848842871b7dbd027433}{decorator\_info}},\ ComputedFieldInfo):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_a68e424982c26848842871b7dbd027433}{decorator\_info}}.wrapped\_property\ =\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00199}00199\ \ \ \ \ \textcolor{keyword}{def\ }\_\_get\_\_(self,\ obj:\ object\ |\ \textcolor{keywordtype}{None},\ obj\_type:\ type[object]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None})\ -\/>\ PydanticDescriptorProxy[ReturnType]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}}.\_\_get\_\_(obj,\ obj\_type)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportReturnType]}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ not\ a\ descriptor,\ e.g.\ a\ partial\ object}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}}\ \ \textcolor{comment}{\#\ type:\ ignore[return-\/value]}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00205}00205\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00206}00206\ \ \ \ \ \textcolor{keyword}{def\ }\_\_set\_name\_\_(self,\ instance:\ Any,\ name:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}},\ \textcolor{stringliteral}{'\_\_set\_name\_\_'}):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}}.\_\_set\_name\_\_(instance,\ name)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportFunctionMemberAccess]}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00210}00210\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getattr\_\_(self,\ name:\ str,\ /)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Forward\ checks\ for\ \_\_isabstractmethod\_\_\ and\ such."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_pydantic_descriptor_proxy_ae33a7c6e584baf75d8a407beb05d5935}{wrapped}},\ name)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00215}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a53c1d30f810261b44c8c2f6f0ba88e8e}{00215}}\ DecoratorInfoType\ =\ TypeVar(\textcolor{stringliteral}{'DecoratorInfoType'},\ bound=DecoratorInfo)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00218}00218\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00219}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator}{00219}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator}{Decorator}}(Generic[DecoratorInfoType]):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00220}00220\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}A\ generic\ container\ class\ to\ join\ together\ the\ decorator\ metadata}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00221}00221\ \textcolor{stringliteral}{\ \ \ \ (metadata\ from\ decorator\ itself,\ which\ we\ have\ when\ the}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00222}00222\ \textcolor{stringliteral}{\ \ \ \ decorator\ is\ called\ but\ not\ when\ we\ are\ building\ the\ core-\/schema)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00223}00223\ \textcolor{stringliteral}{\ \ \ \ and\ the\ bound\ function\ (which\ we\ have\ after\ the\ class\ itself\ is\ created).}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00224}00224\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00225}00225\ \textcolor{stringliteral}{\ \ \ \ Attributes:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00226}00226\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls\_ref:\ The\ class\ ref.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00227}00227\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls\_var\_name:\ The\ decorated\ function\ name.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00228}00228\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ func:\ The\ decorated\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00229}00229\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ shim:\ A\ wrapper\ function\ to\ wrap\ V1\ style\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00230}00230\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ info:\ The\ decorator\ info.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00231}00231\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00233}00233\ \ \ \ \ cls\_ref:\ str}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00234}00234\ \ \ \ \ cls\_var\_name:\ str}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00235}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a651bf2c3ca5940fa37dfdb901e1ee3ec}{00235}}\ \ \ \ \ func:\ Callable[...,\ Any]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00236}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a0ebcbfdf59cf75e2c08192b13bb32516}{00236}}\ \ \ \ \ shim:\ Callable[[Any],\ Any]\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00237}00237\ \ \ \ \ info:\ DecoratorInfoType}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00239}00239\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00240}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a781ebb87664e600f3e828a51ebaee469}{00240}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a781ebb87664e600f3e828a51ebaee469}{build}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ cls\_:\ Any,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ cls\_var\_name:\ str,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ shim:\ Callable[[Any],\ Any]\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ info:\ DecoratorInfoType,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00246}00246\ \ \ \ \ )\ -\/>\ Decorator[DecoratorInfoType]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Build\ a\ new\ decorator.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00248}00248\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00249}00249\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00250}00250\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ cls\_:\ The\ class.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00251}00251\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ cls\_var\_name:\ The\ decorated\ function\ name.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00252}00252\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ shim:\ A\ wrapper\ function\ to\ wrap\ V1\ style\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00253}00253\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ info:\ The\ decorator\ info.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00254}00254\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00255}00255\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00256}00256\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ new\ decorator\ instance.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00257}00257\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ func\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a3d3f0dbb7efd36d7d0527e9c7174a2ec}{get\_attribute\_from\_bases}}(cls\_,\ cls\_var\_name)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ shim\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ func\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a0ebcbfdf59cf75e2c08192b13bb32516}{shim}}(func)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ func\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{unwrap\_wrapped\_function}}(func,\ unwrap\_partial=\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ callable(func):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ branch\ will\ get\ hit\ for\ classmethod\ properties}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ attribute\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a809204b834e5f9411b2146cce20cf011}{get\_attribute\_from\_base\_dicts}}(cls\_,\ cls\_var\_name)\ \ \textcolor{comment}{\#\ prevents\ the\ binding\ call\ to\ \`{}\_\_get\_\_`}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(attribute,\ PydanticDescriptorProxy):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ func\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{unwrap\_wrapped\_function}}(attribute.wrapped)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator}{Decorator}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ cls\_ref=get\_type\_ref(cls\_),}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ cls\_var\_name=cls\_var\_name,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ func=func,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ shim=shim,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ info=info,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00275}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a1732681c9564aa2711442a6fac34a1c1}{00275}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a1732681c9564aa2711442a6fac34a1c1}{bind\_to\_cls}}(self,\ cls:\ Any)\ -\/>\ Decorator[DecoratorInfoType]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Bind\ the\ decorator\ to\ a\ class.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00277}00277\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00278}00278\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00279}00279\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ cls:\ the\ class.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00280}00280\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00281}00281\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00282}00282\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ The\ new\ decorator\ instance.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00283}00283\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a781ebb87664e600f3e828a51ebaee469}{build}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ cls,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ cls\_var\_name=self.cls\_var\_name,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ shim=self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_a0ebcbfdf59cf75e2c08192b13bb32516}{shim}},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ info=self.info,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00292}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a296dc7955e451ea19f3fca316f565003}{00292}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a296dc7955e451ea19f3fca316f565003}{get\_bases}}(tp:\ type[Any])\ -\/>\ tuple[type[Any],\ ...]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00293}00293\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ base\ classes\ of\ a\ class\ or\ typeddict.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00294}00294\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00295}00295\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00296}00296\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ tp:\ The\ type\ or\ class\ to\ get\ the\ bases.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00297}00297\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00298}00298\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00299}00299\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ base\ classes.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00300}00300\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00301}00301\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_typeddict(tp):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp.\_\_orig\_bases\_\_\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00303}00303\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp.\_\_bases\_\_}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00305}00305\ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ()}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00307}00307\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00309}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a46bce8b6a99c1d674691b7e51ae4dd43}{00309}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a46bce8b6a99c1d674691b7e51ae4dd43}{mro}}(tp:\ type[Any])\ -\/>\ tuple[type[Any],\ ...]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00310}00310\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Calculate\ the\ Method\ Resolution\ Order\ of\ bases\ using\ the\ C3\ algorithm.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00311}00311\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00312}00312\ \textcolor{stringliteral}{\ \ \ \ See\ https://www.python.org/download/releases/2.3/mro/}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00313}00313\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00314}00314\ \ \ \ \ \textcolor{comment}{\#\ try\ to\ use\ the\ existing\ mro,\ for\ performance\ mainly}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00315}00315\ \ \ \ \ \textcolor{comment}{\#\ but\ also\ because\ it\ helps\ verify\ the\ implementation\ below}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00316}00316\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ is\_typeddict(tp):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tp.\_\_mro\_\_}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ GenericAlias\ and\ some\ other\ cases}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00323}00323\ \ \ \ \ bases\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a296dc7955e451ea19f3fca316f565003}{get\_bases}}(tp)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00324}00324\ \ \ \ \ \textcolor{keywordflow}{return}\ (tp,)\ +\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a438239d2a82f4a18eabb4f4a53e423ea}{mro\_for\_bases}}(bases)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00326}00326\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00327}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a438239d2a82f4a18eabb4f4a53e423ea}{00327}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a438239d2a82f4a18eabb4f4a53e423ea}{mro\_for\_bases}}(bases:\ tuple[type[Any],\ ...])\ -\/>\ tuple[type[Any],\ ...]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00328}00328\ \ \ \ \ \textcolor{keyword}{def\ }merge\_seqs(seqs:\ list[deque[type[Any]]])\ -\/>\ Iterable[type[Any]]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ non\_empty\ =\ [seq\ \textcolor{keywordflow}{for}\ seq\ \textcolor{keywordflow}{in}\ seqs\ \textcolor{keywordflow}{if}\ seq]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00331}00331\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ non\_empty:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Nothing\ left\ to\ process,\ we're\ done.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ candidate:\ type[Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ seq\ \textcolor{keywordflow}{in}\ non\_empty:\ \ \textcolor{comment}{\#\ Find\ merge\ candidates\ among\ seq\ heads.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ candidate\ =\ seq[0]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ not\_head\ =\ [s\ \textcolor{keywordflow}{for}\ s\ \textcolor{keywordflow}{in}\ non\_empty\ \textcolor{keywordflow}{if}\ candidate\ \textcolor{keywordflow}{in}\ islice(s,\ 1,\ \textcolor{keywordtype}{None})]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ not\_head:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Reject\ the\ candidate.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ candidate\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ candidate:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(\textcolor{stringliteral}{'Inconsistent\ hierarchy,\ no\ C3\ MRO\ is\ possible'})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ candidate}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ seq\ \textcolor{keywordflow}{in}\ non\_empty:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00347}00347\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Remove\ candidate.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ seq[0]\ ==\ candidate:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seq.popleft()}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00350}00350\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00351}00351\ \ \ \ \ seqs\ =\ [deque(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a46bce8b6a99c1d674691b7e51ae4dd43}{mro}}(base))\ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ bases]\ +\ [deque(bases)]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00352}00352\ \ \ \ \ \textcolor{keywordflow}{return}\ tuple(merge\_seqs(seqs))}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00353}00353\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00354}00354\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00355}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a95429705ec7864a4d281d005b9ae70db}{00355}}\ \_sentinel\ =\ object()}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00356}00356\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00357}00357\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00358}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a3d3f0dbb7efd36d7d0527e9c7174a2ec}{00358}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a3d3f0dbb7efd36d7d0527e9c7174a2ec}{get\_attribute\_from\_bases}}(tp:\ type[Any]\ |\ tuple[type[Any],\ ...],\ name:\ str)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00359}00359\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ attribute\ from\ the\ next\ class\ in\ the\ MRO\ that\ has\ it,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00360}00360\ \textcolor{stringliteral}{\ \ \ \ aiming\ to\ simulate\ calling\ the\ method\ on\ the\ actual\ class.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00361}00361\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00362}00362\ \textcolor{stringliteral}{\ \ \ \ The\ reason\ for\ iterating\ over\ the\ mro\ instead\ of\ just\ getting}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00363}00363\ \textcolor{stringliteral}{\ \ \ \ the\ attribute\ (which\ would\ do\ that\ for\ us)\ is\ to\ support\ TypedDict,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00364}00364\ \textcolor{stringliteral}{\ \ \ \ which\ lacks\ a\ real\ \_\_mro\_\_,\ but\ can\ have\ a\ virtual\ one\ constructed}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00365}00365\ \textcolor{stringliteral}{\ \ \ \ from\ its\ bases\ (as\ done\ here).}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00366}00366\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00367}00367\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00368}00368\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ tp:\ The\ type\ or\ class\ to\ search\ for\ the\ attribute.\ If\ a\ tuple,\ this\ is\ treated\ as\ a\ set\ of\ base\ classes.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00369}00369\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ name:\ The\ name\ of\ the\ attribute\ to\ retrieve.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00370}00370\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00371}00371\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00372}00372\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Any:\ The\ attribute\ value,\ if\ found.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00373}00373\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00374}00374\ \textcolor{stringliteral}{\ \ \ \ Raises:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00375}00375\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ AttributeError:\ If\ the\ attribute\ is\ not\ found\ in\ any\ class\ in\ the\ MRO.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00376}00376\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00377}00377\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(tp,\ tuple):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a438239d2a82f4a18eabb4f4a53e423ea}{mro\_for\_bases}}(tp):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ attribute\ =\ base.\_\_dict\_\_.get(name,\ \_sentinel)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ attribute\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \_sentinel:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ attribute\_get\ =\ getattr(attribute,\ \textcolor{stringliteral}{'\_\_get\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ attribute\_get\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ attribute\_get(\textcolor{keywordtype}{None},\ tp)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ attribute}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ AttributeError(f\textcolor{stringliteral}{'\{name\}\ not\ found\ in\ \{tp\}'})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00386}00386\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(tp,\ name)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a3d3f0dbb7efd36d7d0527e9c7174a2ec}{get\_attribute\_from\_bases}}(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a46bce8b6a99c1d674691b7e51ae4dd43}{mro}}(tp),\ name)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00392}00392\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00393}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a809204b834e5f9411b2146cce20cf011}{00393}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a809204b834e5f9411b2146cce20cf011}{get\_attribute\_from\_base\_dicts}}(tp:\ type[Any],\ name:\ str)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00394}00394\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ an\ attribute\ out\ of\ the\ \`{}\_\_dict\_\_\`{}\ following\ the\ MRO.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00395}00395\ \textcolor{stringliteral}{\ \ \ \ This\ prevents\ the\ call\ to\ \`{}\_\_get\_\_\`{}\ on\ the\ descriptor,\ and\ allows}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00396}00396\ \textcolor{stringliteral}{\ \ \ \ us\ to\ get\ the\ original\ function\ for\ classmethod\ properties.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00397}00397\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00398}00398\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00399}00399\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ tp:\ The\ type\ or\ class\ to\ search\ for\ the\ attribute.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00400}00400\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ name:\ The\ name\ of\ the\ attribute\ to\ retrieve.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00401}00401\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00402}00402\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00403}00403\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Any:\ The\ attribute\ value,\ if\ found.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00404}00404\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00405}00405\ \textcolor{stringliteral}{\ \ \ \ Raises:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00406}00406\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ KeyError:\ If\ the\ attribute\ is\ not\ found\ in\ any\ class's\ \`{}\_\_dict\_\_\`{}\ in\ the\ MRO.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00407}00407\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00408}00408\ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ reversed(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a46bce8b6a99c1d674691b7e51ae4dd43}{mro}}(tp)):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{in}\ base.\_\_dict\_\_:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base.\_\_dict\_\_[name]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00411}00411\ \ \ \ \ \textcolor{keywordflow}{return}\ tp.\_\_dict\_\_[name]\ \ \textcolor{comment}{\#\ raise\ the\ error}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00413}00413\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00414}00414\ \textcolor{preprocessor}{@dataclass(**slots\_true)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00415}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos}{00415}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos}{DecoratorInfos}}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00416}00416\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Mapping\ of\ name\ in\ the\ class\ namespace\ to\ decorator\ info.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00417}00417\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00418}00418\ \textcolor{stringliteral}{\ \ \ \ note\ that\ the\ name\ in\ the\ class\ namespace\ is\ the\ function\ or\ attribute\ name}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00419}00419\ \textcolor{stringliteral}{\ \ \ \ not\ the\ field\ name!}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00420}00420\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00421}00421\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00422}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_adcd2d3c7f5001bda731b4932c5494d8b}{00422}}\ \ \ \ \ validators:\ dict[str,\ Decorator[ValidatorDecoratorInfo]]\ =\ field(default\_factory=dict)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00423}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_a3eb01c34ef2aa378e1a658eb5e5980cc}{00423}}\ \ \ \ \ field\_validators:\ dict[str,\ Decorator[FieldValidatorDecoratorInfo]]\ =\ field(default\_factory=dict)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00424}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_a937451fcc43adc2b22626c22d6ee4e25}{00424}}\ \ \ \ \ root\_validators:\ dict[str,\ Decorator[RootValidatorDecoratorInfo]]\ =\ field(default\_factory=dict)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00425}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_a4f78a66473a5f1234ca459179f978438}{00425}}\ \ \ \ \ field\_serializers:\ dict[str,\ Decorator[FieldSerializerDecoratorInfo]]\ =\ field(default\_factory=dict)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00426}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_a09315dd7d72497b04f554266c085e09c}{00426}}\ \ \ \ \ model\_serializers:\ dict[str,\ Decorator[ModelSerializerDecoratorInfo]]\ =\ field(default\_factory=dict)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00427}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_a3afa77764eb0e7a4d5eacc38f7b6c09b}{00427}}\ \ \ \ \ model\_validators:\ dict[str,\ Decorator[ModelValidatorDecoratorInfo]]\ =\ field(default\_factory=dict)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00428}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_afa2a0c1fd027d04eb8a1d48dceef49b3}{00428}}\ \ \ \ \ computed\_fields:\ dict[str,\ Decorator[ComputedFieldInfo]]\ =\ field(default\_factory=dict)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00430}00430\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00431}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_a48661763761e67993a5749629b664dae}{00431}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_a48661763761e67993a5749629b664dae}{build}}(model\_dc:\ type[Any])\ -\/>\ DecoratorInfos:\ \ \textcolor{comment}{\#\ noqa:\ C901\ (ignore\ complexity)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00432}00432\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}We\ want\ to\ collect\ all\ DecFunc\ instances\ that\ exist\ as}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00433}00433\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ attributes\ in\ the\ namespace\ of\ the\ class\ (a\ BaseModel\ or\ dataclass)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00434}00434\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ that\ called\ us}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00435}00435\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ But\ we\ want\ to\ collect\ these\ in\ the\ order\ of\ the\ bases}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00436}00436\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ So\ instead\ of\ getting\ them\ all\ from\ the\ leaf\ class\ (the\ class\ that\ called\ us),}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00437}00437\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ we\ traverse\ the\ bases\ from\ root\ (the\ oldest\ ancestor\ class)\ to\ leaf}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00438}00438\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ collect\ all\ of\ the\ instances\ as\ we\ go,\ taking\ care\ to\ replace}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00439}00439\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ any\ duplicate\ ones\ with\ the\ last\ one\ we\ see\ to\ mimic\ how\ function\ overriding}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00440}00440\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ works\ with\ inheritance.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00441}00441\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ we\ do\ replace\ any\ functions\ we\ put\ the\ replacement\ into\ the\ position}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00442}00442\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ replaced\ function\ was\ in;\ that\ is,\ we\ maintain\ the\ order.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00443}00443\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00444}00444\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ reminder:\ dicts\ are\ ordered\ and\ replacement\ does\ not\ alter\ the\ order}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00445}00445\ \ \ \ \ \ \ \ \ res\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos}{DecoratorInfos}}()}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ reversed(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a46bce8b6a99c1d674691b7e51ae4dd43}{mro}}(model\_dc)[1:]):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ existing:\ DecoratorInfos\ |\ \textcolor{keywordtype}{None}\ =\ base.\_\_dict\_\_.get(\textcolor{stringliteral}{'\_\_pydantic\_decorators\_\_'})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ existing\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ existing\ =\ DecoratorInfos.build(base)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ res.validators.update(\{k:\ v.bind\_to\_cls(model\_dc)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ existing.validators.items()\})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ res.field\_validators.update(\{k:\ v.bind\_to\_cls(model\_dc)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ existing.field\_validators.items()\})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ res.root\_validators.update(\{k:\ v.bind\_to\_cls(model\_dc)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ existing.root\_validators.items()\})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ res.field\_serializers.update(\{k:\ v.bind\_to\_cls(model\_dc)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ existing.field\_serializers.items()\})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ res.model\_serializers.update(\{k:\ v.bind\_to\_cls(model\_dc)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ existing.model\_serializers.items()\})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ \ \ \ \ res.model\_validators.update(\{k:\ v.bind\_to\_cls(model\_dc)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ existing.model\_validators.items()\})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00456}00456\ \ \ \ \ \ \ \ \ \ \ \ \ res.computed\_fields.update(\{k:\ v.bind\_to\_cls(model\_dc)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ existing.computed\_fields.items()\})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00457}00457\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ to\_replace:\ list[tuple[str,\ Any]]\ =\ []}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00459}00459\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ var\_name,\ var\_value\ \textcolor{keywordflow}{in}\ vars(model\_dc).items():}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(var\_value,\ PydanticDescriptorProxy):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00462}00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info\ =\ var\_value.decorator\_info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00463}00463\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(info,\ ValidatorDecoratorInfo):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00464}00464\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.validators[var\_name]\ =\ Decorator.build(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc,\ cls\_var\_name=var\_name,\ shim=var\_value.shim,\ info=info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(info,\ FieldValidatorDecoratorInfo):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.field\_validators[var\_name]\ =\ Decorator.build(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc,\ cls\_var\_name=var\_name,\ shim=var\_value.shim,\ info=info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(info,\ RootValidatorDecoratorInfo):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.root\_validators[var\_name]\ =\ Decorator.build(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc,\ cls\_var\_name=var\_name,\ shim=var\_value.shim,\ info=info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(info,\ FieldSerializerDecoratorInfo):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ check\ whether\ a\ serializer\ function\ is\ already\ registered\ for\ fields}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00477}00477\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\_serializer\_decorator\ \textcolor{keywordflow}{in}\ res.field\_serializers.values():}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ check\ that\ each\ field\ has\ at\ most\ one\ serializer\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ serializer\ functions\ for\ the\ same\ field\ in\ subclasses\ are\ allowed,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ are\ treated\ as\ overrides}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field\_serializer\_decorator.cls\_var\_name\ ==\ var\_name:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ f\ \textcolor{keywordflow}{in}\ info.fields:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ f\ \textcolor{keywordflow}{in}\ field\_serializer\_decorator.info.fields:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Multiple\ field\ serializer\ functions\ were\ defined\ '}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00487}00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'for\ field\ \{f!r\},\ this\ is\ not\ allowed.'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'multiple-\/field-\/serializers'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.field\_serializers[var\_name]\ =\ Decorator.build(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc,\ cls\_var\_name=var\_name,\ shim=var\_value.shim,\ info=info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(info,\ ModelValidatorDecoratorInfo):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00494}00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.model\_validators[var\_name]\ =\ Decorator.build(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc,\ cls\_var\_name=var\_name,\ shim=var\_value.shim,\ info=info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(info,\ ModelSerializerDecoratorInfo):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.model\_serializers[var\_name]\ =\ Decorator.build(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc,\ cls\_var\_name=var\_name,\ shim=var\_value.shim,\ info=info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ ..fields\ \textcolor{keyword}{import}\ ComputedFieldInfo}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00503}00503\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(var\_value,\ ComputedFieldInfo)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res.computed\_fields[var\_name]\ =\ Decorator.build(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc,\ cls\_var\_name=var\_name,\ shim=\textcolor{keywordtype}{None},\ info=info}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ to\_replace.append((var\_name,\ var\_value.wrapped))}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ to\_replace:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ we\ can\ save\ \`{}\_\_pydantic\_decorators\_\_`\ on\ the\ class\ we'll\ be\ able\ to\ check\ for\ it\ above}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ so\ then\ we\ don't\ need\ to\ re-\/process\ the\ type,\ which\ means\ we\ can\ discard\ our\ descriptor\ wrappers}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ replace\ them\ with\ the\ thing\ they\ are\ wrapping\ (see\ the\ other\ setattr\ call\ below)}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00513}00513\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ which\ allows\ validator\ class\ methods\ to\ also\ function\ as\ regular\ class\ methods}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00514}00514\ \ \ \ \ \ \ \ \ \ \ \ \ model\_dc.\_\_pydantic\_decorators\_\_\ =\ res}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ to\_replace:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00516}00516\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setattr(model\_dc,\ name,\ value)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00517}00517\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00518}00518\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00519}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_ab156774edfbdd64feb48c2f31efe4282}{00519}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_ab156774edfbdd64feb48c2f31efe4282}{update\_from\_config}}(self,\ config\_wrapper:\ ConfigWrapper)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00520}00520\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Update\ the\ decorator\ infos\ from\ the\ configuration\ of\ the\ class\ they\ are\ attached\ to."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ computed\_field\_dec\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator_infos_afa2a0c1fd027d04eb8a1d48dceef49b3}{computed\_fields}}.items():}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00522}00522\ \ \ \ \ \ \ \ \ \ \ \ \ computed\_field\_dec.info.\_update\_from\_config(config\_wrapper,\ name)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00523}00523\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00524}00524\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00525}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a22e242c3860b2006ff831526384fe973}{00525}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a22e242c3860b2006ff831526384fe973}{inspect\_validator}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00526}00526\ \ \ \ \ validator:\ Callable[...,\ Any],\ *,\ mode:\ FieldValidatorModes,\ type:\ Literal[\textcolor{stringliteral}{'field'},\ \textcolor{stringliteral}{'model'}]}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00527}00527\ )\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00528}00528\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Look\ at\ a\ field\ or\ model\ validator\ function\ and\ determine\ whether\ it\ takes\ an\ info\ argument.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00529}00529\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00530}00530\ \textcolor{stringliteral}{\ \ \ \ An\ error\ is\ raised\ if\ the\ function\ has\ an\ invalid\ signature.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00531}00531\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00532}00532\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00533}00533\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ validator:\ The\ validator\ function\ to\ inspect.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00534}00534\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ proposed\ validator\ mode.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00535}00535\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ type:\ The\ type\ of\ validator,\ either\ 'field'\ or\ 'model'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00536}00536\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00537}00537\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00538}00538\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Whether\ the\ validator\ takes\ an\ info\ argument.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00539}00539\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00540}00540\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00541}00541\ \ \ \ \ \ \ \ \ sig\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{\_signature\_no\_eval}}(validator)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00542}00542\ \ \ \ \ \textcolor{keywordflow}{except}\ (ValueError,\ TypeError):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}inspect.signature`\ might\ not\ be\ able\ to\ infer\ a\ signature,\ e.g.\ with\ C\ objects.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00544}00544\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ In\ this\ case,\ we\ assume\ no\ info\ argument\ is\ present:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00546}00546\ \ \ \ \ n\_positional\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a33c999b67f11943ab6af9b68df722bbc}{count\_positional\_required\_params}}(sig)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00547}00547\ \ \ \ \ \textcolor{keywordflow}{if}\ mode\ ==\ \textcolor{stringliteral}{'wrap'}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00548}00548\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ n\_positional\ ==\ 3:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00550}00550\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ n\_positional\ ==\ 2:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00552}00552\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00553}00553\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ mode\ \textcolor{keywordflow}{in}\ \{\textcolor{stringliteral}{'before'},\ \textcolor{stringliteral}{'after'},\ \textcolor{stringliteral}{'plain'}\},\ f\textcolor{stringliteral}{"{}invalid\ mode:\ \{mode!r\},\ expected\ 'before',\ 'after'\ or\ 'plain"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00554}00554\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ n\_positional\ ==\ 2:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00555}00555\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00556}00556\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ n\_positional\ ==\ 1:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00558}00558\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00559}00559\ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00560}00560\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unrecognized\ \{type\}\ validator\ function\ signature\ for\ \{validator\}\ with\ \`{}mode=\{mode\}`:\ \{sig\}'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00561}00561\ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'validator-\/signature'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00562}00562\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00563}00563\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00564}00564\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00565}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_ac6a220489a3d0295ce514e139f07d3ef}{00565}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_ac6a220489a3d0295ce514e139f07d3ef}{inspect\_field\_serializer}}(serializer:\ Callable[...,\ Any],\ mode:\ Literal[\textcolor{stringliteral}{'plain'},\ \textcolor{stringliteral}{'wrap'}])\ -\/>\ tuple[bool,\ bool]:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00566}00566\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Look\ at\ a\ field\ serializer\ function\ and\ determine\ if\ it\ is\ a\ field\ serializer,}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00567}00567\ \textcolor{stringliteral}{\ \ \ \ and\ whether\ it\ takes\ an\ info\ argument.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00568}00568\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00569}00569\ \textcolor{stringliteral}{\ \ \ \ An\ error\ is\ raised\ if\ the\ function\ has\ an\ invalid\ signature.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00570}00570\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00571}00571\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00572}00572\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ serializer:\ The\ serializer\ function\ to\ inspect.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00573}00573\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ serializer\ mode,\ either\ 'plain'\ or\ 'wrap'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00574}00574\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00575}00575\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00576}00576\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Tuple\ of\ (is\_field\_serializer,\ info\_arg).}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00577}00577\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00578}00578\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00579}00579\ \ \ \ \ \ \ \ \ sig\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{\_signature\_no\_eval}}(serializer)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00580}00580\ \ \ \ \ \textcolor{keywordflow}{except}\ (ValueError,\ TypeError):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00581}00581\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}inspect.signature`\ might\ not\ be\ able\ to\ infer\ a\ signature,\ e.g.\ with\ C\ objects.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ In\ this\ case,\ we\ assume\ no\ info\ argument\ is\ present\ and\ this\ is\ not\ a\ method:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00583}00583\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (\textcolor{keyword}{False},\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00584}00584\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00585}00585\ \ \ \ \ first\ =\ next(iter(sig.parameters.values()),\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00586}00586\ \ \ \ \ is\_field\_serializer\ =\ first\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ first.name\ ==\ \textcolor{stringliteral}{'self'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00587}00587\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00588}00588\ \ \ \ \ n\_positional\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a33c999b67f11943ab6af9b68df722bbc}{count\_positional\_required\_params}}(sig)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00589}00589\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_field\_serializer:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00590}00590\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ -\/1\ to\ correct\ for\ self\ parameter}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00591}00591\ \ \ \ \ \ \ \ \ info\_arg\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acf6967d64d088ef9531373d5a25d8e39}{\_serializer\_info\_arg}}(mode,\ n\_positional\ -\/\ 1)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00592}00592\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00593}00593\ \ \ \ \ \ \ \ \ info\_arg\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acf6967d64d088ef9531373d5a25d8e39}{\_serializer\_info\_arg}}(mode,\ n\_positional)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00594}00594\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00595}00595\ \ \ \ \ \textcolor{keywordflow}{if}\ info\_arg\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00596}00596\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00597}00597\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unrecognized\ field\_serializer\ function\ signature\ for\ \{serializer\}\ with\ \`{}mode=\{mode\}`:\{sig\}'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00598}00598\ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'field-\/serializer-\/signature'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00599}00599\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00600}00600\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00601}00601\ \ \ \ \ \textcolor{keywordflow}{return}\ is\_field\_serializer,\ info\_arg}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00602}00602\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00603}00603\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00604}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_ab116b99c933ee00798895da5848c6b01}{00604}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_ab116b99c933ee00798895da5848c6b01}{inspect\_annotated\_serializer}}(serializer:\ Callable[...,\ Any],\ mode:\ Literal[\textcolor{stringliteral}{'plain'},\ \textcolor{stringliteral}{'wrap'}])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00605}00605\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Look\ at\ a\ serializer\ function\ used\ via\ \`{}Annotated\`{}\ and\ determine\ whether\ it\ takes\ an\ info\ argument.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00606}00606\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00607}00607\ \textcolor{stringliteral}{\ \ \ \ An\ error\ is\ raised\ if\ the\ function\ has\ an\ invalid\ signature.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00608}00608\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00609}00609\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00610}00610\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ serializer:\ The\ serializer\ function\ to\ check.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00611}00611\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ serializer\ mode,\ either\ 'plain'\ or\ 'wrap'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00612}00612\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00613}00613\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00614}00614\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ info\_arg}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00615}00615\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00616}00616\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00617}00617\ \ \ \ \ \ \ \ \ sig\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{\_signature\_no\_eval}}(serializer)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00618}00618\ \ \ \ \ \textcolor{keywordflow}{except}\ (ValueError,\ TypeError):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00619}00619\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}inspect.signature`\ might\ not\ be\ able\ to\ infer\ a\ signature,\ e.g.\ with\ C\ objects.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00620}00620\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ In\ this\ case,\ we\ assume\ no\ info\ argument\ is\ present:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00621}00621\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00622}00622\ \ \ \ \ info\_arg\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acf6967d64d088ef9531373d5a25d8e39}{\_serializer\_info\_arg}}(mode,\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a33c999b67f11943ab6af9b68df722bbc}{count\_positional\_required\_params}}(sig))}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00623}00623\ \ \ \ \ \textcolor{keywordflow}{if}\ info\_arg\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00624}00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00625}00625\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unrecognized\ field\_serializer\ function\ signature\ for\ \{serializer\}\ with\ \`{}mode=\{mode\}`:\{sig\}'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00626}00626\ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'field-\/serializer-\/signature'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00627}00627\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00628}00628\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00629}00629\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_arg}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00630}00630\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00631}00631\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00632}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a5839ab2cd7ab1bba19819dfe24663f66}{00632}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a5839ab2cd7ab1bba19819dfe24663f66}{inspect\_model\_serializer}}(serializer:\ Callable[...,\ Any],\ mode:\ Literal[\textcolor{stringliteral}{'plain'},\ \textcolor{stringliteral}{'wrap'}])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00633}00633\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Look\ at\ a\ model\ serializer\ function\ and\ determine\ whether\ it\ takes\ an\ info\ argument.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00634}00634\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00635}00635\ \textcolor{stringliteral}{\ \ \ \ An\ error\ is\ raised\ if\ the\ function\ has\ an\ invalid\ signature.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00636}00636\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00637}00637\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00638}00638\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ serializer:\ The\ serializer\ function\ to\ check.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00639}00639\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ mode:\ The\ serializer\ mode,\ either\ 'plain'\ or\ 'wrap'.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00640}00640\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00641}00641\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00642}00642\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}info\_arg\`{}\ -\/\ whether\ the\ function\ expects\ an\ info\ argument.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00643}00643\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00644}00644\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(serializer,\ (staticmethod,\ classmethod))\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_af1f7972c6dacdc3457caa54df90b2185}{is\_instance\_method\_from\_sig}}(serializer):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00646}00646\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\`{}@model\_serializer`\ must\ be\ applied\ to\ instance\ methods'},\ code=\textcolor{stringliteral}{'model-\/serializer-\/instance-\/method'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00647}00647\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00648}00648\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00649}00649\ \ \ \ \ sig\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{\_signature\_no\_eval}}(serializer)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00650}00650\ \ \ \ \ info\_arg\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acf6967d64d088ef9531373d5a25d8e39}{\_serializer\_info\_arg}}(mode,\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a33c999b67f11943ab6af9b68df722bbc}{count\_positional\_required\_params}}(sig))}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00651}00651\ \ \ \ \ \textcolor{keywordflow}{if}\ info\_arg\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00652}00652\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00653}00653\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unrecognized\ model\_serializer\ function\ signature\ for\ \{serializer\}\ with\ \`{}mode=\{mode\}`:\{sig\}'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00654}00654\ \ \ \ \ \ \ \ \ \ \ \ \ code=\textcolor{stringliteral}{'model-\/serializer-\/signature'},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00655}00655\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00656}00656\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00657}00657\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ info\_arg}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00658}00658\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00659}00659\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00660}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acf6967d64d088ef9531373d5a25d8e39}{00660}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acf6967d64d088ef9531373d5a25d8e39}{\_serializer\_info\_arg}}(mode:\ Literal[\textcolor{stringliteral}{'plain'},\ \textcolor{stringliteral}{'wrap'}],\ n\_positional:\ int)\ -\/>\ bool\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00661}00661\ \ \ \ \ \textcolor{keywordflow}{if}\ mode\ ==\ \textcolor{stringliteral}{'plain'}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00662}00662\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ n\_positional\ ==\ 1:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (input\_value:\ Any,\ /)\ -\/>\ Any}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00664}00664\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00665}00665\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ n\_positional\ ==\ 2:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00666}00666\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (model:\ Any,\ input\_value:\ Any,\ /)\ -\/>\ Any}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00667}00667\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00668}00668\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00669}00669\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ mode\ ==\ \textcolor{stringliteral}{'wrap'},\ f\textcolor{stringliteral}{"{}invalid\ mode:\ \{mode!r\},\ expected\ 'plain'\ or\ 'wrap'"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00670}00670\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ n\_positional\ ==\ 2:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00671}00671\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (input\_value:\ Any,\ serializer:\ SerializerFunctionWrapHandler,\ /)\ -\/>\ Any}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00672}00672\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00673}00673\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ n\_positional\ ==\ 3:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00674}00674\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (input\_value:\ Any,\ serializer:\ SerializerFunctionWrapHandler,\ info:\ SerializationInfo,\ /)\ -\/>\ Any}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00675}00675\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00676}00676\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00677}00677\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00678}00678\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00679}00679\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00680}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a5f876a0dc0191fe8f3b1f00c7377422b}{00680}}\ AnyDecoratorCallable:\ TypeAlias\ =\ (}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00681}00681\ \ \ \ \ \textcolor{stringliteral}{'Union[classmethod[Any,\ Any,\ Any],\ staticmethod[Any,\ Any],\ partialmethod[Any],\ Callable[...,\ Any]]'}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00682}00682\ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00683}00683\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00684}00684\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00685}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_af1f7972c6dacdc3457caa54df90b2185}{00685}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_af1f7972c6dacdc3457caa54df90b2185}{is\_instance\_method\_from\_sig}}(function:\ AnyDecoratorCallable)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00686}00686\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Whether\ the\ function\ is\ an\ instance\ method.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00687}00687\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00688}00688\ \textcolor{stringliteral}{\ \ \ \ It\ will\ consider\ a\ function\ as\ instance\ method\ if\ the\ first\ parameter\ of}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00689}00689\ \textcolor{stringliteral}{\ \ \ \ function\ is\ \`{}self\`{}.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00690}00690\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00691}00691\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00692}00692\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ function:\ The\ function\ to\ check.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00693}00693\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00694}00694\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00695}00695\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}True\`{}\ if\ the\ function\ is\ an\ instance\ method,\ \`{}False\`{}\ otherwise.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00696}00696\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00697}00697\ \ \ \ \ sig\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{\_signature\_no\_eval}}(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{unwrap\_wrapped\_function}}(function))}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00698}00698\ \ \ \ \ first\ =\ next(iter(sig.parameters.values()),\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00699}00699\ \ \ \ \ \textcolor{keywordflow}{if}\ first\ \textcolor{keywordflow}{and}\ first.name\ ==\ \textcolor{stringliteral}{'self'}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00700}00700\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00701}00701\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00702}00702\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00703}00703\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00704}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a078a4a3598a8cfebbd20f96355ba814f}{00704}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a078a4a3598a8cfebbd20f96355ba814f}{ensure\_classmethod\_based\_on\_signature}}(function:\ AnyDecoratorCallable)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00705}00705\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Apply\ the\ \`{}@classmethod\`{}\ decorator\ on\ the\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00706}00706\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00707}00707\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00708}00708\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ function:\ The\ function\ to\ apply\ the\ decorator\ on.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00709}00709\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00710}00710\ \textcolor{stringliteral}{\ \ \ \ Return:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00711}00711\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ \`{}@classmethod\`{}\ decorator\ applied\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00712}00712\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00713}00713\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00714}00714\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{unwrap\_wrapped\_function}}(function,\ unwrap\_class\_static\_method=\textcolor{keyword}{False}),\ classmethod}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00715}00715\ \ \ \ \ )\ \textcolor{keywordflow}{and}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1af5f616a877f11ed7bba7b88f06477b}{\_is\_classmethod\_from\_sig}}(function):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00716}00716\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ classmethod(function)\ \ \textcolor{comment}{\#\ type:\ ignore[arg-\/type]}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00717}00717\ \ \ \ \ \textcolor{keywordflow}{return}\ function}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00718}00718\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00719}00719\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00720}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1af5f616a877f11ed7bba7b88f06477b}{00720}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1af5f616a877f11ed7bba7b88f06477b}{\_is\_classmethod\_from\_sig}}(function:\ AnyDecoratorCallable)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00721}00721\ \ \ \ \ sig\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{\_signature\_no\_eval}}(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{unwrap\_wrapped\_function}}(function))}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00722}00722\ \ \ \ \ first\ =\ next(iter(sig.parameters.values()),\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00723}00723\ \ \ \ \ \textcolor{keywordflow}{if}\ first\ \textcolor{keywordflow}{and}\ first.name\ ==\ \textcolor{stringliteral}{'cls'}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00724}00724\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00725}00725\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00726}00726\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00727}00727\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00728}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{00728}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{unwrap\_wrapped\_function}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00729}00729\ \ \ \ \ func:\ Any,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00730}00730\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00731}00731\ \ \ \ \ unwrap\_partial:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00732}00732\ \ \ \ \ unwrap\_class\_static\_method:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00733}00733\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00734}00734\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Recursively\ unwraps\ a\ wrapped\ function\ until\ the\ underlying\ function\ is\ reached.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00735}00735\ \textcolor{stringliteral}{\ \ \ \ This\ handles\ property,\ functools.partial,\ functools.partialmethod,\ staticmethod,\ and\ classmethod.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00736}00736\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00737}00737\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00738}00738\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ func:\ The\ function\ to\ unwrap.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00739}00739\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ unwrap\_partial:\ If\ True\ (default),\ unwrap\ partial\ and\ partialmethod\ decorators.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00740}00740\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ unwrap\_class\_static\_method:\ If\ True\ (default),\ also\ unwrap\ classmethod\ and\ staticmethod}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00741}00741\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ decorators.\ If\ False,\ only\ unwrap\ partial\ and\ partialmethod\ decorators.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00742}00742\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00743}00743\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00744}00744\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ underlying\ function\ of\ the\ wrapped\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00745}00745\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00746}00746\ \ \ \ \ \textcolor{comment}{\#\ Define\ the\ types\ we\ want\ to\ check\ against\ as\ a\ single\ tuple.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00747}00747\ \ \ \ \ unwrap\_types\ =\ (}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00748}00748\ \ \ \ \ \ \ \ \ (property,\ cached\_property)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00749}00749\ \ \ \ \ \ \ \ \ +\ ((partial,\ partialmethod)\ \textcolor{keywordflow}{if}\ unwrap\_partial\ \textcolor{keywordflow}{else}\ ())}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00750}00750\ \ \ \ \ \ \ \ \ +\ ((staticmethod,\ classmethod)\ \textcolor{keywordflow}{if}\ unwrap\_class\_static\_method\ \textcolor{keywordflow}{else}\ ())}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00751}00751\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00752}00752\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00753}00753\ \ \ \ \ \textcolor{keywordflow}{while}\ isinstance(func,\ unwrap\_types):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00754}00754\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ unwrap\_class\_static\_method\ \textcolor{keywordflow}{and}\ isinstance(func,\ (classmethod,\ staticmethod)):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00755}00755\ \ \ \ \ \ \ \ \ \ \ \ \ func\ =\ func.\_\_func\_\_}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00756}00756\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(func,\ (partial,\ partialmethod)):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00757}00757\ \ \ \ \ \ \ \ \ \ \ \ \ func\ =\ func.func}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00758}00758\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(func,\ property):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00759}00759\ \ \ \ \ \ \ \ \ \ \ \ \ func\ =\ func.fget\ \ \textcolor{comment}{\#\ arbitrary\ choice,\ convenient\ for\ computed\ fields}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00760}00760\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00761}00761\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Make\ coverage\ happy\ as\ it\ can\ only\ get\ here\ in\ the\ last\ possible\ case}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00762}00762\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(func,\ cached\_property)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00763}00763\ \ \ \ \ \ \ \ \ \ \ \ \ func\ =\ func.func\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00764}00764\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00765}00765\ \ \ \ \ \textcolor{keywordflow}{return}\ func}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00766}00766\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00767}00767\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00768}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_ad9401bb67737bcf6173a4bda3f37164a}{00768}}\ \_function\_like\ =\ (}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00769}00769\ \ \ \ \ partial,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00770}00770\ \ \ \ \ partialmethod,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00771}00771\ \ \ \ \ types.FunctionType,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00772}00772\ \ \ \ \ types.BuiltinFunctionType,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00773}00773\ \ \ \ \ types.MethodType,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00774}00774\ \ \ \ \ types.WrapperDescriptorType,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00775}00775\ \ \ \ \ types.MethodWrapperType,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00776}00776\ \ \ \ \ types.MemberDescriptorType,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00777}00777\ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00778}00778\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00779}00779\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00780}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a027f978994f6bc7218d72fc0a4ee2097}{00780}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a027f978994f6bc7218d72fc0a4ee2097}{get\_callable\_return\_type}}(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00781}00781\ \ \ \ \ callable\_obj:\ Any,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00782}00782\ \ \ \ \ globalns:\ GlobalsNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00783}00783\ \ \ \ \ localns:\ MappingNamespace\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00784}00784\ )\ -\/>\ Any\ |\ PydanticUndefinedType:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00785}00785\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ callable\ return\ type.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00786}00786\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00787}00787\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00788}00788\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ callable\_obj:\ The\ callable\ to\ analyze.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00789}00789\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ globalns:\ The\ globals\ namespace\ to\ use\ during\ type\ annotation\ evaluation.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00790}00790\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ localns:\ The\ locals\ namespace\ to\ use\ during\ type\ annotation\ evaluation.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00791}00791\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00792}00792\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00793}00793\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ function\ return\ type.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00794}00794\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00795}00795\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(callable\_obj,\ type):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00796}00796\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ types\ are\ callables,\ and\ we\ assume\ the\ return\ type}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00797}00797\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ is\ the\ type\ itself\ (e.g.\ \`{}int()`\ results\ in\ an\ instance\ of\ \`{}int`).}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00798}00798\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ callable\_obj}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00799}00799\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00800}00800\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(callable\_obj,\ \_function\_like):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00801}00801\ \ \ \ \ \ \ \ \ call\_func\ =\ getattr(type(callable\_obj),\ \textcolor{stringliteral}{'\_\_call\_\_'},\ \textcolor{keywordtype}{None})\ \ \textcolor{comment}{\#\ noqa:\ B004}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00802}00802\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ call\_func\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00803}00803\ \ \ \ \ \ \ \ \ \ \ \ \ callable\_obj\ =\ call\_func}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00804}00804\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00805}00805\ \ \ \ \ hints\ =\ get\_function\_type\_hints(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00806}00806\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_adfad5e6d1394d62000cb1de4701d46d7}{unwrap\_wrapped\_function}}(callable\_obj),}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00807}00807\ \ \ \ \ \ \ \ \ include\_keys=\{\textcolor{stringliteral}{'return'}\},}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00808}00808\ \ \ \ \ \ \ \ \ globalns=globalns,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00809}00809\ \ \ \ \ \ \ \ \ localns=localns,}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00810}00810\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00811}00811\ \ \ \ \ \textcolor{keywordflow}{return}\ hints.get(\textcolor{stringliteral}{'return'},\ PydanticUndefined)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00812}00812\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00813}00813\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00814}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a33c999b67f11943ab6af9b68df722bbc}{00814}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a33c999b67f11943ab6af9b68df722bbc}{count\_positional\_required\_params}}(sig:\ Signature)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00815}00815\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ number\ of\ positional\ (required)\ arguments\ of\ a\ signature.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00816}00816\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00817}00817\ \textcolor{stringliteral}{\ \ \ \ This\ function\ should\ only\ be\ used\ to\ inspect\ signatures\ of\ validation\ and\ serialization\ functions.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00818}00818\ \textcolor{stringliteral}{\ \ \ \ The\ first\ argument\ (the\ value\ being\ serialized\ or\ validated)\ is\ counted\ as\ a\ required\ argument}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00819}00819\ \textcolor{stringliteral}{\ \ \ \ even\ if\ a\ default\ value\ exists.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00820}00820\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00821}00821\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00822}00822\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ number\ of\ positional\ arguments\ of\ a\ signature.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00823}00823\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00824}00824\ \ \ \ \ parameters\ =\ list(sig.parameters.values())}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00825}00825\ \ \ \ \ \textcolor{keywordflow}{return}\ sum(}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00826}00826\ \ \ \ \ \ \ \ \ 1}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00827}00827\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ param\ \textcolor{keywordflow}{in}\ parameters}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00828}00828\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ can\_be\_positional(param)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00829}00829\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ First\ argument\ is\ the\ value\ being\ validated/serialized,\ and\ can\ have\ a\ default\ value}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00830}00830\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (e.g.\ \`{}float`,\ which\ has\ signature\ \`{}(x=0,\ /)`).\ We\ assume\ other\ parameters\ (the\ info\ arg}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00831}00831\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ for\ instance)\ should\ be\ required,\ and\ thus\ without\ any\ default\ value.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00832}00832\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ (param.default\ \textcolor{keywordflow}{is}\ Parameter.empty\ \textcolor{keywordflow}{or}\ param\ \textcolor{keywordflow}{is}\ parameters[0])}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00833}00833\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00834}00834\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00835}00835\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00836}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acaf5ab2a2adfb2b76b7d48140bd8d0ed}{00836}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_acaf5ab2a2adfb2b76b7d48140bd8d0ed}{ensure\_property}}(f:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00837}00837\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Ensure\ that\ a\ function\ is\ a\ \`{}property\`{}\ or\ \`{}cached\_property\`{},\ or\ is\ a\ valid\ descriptor.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00838}00838\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00839}00839\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00840}00840\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ f:\ The\ function\ to\ check.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00841}00841\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00842}00842\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00843}00843\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ function,\ or\ a\ \`{}property\`{}\ or\ \`{}cached\_property\`{}\ instance\ wrapping\ the\ function.}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00844}00844\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00845}00845\ \ \ \ \ \textcolor{keywordflow}{if}\ ismethoddescriptor(f)\ \textcolor{keywordflow}{or}\ isdatadescriptor(f):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00846}00846\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00847}00847\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00848}00848\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ property(f)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00849}00849\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00850}00850\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00851}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{00851}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__decorators_a1d6d69c0f75f0c8dd9102f0aa1d5c5d1}{\_signature\_no\_eval}}(f:\ Callable[...,\ Any])\ -\/>\ Signature:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00852}00852\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Get\ the\ signature\ of\ a\ callable\ without\ evaluating\ any\ annotations."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00853}00853\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 14):}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00854}00854\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ annotationlib\ \textcolor{keyword}{import}\ Format}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00855}00855\ }
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00856}00856\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ signature(f,\ annotation\_format=Format.FORWARDREF)}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00857}00857\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__decorators_8py_source_l00858}00858\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ signature(f)}
+
+\end{DoxyCode}

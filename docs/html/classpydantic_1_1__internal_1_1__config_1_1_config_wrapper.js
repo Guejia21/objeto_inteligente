@@ -1,0 +1,28 @@
+var classpydantic_1_1__internal_1_1__config_1_1_config_wrapper =
+[
+    [ "core_config", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a58039592cf164d7c187954f08b247d03", null ],
+    [ "for_model", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#aadb9e9f3d5ae1ca3c3a8780b4e64e6ce", null ],
+    [ "alias_generator", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a6ef79b6b9f0fd2608382efb7ffe0e767", null ],
+    [ "cache_strings", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a1871330575be702dadba8f2ca8a5653d", null ],
+    [ "config_dict", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a904babb7d90243dc3589fb28998ee68e", null ],
+    [ "extra", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#adf2066186e6d636c27907fb88e14f3a4", null ],
+    [ "field_title_generator", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a2557880b83a4877e9c802b9d402d7f64", null ],
+    [ "ignored_types", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a000bce8e5fc6d2b9bcfc0baffc67e603", null ],
+    [ "json_encoders", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a676158187f8283ebf7c535a60374c464", null ],
+    [ "json_schema_extra", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a73b17461879f81d93b2a6418111dafff", null ],
+    [ "json_schema_mode_override", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#aec5791888e0090f5a7bbbf095eeadb59", null ],
+    [ "model_title_generator", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a85ed40d756edfd6c7b3cf1c10712a0db", null ],
+    [ "plugin_settings", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#aabf5b960a50b71e10e506ea21b3276ab", null ],
+    [ "protected_namespaces", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#ad86839a5b71755eb245555a15c16a460", null ],
+    [ "regex_engine", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#aee4825e42af978689376fb75b5f80a61", null ],
+    [ "revalidate_instances", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a87c2c3757a747f01a47123ac61e1ab6b", null ],
+    [ "schema_generator", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a3c04c44c7e130ca023cccdfc515f7599", null ],
+    [ "ser_json_bytes", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a31687577f16debf1be73971a70a81a8d", null ],
+    [ "ser_json_inf_nan", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#af0604d620e08c8fd277c98b463a0fff2", null ],
+    [ "ser_json_temporal", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#abb49e48137967f28c74f36c628e160d1", null ],
+    [ "ser_json_timedelta", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#af20eb0d12d5cff06d80dd3e4509bc734", null ],
+    [ "str_max_length", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a8b82ee56f0044d422aa2b7558f06311f", null ],
+    [ "title", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a05790b9d47b3af0bcdd9a7b9221bf8e1", null ],
+    [ "val_json_bytes", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#a79692c4f224da5d8b2900c248091b4e7", null ],
+    [ "val_temporal_unit", "classpydantic_1_1__internal_1_1__config_1_1_config_wrapper.html#aaec3480681019870f92ccdc59f9cf6f6", null ]
+];

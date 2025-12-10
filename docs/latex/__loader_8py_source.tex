@@ -1,0 +1,64 @@
+\doxysection{\+\_\+loader.\+py}
+\hypertarget{__loader_8py_source}{}\label{__loader_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/plugin/\_loader.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/plugin/\_loader.py}}
+\mbox{\hyperlink{__loader_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1plugin_1_1__loader}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00003}00003\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespaceimportlib_1_1metadata}{importlib.metadata}}\ \textcolor{keyword}{as}\ importlib\_metadata}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00004}00004\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00005}00005\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00006}00006\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Iterable}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00007}00007\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Final}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00009}00009\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00010}00010\ \ \ \ \ \textcolor{keyword}{from}\ .\ \textcolor{keyword}{import}\ PydanticPluginProtocol}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00013}\mbox{\hyperlink{namespacepydantic_1_1plugin_1_1__loader_a24fdbb0b14263b3f7d8f83d1c2a9f0db}{00013}}\ PYDANTIC\_ENTRY\_POINT\_GROUP:\ Final[str]\ =\ \textcolor{stringliteral}{'pydantic'}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00015}00015\ \textcolor{comment}{\#\ cache\ of\ plugins}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00016}\mbox{\hyperlink{namespacepydantic_1_1plugin_1_1__loader_a5b8bfc7294f5640187f83a863d5840ab}{00016}}\ \_plugins:\ dict[str,\ PydanticPluginProtocol]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00017}00017\ \textcolor{comment}{\#\ return\ no\ plugins\ while\ loading\ plugins\ to\ avoid\ recursion\ and\ errors\ while\ import\ plugins}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00018}00018\ \textcolor{comment}{\#\ this\ means\ that\ if\ plugins\ use\ pydantic}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00019}\mbox{\hyperlink{namespacepydantic_1_1plugin_1_1__loader_a219bf3291f388167503089394873a090}{00019}}\ \_loading\_plugins:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00022}\mbox{\hyperlink{namespacepydantic_1_1plugin_1_1__loader_a63cac3f852f5443157776b95b6129ebc}{00022}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1plugin_1_1__loader_a63cac3f852f5443157776b95b6129ebc}{get\_plugins}}()\ -\/>\ Iterable[PydanticPluginProtocol]:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00023}00023\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Load\ plugins\ for\ Pydantic.}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00024}00024\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ Inspired\ by:\ https://github.com/pytest-\/dev/pluggy/blob/1.3.0/src/pluggy/\_manager.py\#L376-\/L402}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00027}00027\ \ \ \ \ disabled\_plugins\ =\ os.getenv(\textcolor{stringliteral}{'PYDANTIC\_DISABLE\_PLUGINS'})}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00028}00028\ \ \ \ \ \textcolor{keyword}{global}\ \_plugins,\ \_loading\_plugins}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00029}00029\ \ \ \ \ \textcolor{keywordflow}{if}\ \_loading\_plugins:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ this\ happens\ when\ plugins\ themselves\ use\ pydantic,\ we\ return\ no\ plugins}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ()}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00032}00032\ \ \ \ \ \textcolor{keywordflow}{elif}\ disabled\_plugins\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'\_\_all\_\_'},\ \textcolor{stringliteral}{'1'},\ \textcolor{stringliteral}{'true'}):}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ()}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00034}00034\ \ \ \ \ \textcolor{keywordflow}{elif}\ \_plugins\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \_plugins\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ set\ \_loading\_plugins\ so\ any\ plugins\ that\ use\ pydantic\ don't\ themselves\ use\ plugins}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \_loading\_plugins\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ dist\ \textcolor{keywordflow}{in}\ importlib\_metadata.distributions():}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ entry\_point\ \textcolor{keywordflow}{in}\ dist.entry\_points:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ entry\_point.group\ !=\ PYDANTIC\_ENTRY\_POINT\_GROUP:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ entry\_point.value\ \textcolor{keywordflow}{in}\ \_plugins:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ disabled\_plugins\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ entry\_point.name\ \textcolor{keywordflow}{in}\ disabled\_plugins.split(\textcolor{stringliteral}{','}):}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_plugins[entry\_point.value]\ =\ entry\_point.load()}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ (ImportError,\ AttributeError)\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ warnings.warn(}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\{e.\_\_class\_\_.\_\_name\_\_\}\ while\ loading\ the\ \`{}\{entry\_point.name\}`\ Pydantic\ plugin,\ '}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'this\ plugin\ will\ not\ be\ installed.\(\backslash\)n\(\backslash\)n\{e!r\}'},}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stacklevel=2,}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \_loading\_plugins\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{__loader_8py_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{return}\ \_plugins.values()}
+
+\end{DoxyCode}

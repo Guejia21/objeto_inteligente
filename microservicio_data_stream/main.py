@@ -1,3 +1,26 @@
+"""
+ * @file main.py
+ * @brief Punto de entrada principal del Microservicio de Datastreams (Microdot)
+ * @details
+ * Servicio responsable de gestionar datastreams de objetos inteligentes usando Microdot framework (MicroPython).
+ * 
+ * Funcionalidades principales:
+ * - Servidor HTTP asincrónico basado en Microdot
+ * - Gestión de datastreams (sensores y actuadores)
+ * - Publicación periódica de telemetría a ThingBoard y Mosquitto
+ * - Consumo de mensajes MQTT para inicialización y actuaciones
+ * - Cierre seguro con manejo de señales UNIX
+ * - Soporte para WiFi en dispositivos ESP32
+ * 
+ * @see routes/datastreams.py para definición de endpoints
+ * @see services/datastream_service.py para lógica de negocio
+ * @see config.py para configuración del servicio
+ * 
+ * @author Sistema de Objetos Inteligentes
+ * @version 1.0.0
+ * @date 2024
+"""
+
 import json as json
 import signal
 from lib.microdot.microdot import Microdot
@@ -38,6 +61,20 @@ def conectar_wifi():
 
 
 async def shutdown():
+    """
+     * @brief Maneja el cierre seguro del servidor Microdot
+     * @details
+     * Coordina la detención ordenada de:
+     * 1. Event loop - propaga shutdown_event
+     * 2. Tareas asyncio - cancela todas las tareas en running_tasks
+     * 3. Conexiones MQTT - cierra clientes mosquitto y ThingBoard
+     * 4. Servidor HTTP - detiene Microdot
+     * 
+     * @return void
+     * @see running_tasks lista de tareas en ejecución
+     * @see mosquitto_broker cliente MQTT Mosquitto
+     * @see tb_broker cliente MQTT ThingBoard
+    """
     """Maneja el cierre seguro del servidor"""
     print("\nCerrando servidor...")
     shutdown_event.set()
@@ -77,6 +114,25 @@ async def shutdown():
 
 # Ejecutar servidor
 async def main():
+    """
+     * @brief Función principal que inicializa y ejecuta el servidor Microdot
+     * @details
+     * Secuencia de inicialización:
+     * 1. Imprime configuración del servicio (HOST, PORT, OSID, TITLE)
+     * 2. Registra manejadores de señales UNIX (SIGINT, SIGTERM) para shutdown seguro
+     * 3. Inicia servidor Microdot asincrónico
+     * 4. Si OSID está configurado:
+     *    - Publica telemetría periódicamente a ThingBoard (si token disponible)
+     *    - Publica telemetría periódicamente a Mosquitto
+     * 5. Si OSID no está configurado: espera mensajes MQTT de inicialización
+     * 6. Aguarda evento de shutdown
+     * 
+     * @return void (async)
+     * @see shutdown() función invocada en cierre
+     * @see Config configuración centralizada
+     * @see publicar_valores tarea de publicación periódica
+     * @see consumer_mqtt consumidor de mensajes de inicialización
+    """
     print(f"   Datastream Service iniciando en {Config.HOST}:{Config.PORT}")
     print(f"   OSID: {Config.OSID}")
     print(f"   Title: {Config.TITLE}")

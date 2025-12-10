@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="stapled_8py" kind="file" language="Python">
+    <compoundname>stapled.py</compoundname>
+    <innerclass refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream" prot="public">anyio::streams::stapled::StapledByteStream</innerclass>
+    <innerclass refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream" prot="public">anyio::streams::stapled::StapledObjectStream</innerclass>
+    <innerclass refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener" prot="public">anyio::streams::stapled::MultiListener</innerclass>
+    <innernamespace refid="namespaceanyio">anyio</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1streams">anyio::streams</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1streams_1_1stapled">anyio::streams::stapled</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespaceanyio_1_1streams_1_1stapled" refkind="compound"><highlight class="keyword">from</highlight><highlight class="normal"><sp/>__future__<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>annotations</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacecollections_1_1abc" kindref="compound">collections.abc</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Callable,<sp/>Mapping,<sp/>Sequence</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>dataclasses<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>dataclass</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Any,<sp/>Generic,<sp/>TypeVar</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>..abc<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>(</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"><sp/><sp/><sp/><sp/>ByteReceiveStream,</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/>ByteSendStream,</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><sp/><sp/><sp/><sp/>ByteStream,</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/>Listener,</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/><sp/><sp/><sp/>ObjectReceiveStream,</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/>ObjectSendStream,</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/>ObjectStream,</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/>TaskGroup,</highlight></codeline>
+<codeline lineno="16"><highlight class="normal">)</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18" refid="namespaceanyio_1_1streams_1_1stapled_1a2f6b7b22b92ab2fdd86d67b55ba4393a" refkind="member"><highlight class="normal">T_Item<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&quot;T_Item&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="19" refid="namespaceanyio_1_1streams_1_1stapled_1a4a14e54cea16186ef63a0087a9d1b58e" refkind="member"><highlight class="normal">T_Stream<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&quot;T_Stream&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">@dataclass(eq=False)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream" kindref="compound">StapledByteStream</ref>(<ref refid="classanyio_1_1abc_1_1__streams_1_1_byte_stream" kindref="compound">ByteStream</ref>):</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="25"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Combines<sp/>two<sp/>byte<sp/>streams<sp/>into<sp/>a<sp/>single,<sp/>bidirectional<sp/>byte<sp/>stream.</highlight></codeline>
+<codeline lineno="26"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="27"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Extra<sp/>attributes<sp/>will<sp/>be<sp/>provided<sp/>from<sp/>both<sp/>streams,<sp/>with<sp/>the<sp/>receive<sp/>stream</highlight></codeline>
+<codeline lineno="28"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>providing<sp/>the<sp/>values<sp/>in<sp/>case<sp/>of<sp/>a<sp/>conflict.</highlight></codeline>
+<codeline lineno="29"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="30"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>ByteSendStream<sp/>send_stream:<sp/>the<sp/>sending<sp/>byte<sp/>stream</highlight></codeline>
+<codeline lineno="31"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>ByteReceiveStream<sp/>receive_stream:<sp/>the<sp/>receiving<sp/>byte<sp/>stream</highlight></codeline>
+<codeline lineno="32"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>send_stream:<sp/>ByteSendStream</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>receive_stream:<sp/>ByteReceiveStream</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="37" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a277bb6fddcf597e1f17c916c315f575c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a277bb6fddcf597e1f17c916c315f575c" kindref="member">receive</ref>(self,<sp/>max_bytes:<sp/>int<sp/>=<sp/>65536)<sp/>-&gt;<sp/>bytes:</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>self.receive_stream.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a277bb6fddcf597e1f17c916c315f575c" kindref="member">receive</ref>(max_bytes)</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight></codeline>
+<codeline lineno="40" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1ab74bc2b598b6bc9fa0ec71f44fbfce75" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1ab74bc2b598b6bc9fa0ec71f44fbfce75" kindref="member">send</ref>(self,<sp/>item:<sp/>bytes)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.send_stream.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1ab74bc2b598b6bc9fa0ec71f44fbfce75" kindref="member">send</ref>(item)</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="43" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1ad6e31d19de910f97f707c84fad2b3b49" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1ad6e31d19de910f97f707c84fad2b3b49" kindref="member">send_eof</ref>(self)<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.send_stream.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a49dfa815588c5356b14ceaf155b0b2db" kindref="member">aclose</ref>()</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a49dfa815588c5356b14ceaf155b0b2db" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a49dfa815588c5356b14ceaf155b0b2db" kindref="member">aclose</ref>(self)<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.send_stream.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a49dfa815588c5356b14ceaf155b0b2db" kindref="member">aclose</ref>()</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.receive_stream.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1a49dfa815588c5356b14ceaf155b0b2db" kindref="member">aclose</ref>()</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="51" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1ae5659e6b9eb7972d4f4e5a7a97ba295d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_byte_stream_1ae5659e6b9eb7972d4f4e5a7a97ba295d" kindref="member">extra_attributes</ref>(self)<sp/>-&gt;<sp/>Mapping[Any,<sp/>Callable[[],<sp/>Any]]:</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>**self.send_stream.extra_attributes,</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>**self.receive_stream.extra_attributes,</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight><highlight class="preprocessor">@dataclass(eq=False)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream" kindref="compound">StapledObjectStream</ref>(Generic[T_Item],<sp/>ObjectStream[T_Item]):</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="61"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Combines<sp/>two<sp/>object<sp/>streams<sp/>into<sp/>a<sp/>single,<sp/>bidirectional<sp/>object<sp/>stream.</highlight></codeline>
+<codeline lineno="62"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="63"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Extra<sp/>attributes<sp/>will<sp/>be<sp/>provided<sp/>from<sp/>both<sp/>streams,<sp/>with<sp/>the<sp/>receive<sp/>stream</highlight></codeline>
+<codeline lineno="64"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>providing<sp/>the<sp/>values<sp/>in<sp/>case<sp/>of<sp/>a<sp/>conflict.</highlight></codeline>
+<codeline lineno="65"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="66"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>ObjectSendStream<sp/>send_stream:<sp/>the<sp/>sending<sp/>object<sp/>stream</highlight></codeline>
+<codeline lineno="67"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>ObjectReceiveStream<sp/>receive_stream:<sp/>the<sp/>receiving<sp/>object<sp/>stream</highlight></codeline>
+<codeline lineno="68"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight></codeline>
+<codeline lineno="70" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ab6f375de31caa40f7a8d39e2fb97352f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>send_stream:<sp/>ObjectSendStream[T_Item]</highlight></codeline>
+<codeline lineno="71" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1adb06623c9c942de20eb3aff1c7a284bc" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>receive_stream:<sp/>ObjectReceiveStream[T_Item]</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ada85730376c3799a559e6e5b3a8d9bf5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ada85730376c3799a559e6e5b3a8d9bf5" kindref="member">receive</ref>(self)<sp/>-&gt;<sp/>T_Item:</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1adb06623c9c942de20eb3aff1c7a284bc" kindref="member">receive_stream</ref>.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ada85730376c3799a559e6e5b3a8d9bf5" kindref="member">receive</ref>()</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1a3598ca8cde1182f8bf08f69f665d494e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1a3598ca8cde1182f8bf08f69f665d494e" kindref="member">send</ref>(self,<sp/>item:<sp/>T_Item)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ab6f375de31caa40f7a8d39e2fb97352f" kindref="member">send_stream</ref>.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1a3598ca8cde1182f8bf08f69f665d494e" kindref="member">send</ref>(item)</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1a1eddc2e58d1fab9248410a5f264a4644" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1a1eddc2e58d1fab9248410a5f264a4644" kindref="member">send_eof</ref>(self)<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ab6f375de31caa40f7a8d39e2fb97352f" kindref="member">send_stream</ref>.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1aafec304e4763e98e3d55b24743e28f50" kindref="member">aclose</ref>()</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight></codeline>
+<codeline lineno="82" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1aafec304e4763e98e3d55b24743e28f50" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1aafec304e4763e98e3d55b24743e28f50" kindref="member">aclose</ref>(self)<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ab6f375de31caa40f7a8d39e2fb97352f" kindref="member">send_stream</ref>.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1aafec304e4763e98e3d55b24743e28f50" kindref="member">aclose</ref>()</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1adb06623c9c942de20eb3aff1c7a284bc" kindref="member">receive_stream</ref>.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1aafec304e4763e98e3d55b24743e28f50" kindref="member">aclose</ref>()</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="87" refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1a9c8f16c387fb3ae37d1dad8b4cecb126" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1a9c8f16c387fb3ae37d1dad8b4cecb126" kindref="member">extra_attributes</ref>(self)<sp/>-&gt;<sp/>Mapping[Any,<sp/>Callable[[],<sp/>Any]]:</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>**self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1ab6f375de31caa40f7a8d39e2fb97352f" kindref="member">send_stream</ref>.extra_attributes,</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>**self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_stapled_object_stream_1adb06623c9c942de20eb3aff1c7a284bc" kindref="member">receive_stream</ref>.extra_attributes,</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight><highlight class="preprocessor">@dataclass(eq=False)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="95" refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener" kindref="compound">MultiListener</ref>(Generic[T_Stream],<sp/>Listener[T_Stream]):</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="97"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Combines<sp/>multiple<sp/>listeners<sp/>into<sp/>one,<sp/>serving<sp/>connections<sp/>from<sp/>all<sp/>of<sp/>them<sp/>at<sp/>once.</highlight></codeline>
+<codeline lineno="98"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="99"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Any<sp/>MultiListeners<sp/>in<sp/>the<sp/>given<sp/>collection<sp/>of<sp/>listeners<sp/>will<sp/>have<sp/>their<sp/>listeners</highlight></codeline>
+<codeline lineno="100"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>moved<sp/>into<sp/>this<sp/>one.</highlight></codeline>
+<codeline lineno="101"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="102"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Extra<sp/>attributes<sp/>are<sp/>provided<sp/>from<sp/>each<sp/>listener,<sp/>with<sp/>each<sp/>successive<sp/>listener</highlight></codeline>
+<codeline lineno="103"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>overriding<sp/>any<sp/>conflicting<sp/>attributes<sp/>from<sp/>the<sp/>previous<sp/>one.</highlight></codeline>
+<codeline lineno="104"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="105"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>listeners:<sp/>listeners<sp/>to<sp/>serve</highlight></codeline>
+<codeline lineno="106"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:type<sp/>listeners:<sp/>Sequence[Listener[T_Stream]]</highlight></codeline>
+<codeline lineno="107"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109" refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a36ace2427387372e377ea72b88bfe8d4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>listeners:<sp/>Sequence[Listener[T_Stream]]</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__post_init__(self)<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>listeners:<sp/>list[Listener[T_Stream]]<sp/>=<sp/>[]</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>listener<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a36ace2427387372e377ea72b88bfe8d4" kindref="member">listeners</ref>:</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>isinstance(listener,<sp/>MultiListener):</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>listeners.extend(listener.listeners)</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>del<sp/>listener.listeners[:]<sp/><sp/></highlight><highlight class="comment">#<sp/>type:<sp/>ignore[attr-defined]</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>listeners.append(listener)</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"></highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a36ace2427387372e377ea72b88bfe8d4" kindref="member">listeners</ref><sp/>=<sp/>listeners</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122" refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1ad8239c2418a888506d36e55e89f5c36c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1ad8239c2418a888506d36e55e89f5c36c" kindref="member">serve</ref>(</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self,<sp/>handler:<sp/>Callable[[T_Stream],<sp/>Any],<sp/>task_group:<sp/>TaskGroup<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>..<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>create_task_group</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">with</highlight><highlight class="normal"><sp/>create_task_group()<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>tg:</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>listener<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a36ace2427387372e377ea72b88bfe8d4" kindref="member">listeners</ref>:</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>tg.start_soon(listener.serve,<sp/>handler,<sp/>task_group)</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"></highlight></codeline>
+<codeline lineno="131" refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a8a2be284d1c49bc3b5dc3a962896eda2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a8a2be284d1c49bc3b5dc3a962896eda2" kindref="member">aclose</ref>(self)<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>listener<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a36ace2427387372e377ea72b88bfe8d4" kindref="member">listeners</ref>:</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>listener.aclose()</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="preprocessor">@property</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="136" refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1aac42351878efe7fb3a6782037c6554a1" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1aac42351878efe7fb3a6782037c6554a1" kindref="member">extra_attributes</ref>(self)<sp/>-&gt;<sp/>Mapping[Any,<sp/>Callable[[],<sp/>Any]]:</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>attributes:<sp/>dict<sp/>=<sp/>{}</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>listener<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>self.<ref refid="classanyio_1_1streams_1_1stapled_1_1_multi_listener_1a36ace2427387372e377ea72b88bfe8d4" kindref="member">listeners</ref>:</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>attributes.update(listener.extra_attributes)</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>attributes</highlight></codeline>
+    </programlisting>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/anyio/streams/stapled.py"/>
+  </compounddef>
+</doxygen>

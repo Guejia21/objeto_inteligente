@@ -1,17 +1,92 @@
+"""
+ * @file datastream_service.py
+ * @brief Servicio de lógica de negocio para gestión de datastreams
+ * @details
+ * Implementa la lógica de lectura/escritura de datastreams (sensores y actuadores).
+ * 
+ * Funcionalidades:
+ * - Carga de metadata desde JSON (configuración de datastreams)
+ * - Obtención de valores de sensores (send_data, send_state)
+ * - Establecimiento de valores en actuadores (set_datastream)
+ * - Validación de OSID y existencia de datastreams
+ * 
+ * Patrón: Application Service
+ * Responsabilidades:
+ * - Orquestar interacciones entre ModuleExecutor y ResponseHelper
+ * - Aplicar reglas de negocio (validaciones, transformaciones)
+ * - Formatear respuestas HTTP
+ * 
+ * @see routes/datastreams.py para endpoints que usan este servicio
+ * @see utils/module_executor.py para ejecución de comandos
+ * @see utils/response.py para formateo de respuestas
+ * @see config.py para configuración
+ * 
+ * @author Sistema de Objetos Inteligentes
+ * @version 1.0.0
+ """
+
 import json as json
 from utils.module_executor import ModuleExecutor
 from utils.response import ResponseHelper
 from config import Config
 
 class DatastreamService:
+    """
+     * @class DatastreamService
+     * @brief Servicio para gestionar datastreams del objeto inteligente
+     * @details
+     * Proporciona interfaz para lectura de sensores y escritura de actuadores.
+     * Carga configuración desde metadata.json durante inicialización.
+     * 
+     * Atributos:
+     * - executor: ModuleExecutor para ejecutar comandos
+     * - response: ResponseHelper para formatear respuestas
+     * - datastreams: Lista de configuraciones de datastreams
+     """
     """Servicio para gestionar datastreams"""
     
     def __init__(self):
+        """
+         * @brief Constructor - Inicializa ejecutor, formateador y carga metadata
+         * @details
+         * Instancia ModuleExecutor con ruta de ejecutables desde configuración.
+         * Instancia ResponseHelper para formateo de respuestas.
+         * Carga metadata.json que contiene definición de datastreams.
+         * 
+         * @return void
+         * @see _load_metadata()
+         """
         self.executor = ModuleExecutor(Config.PATH_EJECUTABLES)
         self.response = ResponseHelper()
         self._load_metadata()
     
     def _load_metadata(self):
+        """
+         * @brief Carga configuración de datastreams desde archivo metadata.json
+         * @details
+         * Estructura esperada de metadata.json:
+         * {
+         *   "object": {
+         *     "id": "ESP32_Sala",
+         *     "title": "Sensor de Sala",
+         *     "ip_object": "192.168.1.100",
+         *     "thingsboard_token": "token_aqui"
+         *   },
+         *   "datastreams": [
+         *     {
+         *       "datastream_id": "temperatura",
+         *       "datastream_format": "float",
+         *       "datastream_type": "sensor"
+         *     },
+         *     ...
+         *   ]
+         * }
+         * 
+         * @return void
+         * @throws Exception Si archivo no existe o JSON inválido (capturado internamente)
+         * @see Config.PATH_METADATA ubicación del archivo
+         * @see self.datastreams almacena lista de datastreams
+         """
         """Carga metadata del objeto desde JSON"""
         try:
             with open(f"{Config.PATH_METADATA}metadata.json", 'r') as f:
@@ -27,6 +102,12 @@ class DatastreamService:
             self.datastreams = []
     
     def datastream_exists(self, datastream_id):
+        """
+         * @brief Verifica si un datastream está registrado en configuración
+         * @param datastream_id string - ID del datastream a buscar
+         * @return bool - True si existe, False en caso contrario
+         * @see get_datastream_info()
+         """
         """Verifica si un datastream existe"""
         return any(ds['datastream_id'] == datastream_id for ds in self.datastreams)
     

@@ -1,0 +1,226 @@
+\doxysection{staticfiles.\+py}
+\hypertarget{starlette_2staticfiles_8py_source}{}\label{starlette_2staticfiles_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/staticfiles.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/staticfiles.py}}
+\mbox{\hyperlink{starlette_2staticfiles_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00001}\mbox{\hyperlink{namespacestarlette_1_1staticfiles}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00003}00003\ \textcolor{keyword}{import}\ errno}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00004}00004\ \textcolor{keyword}{import}\ importlib.util}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00005}00005\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00006}00006\ \textcolor{keyword}{import}\ stat}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00007}00007\ \textcolor{keyword}{from}\ email.utils\ \textcolor{keyword}{import}\ parsedate}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00008}00008\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Union}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00010}00010\ \textcolor{keyword}{import}\ anyio}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00011}00011\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespaceanyio_1_1to__thread}{anyio.to\_thread}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00013}00013\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1__utils}{starlette.\_utils}}\ \textcolor{keyword}{import}\ get\_route\_path}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00014}00014\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1datastructures}{starlette.datastructures}}\ \textcolor{keyword}{import}\ URL,\ Headers}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00015}00015\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1exceptions}{starlette.exceptions}}\ \textcolor{keyword}{import}\ HTTPException}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00016}00016\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1responses}{starlette.responses}}\ \textcolor{keyword}{import}\ FileResponse,\ RedirectResponse,\ Response}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00017}00017\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1types}{starlette.types}}\ \textcolor{keyword}{import}\ Receive,\ Scope,\ Send}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00019}\mbox{\hyperlink{namespacestarlette_1_1staticfiles_a7826ca72ea866e314fb0b43e1b3d9662}{00019}}\ PathLike\ =\ Union[str,\ \textcolor{stringliteral}{"{}os.PathLike[str]"{}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00022}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_not_modified_response}{00022}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_not_modified_response}{NotModifiedResponse}}(\mbox{\hyperlink{classstarlette_1_1responses_1_1_response}{Response}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00023}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_not_modified_response_a64a0d916e48f1d0034552ca77ab37c07}{00023}}\ \ \ \ \ NOT\_MODIFIED\_HEADERS\ =\ (}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}cache-\/control"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}content-\/location"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}date"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}etag"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}expires"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}vary"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00030}00030\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00032}00032\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ headers:\ Headers):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ status\_code=304,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ headers=\{name:\ value\ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ headers.items()\ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_not_modified_response_a64a0d916e48f1d0034552ca77ab37c07}{NOT\_MODIFIED\_HEADERS}}\},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00039}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files}{00039}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files}{StaticFiles}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00040}00040\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ directory:\ PathLike\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ packages:\ list[str\ |\ tuple[str,\ str]]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ html:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ check\_dir:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ follow\_symlink:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00048}00048\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00049}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_af7c455a5e2cbfa4970abf771399719ae}{00049}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_af7c455a5e2cbfa4970abf771399719ae}{directory}}\ =\ directory}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00050}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a60e3bd6824b7728de296e28af7cf2af8}{00050}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a60e3bd6824b7728de296e28af7cf2af8}{packages}}\ =\ packages}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00051}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_ad6fe089465c601a1d9ca8c35d47b3dbd}{00051}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_ad6fe089465c601a1d9ca8c35d47b3dbd}{all\_directories}}\ =\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a4635abf8ab405569c65c305c47a8c03f}{get\_directories}}(directory,\ packages)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00052}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a441b3f31bbbc6500a73b3f976c5f32ee}{00052}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a441b3f31bbbc6500a73b3f976c5f32ee}{html}}\ =\ html}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00053}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a0b75456f60348c6b683cfd7195d7da8c}{00053}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a0b75456f60348c6b683cfd7195d7da8c}{config\_checked}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00054}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a407b935a047cbe05391c72208fa8227e}{00054}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a407b935a047cbe05391c72208fa8227e}{follow\_symlink}}\ =\ follow\_symlink}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ check\_dir\ \textcolor{keywordflow}{and}\ directory\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ os.path.isdir(directory):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(f\textcolor{stringliteral}{"{}Directory\ '\{directory\}'\ does\ not\ exist"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00058}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a4635abf8ab405569c65c305c47a8c03f}{00058}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a4635abf8ab405569c65c305c47a8c03f}{get\_directories}}(}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ directory:\ PathLike\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ packages:\ list[str\ |\ tuple[str,\ str]]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00062}00062\ \ \ \ \ )\ -\/>\ list[PathLike]:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00064}00064\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Given\ \`{}directory\`{}\ and\ \`{}packages\`{}\ arguments,\ return\ a\ list\ of\ all\ the}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00065}00065\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ directories\ that\ should\ be\ used\ for\ serving\ static\ files\ from.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ directories\ =\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ directory\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ directories.append(directory)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ package\ \textcolor{keywordflow}{in}\ packages\ \textcolor{keywordflow}{or}\ []:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(package,\ tuple):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ package,\ statics\_dir\ =\ package}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ statics\_dir\ =\ \textcolor{stringliteral}{"{}statics"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ spec\ =\ importlib.util.find\_spec(package)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ spec\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None},\ f\textcolor{stringliteral}{"{}Package\ \{package!r\}\ could\ not\ be\ found."{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ spec.origin\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None},\ f\textcolor{stringliteral}{"{}Package\ \{package!r\}\ could\ not\ be\ found."{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ package\_directory\ =\ os.path.normpath(os.path.join(spec.origin,\ \textcolor{stringliteral}{"{}.."{}},\ statics\_dir))}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ os.path.isdir(package\_directory),\ (}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}Directory\ '\{statics\_dir!r\}'\ in\ package\ \{package!r\}\ could\ not\ be\ found."{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ directories.append(package\_directory)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ directories}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00087}00087\ \ \ \ \ \textcolor{keyword}{async\ def\ }\_\_call\_\_(self,\ scope:\ Scope,\ receive:\ Receive,\ send:\ Send)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ ASGI\ entry\ point.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ scope[\textcolor{stringliteral}{"{}type"{}}]\ ==\ \textcolor{stringliteral}{"{}http"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00092}00092\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a0b75456f60348c6b683cfd7195d7da8c}{config\_checked}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a46a394a26b861b59617f6c6abd568e71}{check\_config}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a0b75456f60348c6b683cfd7195d7da8c}{config\_checked}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ path\ =\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a089dc3273f9003e8cd4871bd611ffd9c}{get\_path}}(scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ response\ =\ await\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a0949bd7ac2b598d34d9e875655cd21c1}{get\_response}}(path,\ scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ await\ response(scope,\ receive,\ send)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00101}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a089dc3273f9003e8cd4871bd611ffd9c}{00101}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a089dc3273f9003e8cd4871bd611ffd9c}{get\_path}}(self,\ scope:\ Scope)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Given\ the\ ASGI\ scope,\ return\ the\ \`{}path\`{}\ string\ to\ serve\ up,}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ with\ OS\ specific\ path\ separators,\ and\ any\ '..',\ '.'\ components\ removed.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ route\_path\ =\ get\_route\_path(scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.normpath(os.path.join(*route\_path.split(\textcolor{stringliteral}{"{}/"{}})))}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00109}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a0949bd7ac2b598d34d9e875655cd21c1}{00109}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a0949bd7ac2b598d34d9e875655cd21c1}{get\_response}}(self,\ path:\ str,\ scope:\ Scope)\ -\/>\ Response:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ an\ HTTP\ response,\ given\ the\ incoming\ path,\ method\ and\ request\ headers.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ scope[\textcolor{stringliteral}{"{}method"{}}]\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{"{}GET"{}},\ \textcolor{stringliteral}{"{}HEAD"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classstarlette_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=405)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ full\_path,\ stat\_result\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1to__thread_a9ecce2ae7f01bdab449c9c159ed7f314}{anyio.to\_thread.run\_sync}}(self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a53816372ddc50bd1843fd9e5663fed4c}{lookup\_path}},\ path)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ PermissionError:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classstarlette_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=401)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Filename\ is\ too\ long,\ so\ it\ can't\ be\ a\ valid\ static\ file.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ exc.errno\ ==\ errno.ENAMETOOLONG:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classstarlette_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=404)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ exc}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ stat\_result\ \textcolor{keywordflow}{and}\ stat.S\_ISREG(stat\_result.st\_mode):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ We\ have\ a\ static\ file\ to\ serve.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a25386dc41586165bbb7c941ac8997a20}{file\_response}}(full\_path,\ stat\_result,\ scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ stat\_result\ \textcolor{keywordflow}{and}\ stat.S\_ISDIR(stat\_result.st\_mode)\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a441b3f31bbbc6500a73b3f976c5f32ee}{html}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ We're\ in\ HTML\ mode,\ and\ have\ got\ a\ directory\ URL.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Check\ if\ we\ have\ 'index.html'\ file\ to\ serve.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ index\_path\ =\ os.path.join(path,\ \textcolor{stringliteral}{"{}index.html"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ full\_path,\ stat\_result\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1to__thread_a9ecce2ae7f01bdab449c9c159ed7f314}{anyio.to\_thread.run\_sync}}(self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a53816372ddc50bd1843fd9e5663fed4c}{lookup\_path}},\ index\_path)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ stat\_result\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ stat.S\_ISREG(stat\_result.st\_mode):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ scope[\textcolor{stringliteral}{"{}path"{}}].endswith(\textcolor{stringliteral}{"{}/"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Directory\ URLs\ should\ redirect\ to\ always\ end\ in\ "{}/"{}.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}(scope=scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url\ =\ url.replace(path=url.path\ +\ \textcolor{stringliteral}{"{}/"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_redirect_response}{RedirectResponse}}(url=url)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a25386dc41586165bbb7c941ac8997a20}{file\_response}}(full\_path,\ stat\_result,\ scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a441b3f31bbbc6500a73b3f976c5f32ee}{html}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Check\ for\ '404.html'\ if\ we're\ in\ HTML\ mode.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ full\_path,\ stat\_result\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1to__thread_a9ecce2ae7f01bdab449c9c159ed7f314}{anyio.to\_thread.run\_sync}}(self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a53816372ddc50bd1843fd9e5663fed4c}{lookup\_path}},\ \textcolor{stringliteral}{"{}404.html"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ stat\_result\ \textcolor{keywordflow}{and}\ stat.S\_ISREG(stat\_result.st\_mode):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_file_response}{FileResponse}}(full\_path,\ stat\_result=stat\_result,\ status\_code=404)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classstarlette_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=404)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00151}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a53816372ddc50bd1843fd9e5663fed4c}{00151}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a53816372ddc50bd1843fd9e5663fed4c}{lookup\_path}}(self,\ path:\ str)\ -\/>\ tuple[str,\ os.stat\_result\ |\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ directory\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_ad6fe089465c601a1d9ca8c35d47b3dbd}{all\_directories}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ joined\_path\ =\ os.path.join(directory,\ path)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a407b935a047cbe05391c72208fa8227e}{follow\_symlink}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ full\_path\ =\ os.path.abspath(joined\_path)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ directory\ =\ os.path.abspath(directory)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ full\_path\ =\ os.path.realpath(joined\_path)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ directory\ =\ os.path.realpath(directory)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.commonpath([full\_path,\ directory])\ !=\ str(directory):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Don't\ allow\ misbehaving\ clients\ to\ break\ out\ of\ the\ static\ files\ directory.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ full\_path,\ os.stat(full\_path)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ (FileNotFoundError,\ NotADirectoryError):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}"{}},\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00169}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a25386dc41586165bbb7c941ac8997a20}{00169}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a25386dc41586165bbb7c941ac8997a20}{file\_response}}(}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ full\_path:\ PathLike,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ stat\_result:\ os.stat\_result,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ scope:\ Scope,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ status\_code:\ int\ =\ 200,}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00175}00175\ \ \ \ \ )\ -\/>\ Response:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ request\_headers\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers}{Headers}}(scope=scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ response\ =\ \mbox{\hyperlink{classstarlette_1_1responses_1_1_file_response}{FileResponse}}(full\_path,\ status\_code=status\_code,\ stat\_result=stat\_result)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a46b40aab67d5b0150d5e5f06fb0aff47}{is\_not\_modified}}(response.headers,\ request\_headers):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_not_modified_response}{NotModifiedResponse}}(response.headers)}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ response}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00183}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a46a394a26b861b59617f6c6abd568e71}{00183}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a46a394a26b861b59617f6c6abd568e71}{check\_config}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00185}00185\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Perform\ a\ one-\/off\ configuration\ check\ that\ StaticFiles\ is\ actually}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00186}00186\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ pointed\ at\ a\ directory,\ so\ that\ we\ can\ raise\ loud\ errors\ rather\ than}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00187}00187\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ just\ returning\ 404\ responses.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00188}00188\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_af7c455a5e2cbfa4970abf771399719ae}{directory}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ stat\_result\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1to__thread_a9ecce2ae7f01bdab449c9c159ed7f314}{anyio.to\_thread.run\_sync}}(os.stat,\ self.\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_af7c455a5e2cbfa4970abf771399719ae}{directory}})}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ FileNotFoundError:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(f\textcolor{stringliteral}{"{}StaticFiles\ directory\ '\{self.directory\}'\ does\ not\ exist."{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (stat.S\_ISDIR(stat\_result.st\_mode)\ \textcolor{keywordflow}{or}\ stat.S\_ISLNK(stat\_result.st\_mode)):}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(f\textcolor{stringliteral}{"{}StaticFiles\ path\ '\{self.directory\}'\ is\ not\ a\ directory."{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00199}\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a46b40aab67d5b0150d5e5f06fb0aff47}{00199}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1staticfiles_1_1_static_files_a46b40aab67d5b0150d5e5f06fb0aff47}{is\_not\_modified}}(self,\ response\_headers:\ Headers,\ request\_headers:\ Headers)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00201}00201\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Given\ the\ request\ and\ response\ headers,\ return\ \`{}True\`{}\ if\ an\ HTTP}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00202}00202\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}Not\ Modified"{}\ response\ could\ be\ returned\ instead.}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00203}00203\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ if\_none\_match\ =\ request\_headers[\textcolor{stringliteral}{"{}if-\/none-\/match"{}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ etag\ =\ response\_headers[\textcolor{stringliteral}{"{}etag"{}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ etag\ \textcolor{keywordflow}{in}\ [tag.strip(\textcolor{stringliteral}{"{}\ W/"{}})\ \textcolor{keywordflow}{for}\ tag\ \textcolor{keywordflow}{in}\ if\_none\_match.split(\textcolor{stringliteral}{"{},"{}})]:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ if\_modified\_since\ =\ parsedate(request\_headers[\textcolor{stringliteral}{"{}if-\/modified-\/since"{}}])}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ last\_modified\ =\ parsedate(response\_headers[\textcolor{stringliteral}{"{}last-\/modified"{}}])}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ if\_modified\_since\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ last\_modified\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{and}\ if\_modified\_since\ >=\ last\_modified:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{starlette_2staticfiles_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+
+\end{DoxyCode}

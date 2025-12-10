@@ -1,0 +1,130 @@
+\doxysection{\+\_\+repr.\+py}
+\hypertarget{__repr_8py_source}{}\label{__repr_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_repr.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_repr.py}}
+\mbox{\hyperlink{__repr_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__repr}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Tools\ to\ provide\ pretty/human-\/readable\ display\ of\ objects."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations\ \textcolor{keyword}{as}\ \_annotations}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00005}00005\ \textcolor{keyword}{import}\ types}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00006}00006\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Callable,\ Collection,\ Generator,\ Iterable}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00007}00007\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ ForwardRef,\ cast}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00009}00009\ \textcolor{keyword}{import}\ typing\_extensions}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00010}00010\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ TypeAlias}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00011}00011\ \textcolor{keyword}{from}\ typing\_inspection\ \textcolor{keyword}{import}\ typing\_objects}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00012}00012\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacetyping__inspection_1_1introspection}{typing\_inspection.introspection}}\ \textcolor{keyword}{import}\ is\_union\_origin}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00014}00014\ \textcolor{keyword}{from}\ .\ \textcolor{keyword}{import}\ \_typing\_extra}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00016}00016\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00017}00017\ \ \ \ \ \textcolor{comment}{\#\ TODO\ remove\ type\ error\ comments\ when\ we\ drop\ support\ for\ Python\ 3.9}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00018}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__repr_ab2c53f8e7cee3b4d29f9dd2d2fd15882}{00018}}\ \ \ \ \ ReprArgs:\ TypeAlias\ =\ Iterable[tuple[str\ |\ \textcolor{keywordtype}{None},\ Any]]\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportGeneralTypeIssues]}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00019}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__repr_a4ce733d43fc578efa15c5ff20f69a8e0}{00019}}\ \ \ \ \ RichReprResult:\ TypeAlias\ =\ Iterable[Any\ |\ tuple[Any]\ |\ tuple[str,\ Any]\ |\ tuple[str,\ Any,\ Any]]\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportGeneralTypeIssues]}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00022}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_plain_repr}{00022}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_plain_repr}{PlainRepr}}(str):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00023}00023\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}String\ class\ where\ repr\ doesn't\ include\ quotes.\ Useful\ with\ Representation\ when\ you\ want\ to\ return\ a\ string}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ representation\ of\ something\ that\ is\ valid\ (or\ pseudo-\/valid)\ python.}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00027}00027\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(self)}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00031}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{00031}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{Representation}}:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00032}00032\ \ \ \ \ \textcolor{comment}{\#\ Mixin\ to\ provide\ \`{}\_\_str\_\_`,\ \`{}\_\_repr\_\_`,\ and\ \`{}\_\_pretty\_\_`\ and\ \`{}\_\_rich\_repr\_\_`\ methods.}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00033}00033\ \ \ \ \ \textcolor{comment}{\#\ \`{}\_\_pretty\_\_`\ is\ used\ by\ [devtools](https://python-\/devtools.helpmanual.io/).}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00034}00034\ \ \ \ \ \textcolor{comment}{\#\ \`{}\_\_rich\_repr\_\_`\ is\ used\ by\ [rich](https://rich.readthedocs.io/en/stable/pretty.html).}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00035}00035\ \ \ \ \ \textcolor{comment}{\#\ (this\ is\ not\ a\ docstring\ to\ avoid\ adding\ a\ docstring\ to\ classes\ which\ inherit\ from\ Representation)}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00037}00037\ \ \ \ \ \_\_slots\_\_\ =\ ()}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00039}00039\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_args\_\_(self)\ -\/>\ ReprArgs:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Returns\ the\ attributes\ to\ show\ in\ \_\_str\_\_,\ \_\_repr\_\_,\ and\ \_\_pretty\_\_\ this\ is\ generally\ overridden.}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00041}00041\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00042}00042\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Can\ either\ return:}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ name\ -\/\ value\ pairs,\ e.g.:\ \`{}[('foo\_name',\ 'foo'),\ ('bar\_name',\ ['b',\ 'a',\ 'r'])]\`{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ or,\ just\ values,\ e.g.:\ \`{}[(None,\ 'foo'),\ (None,\ ['b',\ 'a',\ 'r'])]\`{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ attrs\_names\ =\ cast(Collection[str],\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{\_\_slots\_\_}})}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ attrs\_names\ \textcolor{keywordflow}{and}\ hasattr(self,\ \textcolor{stringliteral}{'\_\_dict\_\_'}):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ attrs\_names\ =\ self.\_\_dict\_\_.keys()}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ attrs\ =\ ((s,\ getattr(self,\ s))\ \textcolor{keywordflow}{for}\ s\ \textcolor{keywordflow}{in}\ attrs\_names)}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [(a,\ v\ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ self\ \textcolor{keywordflow}{else}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{\_\_repr\_recursion\_\_}}(v))\ \textcolor{keywordflow}{for}\ a,\ v\ \textcolor{keywordflow}{in}\ attrs\ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}]}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00052}00052\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_name\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Name\ of\ the\ instance's\ class,\ used\ in\ \_\_repr\_\_."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\_\_class\_\_.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00056}00056\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_recursion\_\_(self,\ object:\ Any)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Returns\ the\ string\ representation\ of\ a\ recursive\ object."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ copied\ over\ from\ the\ stdlib\ \`{}pprint`\ module:}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{'<Recursion\ on\ \{type(object).\_\_name\_\_\}\ with\ id=\{id(object)\}>'}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00061}00061\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_str\_\_(self,\ join\_str:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ join\_str.join(repr(v)\ \textcolor{keywordflow}{if}\ a\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ f\textcolor{stringliteral}{'\{a\}=\{v!r\}'}\ \textcolor{keywordflow}{for}\ a,\ v\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{\_\_repr\_args\_\_}}())}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00064}00064\ \ \ \ \ \textcolor{keyword}{def\ }\_\_pretty\_\_(self,\ fmt:\ Callable[[Any],\ Any],\ **kwargs:\ Any)\ -\/>\ Generator[Any]:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Used\ by\ devtools\ (https://python-\/devtools.helpmanual.io/)\ to\ pretty\ print\ objects."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{\_\_repr\_name\_\_}}()\ +\ \textcolor{stringliteral}{'('}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ 1}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{\_\_repr\_args\_\_}}():}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ name\ +\ \textcolor{stringliteral}{'='}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ fmt(value)}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{stringliteral}{','}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ 0}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ -\/1}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{stringliteral}{')'}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00077}00077\ \ \ \ \ \textcolor{keyword}{def\ }\_\_rich\_repr\_\_(self)\ -\/>\ RichReprResult:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Used\ by\ Rich\ (https://rich.readthedocs.io/en/stable/pretty.html)\ to\ pretty\ print\ objects."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ field\_repr\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{\_\_repr\_args\_\_}}():}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ field\_repr}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ name,\ field\_repr}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00084}00084\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00085}00085\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__repr_1_1_representation}{\_\_repr\_str\_\_}}(\textcolor{stringliteral}{'\ '})}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00088}00088\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{'\{self.\_\_repr\_name\_\_()\}(\{self.\_\_repr\_str\_\_("{},\ "{})\})'}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00092}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__repr_aa0dc2727dfadb98eef80d1c91ccbb30c}{00092}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__repr_aa0dc2727dfadb98eef80d1c91ccbb30c}{display\_as\_type}}(obj:\ Any)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00093}00093\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Pretty\ representation\ of\ a\ type,\ should\ be\ as\ close\ as\ possible\ to\ the\ original\ type\ definition\ string.}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00094}00094\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ Takes\ some\ logic\ from\ \`{}typing.\_type\_repr\`{}.}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00097}00097\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(obj,\ (types.FunctionType,\ types.BuiltinFunctionType)):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ obj.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00099}00099\ \ \ \ \ \textcolor{keywordflow}{elif}\ obj\ \textcolor{keywordflow}{is}\ ...:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{'...'}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00101}00101\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(obj,\ Representation):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ repr(obj)}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00103}00103\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(obj,\ ForwardRef)\ \textcolor{keywordflow}{or}\ typing\_objects.is\_typealiastype(obj):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(obj)}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00106}00106\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(obj,\ (\_typing\_extra.typing\_base,\ \_typing\_extra.WithArgsTypes,\ type)):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ obj\ =\ obj.\_\_class\_\_}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00109}00109\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_union\_origin(\mbox{\hyperlink{namespacetyping__extensions_a4bbba25af711824493b09a427463198d}{typing\_extensions.get\_origin}}(obj)):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ args\ =\ \textcolor{stringliteral}{',\ '}.join(map(display\_as\_type,\ \mbox{\hyperlink{namespacetyping__extensions_abe2888fbec369aced9e2585a905caa7f}{typing\_extensions.get\_args}}(obj)))}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{'Union[\{args\}]'}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00112}00112\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(obj,\ \_typing\_extra.WithArgsTypes):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_literal(\mbox{\hyperlink{namespacetyping__extensions_a4bbba25af711824493b09a427463198d}{typing\_extensions.get\_origin}}(obj)):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ args\ =\ \textcolor{stringliteral}{',\ '}.join(map(repr,\ \mbox{\hyperlink{namespacetyping__extensions_abe2888fbec369aced9e2585a905caa7f}{typing\_extensions.get\_args}}(obj)))}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ args\ =\ \textcolor{stringliteral}{',\ '}.join(map(display\_as\_type,\ \mbox{\hyperlink{namespacetyping__extensions_abe2888fbec369aced9e2585a905caa7f}{typing\_extensions.get\_args}}(obj)))}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{'\{obj.\_\_qualname\_\_\}[\{args\}]'}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(obj).replace(\textcolor{stringliteral}{'typing.'},\ \textcolor{stringliteral}{''}).replace(\textcolor{stringliteral}{'typing\_extensions.'},\ \textcolor{stringliteral}{''})\ \ \textcolor{comment}{\#\ handles\ TypeAliasType\ in\ 3.12}}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00121}00121\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(obj,\ type):}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ obj.\_\_qualname\_\_}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__repr_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ repr(obj).replace(\textcolor{stringliteral}{'typing.'},\ \textcolor{stringliteral}{''}).replace(\textcolor{stringliteral}{'typing\_extensions.'},\ \textcolor{stringliteral}{''})}
+
+\end{DoxyCode}

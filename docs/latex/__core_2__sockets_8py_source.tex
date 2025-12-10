@@ -1,0 +1,997 @@
+\doxysection{\+\_\+sockets.\+py}
+\hypertarget{__core_2__sockets_8py_source}{}\label{__core_2__sockets_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_sockets.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_sockets.py}}
+\mbox{\hyperlink{__core_2__sockets_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00001}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00003}00003\ \textcolor{keyword}{import}\ errno}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00004}00004\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00005}00005\ \textcolor{keyword}{import}\ socket}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00006}00006\ \textcolor{keyword}{import}\ ssl}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00007}00007\ \textcolor{keyword}{import}\ stat}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00008}00008\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Awaitable}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00010}00010\ \textcolor{keyword}{from}\ dataclasses\ \textcolor{keyword}{import}\ dataclass}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00011}00011\ \textcolor{keyword}{from}\ ipaddress\ \textcolor{keyword}{import}\ IPv4Address,\ IPv6Address,\ ip\_address}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00012}00012\ \textcolor{keyword}{from}\ os\ \textcolor{keyword}{import}\ PathLike,\ chmod}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00013}00013\ \textcolor{keyword}{from}\ socket\ \textcolor{keyword}{import}\ AddressFamily,\ SocketKind}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00014}00014\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ Literal,\ cast,\ overload}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00016}00016\ \textcolor{keyword}{from}\ ..\ \textcolor{keyword}{import}\ ConnectionFailed,\ to\_thread}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00017}00017\ \textcolor{keyword}{from}\ ..abc\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00018}00018\ \ \ \ \ ByteStreamConnectable,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00019}00019\ \ \ \ \ ConnectedUDPSocket,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00020}00020\ \ \ \ \ ConnectedUNIXDatagramSocket,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00021}00021\ \ \ \ \ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00022}00022\ \ \ \ \ IPSockAddrType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00023}00023\ \ \ \ \ SocketListener,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00024}00024\ \ \ \ \ SocketStream,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00025}00025\ \ \ \ \ UDPSocket,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00026}00026\ \ \ \ \ UNIXDatagramSocket,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00027}00027\ \ \ \ \ UNIXSocketStream,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00028}00028\ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00029}00029\ \textcolor{keyword}{from}\ ..streams.stapled\ \textcolor{keyword}{import}\ MultiListener}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00030}00030\ \textcolor{keyword}{from}\ ..streams.tls\ \textcolor{keyword}{import}\ TLSConnectable,\ TLSStream}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00031}00031\ \textcolor{keyword}{from}\ .\_eventloop\ \textcolor{keyword}{import}\ get\_async\_backend}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00032}00032\ \textcolor{keyword}{from}\ .\_resources\ \textcolor{keyword}{import}\ aclose\_forcefully}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00033}00033\ \textcolor{keyword}{from}\ .\_synchronization\ \textcolor{keyword}{import}\ Event}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00034}00034\ \textcolor{keyword}{from}\ .\_tasks\ \textcolor{keyword}{import}\ create\_task\_group,\ move\_on\_after}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00036}00036\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00037}00037\ \ \ \ \ \textcolor{keyword}{from}\ \_typeshed\ \textcolor{keyword}{import}\ FileDescriptorLike}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00038}00038\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00039}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a5ee939ec277e17a9da1eab73a3091f05}{00039}}\ \ \ \ \ FileDescriptorLike\ =\ object}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00041}00041\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 11):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00042}00042\ \ \ \ \ \textcolor{keyword}{from}\ exceptiongroup\ \textcolor{keyword}{import}\ ExceptionGroup}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00044}00044\ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 12):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00045}00045\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ override}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00046}00046\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00047}00047\ \ \ \ \ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ override}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00049}00049\ \textcolor{keywordflow}{if}\ sys.version\_info\ <\ (3,\ 13):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00050}00050\ \ \ \ \ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ deprecated}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00051}00051\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00052}00052\ \ \ \ \ \textcolor{keyword}{from}\ warnings\ \textcolor{keyword}{import}\ deprecated}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00054}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ac473f354308f885c4571bc4d0b189934}{00054}}\ IPPROTO\_IPV6\ =\ getattr(socket,\ \textcolor{stringliteral}{"{}IPPROTO\_IPV6"{}},\ 41)\ \ \textcolor{comment}{\#\ https://bugs.python.org/issue29515}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00056}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a493b5e0df266e536268fcc3910d3033a}{00056}}\ AnyIPAddressFamily\ =\ Literal[}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00057}00057\ \ \ \ \ AddressFamily.AF\_UNSPEC,\ AddressFamily.AF\_INET,\ AddressFamily.AF\_INET6}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00058}00058\ ]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00059}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a49ae50136c0ace9fcd55d80c9e8e8683}{00059}}\ IPAddressFamily\ =\ Literal[AddressFamily.AF\_INET,\ AddressFamily.AF\_INET6]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00062}00062\ \textcolor{comment}{\#\ tls\_hostname\ given}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00063}00063\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00064}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{00064}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{connect\_tcp}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00065}00065\ \ \ \ \ remote\_host:\ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00066}00066\ \ \ \ \ remote\_port:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00067}00067\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00068}00068\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00069}00069\ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00070}00070\ \ \ \ \ tls\_standard\_compatible:\ bool\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00071}00071\ \ \ \ \ tls\_hostname:\ str,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00072}00072\ \ \ \ \ happy\_eyeballs\_delay:\ float\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00073}00073\ )\ -\/>\ TLSStream:\ ...}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00076}00076\ \textcolor{comment}{\#\ ssl\_context\ given}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00077}00077\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00078}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1b22dea627639d55312727145e326763}{00078}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{connect\_tcp}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00079}00079\ \ \ \ \ remote\_host:\ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00080}00080\ \ \ \ \ remote\_port:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00081}00081\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00082}00082\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00083}00083\ \ \ \ \ ssl\_context:\ ssl.SSLContext,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00084}00084\ \ \ \ \ tls\_standard\_compatible:\ bool\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00085}00085\ \ \ \ \ tls\_hostname:\ str\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00086}00086\ \ \ \ \ happy\_eyeballs\_delay:\ float\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00087}00087\ )\ -\/>\ TLSStream:\ ...}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00090}00090\ \textcolor{comment}{\#\ tls=True}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00091}00091\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00092}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaa9fb95c840cccf7e649cfd600b0c750}{00092}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{connect\_tcp}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00093}00093\ \ \ \ \ remote\_host:\ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00094}00094\ \ \ \ \ remote\_port:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00095}00095\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00096}00096\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00097}00097\ \ \ \ \ tls:\ Literal[\textcolor{keyword}{True}],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00098}00098\ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00099}00099\ \ \ \ \ tls\_standard\_compatible:\ bool\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00100}00100\ \ \ \ \ tls\_hostname:\ str\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00101}00101\ \ \ \ \ happy\_eyeballs\_delay:\ float\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00102}00102\ )\ -\/>\ TLSStream:\ ...}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00105}00105\ \textcolor{comment}{\#\ tls=False}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00106}00106\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00107}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a92cbba76db5e1215abf3ac1e09b6baf0}{00107}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{connect\_tcp}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00108}00108\ \ \ \ \ remote\_host:\ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00109}00109\ \ \ \ \ remote\_port:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00110}00110\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00111}00111\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00112}00112\ \ \ \ \ tls:\ Literal[\textcolor{keyword}{False}],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00113}00113\ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00114}00114\ \ \ \ \ tls\_standard\_compatible:\ bool\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00115}00115\ \ \ \ \ tls\_hostname:\ str\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00116}00116\ \ \ \ \ happy\_eyeballs\_delay:\ float\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00117}00117\ )\ -\/>\ SocketStream:\ ...}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00118}00118\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00120}00120\ \textcolor{comment}{\#\ No\ TLS\ arguments}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00121}00121\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00122}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a7acf59321920c5dfec812e7ab7547550}{00122}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{connect\_tcp}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00123}00123\ \ \ \ \ remote\_host:\ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00124}00124\ \ \ \ \ remote\_port:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00125}00125\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00126}00126\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00127}00127\ \ \ \ \ happy\_eyeballs\_delay:\ float\ =\ ...,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00128}00128\ )\ -\/>\ SocketStream:\ ...}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00131}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a3c9a8e00cb62850a1fb0fd90117b159e}{00131}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{connect\_tcp}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00132}00132\ \ \ \ \ remote\_host:\ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00133}00133\ \ \ \ \ remote\_port:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00134}00134\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00135}00135\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00136}00136\ \ \ \ \ tls:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00137}00137\ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00138}00138\ \ \ \ \ tls\_standard\_compatible:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00139}00139\ \ \ \ \ tls\_hostname:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00140}00140\ \ \ \ \ happy\_eyeballs\_delay:\ float\ =\ 0.25,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00141}00141\ )\ -\/>\ SocketStream\ |\ TLSStream:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00142}00142\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00143}00143\ \textcolor{stringliteral}{\ \ \ \ Connect\ to\ a\ host\ using\ the\ TCP\ protocol.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00144}00144\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00145}00145\ \textcolor{stringliteral}{\ \ \ \ This\ function\ implements\ the\ stateless\ version\ of\ the\ Happy\ Eyeballs\ algorithm\ (RFC}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00146}00146\ \textcolor{stringliteral}{\ \ \ \ 6555).\ If\ \`{}\`{}remote\_host\`{}\`{}\ is\ a\ host\ name\ that\ resolves\ to\ multiple\ IP\ addresses,}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00147}00147\ \textcolor{stringliteral}{\ \ \ \ each\ one\ is\ tried\ until\ one\ connection\ attempt\ succeeds.\ If\ the\ first\ attempt\ does}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00148}00148\ \textcolor{stringliteral}{\ \ \ \ not\ connected\ within\ 250\ milliseconds,\ a\ second\ attempt\ is\ started\ using\ the\ next}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00149}00149\ \textcolor{stringliteral}{\ \ \ \ address\ in\ the\ list,\ and\ so\ on.\ On\ IPv6\ enabled\ systems,\ an\ IPv6\ address\ (if}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ available)\ is\ tried\ first.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00151}00151\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ When\ the\ connection\ has\ been\ established,\ a\ TLS\ handshake\ will\ be\ done\ if\ either}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00153}00153\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}ssl\_context\`{}\`{}\ or\ \`{}\`{}tls\_hostname\`{}\`{}\ is\ not\ \`{}\`{}None\`{}\`{},\ or\ if\ \`{}\`{}tls\`{}\`{}\ is\ \`{}\`{}True\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00154}00154\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ :param\ remote\_host:\ the\ IP\ address\ or\ host\ name\ to\ connect\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00156}00156\ \textcolor{stringliteral}{\ \ \ \ :param\ remote\_port:\ port\ on\ the\ target\ host\ to\ connect\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00157}00157\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_host:\ the\ interface\ address\ or\ name\ to\ bind\ the\ socket\ to\ before}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ connecting}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ :param\ tls:\ \`{}\`{}True\`{}\`{}\ to\ do\ a\ TLS\ handshake\ with\ the\ connected\ stream\ and\ return\ a}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00160}00160\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :class:\`{}\string~anyio.streams.tls.TLSStream\`{}\ instead}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ :param\ ssl\_context:\ the\ SSL\ context\ object\ to\ use\ (if\ omitted,\ a\ default\ context\ is}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00162}00162\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ created)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00163}00163\ \textcolor{stringliteral}{\ \ \ \ :param\ tls\_standard\_compatible:\ If\ \`{}\`{}True\`{}\`{},\ performs\ the\ TLS\ shutdown\ handshake}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00164}00164\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ before\ closing\ the\ stream\ and\ requires\ that\ the\ server\ does\ this\ as\ well.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00165}00165\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Otherwise,\ :exc:\`{}\string~ssl.SSLEOFError\`{}\ may\ be\ raised\ during\ reads\ from\ the\ stream.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00166}00166\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Some\ protocols,\ such\ as\ HTTP,\ require\ this\ option\ to\ be\ \`{}\`{}False\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00167}00167\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ See\ :meth:\`{}\string~ssl.SSLContext.wrap\_socket\`{}\ for\ details.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00168}00168\ \textcolor{stringliteral}{\ \ \ \ :param\ tls\_hostname:\ host\ name\ to\ check\ the\ server\ certificate\ against\ (defaults\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00169}00169\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ value\ of\ \`{}\`{}remote\_host\`{}\`{})}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00170}00170\ \textcolor{stringliteral}{\ \ \ \ :param\ happy\_eyeballs\_delay:\ delay\ (in\ seconds)\ before\ starting\ the\ next\ connection}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00171}00171\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ attempt}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00172}00172\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ socket\ stream\ object\ if\ no\ TLS\ handshake\ was\ done,\ otherwise\ a\ TLS\ stream}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ :raises\ ConnectionFailed:\ if\ the\ connection\ fails}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00174}00174\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00175}00175\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00176}00176\ \ \ \ \ \textcolor{comment}{\#\ Placed\ here\ due\ to\ https://github.com/python/mypy/issues/7057}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00177}00177\ \ \ \ \ connected\_stream:\ SocketStream\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00178}00178\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00179}00179\ \ \ \ \ \textcolor{keyword}{async\ def\ }try\_connect(remote\_host:\ str,\ event:\ Event)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ nonlocal\ connected\_stream}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ stream\ =\ await\ asynclib.connect\_tcp(remote\_host,\ remote\_port,\ local\_address)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ oserrors.append(exc)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ connected\_stream\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ connected\_stream\ =\ stream}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tg.cancel\_scope.cancel()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ stream.aclose()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ event.set()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00195}00195\ \ \ \ \ asynclib\ =\ get\_async\_backend()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00196}00196\ \ \ \ \ local\_address:\ IPSockAddrType\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00197}00197\ \ \ \ \ family\ =\ socket.AF\_UNSPEC}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00198}00198\ \ \ \ \ \textcolor{keywordflow}{if}\ local\_host:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ gai\_res\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(str(local\_host),\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ family,\ *\_,\ local\_address\ =\ gai\_res[0]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00202}00202\ \ \ \ \ target\_host\ =\ str(remote\_host)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00203}00203\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ addr\_obj\ =\ ip\_address(remote\_host)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ addr\_obj\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00208}00208\ \ \ \ \ \textcolor{keywordflow}{if}\ addr\_obj\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(addr\_obj,\ IPv6Address):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ target\_addrs\ =\ [(socket.AF\_INET6,\ addr\_obj.compressed)]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ target\_addrs\ =\ [(socket.AF\_INET,\ addr\_obj.compressed)]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00213}00213\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ getaddrinfo()\ will\ raise\ an\ exception\ if\ name\ resolution\ fails}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ gai\_res\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ target\_host,\ remote\_port,\ family=family,\ type=socket.SOCK\_STREAM}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Organize\ the\ list\ so\ that\ the\ first\ address\ is\ an\ IPv6\ address\ (if\ available)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ the\ second\ one\ is\ an\ IPv4\ addresses.\ The\ rest\ can\ be\ in\ whatever\ order.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ v6\_found\ =\ v4\_found\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ target\_addrs\ =\ []}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ af,\ *\_,\ sa\ \textcolor{keywordflow}{in}\ gai\_res:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ af\ ==\ socket.AF\_INET6\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ v6\_found:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v6\_found\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ target\_addrs.insert(0,\ (af,\ sa[0]))}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ af\ ==\ socket.AF\_INET\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ v4\_found\ \textcolor{keywordflow}{and}\ v6\_found:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v4\_found\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ target\_addrs.insert(1,\ (af,\ sa[0]))}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ target\_addrs.append((af,\ sa[0]))}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00233}00233\ \ \ \ \ oserrors:\ list[OSError]\ =\ []}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00234}00234\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ create\_task\_group()\ \textcolor{keyword}{as}\ tg:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ \_af,\ addr\ \textcolor{keywordflow}{in}\ target\_addrs:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ event\ =\ \mbox{\hyperlink{classanyio_1_1__core_1_1__synchronization_1_1_event}{Event}}()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tg.start\_soon(try\_connect,\ addr,\ event)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ move\_on\_after(happy\_eyeballs\_delay):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ event.wait()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ connected\_stream\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ cause\ =\ (}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ oserrors[0]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(oserrors)\ ==\ 1}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ ExceptionGroup(\textcolor{stringliteral}{"{}multiple\ connection\ attempts\ failed"{}},\ oserrors)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ OSError(\textcolor{stringliteral}{"{}All\ connection\ attempts\ failed"{}})\ \textcolor{keyword}{from}\ cause}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ oserrors.clear()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00252}00252\ \ \ \ \ \textcolor{keywordflow}{if}\ tls\ \textcolor{keywordflow}{or}\ tls\_hostname\ \textcolor{keywordflow}{or}\ ssl\_context:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ await\ TLSStream.wrap(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ connected\_stream,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ server\_side=\textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hostname=tls\_hostname\ \textcolor{keywordflow}{or}\ str(remote\_host),}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ssl\_context=ssl\_context,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ standard\_compatible=tls\_standard\_compatible,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ BaseException:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ await\ aclose\_forcefully(connected\_stream)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00264}00264\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00265}00265\ \ \ \ \ \textcolor{keywordflow}{return}\ connected\_stream}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00267}00267\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00268}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae86a1e48ee0ae4cbbec344e0f9fe469d}{00268}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae86a1e48ee0ae4cbbec344e0f9fe469d}{connect\_unix}}(path:\ str\ |\ bytes\ |\ PathLike[Any])\ -\/>\ UNIXSocketStream:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00269}00269\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00270}00270\ \textcolor{stringliteral}{\ \ \ \ Connect\ to\ the\ given\ UNIX\ socket.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00271}00271\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00272}00272\ \textcolor{stringliteral}{\ \ \ \ Not\ available\ on\ Windows.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00273}00273\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00274}00274\ \textcolor{stringliteral}{\ \ \ \ :param\ path:\ path\ to\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00275}00275\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ socket\ stream\ object}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00276}00276\ \textcolor{stringliteral}{\ \ \ \ :raises\ ConnectionFailed:\ if\ the\ connection\ fails}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00277}00277\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00278}00278\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00279}00279\ \ \ \ \ path\ =\ os.fspath(path)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00280}00280\ \ \ \ \ \textcolor{keywordflow}{return}\ await\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae86a1e48ee0ae4cbbec344e0f9fe469d}{connect\_unix}}(path)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00283}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a3863dfa268f6bd30aab5d9139878532c}{00283}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a3863dfa268f6bd30aab5d9139878532c}{create\_tcp\_listener}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00284}00284\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00285}00285\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00286}00286\ \ \ \ \ local\_port:\ int\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00287}00287\ \ \ \ \ family:\ AnyIPAddressFamily\ =\ socket.AddressFamily.AF\_UNSPEC,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00288}00288\ \ \ \ \ backlog:\ int\ =\ 65536,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00289}00289\ \ \ \ \ reuse\_port:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00290}00290\ )\ -\/>\ MultiListener[SocketStream]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00291}00291\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00292}00292\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ TCP\ socket\ listener.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00293}00293\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00294}00294\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_port:\ port\ number\ to\ listen\ on}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00295}00295\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_host:\ IP\ address\ of\ the\ interface\ to\ listen\ on.\ If\ omitted,\ listen\ on}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00296}00296\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ all\ IPv4\ and\ IPv6\ interfaces.\ To\ listen\ on\ all\ interfaces\ on\ a\ specific\ address}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00297}00297\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ family,\ use\ \`{}\`{}0.0.0.0\`{}\`{}\ for\ IPv4\ or\ \`{}\`{}::\`{}\`{}\ for\ IPv6.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00298}00298\ \textcolor{stringliteral}{\ \ \ \ :param\ family:\ address\ family\ (used\ if\ \`{}\`{}local\_host\`{}\`{}\ was\ omitted)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00299}00299\ \textcolor{stringliteral}{\ \ \ \ :param\ backlog:\ maximum\ number\ of\ queued\ incoming\ connections\ (up\ to\ a\ maximum\ of}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00300}00300\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 2**16,\ or\ 65536)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00301}00301\ \textcolor{stringliteral}{\ \ \ \ :param\ reuse\_port:\ \`{}\`{}True\`{}\`{}\ to\ allow\ multiple\ sockets\ to\ bind\ to\ the\ same}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00302}00302\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ address/port\ (not\ supported\ on\ Windows)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00303}00303\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ multi-\/listener\ object\ containing\ one\ or\ more\ socket\ listeners}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00304}00304\ \textcolor{stringliteral}{\ \ \ \ :raises\ OSError:\ if\ there's\ an\ error\ creating\ a\ socket,\ or\ binding\ to\ one\ or\ more}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00305}00305\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ interfaces\ failed}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00306}00306\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00307}00307\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00308}00308\ \ \ \ \ asynclib\ =\ get\_async\_backend()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00309}00309\ \ \ \ \ backlog\ =\ min(backlog,\ 65536)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00310}00310\ \ \ \ \ local\_host\ =\ str(local\_host)\ \textcolor{keywordflow}{if}\ local\_host\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{else}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00312}00312\ \ \ \ \ \textcolor{keyword}{def\ }setup\_raw\_socket(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ fam:\ AddressFamily,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ bind\_addr:\ tuple[str,\ int]\ |\ tuple[str,\ int,\ int,\ int],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ v6only:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00317}00317\ \ \ \ \ )\ -\/>\ socket.socket:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ sock\ =\ socket.socket(fam)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ sock.setblocking(\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00321}00321\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fam\ ==\ AddressFamily.AF\_INET6:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sock.setsockopt(IPPROTO\_IPV6,\ socket.IPV6\_V6ONLY,\ v6only)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00324}00324\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ For\ Windows,\ enable\ exclusive\ address\ use.\ For\ others,\ enable\ address}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ reuse.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sys.platform\ ==\ \textcolor{stringliteral}{"{}win32"{}}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00328}00328\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sock.setsockopt(socket.SOL\_SOCKET,\ socket.SO\_EXCLUSIVEADDRUSE,\ 1)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00330}00330\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sock.setsockopt(socket.SOL\_SOCKET,\ socket.SO\_REUSEADDR,\ 1)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ reuse\_port:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sock.setsockopt(socket.SOL\_SOCKET,\ socket.SO\_REUSEPORT,\ 1)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00334}00334\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Workaround\ for\ \#554}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fam\ ==\ socket.AF\_INET6\ \textcolor{keywordflow}{and}\ \textcolor{stringliteral}{"{}\%"{}}\ \textcolor{keywordflow}{in}\ bind\_addr[0]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ addr,\ scope\_id\ =\ bind\_addr[0].split(\textcolor{stringliteral}{"{}\%"{}},\ 1)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bind\_addr\ =\ (addr,\ bind\_addr[1],\ 0,\ int(scope\_id))}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00339}00339\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ sock.bind(bind\_addr)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ sock.listen(backlog)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ BaseException:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00343}00343\ \ \ \ \ \ \ \ \ \ \ \ \ sock.close()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00344}00344\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00345}00345\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00346}00346\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sock}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00347}00347\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00348}00348\ \ \ \ \ \textcolor{comment}{\#\ We\ passing\ type=0\ on\ non-\/Windows\ platforms\ as\ a\ workaround\ for\ a\ uvloop\ bug}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00349}00349\ \ \ \ \ \textcolor{comment}{\#\ where\ we\ don't\ get\ the\ correct\ scope\ ID\ for\ IPv6\ link-\/local\ addresses\ when\ passing}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00350}00350\ \ \ \ \ \textcolor{comment}{\#\ type=socket.SOCK\_STREAM\ to\ getaddrinfo():}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00351}00351\ \ \ \ \ \textcolor{comment}{\#\ https://github.com/MagicStack/uvloop/issues/539}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00352}00352\ \ \ \ \ gai\_res\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ local\_host,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ local\_port,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ family=family,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ type=socket.SOCK\_STREAM\ \textcolor{keywordflow}{if}\ sys.platform\ ==\ \textcolor{stringliteral}{"{}win32"{}}\ \textcolor{keywordflow}{else}\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ flags=socket.AI\_PASSIVE\ |\ socket.AI\_ADDRCONFIG,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00358}00358\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00360}00360\ \ \ \ \ \textcolor{comment}{\#\ The\ set\ comprehension\ is\ here\ to\ work\ around\ a\ glibc\ bug:}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00361}00361\ \ \ \ \ \textcolor{comment}{\#\ https://sourceware.org/bugzilla/show\_bug.cgi?id=14969}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00362}00362\ \ \ \ \ sockaddrs\ =\ sorted(\{res\ \textcolor{keywordflow}{for}\ res\ \textcolor{keywordflow}{in}\ gai\_res\ \textcolor{keywordflow}{if}\ res[1]\ ==\ SocketKind.SOCK\_STREAM\})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00363}00363\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00364}00364\ \ \ \ \ \textcolor{comment}{\#\ Special\ case\ for\ dual-\/stack\ binding\ on\ the\ "{}any"{}\ interface}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00365}00365\ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ local\_host\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ family\ ==\ AddressFamily.AF\_UNSPEC}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ socket.has\_dualstack\_ipv6()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ any(fam\ ==\ AddressFamily.AF\_INET6\ \textcolor{keywordflow}{for}\ fam,\ *\_\ \textcolor{keywordflow}{in}\ gai\_res)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00370}00370\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ raw\_socket\ =\ setup\_raw\_socket(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ AddressFamily.AF\_INET6,\ (\textcolor{stringliteral}{"{}::"{}},\ local\_port),\ v6only=\textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ listener\ =\ asynclib.create\_tcp\_listener(raw\_socket)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classanyio_1_1streams_1_1stapled_1_1_multi_listener}{MultiListener}}([listener])}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00376}00376\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00377}00377\ \ \ \ \ errors:\ list[OSError]\ =\ []}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00378}00378\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ \_\ \textcolor{keywordflow}{in}\ range(len(sockaddrs)):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ listeners:\ list[SocketListener]\ =\ []}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ bound\_ephemeral\_port\ =\ local\_port}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ fam,\ *\_,\ sockaddr\ \textcolor{keywordflow}{in}\ sockaddrs:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sockaddr\ =\ sockaddr[0],\ bound\_ephemeral\_port,\ *sockaddr[2:]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ raw\_socket\ =\ setup\_raw\_socket(fam,\ sockaddr)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00386}00386\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Store\ the\ assigned\ port\ if\ an\ ephemeral\ port\ was\ requested,\ so}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we'll\ bind\ to\ the\ same\ port\ on\ all\ interfaces}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ local\_port\ ==\ 0\ \textcolor{keywordflow}{and}\ len(gai\_res)\ >\ 1:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bound\_ephemeral\_port\ =\ raw\_socket.getsockname()[1]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ listeners.append(asynclib.create\_tcp\_listener(raw\_socket))}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ BaseException\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ listener\ \textcolor{keywordflow}{in}\ listeners:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ listener.aclose()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00397}00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ an\ ephemeral\ port\ was\ requested\ but\ binding\ the\ assigned\ port}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ failed\ for\ another\ interface,\ rotate\ the\ address\ list\ and\ try\ again}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(exc,\ OSError)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ exc.errno\ ==\ errno.EADDRINUSE}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ local\_port\ ==\ 0}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ bound\_ephemeral\_port}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errors.append(exc)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sockaddrs.append(sockaddrs.pop(0))}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00408}00408\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00410}00410\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classanyio_1_1streams_1_1stapled_1_1_multi_listener}{MultiListener}}(listeners)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00413}00413\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ OSError(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00414}00414\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}Could\ not\ create\ \{len(sockaddrs)\}\ listeners\ with\ a\ consistent\ port"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00415}00415\ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{from}\ ExceptionGroup(\textcolor{stringliteral}{"{}Several\ bind\ attempts\ failed"{}},\ errors)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00416}00416\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ del\ errors\ \ \textcolor{comment}{\#\ Prevent\ reference\ cycles}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00419}00419\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00420}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_afaf921bb1c17aa877ffa678fa457257d}{00420}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_afaf921bb1c17aa877ffa678fa457257d}{create\_unix\_listener}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00421}00421\ \ \ \ \ path:\ str\ |\ bytes\ |\ PathLike[Any],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00422}00422\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00423}00423\ \ \ \ \ mode:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00424}00424\ \ \ \ \ backlog:\ int\ =\ 65536,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00425}00425\ )\ -\/>\ SocketListener:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00426}00426\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00427}00427\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ UNIX\ socket\ listener.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00428}00428\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00429}00429\ \textcolor{stringliteral}{\ \ \ \ Not\ available\ on\ Windows.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00430}00430\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00431}00431\ \textcolor{stringliteral}{\ \ \ \ :param\ path:\ path\ of\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00432}00432\ \textcolor{stringliteral}{\ \ \ \ :param\ mode:\ permissions\ to\ set\ on\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00433}00433\ \textcolor{stringliteral}{\ \ \ \ :param\ backlog:\ maximum\ number\ of\ queued\ incoming\ connections\ (up\ to\ a\ maximum\ of}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00434}00434\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ 2**16,\ or\ 65536)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00435}00435\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ listener\ object}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00436}00436\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00437}00437\ \textcolor{stringliteral}{\ \ \ \ ..\ versionchanged::\ 3.0}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00438}00438\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ a\ socket\ already\ exists\ on\ the\ file\ system\ in\ the\ given\ path,\ it\ will\ be}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00439}00439\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ removed\ first.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00440}00440\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00441}00441\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00442}00442\ \ \ \ \ backlog\ =\ min(backlog,\ 65536)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00443}00443\ \ \ \ \ raw\_socket\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae90559545657c2121a3bbf0f9489e9a6}{setup\_unix\_local\_socket}}(path,\ mode,\ socket.SOCK\_STREAM)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00444}00444\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00445}00445\ \ \ \ \ \ \ \ \ raw\_socket.listen(backlog)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_afaf921bb1c17aa877ffa678fa457257d}{create\_unix\_listener}}(raw\_socket)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00447}00447\ \ \ \ \ \textcolor{keywordflow}{except}\ BaseException:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ raw\_socket.close()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00450}00450\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00451}00451\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00452}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a09f90620bbd3fc699358a004cb81b100}{00452}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a09f90620bbd3fc699358a004cb81b100}{create\_udp\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00453}00453\ \ \ \ \ family:\ AnyIPAddressFamily\ =\ AddressFamily.AF\_UNSPEC,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00454}00454\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00455}00455\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00456}00456\ \ \ \ \ local\_port:\ int\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00457}00457\ \ \ \ \ reuse\_port:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00458}00458\ )\ -\/>\ UDPSocket:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00459}00459\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00460}00460\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ UDP\ socket.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00461}00461\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00462}00462\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}port\`{}\`{}\ has\ been\ given,\ the\ socket\ will\ be\ bound\ to\ this\ port\ on\ the\ local}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00463}00463\ \textcolor{stringliteral}{\ \ \ \ machine,\ making\ this\ socket\ suitable\ for\ providing\ UDP\ based\ services.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00464}00464\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00465}00465\ \textcolor{stringliteral}{\ \ \ \ :param\ family:\ address\ family\ (\`{}\`{}AF\_INET\`{}\`{}\ or\ \`{}\`{}AF\_INET6\`{}\`{})\ –\ automatically}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00466}00466\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ determined\ from\ \`{}\`{}local\_host\`{}\`{}\ if\ omitted}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00467}00467\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_host:\ IP\ address\ or\ host\ name\ of\ the\ local\ interface\ to\ bind\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00468}00468\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_port:\ local\ port\ to\ bind\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00469}00469\ \textcolor{stringliteral}{\ \ \ \ :param\ reuse\_port:\ \`{}\`{}True\`{}\`{}\ to\ allow\ multiple\ sockets\ to\ bind\ to\ the\ same}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00470}00470\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ address/port\ (not\ supported\ on\ Windows)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00471}00471\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ UDP\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00472}00472\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00473}00473\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00474}00474\ \ \ \ \ \textcolor{keywordflow}{if}\ family\ \textcolor{keywordflow}{is}\ AddressFamily.AF\_UNSPEC\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ local\_host:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00475}00475\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{'Either\ "{}family"{}\ or\ "{}local\_host"{}\ must\ be\ given'})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00476}00476\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00477}00477\ \ \ \ \ \textcolor{keywordflow}{if}\ local\_host:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ gai\_res\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ str(local\_host),}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \ \ \ \ local\_port,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ \ \ \ \ family=family,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \ \ \ \ type=socket.SOCK\_DGRAM,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ \ \ \ \ flags=socket.AI\_PASSIVE\ |\ socket.AI\_ADDRCONFIG,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00484}00484\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00485}00485\ \ \ \ \ \ \ \ \ family\ =\ cast(AnyIPAddressFamily,\ gai\_res[0][0])}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00486}00486\ \ \ \ \ \ \ \ \ local\_address\ =\ gai\_res[0][-\/1]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00487}00487\ \ \ \ \ \textcolor{keywordflow}{elif}\ family\ \textcolor{keywordflow}{is}\ AddressFamily.AF\_INET6:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ local\_address\ =\ (\textcolor{stringliteral}{"{}::"{}},\ 0)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00489}00489\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ local\_address\ =\ (\textcolor{stringliteral}{"{}0.0.0.0"{}},\ 0)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00491}00491\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00492}00492\ \ \ \ \ sock\ =\ await\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a09f90620bbd3fc699358a004cb81b100}{create\_udp\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ family,\ local\_address,\ \textcolor{keywordtype}{None},\ reuse\_port}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00494}00494\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00495}00495\ \ \ \ \ \textcolor{keywordflow}{return}\ cast(UDPSocket,\ sock)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00496}00496\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00497}00497\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00498}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1a098b380c5982ce746bad5f71bafbaa}{00498}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1a098b380c5982ce746bad5f71bafbaa}{create\_connected\_udp\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00499}00499\ \ \ \ \ remote\_host:\ IPAddressType,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00500}00500\ \ \ \ \ remote\_port:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00501}00501\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00502}00502\ \ \ \ \ family:\ AnyIPAddressFamily\ =\ AddressFamily.AF\_UNSPEC,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00503}00503\ \ \ \ \ local\_host:\ IPAddressType\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00504}00504\ \ \ \ \ local\_port:\ int\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00505}00505\ \ \ \ \ reuse\_port:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00506}00506\ )\ -\/>\ ConnectedUDPSocket:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00507}00507\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00508}00508\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ connected\ UDP\ socket.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00509}00509\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00510}00510\ \textcolor{stringliteral}{\ \ \ \ Connected\ UDP\ sockets\ can\ only\ communicate\ with\ the\ specified\ remote\ host/port,\ an}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00511}00511\ \textcolor{stringliteral}{\ \ \ \ any\ packets\ sent\ from\ other\ sources\ are\ dropped.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00512}00512\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00513}00513\ \textcolor{stringliteral}{\ \ \ \ :param\ remote\_host:\ remote\ host\ to\ set\ as\ the\ default\ target}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00514}00514\ \textcolor{stringliteral}{\ \ \ \ :param\ remote\_port:\ port\ on\ the\ remote\ host\ to\ set\ as\ the\ default\ target}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00515}00515\ \textcolor{stringliteral}{\ \ \ \ :param\ family:\ address\ family\ (\`{}\`{}AF\_INET\`{}\`{}\ or\ \`{}\`{}AF\_INET6\`{}\`{})\ –\ automatically}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00516}00516\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ determined\ from\ \`{}\`{}local\_host\`{}\`{}\ or\ \`{}\`{}remote\_host\`{}\`{}\ if\ omitted}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00517}00517\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_host:\ IP\ address\ or\ host\ name\ of\ the\ local\ interface\ to\ bind\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00518}00518\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_port:\ local\ port\ to\ bind\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00519}00519\ \textcolor{stringliteral}{\ \ \ \ :param\ reuse\_port:\ \`{}\`{}True\`{}\`{}\ to\ allow\ multiple\ sockets\ to\ bind\ to\ the\ same}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00520}00520\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ address/port\ (not\ supported\ on\ Windows)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00521}00521\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ connected\ UDP\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00522}00522\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00523}00523\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00524}00524\ \ \ \ \ local\_address\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00525}00525\ \ \ \ \ \textcolor{keywordflow}{if}\ local\_host:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ gai\_res\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00527}00527\ \ \ \ \ \ \ \ \ \ \ \ \ str(local\_host),}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00528}00528\ \ \ \ \ \ \ \ \ \ \ \ \ local\_port,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ \ \ \ \ family=family,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ type=socket.SOCK\_DGRAM,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ flags=socket.AI\_PASSIVE\ |\ socket.AI\_ADDRCONFIG,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ family\ =\ cast(AnyIPAddressFamily,\ gai\_res[0][0])}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ local\_address\ =\ gai\_res[0][-\/1]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00535}00535\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00536}00536\ \ \ \ \ gai\_res\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00537}00537\ \ \ \ \ \ \ \ \ str(remote\_host),\ remote\_port,\ family=family,\ type=socket.SOCK\_DGRAM}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00538}00538\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00539}00539\ \ \ \ \ family\ =\ cast(AnyIPAddressFamily,\ gai\_res[0][0])}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00540}00540\ \ \ \ \ remote\_address\ =\ gai\_res[0][-\/1]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00541}00541\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00542}00542\ \ \ \ \ sock\ =\ await\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a09f90620bbd3fc699358a004cb81b100}{create\_udp\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00543}00543\ \ \ \ \ \ \ \ \ family,\ local\_address,\ remote\_address,\ reuse\_port}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00544}00544\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00545}00545\ \ \ \ \ \textcolor{keywordflow}{return}\ cast(ConnectedUDPSocket,\ sock)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00546}00546\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00547}00547\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00548}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a2c9d8f216e5ddcc474d452534e32db3d}{00548}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a2c9d8f216e5ddcc474d452534e32db3d}{create\_unix\_datagram\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00549}00549\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00550}00550\ \ \ \ \ local\_path:\ None\ |\ str\ |\ bytes\ |\ PathLike[Any]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00551}00551\ \ \ \ \ local\_mode:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00552}00552\ )\ -\/>\ UNIXDatagramSocket:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00553}00553\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00554}00554\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ UNIX\ datagram\ socket.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00555}00555\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00556}00556\ \textcolor{stringliteral}{\ \ \ \ Not\ available\ on\ Windows.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00557}00557\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00558}00558\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}local\_path\`{}\`{}\ has\ been\ given,\ the\ socket\ will\ be\ bound\ to\ this\ path,\ making\ this}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00559}00559\ \textcolor{stringliteral}{\ \ \ \ socket\ suitable\ for\ receiving\ datagrams\ from\ other\ processes.\ Other\ processes\ can}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00560}00560\ \textcolor{stringliteral}{\ \ \ \ send\ datagrams\ to\ this\ socket\ only\ if\ \`{}\`{}local\_path\`{}\`{}\ is\ set.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00561}00561\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00562}00562\ \textcolor{stringliteral}{\ \ \ \ If\ a\ socket\ already\ exists\ on\ the\ file\ system\ in\ the\ \`{}\`{}local\_path\`{}\`{},\ it\ will\ be}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00563}00563\ \textcolor{stringliteral}{\ \ \ \ removed\ first.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00564}00564\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00565}00565\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_path:\ the\ path\ on\ which\ to\ bind\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00566}00566\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_mode:\ permissions\ to\ set\ on\ the\ local\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00567}00567\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ UNIX\ datagram\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00568}00568\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00569}00569\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00570}00570\ \ \ \ \ raw\_socket\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae90559545657c2121a3bbf0f9489e9a6}{setup\_unix\_local\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00571}00571\ \ \ \ \ \ \ \ \ local\_path,\ local\_mode,\ socket.SOCK\_DGRAM}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00572}00572\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00573}00573\ \ \ \ \ \textcolor{keywordflow}{return}\ await\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a2c9d8f216e5ddcc474d452534e32db3d}{create\_unix\_datagram\_socket}}(raw\_socket,\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00574}00574\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00575}00575\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00576}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a7ca55d520cd2ccdb7966f661cb94c608}{00576}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a7ca55d520cd2ccdb7966f661cb94c608}{create\_connected\_unix\_datagram\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00577}00577\ \ \ \ \ remote\_path:\ str\ |\ bytes\ |\ PathLike[Any],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00578}00578\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00579}00579\ \ \ \ \ local\_path:\ \textcolor{keywordtype}{None}\ |\ str\ |\ bytes\ |\ PathLike[Any]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00580}00580\ \ \ \ \ local\_mode:\ int\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00581}00581\ )\ -\/>\ ConnectedUNIXDatagramSocket:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00582}00582\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00583}00583\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ connected\ UNIX\ datagram\ socket.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00584}00584\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00585}00585\ \textcolor{stringliteral}{\ \ \ \ Connected\ datagram\ sockets\ can\ only\ communicate\ with\ the\ specified\ remote\ path.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00586}00586\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00587}00587\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}local\_path\`{}\`{}\ has\ been\ given,\ the\ socket\ will\ be\ bound\ to\ this\ path,\ making}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00588}00588\ \textcolor{stringliteral}{\ \ \ \ this\ socket\ suitable\ for\ receiving\ datagrams\ from\ other\ processes.\ Other\ processes}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00589}00589\ \textcolor{stringliteral}{\ \ \ \ can\ send\ datagrams\ to\ this\ socket\ only\ if\ \`{}\`{}local\_path\`{}\`{}\ is\ set.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00590}00590\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00591}00591\ \textcolor{stringliteral}{\ \ \ \ If\ a\ socket\ already\ exists\ on\ the\ file\ system\ in\ the\ \`{}\`{}local\_path\`{}\`{},\ it\ will\ be}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00592}00592\ \textcolor{stringliteral}{\ \ \ \ removed\ first.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00593}00593\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00594}00594\ \textcolor{stringliteral}{\ \ \ \ :param\ remote\_path:\ the\ path\ to\ set\ as\ the\ default\ target}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00595}00595\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_path:\ the\ path\ on\ which\ to\ bind\ to}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00596}00596\ \textcolor{stringliteral}{\ \ \ \ :param\ local\_mode:\ permissions\ to\ set\ on\ the\ local\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00597}00597\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ connected\ UNIX\ datagram\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00598}00598\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00599}00599\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00600}00600\ \ \ \ \ remote\_path\ =\ os.fspath(remote\_path)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00601}00601\ \ \ \ \ raw\_socket\ =\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae90559545657c2121a3bbf0f9489e9a6}{setup\_unix\_local\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00602}00602\ \ \ \ \ \ \ \ \ local\_path,\ local\_mode,\ socket.SOCK\_DGRAM}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00603}00603\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00604}00604\ \ \ \ \ \textcolor{keywordflow}{return}\ await\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a2c9d8f216e5ddcc474d452534e32db3d}{create\_unix\_datagram\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00605}00605\ \ \ \ \ \ \ \ \ raw\_socket,\ remote\_path}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00606}00606\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00607}00607\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00608}00608\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00609}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{00609}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00610}00610\ \ \ \ \ host:\ bytes\ |\ str\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00611}00611\ \ \ \ \ port:\ str\ |\ int\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00612}00612\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00613}00613\ \ \ \ \ family:\ int\ |\ AddressFamily\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00614}00614\ \ \ \ \ type:\ int\ |\ SocketKind\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00615}00615\ \ \ \ \ proto:\ int\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00616}00616\ \ \ \ \ flags:\ int\ =\ 0,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00617}00617\ )\ -\/>\ list[tuple[AddressFamily,\ SocketKind,\ int,\ str,\ tuple[str,\ int]]]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00618}00618\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00619}00619\ \textcolor{stringliteral}{\ \ \ \ Look\ up\ a\ numeric\ IP\ address\ given\ a\ host\ name.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00620}00620\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00621}00621\ \textcolor{stringliteral}{\ \ \ \ Internationalized\ domain\ names\ are\ translated\ according\ to\ the\ (non-\/transitional)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00622}00622\ \textcolor{stringliteral}{\ \ \ \ IDNA\ 2008\ standard.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00623}00623\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00624}00624\ \textcolor{stringliteral}{\ \ \ \ ..\ note::\ 4-\/tuple\ IPv6\ socket\ addresses\ are\ automatically\ converted\ to\ 2-\/tuples\ of}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00625}00625\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ (host,\ port),\ unlike\ what\ :func:\`{}socket.getaddrinfo\`{}\ does.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00626}00626\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00627}00627\ \textcolor{stringliteral}{\ \ \ \ :param\ host:\ host\ name}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00628}00628\ \textcolor{stringliteral}{\ \ \ \ :param\ port:\ port\ number}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00629}00629\ \textcolor{stringliteral}{\ \ \ \ :param\ family:\ socket\ family\ (\`{}'AF\_INET\`{}\`{},\ ...)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00630}00630\ \textcolor{stringliteral}{\ \ \ \ :param\ type:\ socket\ type\ (\`{}\`{}SOCK\_STREAM\`{}\`{},\ ...)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00631}00631\ \textcolor{stringliteral}{\ \ \ \ :param\ proto:\ protocol\ number}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00632}00632\ \textcolor{stringliteral}{\ \ \ \ :param\ flags:\ flags\ to\ pass\ to\ upstream\ \`{}\`{}getaddrinfo()\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00633}00633\ \textcolor{stringliteral}{\ \ \ \ :return:\ list\ of\ tuples\ containing\ (family,\ type,\ proto,\ canonname,\ sockaddr)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00634}00634\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00635}00635\ \textcolor{stringliteral}{\ \ \ \ ..\ seealso::\ :func:\`{}socket.getaddrinfo\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00636}00636\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00637}00637\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00638}00638\ \ \ \ \ \textcolor{comment}{\#\ Handle\ unicode\ hostnames}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00639}00639\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(host,\ str):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00641}00641\ \ \ \ \ \ \ \ \ \ \ \ \ encoded\_host:\ bytes\ |\ \textcolor{keywordtype}{None}\ =\ host.encode(\textcolor{stringliteral}{"{}ascii"{}})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00642}00642\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ UnicodeEncodeError:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00643}00643\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ idna}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00644}00644\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ \ \ \ \ encoded\_host\ =\ idna.encode(host,\ uts46=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00646}00646\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00647}00647\ \ \ \ \ \ \ \ \ encoded\_host\ =\ host}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00648}00648\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00649}00649\ \ \ \ \ gai\_res\ =\ await\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a1ed2b1f0bfd4029d3c0fb1a1a3f8af90}{getaddrinfo}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00650}00650\ \ \ \ \ \ \ \ \ encoded\_host,\ port,\ family=family,\ type=type,\ proto=proto,\ flags=flags}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00651}00651\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00652}00652\ \ \ \ \ \textcolor{keywordflow}{return}\ [}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00653}00653\ \ \ \ \ \ \ \ \ (family,\ type,\ proto,\ canonname,\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a8b0372ec6f0bd33dad6744da630812af}{convert\_ipv6\_sockaddr}}(sockaddr))}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00654}00654\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ family,\ type,\ proto,\ canonname,\ sockaddr\ \textcolor{keywordflow}{in}\ gai\_res}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00655}00655\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ filter\ out\ IPv6\ results\ when\ IPv6\ is\ disabled}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00656}00656\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(sockaddr[0],\ int)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00657}00657\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00658}00658\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00659}00659\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00660}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_adf68459c876e0e3529aedc964029fb0c}{00660}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_adf68459c876e0e3529aedc964029fb0c}{getnameinfo}}(sockaddr:\ IPSockAddrType,\ flags:\ int\ =\ 0)\ -\/>\ Awaitable[tuple[str,\ str]]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00661}00661\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00662}00662\ \textcolor{stringliteral}{\ \ \ \ Look\ up\ the\ host\ name\ of\ an\ IP\ address.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00663}00663\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00664}00664\ \textcolor{stringliteral}{\ \ \ \ :param\ sockaddr:\ socket\ address\ (e.g.\ (ipaddress,\ port)\ for\ IPv4)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00665}00665\ \textcolor{stringliteral}{\ \ \ \ :param\ flags:\ flags\ to\ pass\ to\ upstream\ \`{}\`{}getnameinfo()\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00666}00666\ \textcolor{stringliteral}{\ \ \ \ :return:\ a\ tuple\ of\ (host\ name,\ service\ name)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00667}00667\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00668}00668\ \textcolor{stringliteral}{\ \ \ \ ..\ seealso::\ :func:\`{}socket.getnameinfo\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00669}00669\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00670}00670\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00671}00671\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_adf68459c876e0e3529aedc964029fb0c}{getnameinfo}}(sockaddr,\ flags)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00672}00672\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00673}00673\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00674}00674\ \textcolor{preprocessor}{@deprecated("{}This\ function\ is\ deprecated;\ use\ \`{}wait\_readable`\ instead"{})}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00675}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ab871f43a6d8ea474ad7b049026860a68}{00675}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ab871f43a6d8ea474ad7b049026860a68}{wait\_socket\_readable}}(sock:\ socket.socket)\ -\/>\ Awaitable[\textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00676}00676\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00677}00677\ \textcolor{stringliteral}{\ \ \ \ ..\ deprecated::\ 4.7.0}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00678}00678\ \textcolor{stringliteral}{\ \ \ \ \ \ \ Use\ :func:\`{}wait\_readable\`{}\ instead.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00679}00679\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00680}00680\ \textcolor{stringliteral}{\ \ \ \ Wait\ until\ the\ given\ socket\ has\ data\ to\ be\ read.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00681}00681\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00682}00682\ \textcolor{stringliteral}{\ \ \ \ ..\ warning::\ Only\ use\ this\ on\ raw\ sockets\ that\ have\ not\ been\ wrapped\ by\ any\ higher}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00683}00683\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ level\ constructs\ like\ socket\ streams!}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00684}00684\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00685}00685\ \textcolor{stringliteral}{\ \ \ \ :param\ sock:\ a\ socket\ object}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00686}00686\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.ClosedResourceError:\ if\ the\ socket\ was\ closed\ while\ waiting\ for\ the}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00687}00687\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ socket\ to\ become\ readable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00688}00688\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.BusyResourceError:\ if\ another\ task\ is\ already\ waiting\ for\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00689}00689\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ to\ become\ readable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00690}00690\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00691}00691\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00692}00692\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a194cbde900f281e9c469015ad1d842f4}{wait\_readable}}(sock.fileno())}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00693}00693\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00694}00694\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00695}00695\ \textcolor{preprocessor}{@deprecated("{}This\ function\ is\ deprecated;\ use\ \`{}wait\_writable`\ instead"{})}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00696}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a10ba2d7809b0840b2e40ef52a64b19e2}{00696}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a10ba2d7809b0840b2e40ef52a64b19e2}{wait\_socket\_writable}}(sock:\ socket.socket)\ -\/>\ Awaitable[\textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00697}00697\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00698}00698\ \textcolor{stringliteral}{\ \ \ \ ..\ deprecated::\ 4.7.0}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00699}00699\ \textcolor{stringliteral}{\ \ \ \ \ \ \ Use\ :func:\`{}wait\_writable\`{}\ instead.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00700}00700\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00701}00701\ \textcolor{stringliteral}{\ \ \ \ Wait\ until\ the\ given\ socket\ can\ be\ written\ to.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00702}00702\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00703}00703\ \textcolor{stringliteral}{\ \ \ \ This\ does\ **NOT**\ work\ on\ Windows\ when\ using\ the\ asyncio\ backend\ with\ a\ proactor}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00704}00704\ \textcolor{stringliteral}{\ \ \ \ event\ loop\ (default\ on\ py3.8+).}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00705}00705\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00706}00706\ \textcolor{stringliteral}{\ \ \ \ ..\ warning::\ Only\ use\ this\ on\ raw\ sockets\ that\ have\ not\ been\ wrapped\ by\ any\ higher}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00707}00707\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ level\ constructs\ like\ socket\ streams!}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00708}00708\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00709}00709\ \textcolor{stringliteral}{\ \ \ \ :param\ sock:\ a\ socket\ object}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00710}00710\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.ClosedResourceError:\ if\ the\ socket\ was\ closed\ while\ waiting\ for\ the}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00711}00711\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ socket\ to\ become\ writable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00712}00712\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.BusyResourceError:\ if\ another\ task\ is\ already\ waiting\ for\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00713}00713\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ to\ become\ writable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00714}00714\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00715}00715\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00716}00716\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae66d204f131c5e3f79d87748ec4c3263}{wait\_writable}}(sock.fileno())}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00717}00717\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00718}00718\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00719}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a194cbde900f281e9c469015ad1d842f4}{00719}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a194cbde900f281e9c469015ad1d842f4}{wait\_readable}}(obj:\ FileDescriptorLike)\ -\/>\ Awaitable[\textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00720}00720\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00721}00721\ \textcolor{stringliteral}{\ \ \ \ Wait\ until\ the\ given\ object\ has\ data\ to\ be\ read.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00722}00722\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00723}00723\ \textcolor{stringliteral}{\ \ \ \ On\ Unix\ systems,\ \`{}\`{}obj\`{}\`{}\ must\ either\ be\ an\ integer\ file\ descriptor,\ or\ else\ an}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00724}00724\ \textcolor{stringliteral}{\ \ \ \ object\ with\ a\ \`{}\`{}.fileno()\`{}\`{}\ method\ which\ returns\ an\ integer\ file\ descriptor.\ Any}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00725}00725\ \textcolor{stringliteral}{\ \ \ \ kind\ of\ file\ descriptor\ can\ be\ passed,\ though\ the\ exact\ semantics\ will\ depend\ on}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00726}00726\ \textcolor{stringliteral}{\ \ \ \ your\ kernel.\ For\ example,\ this\ probably\ won't\ do\ anything\ useful\ for\ on-\/disk\ files.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00727}00727\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00728}00728\ \textcolor{stringliteral}{\ \ \ \ On\ Windows\ systems,\ \`{}\`{}obj\`{}\`{}\ must\ either\ be\ an\ integer\ \`{}\`{}SOCKET\`{}\`{}\ handle,\ or\ else\ an}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00729}00729\ \textcolor{stringliteral}{\ \ \ \ object\ with\ a\ \`{}\`{}.fileno()\`{}\`{}\ method\ which\ returns\ an\ integer\ \`{}\`{}SOCKET\`{}\`{}\ handle.\ File}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00730}00730\ \textcolor{stringliteral}{\ \ \ \ descriptors\ aren't\ supported,\ and\ neither\ are\ handles\ that\ refer\ to\ anything\ besides}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00731}00731\ \textcolor{stringliteral}{\ \ \ \ a\ \`{}\`{}SOCKET\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00732}00732\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00733}00733\ \textcolor{stringliteral}{\ \ \ \ On\ backends\ where\ this\ functionality\ is\ not\ natively\ provided\ (asyncio}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00734}00734\ \textcolor{stringliteral}{\ \ \ \ \`{}\`{}ProactorEventLoop\`{}\`{}\ on\ Windows),\ it\ is\ provided\ using\ a\ separate\ selector\ thread}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00735}00735\ \textcolor{stringliteral}{\ \ \ \ which\ is\ set\ to\ shut\ down\ when\ the\ interpreter\ shuts\ down.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00736}00736\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00737}00737\ \textcolor{stringliteral}{\ \ \ \ ..\ warning::\ Don't\ use\ this\ on\ raw\ sockets\ that\ have\ been\ wrapped\ by\ any\ higher}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00738}00738\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ level\ constructs\ like\ socket\ streams!}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00739}00739\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00740}00740\ \textcolor{stringliteral}{\ \ \ \ :param\ obj:\ an\ object\ with\ a\ \`{}\`{}.fileno()\`{}\`{}\ method\ or\ an\ integer\ handle}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00741}00741\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.ClosedResourceError:\ if\ the\ object\ was\ closed\ while\ waiting\ for\ the}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00742}00742\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ object\ to\ become\ readable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00743}00743\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.BusyResourceError:\ if\ another\ task\ is\ already\ waiting\ for\ the\ object}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00744}00744\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ to\ become\ readable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00745}00745\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00746}00746\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00747}00747\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a194cbde900f281e9c469015ad1d842f4}{wait\_readable}}(obj)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00748}00748\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00749}00749\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00750}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae66d204f131c5e3f79d87748ec4c3263}{00750}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae66d204f131c5e3f79d87748ec4c3263}{wait\_writable}}(obj:\ FileDescriptorLike)\ -\/>\ Awaitable[\textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00751}00751\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00752}00752\ \textcolor{stringliteral}{\ \ \ \ Wait\ until\ the\ given\ object\ can\ be\ written\ to.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00753}00753\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00754}00754\ \textcolor{stringliteral}{\ \ \ \ :param\ obj:\ an\ object\ with\ a\ \`{}\`{}.fileno()\`{}\`{}\ method\ or\ an\ integer\ handle}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00755}00755\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.ClosedResourceError:\ if\ the\ object\ was\ closed\ while\ waiting\ for\ the}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00756}00756\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ object\ to\ become\ writable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00757}00757\ \textcolor{stringliteral}{\ \ \ \ :raises\ \string~anyio.BusyResourceError:\ if\ another\ task\ is\ already\ waiting\ for\ the\ object}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00758}00758\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ to\ become\ writable}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00759}00759\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00760}00760\ \textcolor{stringliteral}{\ \ \ \ ..\ seealso::\ See\ the\ documentation\ of\ :func:\`{}wait\_readable\`{}\ for\ the\ definition\ of}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00761}00761\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \`{}\`{}obj\`{}\`{}\ and\ notes\ on\ backend\ compatibility.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00762}00762\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00763}00763\ \textcolor{stringliteral}{\ \ \ \ ..\ warning::\ Don't\ use\ this\ on\ raw\ sockets\ that\ have\ been\ wrapped\ by\ any\ higher}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00764}00764\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ level\ constructs\ like\ socket\ streams!}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00765}00765\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00766}00766\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00767}00767\ \ \ \ \ \textcolor{keywordflow}{return}\ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae66d204f131c5e3f79d87748ec4c3263}{wait\_writable}}(obj)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00768}00768\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00769}00769\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00770}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ac718a67bf6e95c416f4330c73516bcc3}{00770}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ac718a67bf6e95c416f4330c73516bcc3}{notify\_closing}}(obj:\ FileDescriptorLike)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00771}00771\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00772}00772\ \textcolor{stringliteral}{\ \ \ \ Call\ this\ before\ closing\ a\ file\ descriptor\ (on\ Unix)\ or\ socket\ (on}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00773}00773\ \textcolor{stringliteral}{\ \ \ \ Windows).\ This\ will\ cause\ any\ \`{}wait\_readable\`{}\ or\ \`{}wait\_writable\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00774}00774\ \textcolor{stringliteral}{\ \ \ \ calls\ on\ the\ given\ object\ to\ immediately\ wake\ up\ and\ raise}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00775}00775\ \textcolor{stringliteral}{\ \ \ \ \`{}\string~anyio.ClosedResourceError\`{}.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00776}00776\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00777}00777\ \textcolor{stringliteral}{\ \ \ \ This\ doesn't\ actually\ close\ the\ object\ –\ you\ still\ have\ to\ do\ that}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00778}00778\ \textcolor{stringliteral}{\ \ \ \ yourself\ afterwards.\ Also,\ you\ want\ to\ be\ careful\ to\ make\ sure\ no}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00779}00779\ \textcolor{stringliteral}{\ \ \ \ new\ tasks\ start\ waiting\ on\ the\ object\ in\ between\ when\ you\ call\ this}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00780}00780\ \textcolor{stringliteral}{\ \ \ \ and\ when\ it's\ actually\ closed.\ So\ to\ close\ something\ properly,\ you}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00781}00781\ \textcolor{stringliteral}{\ \ \ \ usually\ want\ to\ do\ these\ steps\ in\ order:}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00782}00782\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00783}00783\ \textcolor{stringliteral}{\ \ \ \ 1.\ Explicitly\ mark\ the\ object\ as\ closed,\ so\ that\ any\ new\ attempts}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00784}00784\ \textcolor{stringliteral}{\ \ \ \ \ \ \ to\ use\ it\ will\ abort\ before\ they\ start.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00785}00785\ \textcolor{stringliteral}{\ \ \ \ 2.\ Call\ \`{}notify\_closing\`{}\ to\ wake\ up\ any\ already-\/existing\ users.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00786}00786\ \textcolor{stringliteral}{\ \ \ \ 3.\ Actually\ close\ the\ object.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00787}00787\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00788}00788\ \textcolor{stringliteral}{\ \ \ \ It's\ also\ possible\ to\ do\ them\ in\ a\ different\ order\ if\ that's\ more}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00789}00789\ \textcolor{stringliteral}{\ \ \ \ convenient,\ *but\ only\ if*\ you\ make\ sure\ not\ to\ have\ any\ checkpoints\ in}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00790}00790\ \textcolor{stringliteral}{\ \ \ \ between\ the\ steps.\ This\ way\ they\ all\ happen\ in\ a\ single\ atomic}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00791}00791\ \textcolor{stringliteral}{\ \ \ \ step,\ so\ other\ tasks\ won't\ be\ able\ to\ tell\ what\ order\ they\ happened}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00792}00792\ \textcolor{stringliteral}{\ \ \ \ in\ anyway.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00793}00793\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00794}00794\ \textcolor{stringliteral}{\ \ \ \ :param\ obj:\ an\ object\ with\ a\ \`{}\`{}.fileno()\`{}\`{}\ method\ or\ an\ integer\ handle}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00795}00795\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00796}00796\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00797}00797\ \ \ \ \ get\_async\_backend().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ac718a67bf6e95c416f4330c73516bcc3}{notify\_closing}}(obj)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00798}00798\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00799}00799\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00800}00800\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00801}00801\ \textcolor{comment}{\#\ Private\ API}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00802}00802\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00803}00803\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00804}00804\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00805}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a8b0372ec6f0bd33dad6744da630812af}{00805}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a8b0372ec6f0bd33dad6744da630812af}{convert\_ipv6\_sockaddr}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00806}00806\ \ \ \ \ sockaddr:\ tuple[str,\ int,\ int,\ int]\ |\ tuple[str,\ int],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00807}00807\ )\ -\/>\ tuple[str,\ int]:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00808}00808\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00809}00809\ \textcolor{stringliteral}{\ \ \ \ Convert\ a\ 4-\/tuple\ IPv6\ socket\ address\ to\ a\ 2-\/tuple\ (address,\ port)\ format.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00810}00810\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00811}00811\ \textcolor{stringliteral}{\ \ \ \ If\ the\ scope\ ID\ is\ nonzero,\ it\ is\ added\ to\ the\ address,\ separated\ with\ \`{}\`{}\%\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00812}00812\ \textcolor{stringliteral}{\ \ \ \ Otherwise\ the\ flow\ id\ and\ scope\ id\ are\ simply\ cut\ off\ from\ the\ tuple.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00813}00813\ \textcolor{stringliteral}{\ \ \ \ Any\ other\ kinds\ of\ socket\ addresses\ are\ returned\ as-\/is.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00814}00814\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00815}00815\ \textcolor{stringliteral}{\ \ \ \ :param\ sockaddr:\ the\ result\ of\ :meth:\`{}\string~socket.socket.getsockname\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00816}00816\ \textcolor{stringliteral}{\ \ \ \ :return:\ the\ converted\ socket\ address}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00817}00817\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00818}00818\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00819}00819\ \ \ \ \ \textcolor{comment}{\#\ This\ is\ more\ complicated\ than\ it\ should\ be\ because\ of\ MyPy}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00820}00820\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(sockaddr,\ tuple)\ \textcolor{keywordflow}{and}\ len(sockaddr)\ ==\ 4:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00821}00821\ \ \ \ \ \ \ \ \ host,\ port,\ flowinfo,\ scope\_id\ =\ sockaddr}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00822}00822\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ scope\_id:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00823}00823\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ PyPy\ (as\ of\ v7.3.11)\ leaves\ the\ interface\ name\ in\ the\ result,\ so}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00824}00824\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ discard\ it\ and\ only\ get\ the\ scope\ ID\ from\ the\ end}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00825}00825\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (https://foss.heptapod.net/pypy/pypy/-\//issues/3938)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00826}00826\ \ \ \ \ \ \ \ \ \ \ \ \ host\ =\ host.split(\textcolor{stringliteral}{"{}\%"{}})[0]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00827}00827\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00828}00828\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Add\ scope\_id\ to\ the\ address}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00829}00829\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{host\}\%\{scope\_id\}"{}},\ port}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00830}00830\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00831}00831\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ host,\ port}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00832}00832\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00833}00833\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sockaddr}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00834}00834\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00835}00835\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00836}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae90559545657c2121a3bbf0f9489e9a6}{00836}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae90559545657c2121a3bbf0f9489e9a6}{setup\_unix\_local\_socket}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00837}00837\ \ \ \ \ path:\ None\ |\ str\ |\ bytes\ |\ PathLike[Any],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00838}00838\ \ \ \ \ mode:\ int\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00839}00839\ \ \ \ \ socktype:\ int,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00840}00840\ )\ -\/>\ socket.socket:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00841}00841\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00842}00842\ \textcolor{stringliteral}{\ \ \ \ Create\ a\ UNIX\ local\ socket\ object,\ deleting\ the\ socket\ at\ the\ given\ path\ if\ it}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00843}00843\ \textcolor{stringliteral}{\ \ \ \ exists.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00844}00844\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00845}00845\ \textcolor{stringliteral}{\ \ \ \ Not\ available\ on\ Windows.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00846}00846\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00847}00847\ \textcolor{stringliteral}{\ \ \ \ :param\ path:\ path\ of\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00848}00848\ \textcolor{stringliteral}{\ \ \ \ :param\ mode:\ permissions\ to\ set\ on\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00849}00849\ \textcolor{stringliteral}{\ \ \ \ :param\ socktype:\ socket.SOCK\_STREAM\ or\ socket.SOCK\_DGRAM}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00850}00850\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00851}00851\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00852}00852\ \ \ \ \ path\_str:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00853}00853\ \ \ \ \ \textcolor{keywordflow}{if}\ path\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00854}00854\ \ \ \ \ \ \ \ \ path\_str\ =\ os.fsdecode(path)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00855}00855\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00856}00856\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Linux\ abstract\ namespace\ sockets\ aren't\ backed\ by\ a\ concrete\ file\ so\ skip\ stat\ call}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00857}00857\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ path\_str.startswith(\textcolor{stringliteral}{"{}\(\backslash\)0"{}}):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00858}00858\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Copied\ from\ pathlib...}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00859}00859\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00860}00860\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stat\_result\ =\ os.stat(path)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00861}00861\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00862}00862\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ e.errno\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ (}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00863}00863\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errno.ENOENT,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00864}00864\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errno.ENOTDIR,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00865}00865\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errno.EBADF,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00866}00866\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errno.ELOOP,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00867}00867\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00868}00868\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00869}00869\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00870}00870\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ stat.S\_ISSOCK(stat\_result.st\_mode):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00871}00871\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.unlink(path)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00872}00872\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00873}00873\ \ \ \ \ \ \ \ \ path\_str\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00874}00874\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00875}00875\ \ \ \ \ raw\_socket\ =\ socket.socket(socket.AF\_UNIX,\ socktype)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00876}00876\ \ \ \ \ raw\_socket.setblocking(\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00877}00877\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00878}00878\ \ \ \ \ \textcolor{keywordflow}{if}\ path\_str\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00879}00879\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00880}00880\ \ \ \ \ \ \ \ \ \ \ \ \ await\ to\_thread.run\_sync(raw\_socket.bind,\ path\_str,\ abandon\_on\_cancel=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00881}00881\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ mode\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00882}00882\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ to\_thread.run\_sync(chmod,\ path\_str,\ mode,\ abandon\_on\_cancel=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00883}00883\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ BaseException:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00884}00884\ \ \ \ \ \ \ \ \ \ \ \ \ raw\_socket.close()}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00885}00885\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00886}00886\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00887}00887\ \ \ \ \ \textcolor{keywordflow}{return}\ raw\_socket}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00888}00888\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00889}00889\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00890}00890\ \textcolor{preprocessor}{@dataclass}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00891}\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable}{00891}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable}{TCPConnectable}}(\mbox{\hyperlink{classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable}{ByteStreamConnectable}}):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00892}00892\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00893}00893\ \textcolor{stringliteral}{\ \ \ \ Connects\ to\ a\ TCP\ server\ at\ the\ given\ host\ and\ port.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00894}00894\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00895}00895\ \textcolor{stringliteral}{\ \ \ \ :param\ host:\ host\ name\ or\ IP\ address\ of\ the\ server}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00896}00896\ \textcolor{stringliteral}{\ \ \ \ :param\ port:\ TCP\ port\ number\ of\ the\ server}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00897}00897\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00898}00898\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00899}\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_ae05da8ac29c4e9c31c1738cf963f9282}{00899}}\ \ \ \ \ host:\ str\ |\ IPv4Address\ |\ IPv6Address}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00900}00900\ \ \ \ \ port:\ int}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00901}00901\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00902}00902\ \ \ \ \ \textcolor{keyword}{def\ }\_\_post\_init\_\_(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00903}00903\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_af343e6b79fb60c57ca46a7354d078832}{port}}\ <\ 1\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_af343e6b79fb60c57ca46a7354d078832}{port}}\ >\ 65535:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00904}00904\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{"{}TCP\ port\ number\ out\ of\ range"{}})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00905}00905\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00906}00906\ \ \ \ \ \textcolor{preprocessor}{@override}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00907}\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_a854cc5149ff738a62e4bf283f2c01e07}{00907}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_a854cc5149ff738a62e4bf283f2c01e07}{connect}}(self)\ -\/>\ SocketStream:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00908}00908\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00909}\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_af343e6b79fb60c57ca46a7354d078832}{00909}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_aaf727985d85c7457110072445abb8f76}{connect\_tcp}}(self.\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_ae05da8ac29c4e9c31c1738cf963f9282}{host}},\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable_af343e6b79fb60c57ca46a7354d078832}{port}})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00910}00910\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00911}00911\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classanyio_1_1__core_1_1__exceptions_1_1_connection_failed}{ConnectionFailed}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00912}00912\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}error\ connecting\ to\ \{self.host\}:\{self.port\}:\ \{exc\}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00913}00913\ \ \ \ \ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{from}\ exc}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00914}00914\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00915}00915\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00916}00916\ \textcolor{preprocessor}{@dataclass}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00917}\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_u_n_i_x_connectable}{00917}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_u_n_i_x_connectable}{UNIXConnectable}}(\mbox{\hyperlink{classanyio_1_1abc_1_1__streams_1_1_byte_stream_connectable}{ByteStreamConnectable}}):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00918}00918\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00919}00919\ \textcolor{stringliteral}{\ \ \ \ Connects\ to\ a\ UNIX\ domain\ socket\ at\ the\ given\ path.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00920}00920\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00921}00921\ \textcolor{stringliteral}{\ \ \ \ :param\ path:\ the\ file\ system\ path\ of\ the\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00922}00922\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00923}00923\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00924}\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_u_n_i_x_connectable_a6fe899ca4a977da0ad84fc79c1cd1f07}{00924}}\ \ \ \ \ path:\ str\ |\ bytes\ |\ PathLike[str]\ |\ PathLike[bytes]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00925}00925\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00926}00926\ \ \ \ \ \textcolor{preprocessor}{@override}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00927}\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_u_n_i_x_connectable_a442d97b961e69e28b3ef4bc059c89cc2}{00927}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_u_n_i_x_connectable_a442d97b961e69e28b3ef4bc059c89cc2}{connect}}(self)\ -\/>\ UNIXSocketStream:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00928}00928\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00929}00929\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_ae86a1e48ee0ae4cbbec344e0f9fe469d}{connect\_unix}}(self.\mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_u_n_i_x_connectable_a6fe899ca4a977da0ad84fc79c1cd1f07}{path}})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00930}00930\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00931}00931\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classanyio_1_1__core_1_1__exceptions_1_1_connection_failed}{ConnectionFailed}}(f\textcolor{stringliteral}{"{}error\ connecting\ to\ \{self.path!r\}:\ \{exc\}"{}})\ \textcolor{keyword}{from}\ exc}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00932}00932\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00933}00933\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00934}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a4b907480fa55c4663e4b02537d0499f6}{00934}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__sockets_a4b907480fa55c4663e4b02537d0499f6}{as\_connectable}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00935}00935\ \ \ \ \ remote:\ ByteStreamConnectable}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00936}00936\ \ \ \ \ |\ tuple[str\ |\ IPv4Address\ |\ IPv6Address,\ int]}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00937}00937\ \ \ \ \ |\ str}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00938}00938\ \ \ \ \ |\ bytes}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00939}00939\ \ \ \ \ |\ PathLike[str],}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00940}00940\ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00941}00941\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00942}00942\ \ \ \ \ tls:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00943}00943\ \ \ \ \ ssl\_context:\ ssl.SSLContext\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00944}00944\ \ \ \ \ tls\_hostname:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00945}00945\ \ \ \ \ tls\_standard\_compatible:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00946}00946\ )\ -\/>\ ByteStreamConnectable:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00947}00947\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00948}00948\ \textcolor{stringliteral}{\ \ \ \ Return\ a\ byte\ stream\ connectable\ from\ the\ given\ object.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00949}00949\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00950}00950\ \textcolor{stringliteral}{\ \ \ \ If\ a\ bytestream\ connectable\ is\ given,\ it\ is\ returned\ unchanged.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00951}00951\ \textcolor{stringliteral}{\ \ \ \ If\ a\ tuple\ of\ (host,\ port)\ is\ given,\ a\ TCP\ connectable\ is\ returned.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00952}00952\ \textcolor{stringliteral}{\ \ \ \ If\ a\ string\ or\ bytes\ path\ is\ given,\ a\ UNIX\ connectable\ is\ returned.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00953}00953\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00954}00954\ \textcolor{stringliteral}{\ \ \ \ If\ \`{}\`{}tls=True\`{}\`{},\ the\ connectable\ will\ be\ wrapped\ in\ a}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00955}00955\ \textcolor{stringliteral}{\ \ \ \ :class:\`{}\string~.streams.tls.TLSConnectable\`{}.}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00956}00956\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00957}00957\ \textcolor{stringliteral}{\ \ \ \ :param\ remote:\ a\ connectable,\ a\ tuple\ of\ (host,\ port)\ or\ a\ path\ to\ a\ UNIX\ socket}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00958}00958\ \textcolor{stringliteral}{\ \ \ \ :param\ tls:\ if\ \`{}\`{}True\`{}\`{},\ wrap\ the\ plaintext\ connectable\ in\ a}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00959}00959\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :class:\`{}\string~.streams.tls.TLSConnectable\`{},\ using\ the\ provided\ TLS\ settings)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00960}00960\ \textcolor{stringliteral}{\ \ \ \ :param\ ssl\_context:\ if\ \`{}\`{}tls=True\`{}\`{},\ the\ SSLContext\ object\ to\ use\ \ (if\ not\ provided,}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00961}00961\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ a\ secure\ default\ will\ be\ created)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00962}00962\ \textcolor{stringliteral}{\ \ \ \ :param\ tls\_hostname:\ if\ \`{}\`{}tls=True\`{}\`{},\ host\ name\ of\ the\ server\ to\ use\ for\ checking}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00963}00963\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ the\ server\ certificate\ (defaults\ to\ the\ host\ portion\ of\ the\ address\ for\ TCP}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00964}00964\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ connectables)}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00965}00965\ \textcolor{stringliteral}{\ \ \ \ :param\ tls\_standard\_compatible:\ if\ \`{}\`{}False\`{}\`{}\ and\ \`{}\`{}tls=True\`{}\`{},\ makes\ the\ TLS\ stream}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00966}00966\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ skip\ the\ closing\ handshake\ when\ closing\ the\ connection,\ so\ it\ won't\ raise\ an}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00967}00967\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ exception\ if\ the\ server\ does\ the\ same}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00968}00968\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00969}00969\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00970}00970\ \ \ \ \ connectable:\ TCPConnectable\ |\ UNIXConnectable\ |\ TLSConnectable}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00971}00971\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(remote,\ ByteStreamConnectable):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00972}00972\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ remote}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00973}00973\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(remote,\ tuple)\ \textcolor{keywordflow}{and}\ len(remote)\ ==\ 2:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00974}00974\ \ \ \ \ \ \ \ \ connectable\ =\ \mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_t_c_p_connectable}{TCPConnectable}}(*remote)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00975}00975\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(remote,\ (str,\ bytes,\ PathLike)):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00976}00976\ \ \ \ \ \ \ \ \ connectable\ =\ \mbox{\hyperlink{classanyio_1_1__core_1_1__sockets_1_1_u_n_i_x_connectable}{UNIXConnectable}}(remote)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00977}00977\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00978}00978\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}cannot\ convert\ \{remote!r\}\ to\ a\ connectable"{}})}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00979}00979\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00980}00980\ \ \ \ \ \textcolor{keywordflow}{if}\ tls:}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00981}00981\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ tls\_hostname\ \textcolor{keywordflow}{and}\ isinstance(connectable,\ TCPConnectable):}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00982}00982\ \ \ \ \ \ \ \ \ \ \ \ \ tls\_hostname\ =\ str(connectable.host)}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00983}00983\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00984}00984\ \ \ \ \ \ \ \ \ connectable\ =\ \mbox{\hyperlink{classanyio_1_1streams_1_1tls_1_1_t_l_s_connectable}{TLSConnectable}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00985}00985\ \ \ \ \ \ \ \ \ \ \ \ \ connectable,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00986}00986\ \ \ \ \ \ \ \ \ \ \ \ \ ssl\_context=ssl\_context,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00987}00987\ \ \ \ \ \ \ \ \ \ \ \ \ hostname=tls\_hostname,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00988}00988\ \ \ \ \ \ \ \ \ \ \ \ \ standard\_compatible=tls\_standard\_compatible,}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00989}00989\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00990}00990\ }
+\DoxyCodeLine{\Hypertarget{__core_2__sockets_8py_source_l00991}00991\ \ \ \ \ \textcolor{keywordflow}{return}\ connectable}
+
+\end{DoxyCode}

@@ -1,0 +1,159 @@
+\doxysection{things\+\_\+board.\+py}
+\hypertarget{things__board_8py_source}{}\label{things__board_8py_source}\index{micro\_gestion\_objetos/app/infraestructure/things\_board.py@{micro\_gestion\_objetos/app/infraestructure/things\_board.py}}
+\mbox{\hyperlink{things__board_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00001}\mbox{\hyperlink{namespacethings__board}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Cliente\ de\ API\ REST\ para\ ThingsBoard"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00002}00002\ \textcolor{keyword}{import}\ json}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00003}00003\ \textcolor{keyword}{import}\ requests}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00004}00004\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Optional,\ Dict}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00005}00005\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00006}00006\ \textcolor{keyword}{from}\ infraestructure.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00007}\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i}{00007}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i}{ThingsBoardAPI}}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00008}00008\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ host:\ str\ =\ settings.THINGSBOARD\_HOST,\ port:\ int\ =\ settings.THINGSBOARD\_PORT):}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00009}\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_abfc17aaa9d15ed55085d9792dd794b90}{00009}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_abfc17aaa9d15ed55085d9792dd794b90}{base\_url}}\ =\ f\textcolor{stringliteral}{"{}http://\{host\}:\{port\}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00010}\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a2a609ee24dfc72b5afbad250f32383e7}{00010}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a2a609ee24dfc72b5afbad250f32383e7}{token}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00011}00011\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00012}\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a57c8c19ad0c09e3a6b2513c0e34bb0da}{00012}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a57c8c19ad0c09e3a6b2513c0e34bb0da}{login}}(self,\ username:\ str,\ password:\ str)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00013}00013\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00014}00014\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Autentica\ con\ ThingsBoard\ y\ obtiene\ el\ token\ JWT}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00015}00015\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00016}00016\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00017}00017\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ username:\ Usuario\ de\ ThingsBoard\ (ej:\ tenant@thingsboard.org)}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00018}00018\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ password:\ Contraseña}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00019}00019\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00020}00020\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00021}00021\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ True\ si\ la\ autenticación\ fue\ exitosa}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}\{self.base\_url\}/api/auth/login"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ payload\ =\ \{}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}username"{}}:\ username,}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}password"{}}:\ password}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ requests.post(url,\ json=payload)}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response.status\_code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ response.json()}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a2a609ee24dfc72b5afbad250f32383e7}{token}}\ =\ data.get(\textcolor{stringliteral}{"{}token"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ settings.THINGSBOARD\_ACCESS\_TOKEN\ =\ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a2a609ee24dfc72b5afbad250f32383e7}{token}}\ \ \textcolor{comment}{\#\ Guardar\ token\ en\ configuración}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(\textcolor{stringliteral}{"{}Autenticación\ exitosa"{}})\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ de\ autenticación:\ \{response.status\_code\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Excepción\ en\ login:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00045}00045\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00046}\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_ad505221ebe53122638fbbb7b52375758}{00046}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_ad505221ebe53122638fbbb7b52375758}{create\_device}}(self,\ device\_name:\ str,\ device\_type:\ str\ =\ \textcolor{stringliteral}{"{}default"{}},\ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ label:\ str\ =\ \textcolor{keywordtype}{None})\ -\/>\ Optional[Dict]:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Crea\ un\ nuevo\ dispositivo\ en\ ThingsBoard}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00052}00052\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ device\_name:\ Nombre\ del\ dispositivo}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00053}00053\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ device\_type:\ Tipo\ de\ dispositivo}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00054}00054\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ label:\ Etiqueta\ opcional}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00055}00055\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00056}00056\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00057}00057\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Dict\ con\ información\ del\ dispositivo\ creado\ o\ None\ si\ falla}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00058}00058\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a2a609ee24dfc72b5afbad250f32383e7}{token}}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}No\ autenticado.\ Llama\ a\ login()\ primero"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}\{self.base\_url\}/api/device"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ headers\ =\ \{}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Content-\/Type"{}}:\ \textcolor{stringliteral}{"{}application/json"{}},}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}X-\/Authorization"{}}:\ f\textcolor{stringliteral}{"{}Bearer\ \{self.token\}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ payload\ =\ \{}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}name"{}}:\ device\_name,}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}type"{}}:\ device\_type,}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}label"{}}:\ label\ \textcolor{keywordflow}{or}\ device\_name}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ requests.post(url,\ json=payload,\ headers=headers)}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response.status\_code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ device\ =\ response.json()}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Dispositivo\ '\{device\_name\}'\ creado\ exitosamente"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}\ \ \ ID:\ \{device.get('id',\ \{\}).get('id')\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ device}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ creando\ dispositivo:\ \{response.status\_code\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}\ \ \ Respuesta:\ \{response.text\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Excepción\ creando\ dispositivo:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00091}00091\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00092}\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a7e696c6279c38c05f90f623d3d31e880}{00092}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a7e696c6279c38c05f90f623d3d31e880}{get\_device\_credentials}}(self,\ device\_id:\ str)\ -\/>\ Optional[str]:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Obtiene\ las\ credenciales\ (Access\ Token)\ de\ un\ dispositivo}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ device\_id:\ ID\ del\ dispositivo}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Access\ Token\ del\ dispositivo\ o\ None\ si\ falla}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a2a609ee24dfc72b5afbad250f32383e7}{token}}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}No\ autenticado.\ Llama\ a\ login()\ primero"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}\{self.base\_url\}/api/device/\{device\_id\}/credentials"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ headers\ =\ \{}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}X-\/Authorization"{}}:\ f\textcolor{stringliteral}{"{}Bearer\ \{self.token\}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ requests.get(url,\ headers=headers)}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response.status\_code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ credentials\ =\ response.json()}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ access\_token\ =\ credentials.get(\textcolor{stringliteral}{"{}credentialsId"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Credenciales\ obtenidas\ para\ dispositivo\ ID\ \{device\_id\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ access\_token}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ obteniendo\ credenciales:\ \{response.status\_code\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Excepción\ obteniendo\ credenciales:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00126}00126\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00127}\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_ac217c8b4970a9bd19cf548b6989a2cfd}{00127}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_ac217c8b4970a9bd19cf548b6989a2cfd}{create\_device\_with\_token}}(self,\ device\_name:\ str,\ device\_type:\ str\ =\ \textcolor{stringliteral}{"{}default"{}})\ -\/>\ Optional[str]:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00129}00129\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Crea\ un\ dispositivo\ y\ obtiene\ su\ Access\ Token\ en\ una\ sola\ llamada}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00130}00130\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00131}00131\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00132}00132\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ device\_name:\ Nombre\ del\ dispositivo}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00133}00133\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ device\_type:\ Tipo\ de\ dispositivo}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00134}00134\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00135}00135\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00136}00136\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Access\ Token\ del\ dispositivo\ o\ None\ si\ falla}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00137}00137\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Asegurar\ autenticación}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a57c8c19ad0c09e3a6b2513c0e34bb0da}{login}}(settings.THINGSBOARD\_USER,\ settings.THINGSBOARD\_PASSWORD)\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Crear\ dispositivo}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ device\ =\ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_ad505221ebe53122638fbbb7b52375758}{create\_device}}(device\_name,\ device\_type)}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ device:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Obtener\ credenciales}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ device\_id\ =\ device.get(\textcolor{stringliteral}{"{}id"{}},\ \{\}).get(\textcolor{stringliteral}{"{}id"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ device\_id:}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}No\ se\ pudo\ obtener\ el\ ID\ del\ dispositivo"{}})}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i_a7e696c6279c38c05f90f623d3d31e880}{get\_device\_credentials}}(device\_id)}
+\DoxyCodeLine{\Hypertarget{things__board_8py_source_l00153}\mbox{\hyperlink{namespacethings__board_a8c0bdc7e46b5b701d494343740af0aab}{00153}}\ tb\_client\ =\ \mbox{\hyperlink{classthings__board_1_1_things_board_a_p_i}{ThingsBoardAPI}}()}
+
+\end{DoxyCode}

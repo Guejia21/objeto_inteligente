@@ -1,0 +1,531 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/pydantic/v1/class_validators.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('v1_2class__validators_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">class_validators.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="v1_2class__validators_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html">    1</a></span><span class="keyword">import</span> warnings</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="keyword">from</span> collections <span class="keyword">import</span> ChainMap</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">from</span> functools <span class="keyword">import</span> partial, partialmethod, wraps</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">from</span> itertools <span class="keyword">import</span> chain</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">from</span> types <span class="keyword">import</span> FunctionType</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">from</span> typing <span class="keyword">import</span> TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Type, Union, overload</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1_1_1errors.html">pydantic.v1.errors</a> <span class="keyword">import</span> ConfigError</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1_1_1typing.html">pydantic.v1.typing</a> <span class="keyword">import</span> AnyCallable</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1_1_1utils.html">pydantic.v1.utils</a> <span class="keyword">import</span> ROOT_KEY, in_ipython</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keywordflow">if</span> TYPE_CHECKING:</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1_1_1typing.html">pydantic.v1.typing</a> <span class="keyword">import</span> AnyClassMethod</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00016" data-start="" data-end="">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html">   16</a></span><span class="keyword">class </span><a class="code hl_class" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html">Validator</a>:</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    __slots__ = <span class="stringliteral">&#39;func&#39;</span>, <span class="stringliteral">&#39;pre&#39;</span>, <span class="stringliteral">&#39;each_item&#39;</span>, <span class="stringliteral">&#39;always&#39;</span>, <span class="stringliteral">&#39;check_fields&#39;</span>, <span class="stringliteral">&#39;skip_on_failure&#39;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">def </span>__init__(</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        self,</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        func: AnyCallable,</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        pre: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        each_item: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        always: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        check_fields: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        skip_on_failure: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    ):</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#ac87c257c1fd821b9f0c9a78242c2d431">   28</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#ac87c257c1fd821b9f0c9a78242c2d431">func</a> = func</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a70c2120f7bf906a279e820de47a20a53">   29</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a70c2120f7bf906a279e820de47a20a53">pre</a> = pre</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a24e8735f3b7212faab892453b129c8e2">   30</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a24e8735f3b7212faab892453b129c8e2">each_item</a> = each_item</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#abf290907afe8c4d7ae162b857f6ff42a">   31</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#abf290907afe8c4d7ae162b857f6ff42a">always</a> = always</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#af2f76cbce692373b6557e76f42b25f05">   32</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#af2f76cbce692373b6557e76f42b25f05">check_fields</a> = check_fields</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a1bb5057e9f9d1d42453b01462d77d987">   33</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a1bb5057e9f9d1d42453b01462d77d987">skip_on_failure</a> = skip_on_failure</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keywordflow">if</span> TYPE_CHECKING:</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">from</span> inspect <span class="keyword">import</span> Signature</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1_1_1config.html">pydantic.v1.config</a> <span class="keyword">import</span> BaseConfig</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1_1_1fields.html">pydantic.v1.fields</a> <span class="keyword">import</span> ModelField</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1_1_1types.html">pydantic.v1.types</a> <span class="keyword">import</span> ModelOrDc</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#ad26ab8debae6c95b3f0b0705158f938c">   43</a></span>    ValidatorCallable = Callable[[Optional[ModelOrDc], Any, Dict[str, Any], ModelField, Type[BaseConfig]], Any]</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a286cc7ed922ef56c38c697d288e1c40c">   44</a></span>    ValidatorsList = List[ValidatorCallable]</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a3589e4323065f50954308a74a17b26bb">   45</a></span>    ValidatorListDict = Dict[str, List[Validator]]</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#abdcd28b6b866de5322764c0211bc130e">   47</a></span>_FUNCS: Set[str] = set()</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a37e9e698b0d2eff96c011b3b78c200f0">   48</a></span>VALIDATOR_CONFIG_KEY = <span class="stringliteral">&#39;__validator_config__&#39;</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a130d1d0dbabf57fca919dfbc15877af6">   49</a></span>ROOT_VALIDATOR_CONFIG_KEY = <span class="stringliteral">&#39;__root_validator_config__&#39;</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="foldopen" id="foldopen00052" data-start="" data-end="">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">   52</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    *fields: str,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    pre: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    each_item: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    always: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    check_fields: bool = <span class="keyword">True</span>,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    whole: Optional[bool] = <span class="keywordtype">None</span>,</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    allow_reuse: bool = <span class="keyword">False</span>,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>) -&gt; Callable[[AnyCallable], <span class="stringliteral">&#39;AnyClassMethod&#39;</span>]:</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="stringliteral">    Decorate methods on the class indicating that they should be used to validate fields</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="stringliteral">    :param fields: which field(s) the method should be called on</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="stringliteral">    :param pre: whether or not this validator should be called before the standard validators (else after)</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="stringliteral">    :param each_item: for complex objects (sets, lists etc.) whether to validate individual elements rather than the</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="stringliteral">      whole object</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="stringliteral">    :param always: whether this method and other validators should be called even if the value is missing</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="stringliteral">    :param check_fields: whether to check that the fields actually exist on the model</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="stringliteral">    :param allow_reuse: whether to track and raise an error if another validator refers to the decorated function</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">if</span> <span class="keywordflow">not</span> fields:</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(<span class="stringliteral">&#39;validator with no fields specified&#39;</span>)</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordflow">elif</span> isinstance(fields[0], FunctionType):</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            <span class="stringliteral">&quot;validators should be used with fields and keyword arguments, not bare. &quot;</span>  <span class="comment"># noqa: Q000</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <span class="stringliteral">&quot;E.g. usage should be `@validator(&#39;&lt;field_name&gt;&#39;, ...)`&quot;</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        )</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">elif</span> <span class="keywordflow">not</span> all(isinstance(field, str) <span class="keywordflow">for</span> field <span class="keywordflow">in</span> fields):</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>            <span class="stringliteral">&quot;validator fields should be passed as separate string args. &quot;</span>  <span class="comment"># noqa: Q000</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>            <span class="stringliteral">&quot;E.g. usage should be `@validator(&#39;&lt;field_name_1&gt;&#39;, &#39;&lt;field_name_2&gt;&#39;, ...)`&quot;</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        )</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">if</span> whole <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        warnings.warn(</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>            <span class="stringliteral">&#39;The &quot;whole&quot; keyword argument is deprecated, use &quot;each_item&quot; (inverse meaning, default False) instead&#39;</span>,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            DeprecationWarning,</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        )</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keyword">assert</span> each_item <span class="keywordflow">is</span> <span class="keyword">False</span>, <span class="stringliteral">&#39;&quot;each_item&quot; and &quot;whole&quot; conflict, remove &quot;whole&quot;&#39;</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        each_item = <span class="keywordflow">not</span> whole</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">def </span>dec(f: AnyCallable) -&gt; <span class="stringliteral">&#39;AnyClassMethod&#39;</span>:</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        f_cls = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#aefd7694b9b0d1859a7f8a393648ac803">_prepare_validator</a>(f, allow_reuse)</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        setattr(</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            f_cls,</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            VALIDATOR_CONFIG_KEY,</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            (</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>                fields,</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                <a class="code hl_class" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html">Validator</a>(func=f_cls.__func__, pre=pre, each_item=each_item, always=always, check_fields=check_fields),</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            ),</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        )</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keywordflow">return</span> f_cls</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordflow">return</span> dec</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">@overload</span></div>
+</div>
+<div class="foldopen" id="foldopen00108" data-start="" data-end="">
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a42cd86a22a102b24c33c3bc8266c2207">  108</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a42cd86a22a102b24c33c3bc8266c2207">root_validator</a>(_func: AnyCallable) -&gt; <span class="stringliteral">&#39;AnyClassMethod&#39;</span>:</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    ...</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">@overload</span></div>
+</div>
+<div class="foldopen" id="foldopen00113" data-start="" data-end="">
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#ad975c30dd93672a57e3aa1e736645318">  113</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a42cd86a22a102b24c33c3bc8266c2207">root_validator</a>(</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    *, pre: bool = <span class="keyword">False</span>, allow_reuse: bool = <span class="keyword">False</span>, skip_on_failure: bool = <span class="keyword">False</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>) -&gt; Callable[[AnyCallable], <span class="stringliteral">&#39;AnyClassMethod&#39;</span>]:</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    ...</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+</div>
+<div class="foldopen" id="foldopen00119" data-start="" data-end="">
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a8c62fe45fb3a388615c2a520d2d89c1e">  119</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a42cd86a22a102b24c33c3bc8266c2207">root_validator</a>(</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    _func: Optional[AnyCallable] = <span class="keywordtype">None</span>, *, pre: bool = <span class="keyword">False</span>, allow_reuse: bool = <span class="keyword">False</span>, skip_on_failure: bool = <span class="keyword">False</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>) -&gt; Union[<span class="stringliteral">&#39;AnyClassMethod&#39;</span>, Callable[[AnyCallable], <span class="stringliteral">&#39;AnyClassMethod&#39;</span>]]:</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="stringliteral">    Decorate methods on a model indicating that they should be used to validate (and perhaps modify) data either</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="stringliteral">    before or after standard model parsing/validation is performed.</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keywordflow">if</span> _func:</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        f_cls = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#aefd7694b9b0d1859a7f8a393648ac803">_prepare_validator</a>(_func, allow_reuse)</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        setattr(</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>            f_cls, ROOT_VALIDATOR_CONFIG_KEY, <a class="code hl_class" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html">Validator</a>(func=f_cls.__func__, pre=pre, skip_on_failure=skip_on_failure)</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        )</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        <span class="keywordflow">return</span> f_cls</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keyword">def </span>dec(f: AnyCallable) -&gt; <span class="stringliteral">&#39;AnyClassMethod&#39;</span>:</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        f_cls = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#aefd7694b9b0d1859a7f8a393648ac803">_prepare_validator</a>(f, allow_reuse)</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        setattr(</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>            f_cls, ROOT_VALIDATOR_CONFIG_KEY, <a class="code hl_class" href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html">Validator</a>(func=f_cls.__func__, pre=pre, skip_on_failure=skip_on_failure)</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        )</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="keywordflow">return</span> f_cls</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <span class="keywordflow">return</span> dec</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+</div>
+<div class="foldopen" id="foldopen00143" data-start="" data-end="">
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#aefd7694b9b0d1859a7f8a393648ac803">  143</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#aefd7694b9b0d1859a7f8a393648ac803">_prepare_validator</a>(function: AnyCallable, allow_reuse: bool) -&gt; <span class="stringliteral">&#39;AnyClassMethod&#39;</span>:</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="stringliteral">    Avoid validators with duplicated names since without this, validators can be overwritten silently</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="stringliteral">    which generally isn&#39;t the intended behaviour, don&#39;t run in ipython (see #312) or if allow_reuse is False.</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    f_cls = function <span class="keywordflow">if</span> isinstance(function, classmethod) <span class="keywordflow">else</span> classmethod(function)</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    <span class="keywordflow">if</span> <span class="keywordflow">not</span> in_ipython() <span class="keywordflow">and</span> <span class="keywordflow">not</span> allow_reuse:</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        ref = (</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>            getattr(f_cls.__func__, <span class="stringliteral">&#39;__module__&#39;</span>, <span class="stringliteral">&#39;&lt;No __module__&gt;&#39;</span>)</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>            + <span class="stringliteral">&#39;.&#39;</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>            + getattr(f_cls.__func__, <span class="stringliteral">&#39;__qualname__&#39;</span>, f<span class="stringliteral">&#39;&lt;No __qualname__: id:{id(f_cls.__func__)}&gt;&#39;</span>)</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        )</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="keywordflow">if</span> ref <span class="keywordflow">in</span> _FUNCS:</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(f<span class="stringliteral">&#39;duplicate validator function &quot;{ref}&quot;; if this is intended, set `allow_reuse=True`&#39;</span>)</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        _FUNCS.add(ref)</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="keywordflow">return</span> f_cls</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+</div>
+<div class="foldopen" id="foldopen00161" data-start="" data-end="">
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html">  161</a></span><span class="keyword">class </span><a class="code hl_class" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html">ValidatorGroup</a>:</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="keyword">def </span>__init__(self, validators: <span class="stringliteral">&#39;ValidatorListDict&#39;</span>) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#aea8c0391d654af2a2b386060c4ca007e">  163</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#aea8c0391d654af2a2b386060c4ca007e">validators</a> = validators</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a68aeb97a34593202bb888bbd46dfd415">  164</a></span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a68aeb97a34593202bb888bbd46dfd415">used_validators</a> = {<span class="stringliteral">&#39;*&#39;</span>}</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="foldopen" id="foldopen00166" data-start="" data-end="">
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a8ae7f8db0d79e4f7f84eb43af99ccb38">  166</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a8ae7f8db0d79e4f7f84eb43af99ccb38">get_validators</a>(self, name: str) -&gt; Optional[Dict[str, Validator]]:</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>        self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a68aeb97a34593202bb888bbd46dfd415">used_validators</a>.add(name)</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        validators = self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#aea8c0391d654af2a2b386060c4ca007e">validators</a>.get(name, [])</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        <span class="keywordflow">if</span> name != ROOT_KEY:</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>            validators += self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#aea8c0391d654af2a2b386060c4ca007e">validators</a>.get(<span class="stringliteral">&#39;*&#39;</span>, [])</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        <span class="keywordflow">if</span> validators:</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>            <span class="keywordflow">return</span> {getattr(v.func, <span class="stringliteral">&#39;__name__&#39;</span>, f<span class="stringliteral">&#39;&lt;No __name__: id:{id(v.func)}&gt;&#39;</span>): v <span class="keywordflow">for</span> v <span class="keywordflow">in</span> validators}</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>            <span class="keywordflow">return</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+</div>
+<div class="foldopen" id="foldopen00176" data-start="" data-end="">
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#af86a35cf878ffc7f9e883046d688eab1">  176</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#af86a35cf878ffc7f9e883046d688eab1">check_for_unused</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        unused_validators = set(</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>            chain.from_iterable(</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                (</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                    getattr(v.func, <span class="stringliteral">&#39;__name__&#39;</span>, f<span class="stringliteral">&#39;&lt;No __name__: id:{id(v.func)}&gt;&#39;</span>)</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                    <span class="keywordflow">for</span> v <span class="keywordflow">in</span> self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#aea8c0391d654af2a2b386060c4ca007e">validators</a>[f]</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>                    <span class="keywordflow">if</span> v.check_fields</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>                )</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>                <span class="keywordflow">for</span> f <span class="keywordflow">in</span> (self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#aea8c0391d654af2a2b386060c4ca007e">validators</a>.keys() - self.<a class="code hl_variable" href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a68aeb97a34593202bb888bbd46dfd415">used_validators</a>)</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>            )</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        )</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        <span class="keywordflow">if</span> unused_validators:</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            fn = <span class="stringliteral">&#39;, &#39;</span>.join(unused_validators)</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>            <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>                f<span class="stringliteral">&quot;Validators defined with incorrect fields: {fn} &quot;</span>  <span class="comment"># noqa: Q000</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>                f<span class="stringliteral">&quot;(use check_fields=False if you&#39;re inheriting from the model and intended this)&quot;</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>            )</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00195" data-start="" data-end="">
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a1d4513d3a4896303a480b7c0fb108ac8">  195</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a1d4513d3a4896303a480b7c0fb108ac8">extract_validators</a>(namespace: Dict[str, Any]) -&gt; Dict[str, List[Validator]]:</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    validators: Dict[str, List[Validator]] = {}</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    <span class="keywordflow">for</span> var_name, value <span class="keywordflow">in</span> namespace.items():</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        validator_config = getattr(value, VALIDATOR_CONFIG_KEY, <span class="keywordtype">None</span>)</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        <span class="keywordflow">if</span> validator_config:</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>            fields, v = validator_config</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>            <span class="keywordflow">for</span> field <span class="keywordflow">in</span> fields:</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>                <span class="keywordflow">if</span> field <span class="keywordflow">in</span> validators:</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>                    validators[field].append(v)</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>                <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>                    validators[field] = [v]</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <span class="keywordflow">return</span> validators</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+</div>
+<div class="foldopen" id="foldopen00209" data-start="" data-end="">
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a8ca72d9dd0c397224ab8f55c78762555">  209</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a8ca72d9dd0c397224ab8f55c78762555">extract_root_validators</a>(namespace: Dict[str, Any]) -&gt; Tuple[List[AnyCallable], List[Tuple[bool, AnyCallable]]]:</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    <span class="keyword">from</span> inspect <span class="keyword">import</span> signature</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    pre_validators: List[AnyCallable] = []</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    post_validators: List[Tuple[bool, AnyCallable]] = []</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="keywordflow">for</span> name, value <span class="keywordflow">in</span> namespace.items():</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        validator_config: Optional[Validator] = getattr(value, ROOT_VALIDATOR_CONFIG_KEY, <span class="keywordtype">None</span>)</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <span class="keywordflow">if</span> validator_config:</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>            sig = signature(validator_config.func)</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            args = list(sig.parameters.keys())</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>            <span class="keywordflow">if</span> args[0] == <span class="stringliteral">&#39;self&#39;</span>:</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>                <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>                    f<span class="stringliteral">&#39;Invalid signature for root validator {name}: {sig}, &quot;self&quot; not permitted as first argument, &#39;</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>                    f<span class="stringliteral">&#39;should be: (cls, values).&#39;</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>                )</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>            <span class="keywordflow">if</span> len(args) != 2:</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>                <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(f<span class="stringliteral">&#39;Invalid signature for root validator {name}: {sig}, should be: (cls, values).&#39;</span>)</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>            <span class="comment"># check function signature</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            <span class="keywordflow">if</span> validator_config.pre:</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>                pre_validators.append(validator_config.func)</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>            <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>                post_validators.append((validator_config.skip_on_failure, validator_config.func))</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <span class="keywordflow">return</span> pre_validators, post_validators</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+</div>
+<div class="foldopen" id="foldopen00234" data-start="" data-end="">
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#adc45f6d2c7b311c1a1000245b76421ae">  234</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#adc45f6d2c7b311c1a1000245b76421ae">inherit_validators</a>(base_validators: <span class="stringliteral">&#39;ValidatorListDict&#39;</span>, validators: <span class="stringliteral">&#39;ValidatorListDict&#39;</span>) -&gt; <span class="stringliteral">&#39;ValidatorListDict&#39;</span>:</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <span class="keywordflow">for</span> field, field_validators <span class="keywordflow">in</span> base_validators.items():</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keywordflow">if</span> field <span class="keywordflow">not</span> <span class="keywordflow">in</span> validators:</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>            validators[field] = []</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        validators[field] += field_validators</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <span class="keywordflow">return</span> validators</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+</div>
+<div class="foldopen" id="foldopen00242" data-start="" data-end="">
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a2689351a27df57eba2bb22f7fc217c7a">  242</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a2689351a27df57eba2bb22f7fc217c7a">make_generic_validator</a>(validator: AnyCallable) -&gt; <span class="stringliteral">&#39;ValidatorCallable&#39;</span>:</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><span class="stringliteral">    Make a generic function which calls a validator with the right arguments.</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span><span class="stringliteral">    Unfortunately other approaches (eg. return a partial of a function that builds the arguments) is slow,</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span><span class="stringliteral">    hence this laborious way of doing things.</span></div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span><span class="stringliteral">    It&#39;s done like this so validators don&#39;t all need **kwargs in their signature, eg. any combination of</span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span><span class="stringliteral">    the arguments &quot;values&quot;, &quot;fields&quot; and/or &quot;config&quot; are permitted.</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    <span class="keyword">from</span> inspect <span class="keyword">import</span> signature</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <span class="keywordflow">if</span> <span class="keywordflow">not</span> isinstance(validator, (partial, partialmethod)):</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="comment"># This should be the default case, so overhead is reduced</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        sig = signature(validator)</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        args = list(sig.parameters.keys())</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        <span class="comment"># Fix the generated argument lists of partial methods</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        sig = signature(validator.func)</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        args = [</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>            k</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>            <span class="keywordflow">for</span> k <span class="keywordflow">in</span> signature(validator.func).parameters.keys()</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>            <span class="keywordflow">if</span> k <span class="keywordflow">not</span> <span class="keywordflow">in</span> validator.args | validator.keywords.keys()</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        ]</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    first_arg = args.pop(0)</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    <span class="keywordflow">if</span> first_arg == <span class="stringliteral">&#39;self&#39;</span>:</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>            f<span class="stringliteral">&#39;Invalid signature for validator {validator}: {sig}, &quot;self&quot; not permitted as first argument, &#39;</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>            f<span class="stringliteral">&#39;should be: (cls, value, values, config, field), &quot;values&quot;, &quot;config&quot; and &quot;field&quot; are all optional.&#39;</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        )</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    <span class="keywordflow">elif</span> first_arg == <span class="stringliteral">&#39;cls&#39;</span>:</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        <span class="comment"># assume the second argument is value</span></div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        <span class="keywordflow">return</span> wraps(validator)(<a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#acab1575d5cfd9cdd1c488d99247a3e09">_generic_validator_cls</a>(validator, sig, set(args[1:])))</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        <span class="comment"># assume the first argument was value which has already been removed</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <span class="keywordflow">return</span> wraps(validator)(<a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#ac4e8cf8417a244977f5b7e5f61359880">_generic_validator_basic</a>(validator, sig, set(args)))</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
+</div>
+<div class="foldopen" id="foldopen00281" data-start="" data-end="">
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#a015ea7b6b26754c44ec107bdd9a23e8c">  281</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a015ea7b6b26754c44ec107bdd9a23e8c">prep_validators</a>(v_funcs: Iterable[AnyCallable]) -&gt; <span class="stringliteral">&#39;ValidatorsList&#39;</span>:</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    <span class="keywordflow">return</span> [<a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a2689351a27df57eba2bb22f7fc217c7a">make_generic_validator</a>(f) <span class="keywordflow">for</span> f <span class="keywordflow">in</span> v_funcs <span class="keywordflow">if</span> f]</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
+</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#ac8fcb1b26a9537f0e67f1e4cb93f658a">  285</a></span>all_kwargs = {<span class="stringliteral">&#39;values&#39;</span>, <span class="stringliteral">&#39;field&#39;</span>, <span class="stringliteral">&#39;config&#39;</span>}</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span> </div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
+<div class="foldopen" id="foldopen00288" data-start="" data-end="">
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#acab1575d5cfd9cdd1c488d99247a3e09">  288</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#acab1575d5cfd9cdd1c488d99247a3e09">_generic_validator_cls</a>(validator: AnyCallable, sig: <span class="stringliteral">&#39;Signature&#39;</span>, args: Set[str]) -&gt; <span class="stringliteral">&#39;ValidatorCallable&#39;</span>:</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    <span class="comment"># assume the first argument is value</span></div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    has_kwargs = <span class="keyword">False</span></div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="keywordflow">if</span> <span class="stringliteral">&#39;kwargs&#39;</span> <span class="keywordflow">in</span> args:</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        has_kwargs = <span class="keyword">True</span></div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>        args -= {<span class="stringliteral">&#39;kwargs&#39;</span>}</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span> </div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    <span class="keywordflow">if</span> <span class="keywordflow">not</span> args.issubset(all_kwargs):</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>            f<span class="stringliteral">&#39;Invalid signature for validator {validator}: {sig}, should be: &#39;</span></div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>            f<span class="stringliteral">&#39;(cls, value, values, config, field), &quot;values&quot;, &quot;config&quot; and &quot;field&quot; are all optional.&#39;</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>        )</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    <span class="keywordflow">if</span> has_kwargs:</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, values=values, field=field, config=config)</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    <span class="keywordflow">elif</span> args == set():</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v)</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;values&#39;</span>}:</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, values=values)</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;field&#39;</span>}:</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, field=field)</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;config&#39;</span>}:</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, config=config)</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;values&#39;</span>, <span class="stringliteral">&#39;field&#39;</span>}:</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, values=values, field=field)</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;values&#39;</span>, <span class="stringliteral">&#39;config&#39;</span>}:</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, values=values, config=config)</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;field&#39;</span>, <span class="stringliteral">&#39;config&#39;</span>}:</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, field=field, config=config)</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>    <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>        <span class="comment"># args == {&#39;values&#39;, &#39;field&#39;, &#39;config&#39;}</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(cls, v, values=values, field=field, config=config)</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span> </div>
+</div>
+<div class="foldopen" id="foldopen00322" data-start="" data-end="">
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#ac4e8cf8417a244977f5b7e5f61359880">  322</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#ac4e8cf8417a244977f5b7e5f61359880">_generic_validator_basic</a>(validator: AnyCallable, sig: <span class="stringliteral">&#39;Signature&#39;</span>, args: Set[str]) -&gt; <span class="stringliteral">&#39;ValidatorCallable&#39;</span>:</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>    has_kwargs = <span class="keyword">False</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>    <span class="keywordflow">if</span> <span class="stringliteral">&#39;kwargs&#39;</span> <span class="keywordflow">in</span> args:</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>        has_kwargs = <span class="keyword">True</span></div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>        args -= {<span class="stringliteral">&#39;kwargs&#39;</span>}</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span> </div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>    <span class="keywordflow">if</span> <span class="keywordflow">not</span> args.issubset(all_kwargs):</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">ConfigError</a>(</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>            f<span class="stringliteral">&#39;Invalid signature for validator {validator}: {sig}, should be: &#39;</span></div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>            f<span class="stringliteral">&#39;(value, values, config, field), &quot;values&quot;, &quot;config&quot; and &quot;field&quot; are all optional.&#39;</span></div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        )</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    <span class="keywordflow">if</span> has_kwargs:</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, values=values, field=field, config=config)</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <span class="keywordflow">elif</span> args == set():</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v)</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;values&#39;</span>}:</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, values=values)</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;field&#39;</span>}:</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, field=field)</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;config&#39;</span>}:</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, config=config)</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;values&#39;</span>, <span class="stringliteral">&#39;field&#39;</span>}:</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, values=values, field=field)</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;values&#39;</span>, <span class="stringliteral">&#39;config&#39;</span>}:</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, values=values, config=config)</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    <span class="keywordflow">elif</span> args == {<span class="stringliteral">&#39;field&#39;</span>, <span class="stringliteral">&#39;config&#39;</span>}:</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, field=field, config=config)</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        <span class="comment"># args == {&#39;values&#39;, &#39;field&#39;, &#39;config&#39;}</span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>        <span class="keywordflow">return</span> <span class="keyword">lambda</span> cls, v, values, field, config: <a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">validator</a>(v, values=values, field=field, config=config)</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span> </div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
+</div>
+<div class="foldopen" id="foldopen00355" data-start="" data-end="">
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1class__validators.html#ac8d09b98a88c84d5cad7ad2b06d0ef88">  355</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1class__validators.html#ac8d09b98a88c84d5cad7ad2b06d0ef88">gather_all_validators</a>(type_: <span class="stringliteral">&#39;ModelOrDc&#39;</span>) -&gt; Dict[str, <span class="stringliteral">&#39;AnyClassMethod&#39;</span>]:</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    all_attributes = ChainMap(*[cls.__dict__ <span class="keywordflow">for</span> cls <span class="keywordflow">in</span> type_.__mro__])  <span class="comment"># type: ignore[arg-type,var-annotated]</span></div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>    <span class="keywordflow">return</span> {</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>        k: v</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>        <span class="keywordflow">for</span> k, v <span class="keywordflow">in</span> all_attributes.items()</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        <span class="keywordflow">if</span> hasattr(v, VALIDATOR_CONFIG_KEY) <span class="keywordflow">or</span> hasattr(v, ROOT_VALIDATOR_CONFIG_KEY)</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    }</div>
+</div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_group_html"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html">pydantic.v1.class_validators.ValidatorGroup</a></div><div class="ttdef"><b>Definition</b> <a href="#l00161">class_validators.py:161</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_group_html_a68aeb97a34593202bb888bbd46dfd415"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a68aeb97a34593202bb888bbd46dfd415">pydantic.v1.class_validators.ValidatorGroup.used_validators</a></div><div class="ttdeci">dict used_validators</div><div class="ttdef"><b>Definition</b> <a href="#l00164">class_validators.py:164</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_group_html_a8ae7f8db0d79e4f7f84eb43af99ccb38"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#a8ae7f8db0d79e4f7f84eb43af99ccb38">pydantic.v1.class_validators.ValidatorGroup.get_validators</a></div><div class="ttdeci">Optional[Dict[str, Validator]] get_validators(self, str name)</div><div class="ttdef"><b>Definition</b> <a href="#l00166">class_validators.py:166</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_group_html_aea8c0391d654af2a2b386060c4ca007e"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#aea8c0391d654af2a2b386060c4ca007e">pydantic.v1.class_validators.ValidatorGroup.validators</a></div><div class="ttdeci">validators</div><div class="ttdef"><b>Definition</b> <a href="#l00163">class_validators.py:163</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_group_html_af86a35cf878ffc7f9e883046d688eab1"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator_group.html#af86a35cf878ffc7f9e883046d688eab1">pydantic.v1.class_validators.ValidatorGroup.check_for_unused</a></div><div class="ttdeci">None check_for_unused(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00176">class_validators.py:176</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_html"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html">pydantic.v1.class_validators.Validator</a></div><div class="ttdef"><b>Definition</b> <a href="#l00016">class_validators.py:16</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_html_a1bb5057e9f9d1d42453b01462d77d987"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a1bb5057e9f9d1d42453b01462d77d987">pydantic.v1.class_validators.Validator.skip_on_failure</a></div><div class="ttdeci">skip_on_failure</div><div class="ttdef"><b>Definition</b> <a href="#l00033">class_validators.py:33</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_html_a24e8735f3b7212faab892453b129c8e2"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a24e8735f3b7212faab892453b129c8e2">pydantic.v1.class_validators.Validator.each_item</a></div><div class="ttdeci">each_item</div><div class="ttdef"><b>Definition</b> <a href="#l00030">class_validators.py:30</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_html_a70c2120f7bf906a279e820de47a20a53"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#a70c2120f7bf906a279e820de47a20a53">pydantic.v1.class_validators.Validator.pre</a></div><div class="ttdeci">pre</div><div class="ttdef"><b>Definition</b> <a href="#l00029">class_validators.py:29</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_html_abf290907afe8c4d7ae162b857f6ff42a"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#abf290907afe8c4d7ae162b857f6ff42a">pydantic.v1.class_validators.Validator.always</a></div><div class="ttdeci">always</div><div class="ttdef"><b>Definition</b> <a href="#l00031">class_validators.py:31</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_html_ac87c257c1fd821b9f0c9a78242c2d431"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#ac87c257c1fd821b9f0c9a78242c2d431">pydantic.v1.class_validators.Validator.func</a></div><div class="ttdeci">func</div><div class="ttdef"><b>Definition</b> <a href="#l00028">class_validators.py:28</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1class__validators_1_1_validator_html_af2f76cbce692373b6557e76f42b25f05"><div class="ttname"><a href="classpydantic_1_1v1_1_1class__validators_1_1_validator.html#af2f76cbce692373b6557e76f42b25f05">pydantic.v1.class_validators.Validator.check_fields</a></div><div class="ttdeci">check_fields</div><div class="ttdef"><b>Definition</b> <a href="#l00032">class_validators.py:32</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1errors_1_1_config_error_html"><div class="ttname"><a href="classpydantic_1_1v1_1_1errors_1_1_config_error.html">pydantic.v1.errors.ConfigError</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2errors_8py_source.html#l00141">errors.py:141</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_a015ea7b6b26754c44ec107bdd9a23e8c"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#a015ea7b6b26754c44ec107bdd9a23e8c">pydantic.v1.class_validators.prep_validators</a></div><div class="ttdeci"> &#39;ValidatorsList&#39; prep_validators(Iterable[AnyCallable] v_funcs)</div><div class="ttdef"><b>Definition</b> <a href="#l00281">class_validators.py:281</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_a122f1e709009ea3e5f2ae948dae2ca57"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#a122f1e709009ea3e5f2ae948dae2ca57">pydantic.v1.class_validators.validator</a></div><div class="ttdeci">Callable[[AnyCallable], &#39;AnyClassMethod&#39;] validator(*str fields, bool pre=False, bool each_item=False, bool always=False, bool check_fields=True, Optional[bool] whole=None, bool allow_reuse=False)</div><div class="ttdef"><b>Definition</b> <a href="#l00052">class_validators.py:60</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_a1d4513d3a4896303a480b7c0fb108ac8"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#a1d4513d3a4896303a480b7c0fb108ac8">pydantic.v1.class_validators.extract_validators</a></div><div class="ttdeci">Dict[str, List[Validator]] extract_validators(Dict[str, Any] namespace)</div><div class="ttdef"><b>Definition</b> <a href="#l00195">class_validators.py:195</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_a2689351a27df57eba2bb22f7fc217c7a"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#a2689351a27df57eba2bb22f7fc217c7a">pydantic.v1.class_validators.make_generic_validator</a></div><div class="ttdeci"> &#39;ValidatorCallable&#39; make_generic_validator(AnyCallable validator)</div><div class="ttdef"><b>Definition</b> <a href="#l00242">class_validators.py:242</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_a42cd86a22a102b24c33c3bc8266c2207"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#a42cd86a22a102b24c33c3bc8266c2207">pydantic.v1.class_validators.root_validator</a></div><div class="ttdeci"> &#39;AnyClassMethod&#39; root_validator(AnyCallable _func)</div><div class="ttdef"><b>Definition</b> <a href="#l00108">class_validators.py:108</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_a8ca72d9dd0c397224ab8f55c78762555"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#a8ca72d9dd0c397224ab8f55c78762555">pydantic.v1.class_validators.extract_root_validators</a></div><div class="ttdeci">Tuple[List[AnyCallable], List[Tuple[bool, AnyCallable]]] extract_root_validators(Dict[str, Any] namespace)</div><div class="ttdef"><b>Definition</b> <a href="#l00209">class_validators.py:209</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_ac4e8cf8417a244977f5b7e5f61359880"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#ac4e8cf8417a244977f5b7e5f61359880">pydantic.v1.class_validators._generic_validator_basic</a></div><div class="ttdeci"> &#39;ValidatorCallable&#39; _generic_validator_basic(AnyCallable validator, &#39;Signature&#39; sig, Set[str] args)</div><div class="ttdef"><b>Definition</b> <a href="#l00322">class_validators.py:322</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_ac8d09b98a88c84d5cad7ad2b06d0ef88"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#ac8d09b98a88c84d5cad7ad2b06d0ef88">pydantic.v1.class_validators.gather_all_validators</a></div><div class="ttdeci">Dict[str, &#39;AnyClassMethod&#39;] gather_all_validators(&#39;ModelOrDc&#39; type_)</div><div class="ttdef"><b>Definition</b> <a href="#l00355">class_validators.py:355</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_acab1575d5cfd9cdd1c488d99247a3e09"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#acab1575d5cfd9cdd1c488d99247a3e09">pydantic.v1.class_validators._generic_validator_cls</a></div><div class="ttdeci"> &#39;ValidatorCallable&#39; _generic_validator_cls(AnyCallable validator, &#39;Signature&#39; sig, Set[str] args)</div><div class="ttdef"><b>Definition</b> <a href="#l00288">class_validators.py:288</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_adc45f6d2c7b311c1a1000245b76421ae"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#adc45f6d2c7b311c1a1000245b76421ae">pydantic.v1.class_validators.inherit_validators</a></div><div class="ttdeci"> &#39;ValidatorListDict&#39; inherit_validators(&#39;ValidatorListDict&#39; base_validators, &#39;ValidatorListDict&#39; validators)</div><div class="ttdef"><b>Definition</b> <a href="#l00234">class_validators.py:234</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1class__validators_html_aefd7694b9b0d1859a7f8a393648ac803"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1class__validators.html#aefd7694b9b0d1859a7f8a393648ac803">pydantic.v1.class_validators._prepare_validator</a></div><div class="ttdeci"> &#39;AnyClassMethod&#39; _prepare_validator(AnyCallable function, bool allow_reuse)</div><div class="ttdef"><b>Definition</b> <a href="#l00143">class_validators.py:143</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1config_html"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1config.html">pydantic.v1.config</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2config_8py_source.html#l00001">config.py:1</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1errors_html"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1errors.html">pydantic.v1.errors</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2errors_8py_source.html#l00001">errors.py:1</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1fields_html"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1fields.html">pydantic.v1.fields</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2fields_8py_source.html#l00001">fields.py:1</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1types_html"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1types.html">pydantic.v1.types</a></div><div class="ttdef"><b>Definition</b> <a href="pydantic_2v1_2types_8py_source.html#l00001">types.py:1</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1typing_html"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1typing.html">pydantic.v1.typing</a></div><div class="ttdef"><b>Definition</b> <a href="v1_2typing_8py_source.html#l00001">typing.py:1</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1utils_html"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1utils.html">pydantic.v1.utils</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2utils_8py_source.html#l00001">utils.py:1</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_cff67c8c4ede01a5ffd78f35945c5bda.html">pydantic</a></li><li class="navelem"><a href="dir_5474fc2212d0f7e6962f0a0020c16fb6.html">v1</a></li><li class="navelem"><a href="v1_2class__validators_8py.html">class_validators.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

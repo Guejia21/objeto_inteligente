@@ -1,0 +1,21 @@
+var dir_7955b935f81aee4639043ebc619001a7 =
+[
+    [ "__init__.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2____init_____8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2____init_____8py" ],
+    [ "cache.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2cache_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2cache_8py" ],
+    [ "check.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2check_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2check_8py" ],
+    [ "completion.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2completion_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2completion_8py" ],
+    [ "configuration.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2configuration_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2configuration_8py" ],
+    [ "debug.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2debug_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2debug_8py" ],
+    [ "download.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2download_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2download_8py" ],
+    [ "freeze.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2freeze_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2freeze_8py" ],
+    [ "hash.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2hash_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2hash_8py" ],
+    [ "help.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2help_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2help_8py" ],
+    [ "index.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2index_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2index_8py" ],
+    [ "inspect.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2inspect_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2inspect_8py" ],
+    [ "install.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2install_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2install_8py" ],
+    [ "list.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2list_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2list_8py" ],
+    [ "search.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2search_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2search_8py" ],
+    [ "show.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2show_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2show_8py" ],
+    [ "uninstall.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2uninstall_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2uninstall_8py" ],
+    [ "wheel.py", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2wheel_8py.html", "microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__internal_2commands_2wheel_8py" ]
+];

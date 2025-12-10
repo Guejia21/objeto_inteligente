@@ -1,0 +1,254 @@
+\doxysection{datetime\+\_\+parse.\+py}
+\hypertarget{v1_2datetime__parse_8py_source}{}\label{v1_2datetime__parse_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/datetime\_parse.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/datetime\_parse.py}}
+\mbox{\hyperlink{v1_2datetime__parse_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00002}00002\ \textcolor{stringliteral}{Functions\ to\ parse\ datetime\ objects.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00003}00003\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00004}00004\ \textcolor{stringliteral}{We're\ using\ regular\ expressions\ rather\ than\ time.strptime\ because:}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00005}00005\ \textcolor{stringliteral}{-\/\ They\ provide\ both\ validation\ and\ parsing.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00006}00006\ \textcolor{stringliteral}{-\/\ They're\ more\ flexible\ for\ datetimes.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00007}00007\ \textcolor{stringliteral}{-\/\ The\ date/datetime/time\ constructors\ produce\ friendlier\ error\ messages.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00008}00008\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00009}00009\ \textcolor{stringliteral}{Stolen\ from\ https://raw.githubusercontent.com/django/django/main/django/utils/dateparse.py\ at}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00010}00010\ \textcolor{stringliteral}{9718fa2e8abe430c3526a9278dd976443d4ae3c6}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00011}00011\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00012}00012\ \textcolor{stringliteral}{Changed\ to:}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00013}00013\ \textcolor{stringliteral}{*\ use\ standard\ python\ datetime\ types\ not\ django.utils.timezone}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00014}00014\ \textcolor{stringliteral}{*\ raise\ ValueError\ when\ regex\ doesn't\ match\ rather\ than\ returning\ None}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00015}00015\ \textcolor{stringliteral}{*\ support\ parsing\ unix\ timestamps\ for\ dates\ and\ datetimes}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00016}00016\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00017}00017\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00018}00018\ \textcolor{keyword}{from}\ datetime\ \textcolor{keyword}{import}\ date,\ datetime,\ time,\ timedelta,\ timezone}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00019}00019\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Dict,\ Optional,\ Type,\ Union}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00021}00021\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1}{pydantic.v1}}\ \textcolor{keyword}{import}\ errors}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00023}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a5a6623f7b8d1dd4fd9dfc0dec544f979}{00023}}\ date\_expr\ =\ \textcolor{stringliteral}{r'(?P<year>\(\backslash\)d\{4\})-\/(?P<month>\(\backslash\)d\{1,2\})-\/(?P<day>\(\backslash\)d\{1,2\})'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00024}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a8141e5129f07979df68473bcb06b5e54}{00024}}\ time\_expr\ =\ (}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00025}00025\ \ \ \ \ \textcolor{stringliteral}{r'(?P<hour>\(\backslash\)d\{1,2\}):(?P<minute>\(\backslash\)d\{1,2\})'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00026}00026\ \ \ \ \ \textcolor{stringliteral}{r'(?::(?P<second>\(\backslash\)d\{1,2\})(?:\(\backslash\).(?P<microsecond>\(\backslash\)d\{1,6\})\(\backslash\)d\{0,6\})?)?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00027}00027\ \ \ \ \ \textcolor{stringliteral}{r'(?P<tzinfo>Z|[+-\/]\(\backslash\)d\{2\}(?::?\(\backslash\)d\{2\})?)?\$'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00028}00028\ )}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00030}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a4f70663f139c793754d59bbaf35d0cf9}{00030}}\ date\_re\ =\ re.compile(f\textcolor{stringliteral}{'\{date\_expr\}\$'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00031}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a2d4313dd7b262cc0cda3f909b5aedd87}{00031}}\ time\_re\ =\ re.compile(time\_expr)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00032}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_aa1c5ce4e8d56674af98d82e922b8c1a7}{00032}}\ datetime\_re\ =\ re.compile(f\textcolor{stringliteral}{'\{date\_expr\}[T\ ]\{time\_expr\}'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00034}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a8615782140660e10ef08449b32ba186c}{00034}}\ standard\_duration\_re\ =\ re.compile(}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00035}00035\ \ \ \ \ \textcolor{stringliteral}{r'\string^'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00036}00036\ \ \ \ \ \textcolor{stringliteral}{r'(?:(?P<days>-\/?\(\backslash\)d+)\ (days?,\ )?)?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00037}00037\ \ \ \ \ \textcolor{stringliteral}{r'((?:(?P<hours>-\/?\(\backslash\)d+):)(?=\(\backslash\)d+:\(\backslash\)d+))?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00038}00038\ \ \ \ \ \textcolor{stringliteral}{r'(?:(?P<minutes>-\/?\(\backslash\)d+):)?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00039}00039\ \ \ \ \ \textcolor{stringliteral}{r'(?P<seconds>-\/?\(\backslash\)d+)'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00040}00040\ \ \ \ \ \textcolor{stringliteral}{r'(?:\(\backslash\).(?P<microseconds>\(\backslash\)d\{1,6\})\(\backslash\)d\{0,6\})?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00041}00041\ \ \ \ \ \textcolor{stringliteral}{r'\$'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00042}00042\ )}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00044}00044\ \textcolor{comment}{\#\ Support\ the\ sections\ of\ ISO\ 8601\ date\ representation\ that\ are\ accepted\ by\ timedelta}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00045}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a558e442fe736d268b2cc84f31a808684}{00045}}\ iso8601\_duration\_re\ =\ re.compile(}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00046}00046\ \ \ \ \ \textcolor{stringliteral}{r'\string^(?P<sign>[-\/+]?)'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00047}00047\ \ \ \ \ \textcolor{stringliteral}{r'P'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00048}00048\ \ \ \ \ \textcolor{stringliteral}{r'(?:(?P<days>\(\backslash\)d+(.\(\backslash\)d+)?)D)?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00049}00049\ \ \ \ \ \textcolor{stringliteral}{r'(?:T'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00050}00050\ \ \ \ \ \textcolor{stringliteral}{r'(?:(?P<hours>\(\backslash\)d+(.\(\backslash\)d+)?)H)?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00051}00051\ \ \ \ \ \textcolor{stringliteral}{r'(?:(?P<minutes>\(\backslash\)d+(.\(\backslash\)d+)?)M)?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00052}00052\ \ \ \ \ \textcolor{stringliteral}{r'(?:(?P<seconds>\(\backslash\)d+(.\(\backslash\)d+)?)S)?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00053}00053\ \ \ \ \ \textcolor{stringliteral}{r')?'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00054}00054\ \ \ \ \ \textcolor{stringliteral}{r'\$'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00055}00055\ )}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00057}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a521358c1dbc8736b448583b20b323f54}{00057}}\ EPOCH\ =\ datetime(1970,\ 1,\ 1)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00058}00058\ \textcolor{comment}{\#\ if\ greater\ than\ this,\ the\ number\ is\ in\ ms,\ if\ less\ than\ or\ equal\ it's\ in\ seconds}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00059}00059\ \textcolor{comment}{\#\ (in\ seconds\ this\ is\ 11th\ October\ 2603,\ in\ ms\ it's\ 20th\ August\ 1970)}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00060}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a4e81962a97c4a7011c91331d20f82420}{00060}}\ MS\_WATERSHED\ =\ int(2e10)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00061}00061\ \textcolor{comment}{\#\ slightly\ more\ than\ datetime.max\ in\ ns\ -\/\ (datetime.max\ -\/\ EPOCH).total\_seconds()\ *\ 1e9}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00062}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_ab1d9c222d6d63f91b49ad509c4ffab9f}{00062}}\ MAX\_NUMBER\ =\ int(3e20)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00063}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_aa7c4763f133c0c24d024a4d5eeea70f2}{00063}}\ StrBytesIntFloat\ =\ Union[str,\ bytes,\ int,\ float]}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00066}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a872cb47762a0dedff55be357ba7179f8}{00066}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a872cb47762a0dedff55be357ba7179f8}{get\_numeric}}(value:\ StrBytesIntFloat,\ native\_expected\_type:\ str)\ -\/>\ Union[\textcolor{keywordtype}{None},\ int,\ float]:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00067}00067\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ (int,\ float)):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00069}00069\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ float(value)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00071}00071\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00073}00073\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'invalid\ type;\ expected\ \{native\_expected\_type\},\ string,\ bytes,\ int\ or\ float'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00077}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a78b869eb145d1911b57de4cc60e0e339}{00077}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a78b869eb145d1911b57de4cc60e0e339}{from\_unix\_seconds}}(seconds:\ Union[int,\ float])\ -\/>\ datetime:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00078}00078\ \ \ \ \ \textcolor{keywordflow}{if}\ seconds\ >\ MAX\_NUMBER:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ datetime.max}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00080}00080\ \ \ \ \ \textcolor{keywordflow}{elif}\ seconds\ <\ -\/MAX\_NUMBER:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ datetime.min}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00083}00083\ \ \ \ \ \textcolor{keywordflow}{while}\ abs(seconds)\ >\ MS\_WATERSHED:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ seconds\ /=\ 1000}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00085}00085\ \ \ \ \ dt\ =\ EPOCH\ +\ timedelta(seconds=seconds)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00086}00086\ \ \ \ \ \textcolor{keywordflow}{return}\ dt.replace(tzinfo=timezone.utc)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00089}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a6f3b1ab3d2f561f8c78de64b8f18da8e}{00089}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a6f3b1ab3d2f561f8c78de64b8f18da8e}{\_parse\_timezone}}(value:\ Optional[str],\ error:\ Type[Exception])\ -\/>\ Union[\textcolor{keywordtype}{None},\ int,\ timezone]:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00090}00090\ \ \ \ \ \textcolor{keywordflow}{if}\ value\ ==\ \textcolor{stringliteral}{'Z'}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ timezone.utc}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{elif}\ value\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ offset\_mins\ =\ int(value[-\/2:])\ \textcolor{keywordflow}{if}\ len(value)\ >\ 3\ \textcolor{keywordflow}{else}\ 0}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ offset\ =\ 60\ *\ int(value[1:3])\ +\ offset\_mins}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value[0]\ ==\ \textcolor{stringliteral}{'-\/'}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ offset\ =\ -\/offset}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ timezone(timedelta(minutes=offset))}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ error()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00101}00101\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00105}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a9a903e42258a3c16672ecd11c2c3d57f}{00105}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a9a903e42258a3c16672ecd11c2c3d57f}{parse\_date}}(value:\ Union[date,\ StrBytesIntFloat])\ -\/>\ date:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00106}00106\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ Parse\ a\ date/int/float/string\ and\ return\ a\ datetime.date.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00108}00108\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ Raise\ ValueError\ if\ the\ input\ is\ well\ formatted\ but\ not\ a\ valid\ date.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ Raise\ ValueError\ if\ the\ input\ isn't\ well\ formatted.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00112}00112\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ date):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ datetime):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value.date()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00118}00118\ \ \ \ \ number\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a872cb47762a0dedff55be357ba7179f8}{get\_numeric}}(value,\ \textcolor{stringliteral}{'date'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00119}00119\ \ \ \ \ \textcolor{keywordflow}{if}\ number\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a78b869eb145d1911b57de4cc60e0e339}{from\_unix\_seconds}}(number).date()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00122}00122\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ value\ =\ value.decode()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00125}00125\ \ \ \ \ match\ =\ date\_re.match(value)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00126}00126\ \ \ \ \ \textcolor{keywordflow}{if}\ match\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_date_error}{errors.DateError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00129}00129\ \ \ \ \ kw\ =\ \{k:\ int(v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ match.groupdict().items()\}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00131}00131\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ date(**kw)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_date_error}{errors.DateError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00137}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a8769829fc434727e7241b70a512be004}{00137}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a8769829fc434727e7241b70a512be004}{parse\_time}}(value:\ Union[time,\ StrBytesIntFloat])\ -\/>\ time:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00138}00138\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00139}00139\ \textcolor{stringliteral}{\ \ \ \ Parse\ a\ time/string\ and\ return\ a\ datetime.time.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00140}00140\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ Raise\ ValueError\ if\ the\ input\ is\ well\ formatted\ but\ not\ a\ valid\ time.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ Raise\ ValueError\ if\ the\ input\ isn't\ well\ formatted,\ in\ particular\ if\ it\ contains\ an\ offset.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00143}00143\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00144}00144\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ time):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00147}00147\ \ \ \ \ number\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a872cb47762a0dedff55be357ba7179f8}{get\_numeric}}(value,\ \textcolor{stringliteral}{'time'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00148}00148\ \ \ \ \ \textcolor{keywordflow}{if}\ number\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ number\ >=\ 86400:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ doesn't\ make\ sense\ since\ the\ time\ time\ loop\ back\ around\ to\ 0}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_time_error}{errors.TimeError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (datetime.min\ +\ timedelta(seconds=number)).time()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00154}00154\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ value\ =\ value.decode()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00157}00157\ \ \ \ \ match\ =\ time\_re.match(value)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00158}00158\ \ \ \ \ \textcolor{keywordflow}{if}\ match\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_time_error}{errors.TimeError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00161}00161\ \ \ \ \ kw\ =\ match.groupdict()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00162}00162\ \ \ \ \ \textcolor{keywordflow}{if}\ kw[\textcolor{stringliteral}{'microsecond'}]:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ kw[\textcolor{stringliteral}{'microsecond'}]\ =\ kw[\textcolor{stringliteral}{'microsecond'}].ljust(6,\ \textcolor{stringliteral}{'0'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00165}00165\ \ \ \ \ tzinfo\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a6f3b1ab3d2f561f8c78de64b8f18da8e}{\_parse\_timezone}}(kw.pop(\textcolor{stringliteral}{'tzinfo'}),\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_time_error}{errors.TimeError}})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00166}00166\ \ \ \ \ kw\_:\ Dict[str,\ Union[\textcolor{keywordtype}{None},\ int,\ timezone]]\ =\ \{k:\ int(v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ kw.items()\ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00167}00167\ \ \ \ \ kw\_[\textcolor{stringliteral}{'tzinfo'}]\ =\ tzinfo}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00169}00169\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ time(**kw\_)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00171}00171\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_time_error}{errors.TimeError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00174}00174\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00175}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_acb94d9c78a16fb21828aba1c1ca1ffed}{00175}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_acb94d9c78a16fb21828aba1c1ca1ffed}{parse\_datetime}}(value:\ Union[datetime,\ StrBytesIntFloat])\ -\/>\ datetime:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00176}00176\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00177}00177\ \textcolor{stringliteral}{\ \ \ \ Parse\ a\ datetime/int/float/string\ and\ return\ a\ datetime.datetime.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00178}00178\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00179}00179\ \textcolor{stringliteral}{\ \ \ \ This\ function\ supports\ time\ zone\ offsets.\ When\ the\ input\ contains\ one,}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00180}00180\ \textcolor{stringliteral}{\ \ \ \ the\ output\ uses\ a\ timezone\ with\ a\ fixed\ offset\ from\ UTC.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00181}00181\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ Raise\ ValueError\ if\ the\ input\ is\ well\ formatted\ but\ not\ a\ valid\ datetime.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00183}00183\ \textcolor{stringliteral}{\ \ \ \ Raise\ ValueError\ if\ the\ input\ isn't\ well\ formatted.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00184}00184\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00185}00185\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ datetime):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00188}00188\ \ \ \ \ number\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a872cb47762a0dedff55be357ba7179f8}{get\_numeric}}(value,\ \textcolor{stringliteral}{'datetime'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00189}00189\ \ \ \ \ \textcolor{keywordflow}{if}\ number\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a78b869eb145d1911b57de4cc60e0e339}{from\_unix\_seconds}}(number)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00192}00192\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ value\ =\ value.decode()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00195}00195\ \ \ \ \ match\ =\ datetime\_re.match(value)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00196}00196\ \ \ \ \ \textcolor{keywordflow}{if}\ match\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_date_time_error}{errors.DateTimeError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00199}00199\ \ \ \ \ kw\ =\ match.groupdict()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00200}00200\ \ \ \ \ \textcolor{keywordflow}{if}\ kw[\textcolor{stringliteral}{'microsecond'}]:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ kw[\textcolor{stringliteral}{'microsecond'}]\ =\ kw[\textcolor{stringliteral}{'microsecond'}].ljust(6,\ \textcolor{stringliteral}{'0'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00203}00203\ \ \ \ \ tzinfo\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_a6f3b1ab3d2f561f8c78de64b8f18da8e}{\_parse\_timezone}}(kw.pop(\textcolor{stringliteral}{'tzinfo'}),\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_date_time_error}{errors.DateTimeError}})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00204}00204\ \ \ \ \ kw\_:\ Dict[str,\ Union[\textcolor{keywordtype}{None},\ int,\ timezone]]\ =\ \{k:\ int(v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ kw.items()\ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00205}00205\ \ \ \ \ kw\_[\textcolor{stringliteral}{'tzinfo'}]\ =\ tzinfo}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00207}00207\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ datetime(**kw\_)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00209}00209\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_date_time_error}{errors.DateTimeError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00213}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_ac2f0d088f884284319f41165126d2d99}{00213}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1datetime__parse_ac2f0d088f884284319f41165126d2d99}{parse\_duration}}(value:\ StrBytesIntFloat)\ -\/>\ timedelta:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00214}00214\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00215}00215\ \textcolor{stringliteral}{\ \ \ \ Parse\ a\ duration\ int/float/string\ and\ return\ a\ datetime.timedelta.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00216}00216\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00217}00217\ \textcolor{stringliteral}{\ \ \ \ The\ preferred\ format\ for\ durations\ in\ Django\ is\ '\%d\ \%H:\%M:\%S.\%f'.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00218}00218\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00219}00219\ \textcolor{stringliteral}{\ \ \ \ Also\ supports\ ISO\ 8601\ representation.}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00220}00220\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00221}00221\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ timedelta):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00224}00224\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ (int,\ float)):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ below\ code\ requires\ a\ string}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ value\ =\ f\textcolor{stringliteral}{'\{value:f\}'}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00227}00227\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ value\ =\ value.decode()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00230}00230\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ match\ =\ standard\_duration\_re.match(value)\ \textcolor{keywordflow}{or}\ iso8601\_duration\_re.match(value)}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00232}00232\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(\textcolor{stringliteral}{'invalid\ type;\ expected\ timedelta,\ string,\ bytes,\ int\ or\ float'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00235}00235\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ match:}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1errors_1_1_duration_error}{errors.DurationError}}()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00238}00238\ \ \ \ \ kw\ =\ match.groupdict()}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00239}00239\ \ \ \ \ sign\ =\ -\/1\ \textcolor{keywordflow}{if}\ kw.pop(\textcolor{stringliteral}{'sign'},\ \textcolor{stringliteral}{'+'})\ ==\ \textcolor{stringliteral}{'-\/'}\ \textcolor{keywordflow}{else}\ 1}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00240}00240\ \ \ \ \ \textcolor{keywordflow}{if}\ kw.get(\textcolor{stringliteral}{'microseconds'}):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ kw[\textcolor{stringliteral}{'microseconds'}]\ =\ kw[\textcolor{stringliteral}{'microseconds'}].ljust(6,\ \textcolor{stringliteral}{'0'})}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00243}00243\ \ \ \ \ \textcolor{keywordflow}{if}\ kw.get(\textcolor{stringliteral}{'seconds'})\ \textcolor{keywordflow}{and}\ kw.get(\textcolor{stringliteral}{'microseconds'})\ \textcolor{keywordflow}{and}\ kw[\textcolor{stringliteral}{'seconds'}].startswith(\textcolor{stringliteral}{'-\/'}):}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ kw[\textcolor{stringliteral}{'microseconds'}]\ =\ \textcolor{stringliteral}{'-\/'}\ +\ kw[\textcolor{stringliteral}{'microseconds'}]}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00246}00246\ \ \ \ \ kw\_\ =\ \{k:\ float(v)\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ kw.items()\ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\}}
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00247}00247\ }
+\DoxyCodeLine{\Hypertarget{v1_2datetime__parse_8py_source_l00248}00248\ \ \ \ \ \textcolor{keywordflow}{return}\ sign\ *\ timedelta(**kw\_)}
+
+\end{DoxyCode}

@@ -1,0 +1,539 @@
+\doxysection{\+\_\+validators.\+py}
+\hypertarget{__validators_8py_source}{}\label{__validators_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_validators.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_validators.py}}
+\mbox{\hyperlink{__validators_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Validator\ functions\ for\ standard\ library\ types.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00002}00002\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00003}00003\ \textcolor{stringliteral}{Import\ of\ this\ module\ is\ deferred\ since\ it\ contains\ imports\ of\ many\ standard\ library\ modules.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00004}00004\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00006}00006\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations\ \textcolor{keyword}{as}\ \_annotations}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00008}00008\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00009}00009\ \textcolor{keyword}{import}\ math}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00010}00010\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00011}00011\ \textcolor{keyword}{import}\ typing}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00012}00012\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Sequence}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00013}00013\ \textcolor{keyword}{from}\ decimal\ \textcolor{keyword}{import}\ Decimal}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00014}00014\ \textcolor{keyword}{from}\ fractions\ \textcolor{keyword}{import}\ Fraction}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00015}00015\ \textcolor{keyword}{from}\ ipaddress\ \textcolor{keyword}{import}\ IPv4Address,\ IPv4Interface,\ IPv4Network,\ IPv6Address,\ IPv6Interface,\ IPv6Network}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00016}00016\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any,\ Callable,\ TypeVar,\ Union,\ cast}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00017}00017\ \textcolor{keyword}{from}\ zoneinfo\ \textcolor{keyword}{import}\ ZoneInfo,\ ZoneInfoNotFoundError}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00019}00019\ \textcolor{keyword}{import}\ typing\_extensions}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00020}00020\ \textcolor{keyword}{from}\ pydantic\_core\ \textcolor{keyword}{import}\ PydanticCustomError,\ PydanticKnownError,\ core\_schema}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00021}00021\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ get\_args,\ get\_origin}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00022}00022\ \textcolor{keyword}{from}\ typing\_inspection\ \textcolor{keyword}{import}\ typing\_objects}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00024}00024\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__import__utils}{pydantic.\_internal.\_import\_utils}}\ \textcolor{keyword}{import}\ import\_cached\_field\_info}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00025}00025\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1errors}{pydantic.errors}}\ \textcolor{keyword}{import}\ PydanticSchemaGenerationError}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00028}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a8b4aad100d41999c7a1005e7d960a759}{00028}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a8b4aad100d41999c7a1005e7d960a759}{sequence\_validator}}(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00029}00029\ \ \ \ \ input\_value:\ Sequence[Any],}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00030}00030\ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00031}00031\ \ \ \ \ validator:\ \mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_validator_function_wrap_handler}{core\_schema.ValidatorFunctionWrapHandler}},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00032}00032\ )\ -\/>\ Sequence[Any]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00033}00033\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Validator\ for\ \`{}Sequence\`{}\ types,\ isinstance(v,\ Sequence)\ has\ already\ been\ called."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00034}00034\ \ \ \ \ value\_type\ =\ type(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00035}00035\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00036}00036\ \ \ \ \ \textcolor{comment}{\#\ We\ don't\ accept\ any\ plain\ string\ as\ a\ sequence}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00037}00037\ \ \ \ \ \textcolor{comment}{\#\ Relevant\ issue:\ https://github.com/pydantic/pydantic/issues/5595}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00038}00038\ \ \ \ \ \textcolor{keywordflow}{if}\ issubclass(value\_type,\ (str,\ bytes)):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'sequence\_str'},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}'\{type\_name\}'\ instances\ are\ not\ allowed\ as\ a\ Sequence\ value"{}},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \{\textcolor{stringliteral}{'type\_name'}:\ value\_type.\_\_name\_\_\},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00044}00044\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00045}00045\ \ \ \ \ \textcolor{comment}{\#\ TODO:\ refactor\ sequence\ validation\ to\ validate\ with\ either\ a\ list\ or\ a\ tuple}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00046}00046\ \ \ \ \ \textcolor{comment}{\#\ schema,\ depending\ on\ the\ type\ of\ the\ value.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00047}00047\ \ \ \ \ \textcolor{comment}{\#\ Additionally,\ we\ should\ be\ able\ to\ remove\ one\ of\ either\ this\ validator\ or\ the}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00048}00048\ \ \ \ \ \textcolor{comment}{\#\ SequenceValidator\ in\ \_std\_types\_schema.py\ (preferably\ this\ one,\ while\ porting\ over\ some\ logic).}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00049}00049\ \ \ \ \ \textcolor{comment}{\#\ Effectively,\ a\ refactor\ for\ sequence\ validation\ is\ needed.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00050}00050\ \ \ \ \ \textcolor{keywordflow}{if}\ value\_type\ \textcolor{keywordflow}{is}\ tuple:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ input\_value\ =\ list(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00053}00053\ \ \ \ \ v\_list\ =\ validator(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00055}00055\ \ \ \ \ \textcolor{comment}{\#\ the\ rest\ of\ the\ logic\ is\ just\ re-\/creating\ the\ original\ type\ from\ \`{}v\_list`}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{if}\ value\_type\ \textcolor{keywordflow}{is}\ list:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v\_list}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{elif}\ issubclass(value\_type,\ range):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ return\ the\ list\ as\ we\ probably\ can't\ re-\/create\ the\ range}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v\_list}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00061}00061\ \ \ \ \ \textcolor{keywordflow}{elif}\ value\_type\ \textcolor{keywordflow}{is}\ tuple:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tuple(v\_list)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00063}00063\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ best\ guess\ at\ how\ to\ re-\/create\ the\ original\ type,\ more\ custom\ construction\ logic\ might\ be\ required}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value\_type(v\_list)\ \ \textcolor{comment}{\#\ type:\ ignore[call-\/arg]}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00068}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ae7fdb3ba57ec4f27021f5887fea9f7e9}{00068}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ae7fdb3ba57ec4f27021f5887fea9f7e9}{import\_string}}(value:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00069}00069\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ str):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aceee25405f454da06c640a0615df99f4}{\_import\_string\_logic}}(value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'import\_error'},\ \textcolor{stringliteral}{'Invalid\ python\ path:\ \{error\}'},\ \{\textcolor{stringliteral}{'error'}:\ str(e)\})\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00074}00074\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ otherwise\ we\ just\ return\ the\ value\ and\ let\ the\ next\ validator\ do\ the\ rest\ of\ the\ work}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00079}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aceee25405f454da06c640a0615df99f4}{00079}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aceee25405f454da06c640a0615df99f4}{\_import\_string\_logic}}(dotted\_path:\ str)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00080}00080\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Inspired\ by\ uvicorn\ —\ dotted\ paths\ should\ include\ a\ colon\ before\ the\ final\ item\ if\ that\ item\ is\ not\ a\ module.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ (This\ is\ necessary\ to\ distinguish\ between\ a\ submodule\ and\ an\ attribute\ when\ there\ is\ a\ conflict.).}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00082}00082\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ If\ the\ dotted\ path\ does\ not\ include\ a\ colon\ and\ the\ final\ item\ is\ not\ a\ valid\ module,\ importing\ as\ an\ attribute}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ rather\ than\ a\ submodule\ will\ be\ attempted\ automatically.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00085}00085\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ So,\ for\ example,\ the\ following\ values\ of\ \`{}dotted\_path\`{}\ result\ in\ the\ following\ returned\ values:}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ *\ 'collections':\ <module\ 'collections'>}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ *\ 'collections.abc':\ <module\ 'collections.abc'>}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ *\ 'collections.abc:Mapping':\ <class\ 'collections.abc.Mapping'>}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ *\ \`{}collections.abc.Mapping\`{}:\ <class\ 'collections.abc.Mapping'>\ (though\ this\ is\ a\ bit\ slower\ than\ the\ previous\ line)}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00091}00091\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ An\ error\ will\ be\ raised\ under\ any\ of\ the\ following\ scenarios:}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ *\ \`{}dotted\_path\`{}\ contains\ more\ than\ one\ colon\ (e.g.,\ 'collections:abc:Mapping')}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ *\ the\ substring\ of\ \`{}dotted\_path\`{}\ before\ the\ colon\ is\ not\ a\ valid\ module\ in\ the\ environment\ (e.g.,\ '123:Mapping')}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ *\ the\ substring\ of\ \`{}dotted\_path\`{}\ after\ the\ colon\ is\ not\ an\ attribute\ of\ the\ module\ (e.g.,\ 'collections:abc123')}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00097}00097\ \ \ \ \ \textcolor{keyword}{from}\ importlib\ \textcolor{keyword}{import}\ import\_module}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00099}00099\ \ \ \ \ components\ =\ dotted\_path.strip().split(\textcolor{stringliteral}{':'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00100}00100\ \ \ \ \ \textcolor{keywordflow}{if}\ len(components)\ >\ 2:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ImportError(f\textcolor{stringliteral}{"{}Import\ strings\ should\ have\ at\ most\ one\ ':';\ received\ \{dotted\_path!r\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00102}00102\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00103}00103\ \ \ \ \ module\_path\ =\ components[0]}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ module\_path:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ImportError(f\textcolor{stringliteral}{'Import\ strings\ should\ have\ a\ nonempty\ module\ name;\ received\ \{dotted\_path!r\}'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00107}00107\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ module\ =\ import\_module(module\_path)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00109}00109\ \ \ \ \ \textcolor{keywordflow}{except}\ ModuleNotFoundError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'.'}\ \textcolor{keywordflow}{in}\ module\_path:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Check\ if\ it\ would\ be\ valid\ if\ the\ final\ item\ was\ separated\ from\ its\ module\ with\ a\ \`{}:`}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ maybe\_module\_path,\ maybe\_attribute\ =\ dotted\_path.strip().rsplit(\textcolor{stringliteral}{'.'},\ 1)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aceee25405f454da06c640a0615df99f4}{\_import\_string\_logic}}(f\textcolor{stringliteral}{'\{maybe\_module\_path\}:\{maybe\_attribute\}'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ImportError(f\textcolor{stringliteral}{'No\ module\ named\ \{module\_path!r\}'})\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ e}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00120}00120\ \ \ \ \ \textcolor{keywordflow}{if}\ len(components)\ >\ 1:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ attribute\ =\ components[1]}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(module,\ attribute)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ImportError(f\textcolor{stringliteral}{'cannot\ import\ name\ \{attribute!r\}\ from\ \{module\_path!r\}'})\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00126}00126\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ module}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00130}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_abde478ffc92e89eb66c6a022f870275f}{00130}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_abde478ffc92e89eb66c6a022f870275f}{pattern\_either\_validator}}(input\_value:\ Any,\ /)\ -\/>\ re.Pattern[Any]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00131}00131\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ re.Pattern):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(input\_value,\ (str,\ bytes)):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ todo\ strict\ mode}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a91be9e8e4c1996b0b3e6f607cbcc5228}{compile\_pattern}}(input\_value)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00136}00136\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_type'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ valid\ pattern'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00140}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a0dc968b55182e6cbcad81177c0a89ddb}{00140}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a0dc968b55182e6cbcad81177c0a89ddb}{pattern\_str\_validator}}(input\_value:\ Any,\ /)\ -\/>\ re.Pattern[str]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00141}00141\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ re.Pattern):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value.pattern,\ str):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_str\_type'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ string\ pattern'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00146}00146\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(input\_value,\ str):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a91be9e8e4c1996b0b3e6f607cbcc5228}{compile\_pattern}}(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00148}00148\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(input\_value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_str\_type'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ string\ pattern'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00150}00150\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_type'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ valid\ pattern'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00154}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ae291e90a1cead4a5e92c5f9150ac9a90}{00154}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ae291e90a1cead4a5e92c5f9150ac9a90}{pattern\_bytes\_validator}}(input\_value:\ Any,\ /)\ -\/>\ re.Pattern[bytes]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00155}00155\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ re.Pattern):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value.pattern,\ bytes):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_bytes\_type'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ bytes\ pattern'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00160}00160\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(input\_value,\ bytes):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a91be9e8e4c1996b0b3e6f607cbcc5228}{compile\_pattern}}(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00162}00162\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(input\_value,\ str):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_bytes\_type'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ bytes\ pattern'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00164}00164\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_type'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ valid\ pattern'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00168}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a75a92a00f4a531efac5e0fb6b2b6a7f7}{00168}}\ PatternType\ =\ TypeVar(\textcolor{stringliteral}{'PatternType'},\ str,\ bytes)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00171}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a91be9e8e4c1996b0b3e6f607cbcc5228}{00171}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a91be9e8e4c1996b0b3e6f607cbcc5228}{compile\_pattern}}(pattern:\ PatternType)\ -\/>\ re.Pattern[PatternType]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ re.compile(pattern)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00174}00174\ \ \ \ \ \textcolor{keywordflow}{except}\ re.error:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'pattern\_regex'},\ \textcolor{stringliteral}{'Input\ should\ be\ a\ valid\ regular\ expression'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00178}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aabb9c6fae9d6b191a3b80fe98a11931e}{00178}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aabb9c6fae9d6b191a3b80fe98a11931e}{ip\_v4\_address\_validator}}(input\_value:\ Any,\ /)\ -\/>\ IPv4Address:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ IPv4Address):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00182}00182\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ IPv4Address(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00184}00184\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'ip\_v4\_address'},\ \textcolor{stringliteral}{'Input\ is\ not\ a\ valid\ IPv4\ address'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00188}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a85ecaf300eb0820771e60f2ec2f49575}{00188}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a85ecaf300eb0820771e60f2ec2f49575}{ip\_v6\_address\_validator}}(input\_value:\ Any,\ /)\ -\/>\ IPv6Address:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00189}00189\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ IPv6Address):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00192}00192\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ IPv6Address(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00194}00194\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'ip\_v6\_address'},\ \textcolor{stringliteral}{'Input\ is\ not\ a\ valid\ IPv6\ address'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00196}00196\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00198}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bcbf29b28d0b04488acec98d7cd9240}{00198}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bcbf29b28d0b04488acec98d7cd9240}{ip\_v4\_network\_validator}}(input\_value:\ Any,\ /)\ -\/>\ IPv4Network:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00199}00199\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Assume\ IPv4Network\ initialised\ with\ a\ default\ \`{}strict\`{}\ argument.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00200}00200\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00201}00201\ \textcolor{stringliteral}{\ \ \ \ See\ more:}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00202}00202\ \textcolor{stringliteral}{\ \ \ \ https://docs.python.org/library/ipaddress.html\#ipaddress.IPv4Network}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00203}00203\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00204}00204\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ IPv4Network):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00206}00206\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00207}00207\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ IPv4Network(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00209}00209\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'ip\_v4\_network'},\ \textcolor{stringliteral}{'Input\ is\ not\ a\ valid\ IPv4\ network'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00212}00212\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00213}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aec1a9be517d3c0028286fc3e250e2d16}{00213}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aec1a9be517d3c0028286fc3e250e2d16}{ip\_v6\_network\_validator}}(input\_value:\ Any,\ /)\ -\/>\ IPv6Network:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00214}00214\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Assume\ IPv6Network\ initialised\ with\ a\ default\ \`{}strict\`{}\ argument.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00215}00215\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00216}00216\ \textcolor{stringliteral}{\ \ \ \ See\ more:}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00217}00217\ \textcolor{stringliteral}{\ \ \ \ https://docs.python.org/library/ipaddress.html\#ipaddress.IPv6Network}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00218}00218\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00219}00219\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ IPv6Network):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00222}00222\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ IPv6Network(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00224}00224\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'ip\_v6\_network'},\ \textcolor{stringliteral}{'Input\ is\ not\ a\ valid\ IPv6\ network'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00227}00227\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00228}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a3eede70b2f452f64bc185cbfd6a5b13c}{00228}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a3eede70b2f452f64bc185cbfd6a5b13c}{ip\_v4\_interface\_validator}}(input\_value:\ Any,\ /)\ -\/>\ IPv4Interface:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00229}00229\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ IPv4Interface):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00232}00232\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ IPv4Interface(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00234}00234\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'ip\_v4\_interface'},\ \textcolor{stringliteral}{'Input\ is\ not\ a\ valid\ IPv4\ interface'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00236}00236\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00237}00237\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00238}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_adb45f05f745e515e28b15b681af9e28a}{00238}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_adb45f05f745e515e28b15b681af9e28a}{ip\_v6\_interface\_validator}}(input\_value:\ Any,\ /)\ -\/>\ IPv6Interface:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00239}00239\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ IPv6Interface):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00241}00241\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00242}00242\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ IPv6Interface(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00244}00244\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'ip\_v6\_interface'},\ \textcolor{stringliteral}{'Input\ is\ not\ a\ valid\ IPv6\ interface'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00247}00247\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00248}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a3b624e59ae201f70a066658ba8d41e0d}{00248}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a3b624e59ae201f70a066658ba8d41e0d}{fraction\_validator}}(input\_value:\ Any,\ /)\ -\/>\ Fraction:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00249}00249\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ Fraction):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ input\_value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00251}00251\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00252}00252\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Fraction(input\_value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00254}00254\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'fraction\_parsing'},\ \textcolor{stringliteral}{'Input\ is\ not\ a\ valid\ fraction'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00258}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ad8094d5a6a9577bb7c6342d1bbbe7a98}{00258}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ad8094d5a6a9577bb7c6342d1bbbe7a98}{forbid\_inf\_nan\_check}}(x:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00259}00259\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ math.isfinite(x):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(\textcolor{stringliteral}{'finite\_number'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00261}00261\ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00263}00263\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00264}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bee42d3e5ab9686f90fa83075f2c9e9}{00264}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bee42d3e5ab9686f90fa83075f2c9e9}{\_safe\_repr}}(v:\ Any)\ -\/>\ int\ |\ float\ |\ str:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00265}00265\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ context\ argument\ for\ \`{}PydanticKnownError\`{}\ requires\ a\ number\ or\ str\ type,\ so\ we\ do\ a\ simple\ repr()\ coercion\ for\ types\ like\ timedelta.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00266}00266\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00267}00267\ \textcolor{stringliteral}{\ \ \ \ See\ tests/test\_types.py::test\_annotated\_metadata\_any\_order\ for\ some\ context.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00268}00268\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00269}00269\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(v,\ (int,\ float,\ str)):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00271}00271\ \ \ \ \ \textcolor{keywordflow}{return}\ repr(v)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00272}00272\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00273}00273\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00274}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ae67c6a5776ad45f227e14c40172f512c}{00274}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ae67c6a5776ad45f227e14c40172f512c}{greater\_than\_validator}}(x:\ Any,\ gt:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00275}00275\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (x\ >\ gt):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(\textcolor{stringliteral}{'greater\_than'},\ \{\textcolor{stringliteral}{'gt'}:\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bee42d3e5ab9686f90fa83075f2c9e9}{\_safe\_repr}}(gt)\})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00279}00279\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'gt'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00281}00281\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00283}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_af5016282058da31465fbe17ac3c11551}{00283}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_af5016282058da31465fbe17ac3c11551}{greater\_than\_or\_equal\_validator}}(x:\ Any,\ ge:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00284}00284\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (x\ >=\ ge):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(\textcolor{stringliteral}{'greater\_than\_equal'},\ \{\textcolor{stringliteral}{'ge'}:\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bee42d3e5ab9686f90fa83075f2c9e9}{\_safe\_repr}}(ge)\})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00288}00288\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'ge'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00291}00291\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00292}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a575eb2390f1a1238259e93dfcf16f1e5}{00292}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a575eb2390f1a1238259e93dfcf16f1e5}{less\_than\_validator}}(x:\ Any,\ lt:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00293}00293\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (x\ <\ lt):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(\textcolor{stringliteral}{'less\_than'},\ \{\textcolor{stringliteral}{'lt'}:\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bee42d3e5ab9686f90fa83075f2c9e9}{\_safe\_repr}}(lt)\})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00297}00297\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'lt'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00299}00299\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00301}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a08b2c2389e1e58a7bb5082ff2f5980f1}{00301}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a08b2c2389e1e58a7bb5082ff2f5980f1}{less\_than\_or\_equal\_validator}}(x:\ Any,\ le:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00302}00302\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (x\ <=\ le):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(\textcolor{stringliteral}{'less\_than\_equal'},\ \{\textcolor{stringliteral}{'le'}:\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bee42d3e5ab9686f90fa83075f2c9e9}{\_safe\_repr}}(le)\})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00306}00306\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'le'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00310}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_abd4f73b04089523ac58b6868111e9b9e}{00310}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_abd4f73b04089523ac58b6868111e9b9e}{multiple\_of\_validator}}(x:\ Any,\ multiple\_of:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00311}00311\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ x\ \%\ multiple\_of:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(\textcolor{stringliteral}{'multiple\_of'},\ \{\textcolor{stringliteral}{'multiple\_of'}:\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6bee42d3e5ab9686f90fa83075f2c9e9}{\_safe\_repr}}(multiple\_of)\})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00315}00315\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'multiple\_of'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00317}00317\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00318}00318\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00319}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a05402ec3b1e3a95891f615f29e3283f0}{00319}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a05402ec3b1e3a95891f615f29e3283f0}{min\_length\_validator}}(x:\ Any,\ min\_length:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00320}00320\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (len(x)\ >=\ min\_length):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'too\_short'},\ \{\textcolor{stringliteral}{'field\_type'}:\ \textcolor{stringliteral}{'Value'},\ \textcolor{stringliteral}{'min\_length'}:\ min\_length,\ \textcolor{stringliteral}{'actual\_length'}:\ len(x)\}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00326}00326\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'min\_length'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00329}00329\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00330}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a32e1204f88a5c15a233132197a30814e}{00330}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a32e1204f88a5c15a233132197a30814e}{max\_length\_validator}}(x:\ Any,\ max\_length:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00331}00331\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(x)\ >\ max\_length:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'too\_long'},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\textcolor{stringliteral}{'field\_type'}:\ \textcolor{stringliteral}{'Value'},\ \textcolor{stringliteral}{'max\_length'}:\ max\_length,\ \textcolor{stringliteral}{'actual\_length'}:\ len(x)\},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00338}00338\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'max\_length'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00340}00340\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00342}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aaa9623991c6cb71dc6adda93e4ebc405}{00342}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aaa9623991c6cb71dc6adda93e4ebc405}{\_extract\_decimal\_digits\_info}}(decimal:\ Decimal)\ -\/>\ tuple[int,\ int]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00343}00343\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Compute\ the\ total\ number\ of\ digits\ and\ decimal\ places\ for\ a\ given\ [\`{}Decimal\`{}][decimal.Decimal]\ instance.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00344}00344\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00345}00345\ \textcolor{stringliteral}{\ \ \ \ This\ function\ handles\ both\ normalized\ and\ non-\/normalized\ Decimal\ instances.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00346}00346\ \textcolor{stringliteral}{\ \ \ \ Example:\ Decimal('1.230')\ -\/>\ 4\ digits,\ 3\ decimal\ places}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00347}00347\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00348}00348\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00349}00349\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ decimal\ (Decimal):\ The\ decimal\ number\ to\ analyze.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00350}00350\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00351}00351\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00352}00352\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ tuple[int,\ int]:\ A\ tuple\ containing\ the\ number\ of\ decimal\ places\ and\ total\ digits.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00353}00353\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00354}00354\ \textcolor{stringliteral}{\ \ \ \ Though\ this\ could\ be\ divided\ into\ two\ separate\ functions,\ the\ logic\ is\ easier\ to\ follow\ if\ we\ couple\ the\ computation}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00355}00355\ \textcolor{stringliteral}{\ \ \ \ of\ the\ number\ of\ decimals\ and\ digits\ together.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00356}00356\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00357}00357\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ decimal\_tuple\ =\ decimal.as\_tuple()}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00359}00359\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(decimal\_tuple.exponent,\ int)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ exponent\ =\ decimal\_tuple.exponent}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ num\_digits\ =\ len(decimal\_tuple.digits)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00364}00364\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ exponent\ >=\ 0:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ A\ positive\ exponent\ adds\ that\ many\ trailing\ zeros}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Ex:\ digit\_tuple=(1,\ 2,\ 3),\ exponent=2\ -\/>\ 12300\ -\/>\ 0\ decimal\ places,\ 5\ digits}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \ \ \ \ num\_digits\ +=\ exponent}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ decimal\_places\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ the\ absolute\ value\ of\ the\ negative\ exponent\ is\ larger\ than\ the}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ number\ of\ digits,\ then\ it's\ the\ same\ as\ the\ number\ of\ digits,}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ because\ it'll\ consume\ all\ the\ digits\ in\ digit\_tuple\ and\ then}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ add\ abs(exponent)\ -\/\ len(digit\_tuple)\ leading\ zeros\ after\ the\ decimal\ point.}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Ex:\ digit\_tuple=(1,\ 2,\ 3),\ exponent=-\/2\ -\/>\ 1.23\ -\/>\ 2\ decimal\ places,\ 3\ digits}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Ex:\ digit\_tuple=(1,\ 2,\ 3),\ exponent=-\/4\ -\/>\ 0.0123\ -\/>\ 4\ decimal\ places,\ 4\ digits}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ decimal\_places\ =\ abs(exponent)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ num\_digits\ =\ max(num\_digits,\ decimal\_places)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00379}00379\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ decimal\_places,\ num\_digits}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00381}00381\ \ \ \ \ \textcolor{keywordflow}{except}\ (AssertionError,\ AttributeError):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'Unable\ to\ extract\ decimal\ digits\ info\ from\ supplied\ value\ \{decimal\}'})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00383}00383\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00384}00384\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00385}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ace73a53b210c1c250246af059c10804a}{00385}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ace73a53b210c1c250246af059c10804a}{max\_digits\_validator}}(x:\ Any,\ max\_digits:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00386}00386\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \_,\ num\_digits\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aaa9623991c6cb71dc6adda93e4ebc405}{\_extract\_decimal\_digits\_info}}(x)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \_,\ normalized\_num\_digits\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aaa9623991c6cb71dc6adda93e4ebc405}{\_extract\_decimal\_digits\_info}}(x.normalize())}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (num\_digits\ >\ max\_digits)\ \textcolor{keywordflow}{and}\ (normalized\_num\_digits\ >\ max\_digits):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00391}00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'decimal\_max\_digits'},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\textcolor{stringliteral}{'max\_digits'}:\ max\_digits\},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00394}00394\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00395}00395\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'max\_digits'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00398}00398\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00399}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a39e5f9e8ba46c9b344923a775000a661}{00399}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a39e5f9e8ba46c9b344923a775000a661}{decimal\_places\_validator}}(x:\ Any,\ decimal\_places:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00400}00400\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ decimal\_places\_,\ \_\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aaa9623991c6cb71dc6adda93e4ebc405}{\_extract\_decimal\_digits\_info}}(x)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ decimal\_places\_\ >\ decimal\_places:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00403}00403\ \ \ \ \ \ \ \ \ \ \ \ \ normalized\_decimal\_places,\ \_\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_aaa9623991c6cb71dc6adda93e4ebc405}{\_extract\_decimal\_digits\_info}}(x.normalize())}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ normalized\_decimal\_places\ >\ decimal\_places:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticKnownError(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'decimal\_max\_places'},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\textcolor{stringliteral}{'decimal\_places'}:\ decimal\_places\},}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00410}00410\ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{"{}Unable\ to\ apply\ constraint\ 'decimal\_places'\ to\ supplied\ value\ \{x\}"{}})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00412}00412\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00413}00413\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00414}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a7a8490c674dcdb7f5715c8984d090604}{00414}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a7a8490c674dcdb7f5715c8984d090604}{deque\_validator}}(input\_value:\ Any,\ handler:\ \mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_validator_function_wrap_handler}{core\_schema.ValidatorFunctionWrapHandler}})\ -\/>\ collections.deque[Any]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00415}00415\ \ \ \ \ \textcolor{keywordflow}{return}\ collections.deque(handler(input\_value),\ maxlen=getattr(input\_value,\ \textcolor{stringliteral}{'maxlen'},\ \textcolor{keywordtype}{None}))}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00416}00416\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00417}00417\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00418}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a7cf6d87159dbcb1585416264ce5f0a61}{00418}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a7cf6d87159dbcb1585416264ce5f0a61}{defaultdict\_validator}}(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00419}00419\ \ \ \ \ input\_value:\ Any,\ handler:\ \mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_validator_function_wrap_handler}{core\_schema.ValidatorFunctionWrapHandler}},\ default\_default\_factory:\ Callable[[],\ Any]}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00420}00420\ )\ -\/>\ collections.defaultdict[Any,\ Any]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00421}00421\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(input\_value,\ collections.defaultdict):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ default\_factory\ =\ input\_value.default\_factory}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00423}00423\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ collections.defaultdict(default\_factory,\ handler(input\_value))}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00424}00424\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00425}00425\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ collections.defaultdict(default\_default\_factory,\ handler(input\_value))}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00426}00426\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00427}00427\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00428}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_af6fff71b1bea18ad145327a9f8121861}{00428}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_af6fff71b1bea18ad145327a9f8121861}{get\_defaultdict\_default\_default\_factory}}(values\_source\_type:\ Any)\ -\/>\ Callable[[],\ Any]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00429}00429\ \ \ \ \ FieldInfo\ =\ import\_cached\_field\_info()}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00430}00430\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00431}00431\ \ \ \ \ values\_type\_origin\ =\ get\_origin(values\_source\_type)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00432}00432\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00433}00433\ \ \ \ \ \textcolor{keyword}{def\ }infer\_default()\ -\/>\ Callable[[],\ Any]:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00434}00434\ \ \ \ \ \ \ \ \ allowed\_default\_types:\ dict[Any,\ Any]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ tuple:\ tuple,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ collections.abc.Sequence:\ tuple,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ collections.abc.MutableSequence:\ list,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ \ \ \ \ list:\ list,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00439}00439\ \ \ \ \ \ \ \ \ \ \ \ \ typing.Sequence:\ list,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ set:\ set,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ typing.MutableSet:\ set,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00442}00442\ \ \ \ \ \ \ \ \ \ \ \ \ collections.abc.MutableSet:\ set,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ collections.abc.Set:\ frozenset,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ typing.MutableMapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ typing.Mapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00446}00446\ \ \ \ \ \ \ \ \ \ \ \ \ collections.abc.Mapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ collections.abc.MutableMapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ float:\ float,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ int:\ int,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ str:\ str,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ bool:\ bool,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00452}00452\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00453}00453\ \ \ \ \ \ \ \ \ values\_type\ =\ values\_type\_origin\ \textcolor{keywordflow}{or}\ values\_source\_type}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ instructions\ =\ \textcolor{stringliteral}{'set\ using\ \`{}DefaultDict[...,\ Annotated[...,\ Field(default\_factory=...)]]`'}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_typevar(values\_type):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00456}00456\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }type\_var\_default\_factory()\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00459}00459\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Generic\ defaultdict\ cannot\ be\ used\ without\ a\ concrete\ value\ type\ or\ an'}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\ explicit\ default\ factory,\ '}\ +\ instructions}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00461}00461\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00462}00462\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00463}00463\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_var\_default\_factory}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00464}00464\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ values\_type\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ allowed\_default\_types:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ a\ somewhat\ subjective\ set\ of\ types\ that\ have\ reasonable\ default\ values}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ \ \ \ \ allowed\_msg\ =\ \textcolor{stringliteral}{',\ '}.join([t.\_\_name\_\_\ \textcolor{keywordflow}{for}\ t\ \textcolor{keywordflow}{in}\ set(allowed\_default\_types.values())])}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_schema_generation_error}{PydanticSchemaGenerationError}}(}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unable\ to\ infer\ a\ default\ factory\ for\ keys\ of\ type\ \{values\_source\_type\}.'}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'\ Only\ \{allowed\_msg\}\ are\ supported,\ other\ types\ require\ an\ explicit\ default\ factory'}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\ '}\ +\ instructions}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ allowed\_default\_types[values\_type]}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00473}00473\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00474}00474\ \ \ \ \ \textcolor{comment}{\#\ Assume\ Annotated[...,\ Field(...)]}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00475}00475\ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_annotated(values\_type\_origin):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ field\_info\ =\ next((v\ \textcolor{keywordflow}{for}\ v\ \textcolor{keywordflow}{in}\ get\_args(values\_source\_type)\ \textcolor{keywordflow}{if}\ isinstance(v,\ FieldInfo)),\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00477}00477\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ field\_info\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00479}00479\ \ \ \ \ \textcolor{keywordflow}{if}\ field\_info\ \textcolor{keywordflow}{and}\ field\_info.default\_factory:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00480}00480\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Assume\ the\ default\ factory\ does\ not\ take\ any\ argument:}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00481}00481\ \ \ \ \ \ \ \ \ default\_default\_factory\ =\ cast(Callable[[],\ Any],\ field\_info.default\_factory)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00482}00482\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00483}00483\ \ \ \ \ \ \ \ \ default\_default\_factory\ =\ infer\_default()}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00484}00484\ \ \ \ \ \textcolor{keywordflow}{return}\ default\_default\_factory}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00485}00485\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00486}00486\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00487}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a5820844c7bfb5bc0d2cdb3490e5ab0a6}{00487}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a5820844c7bfb5bc0d2cdb3490e5ab0a6}{validate\_str\_is\_valid\_iana\_tz}}(value:\ Any,\ /)\ -\/>\ ZoneInfo:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00488}00488\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(value,\ ZoneInfo):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00490}00490\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ZoneInfo(value)}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00492}00492\ \ \ \ \ \textcolor{keywordflow}{except}\ (ZoneInfoNotFoundError,\ ValueError,\ TypeError):}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ PydanticCustomError(\textcolor{stringliteral}{'zoneinfo\_str'},\ \textcolor{stringliteral}{'invalid\ timezone:\ \{value\}'},\ \{\textcolor{stringliteral}{'value'}:\ value\})}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00494}00494\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00495}00495\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00496}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a6ed9d033990b22e196f5103eae6654aa}{00496}}\ NUMERIC\_VALIDATOR\_LOOKUP:\ dict[str,\ Callable]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00497}00497\ \ \ \ \ \textcolor{stringliteral}{'gt'}:\ greater\_than\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00498}00498\ \ \ \ \ \textcolor{stringliteral}{'ge'}:\ greater\_than\_or\_equal\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00499}00499\ \ \ \ \ \textcolor{stringliteral}{'lt'}:\ less\_than\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00500}00500\ \ \ \ \ \textcolor{stringliteral}{'le'}:\ less\_than\_or\_equal\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00501}00501\ \ \ \ \ \textcolor{stringliteral}{'multiple\_of'}:\ multiple\_of\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00502}00502\ \ \ \ \ \textcolor{stringliteral}{'min\_length'}:\ min\_length\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00503}00503\ \ \ \ \ \textcolor{stringliteral}{'max\_length'}:\ max\_length\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00504}00504\ \ \ \ \ \textcolor{stringliteral}{'max\_digits'}:\ max\_digits\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00505}00505\ \ \ \ \ \textcolor{stringliteral}{'decimal\_places'}:\ decimal\_places\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00506}00506\ \}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00507}00507\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00508}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_a77fb9763e573c74835fd37b9c32f930f}{00508}}\ IpType\ =\ Union[IPv4Address,\ IPv6Address,\ IPv4Network,\ IPv6Network,\ IPv4Interface,\ IPv6Interface]}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00509}00509\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00510}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__validators_ad7e616dba99fa68800ebb3d85cddc094}{00510}}\ IP\_VALIDATOR\_LOOKUP:\ dict[type[IpType],\ Callable]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00511}00511\ \ \ \ \ IPv4Address:\ ip\_v4\_address\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00512}00512\ \ \ \ \ IPv6Address:\ ip\_v6\_address\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00513}00513\ \ \ \ \ IPv4Network:\ ip\_v4\_network\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00514}00514\ \ \ \ \ IPv6Network:\ ip\_v6\_network\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00515}00515\ \ \ \ \ IPv4Interface:\ ip\_v4\_interface\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00516}00516\ \ \ \ \ IPv6Interface:\ ip\_v6\_interface\_validator,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00517}00517\ \}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00518}00518\ }
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00519}00519\ MAPPING\_ORIGIN\_MAP:\ dict[Any,\ Any]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00520}00520\ \ \ \ \ typing.DefaultDict:\ collections.defaultdict,\ \ \textcolor{comment}{\#\ noqa:\ UP006}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00521}00521\ \ \ \ \ collections.defaultdict:\ collections.defaultdict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00522}00522\ \ \ \ \ typing.OrderedDict:\ collections.OrderedDict,\ \ \textcolor{comment}{\#\ noqa:\ UP006}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00523}00523\ \ \ \ \ collections.OrderedDict:\ collections.OrderedDict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00524}00524\ \ \ \ \ typing\_extensions.OrderedDict:\ collections.OrderedDict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00525}00525\ \ \ \ \ typing.Counter:\ collections.Counter,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00526}00526\ \ \ \ \ collections.Counter:\ collections.Counter,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00527}00527\ \ \ \ \ \textcolor{comment}{\#\ this\ doesn't\ handle\ subclasses\ of\ these}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00528}00528\ \ \ \ \ typing.Mapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00529}00529\ \ \ \ \ typing.MutableMapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00530}00530\ \ \ \ \ \textcolor{comment}{\#\ parametrized\ typing.\{Mutable\}Mapping\ creates\ one\ of\ these}}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00531}00531\ \ \ \ \ collections.abc.Mapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00532}00532\ \ \ \ \ collections.abc.MutableMapping:\ dict,}
+\DoxyCodeLine{\Hypertarget{__validators_8py_source_l00533}00533\ \}}
+
+\end{DoxyCode}

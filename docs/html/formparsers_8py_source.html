@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/starlette/formparsers.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('formparsers_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">formparsers.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="formparsers_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespacestarlette_1_1formparsers.html">    1</a></span><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacecollections_1_1abc.html">collections.abc</a> <span class="keyword">import</span> AsyncGenerator</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass, field</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">from</span> enum <span class="keyword">import</span> Enum</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">from</span> tempfile <span class="keyword">import</span> SpooledTemporaryFile</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">from</span> typing <span class="keyword">import</span> TYPE_CHECKING</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> unquote_plus</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacestarlette_1_1datastructures.html">starlette.datastructures</a> <span class="keyword">import</span> FormData, Headers, UploadFile</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keywordflow">if</span> TYPE_CHECKING:</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keyword">import</span> python_multipart <span class="keyword">as</span> multipart</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="keyword">from</span> python_multipart.multipart <span class="keyword">import</span> MultipartCallbacks, QuerystringCallbacks, parse_options_header</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>            <span class="keyword">import</span> python_multipart <span class="keyword">as</span> multipart</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>            <span class="keyword">from</span> python_multipart.multipart <span class="keyword">import</span> parse_options_header</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        <span class="keywordflow">except</span> ModuleNotFoundError:  <span class="comment"># pragma: no cover</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>            <span class="keyword">import</span> multipart</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>            <span class="keyword">from</span> multipart.multipart <span class="keyword">import</span> parse_options_header</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keywordflow">except</span> ModuleNotFoundError:  <span class="comment"># pragma: no cover</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="namespacestarlette_1_1formparsers.html#a227e525dfa8e4d9cb147578f23aff392">   24</a></span>        multipart = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="namespacestarlette_1_1formparsers.html#a296e841db42ef195e7603652ae6ffe2e">   25</a></span>        parse_options_header = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="foldopen" id="foldopen00028" data-start="" data-end="">
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_message.html">   28</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1formparsers_1_1_form_message.html">FormMessage</a>(Enum):</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_message.html#a3d627f4a635481252866214756305f1a">   29</a></span>    FIELD_START = 1</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_message.html#a9d1d5d4711c65ab5a5c3cc13462d729b">   30</a></span>    FIELD_NAME = 2</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_message.html#a44ae9641ec5ff2a57c5a8824ee02c698">   31</a></span>    FIELD_DATA = 3</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_message.html#a9f5438dc71e5a71a93aa82589aefc741">   32</a></span>    FIELD_END = 4</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_message.html#a655d72b0b71e59eed1138a7c786dcce9">   33</a></span>    END = 5</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">@dataclass</span></div>
+</div>
+<div class="foldopen" id="foldopen00037" data-start="" data-end="">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multipart_part.html">   37</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multipart_part.html">MultipartPart</a>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multipart_part.html#a9eae2f3c4d137784ef79ec0048e58a33">   38</a></span>    content_disposition: bytes | <span class="keywordtype">None</span> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multipart_part.html#aff2dff53d5538498dc1256f4e2bbf87d">   39</a></span>    field_name: str = <span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multipart_part.html#ad77eb6adec71ceb26a3732bc2614c065">   40</a></span>    data: bytearray = field(default_factory=bytearray)</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multipart_part.html#a680cc76aa9f414f1ffdd4ce74949cc3a">   41</a></span>    file: UploadFile | <span class="keywordtype">None</span> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multipart_part.html#ae86bab512c4d1efb8b4e66620265e856">   42</a></span>    item_headers: list[tuple[bytes, bytes]] = field(default_factory=list)</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+</div>
+<div class="foldopen" id="foldopen00045" data-start="" data-end="">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="namespacestarlette_1_1formparsers.html#a79e3531a9b54216d510fb0a13b714dd2">   45</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacestarlette_1_1formparsers.html#a79e3531a9b54216d510fb0a13b714dd2">_user_safe_decode</a>(src: bytes | bytearray, codec: str) -&gt; str:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keywordflow">return</span> src.decode(codec)</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">except</span> (UnicodeDecodeError, LookupError):</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">return</span> src.decode(<span class="stringliteral">&quot;latin-1&quot;</span>)</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+</div>
+<div class="foldopen" id="foldopen00052" data-start="" data-end="">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html">   52</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html">MultiPartException</a>(Exception):</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">def </span>__init__(self, message: str) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html#a9d443c532fd967b37a0b923fc9ab1d4f">   54</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html#a9d443c532fd967b37a0b923fc9ab1d4f">message</a> = message</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+</div>
+<div class="foldopen" id="foldopen00057" data-start="" data-end="">
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html">   57</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1formparsers_1_1_form_parser.html">FormParser</a>:</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">def </span>__init__(self, headers: Headers, stream: AsyncGenerator[bytes, <span class="keywordtype">None</span>]) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keyword">assert</span> multipart <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>, <span class="stringliteral">&quot;The `python-multipart` library must be installed to use form parsing.&quot;</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#adfe8ee9ed56883e98b320dd02d3c064b">   60</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#adfe8ee9ed56883e98b320dd02d3c064b">headers</a> = headers</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#a8fa1707a44e7e13e041277619415b250">   61</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a8fa1707a44e7e13e041277619415b250">stream</a> = stream</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">   62</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>: list[tuple[FormMessage, bytes]] = []</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="foldopen" id="foldopen00064" data-start="" data-end="">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#a5deaa39fb5c1b39eda077217f0b41e85">   64</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a5deaa39fb5c1b39eda077217f0b41e85">on_field_start</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        message = (FormMessage.FIELD_START, b<span class="stringliteral">&quot;&quot;</span>)</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>.append(message)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+</div>
+<div class="foldopen" id="foldopen00068" data-start="" data-end="">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#a3c2e0607e5eacf5938ff325eaca36204">   68</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a3c2e0607e5eacf5938ff325eaca36204">on_field_name</a>(self, data: bytes, start: int, end: int) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        message = (FormMessage.FIELD_NAME, data[start:end])</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>.append(message)</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+</div>
+<div class="foldopen" id="foldopen00072" data-start="" data-end="">
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#ae94f475ae462aa93e9e59795e38e55ae">   72</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#ae94f475ae462aa93e9e59795e38e55ae">on_field_data</a>(self, data: bytes, start: int, end: int) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        message = (FormMessage.FIELD_DATA, data[start:end])</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>.append(message)</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+</div>
+<div class="foldopen" id="foldopen00076" data-start="" data-end="">
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#a208511f680f801a5f23344d1e0c38df4">   76</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a208511f680f801a5f23344d1e0c38df4">on_field_end</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        message = (FormMessage.FIELD_END, b<span class="stringliteral">&quot;&quot;</span>)</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>.append(message)</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+</div>
+<div class="foldopen" id="foldopen00080" data-start="" data-end="">
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#a170112ee9397f49906feecea8d3331fd">   80</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a170112ee9397f49906feecea8d3331fd">on_end</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        message = (FormMessage.END, b<span class="stringliteral">&quot;&quot;</span>)</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>.append(message)</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+</div>
+<div class="foldopen" id="foldopen00084" data-start="" data-end="">
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_form_parser.html#adc555df120f6fe7aba6661e9983f6f2d">   84</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#adc555df120f6fe7aba6661e9983f6f2d">parse</a>(self) -&gt; FormData:</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="comment"># Callbacks dictionary.</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        callbacks: QuerystringCallbacks = {</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <span class="stringliteral">&quot;on_field_start&quot;</span>: self.<a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a5deaa39fb5c1b39eda077217f0b41e85">on_field_start</a>,</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            <span class="stringliteral">&quot;on_field_name&quot;</span>: self.<a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a3c2e0607e5eacf5938ff325eaca36204">on_field_name</a>,</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>            <span class="stringliteral">&quot;on_field_data&quot;</span>: self.<a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#ae94f475ae462aa93e9e59795e38e55ae">on_field_data</a>,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            <span class="stringliteral">&quot;on_field_end&quot;</span>: self.<a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a208511f680f801a5f23344d1e0c38df4">on_field_end</a>,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            <span class="stringliteral">&quot;on_end&quot;</span>: self.<a class="code hl_function" href="classstarlette_1_1formparsers_1_1_form_parser.html#a170112ee9397f49906feecea8d3331fd">on_end</a>,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        }</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="comment"># Create the parser.</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        parser = multipart.QuerystringParser(callbacks)</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        field_name = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        field_value = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        items: list[tuple[str, str | UploadFile]] = []</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="comment"># Feed the parser with data from the request.</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keyword">async</span> <span class="keywordflow">for</span> chunk <span class="keywordflow">in</span> self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a8fa1707a44e7e13e041277619415b250">stream</a>:</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            <span class="keywordflow">if</span> chunk:</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                parser.write(chunk)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                parser.finalize()</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            messages = list(self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>)</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">messages</a>.clear()</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            <span class="keywordflow">for</span> message_type, message_bytes <span class="keywordflow">in</span> messages:</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                <span class="keywordflow">if</span> message_type == FormMessage.FIELD_START:</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>                    field_name = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>                    field_value = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>                <span class="keywordflow">elif</span> message_type == FormMessage.FIELD_NAME:</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>                    field_name += message_bytes</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                <span class="keywordflow">elif</span> message_type == FormMessage.FIELD_DATA:</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                    field_value += message_bytes</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                <span class="keywordflow">elif</span> message_type == FormMessage.FIELD_END:</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>                    name = unquote_plus(field_name.decode(<span class="stringliteral">&quot;latin-1&quot;</span>))</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>                    value = unquote_plus(field_value.decode(<span class="stringliteral">&quot;latin-1&quot;</span>))</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                    items.append((name, value))</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classstarlette_1_1datastructures_1_1_form_data.html">FormData</a>(items)</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00125" data-start="" data-end="">
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html">  125</a></span><span class="keyword">class </span><a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html">MultiPartParser</a>:</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adb9c8d6417ecf9030f0b30954fe23d15">  126</a></span>    spool_max_size = 1024 * 1024  <span class="comment"># 1MB</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="stringliteral">&quot;&quot;&quot;The maximum size of the spooled temporary file used to store file data.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a975ea9bde813614aa37d6ee80ea19c6e">  128</a></span>    max_part_size = 1024 * 1024  <span class="comment"># 1MB</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="stringliteral">&quot;&quot;&quot;The maximum size of a part in the multipart request.&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keyword">def </span>__init__(</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        self,</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        headers: Headers,</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        stream: AsyncGenerator[bytes, <span class="keywordtype">None</span>],</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        *,</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        max_files: int | float = 1000,</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        max_fields: int | float = 1000,</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        max_part_size: int = 1024 * 1024,  <span class="comment"># 1MB</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        <span class="keyword">assert</span> multipart <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>, <span class="stringliteral">&quot;The `python-multipart` library must be installed to use form parsing.&quot;</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#ae85654af6b9eaa5d63d6be05c2f9457f">  141</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#ae85654af6b9eaa5d63d6be05c2f9457f">headers</a> = headers</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#abd9b8b22a5f333b813aa3474898f7ded">  142</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#abd9b8b22a5f333b813aa3474898f7ded">stream</a> = stream</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#abe6f4d43b4767d79d2733d21c5c48b3c">  143</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#abe6f4d43b4767d79d2733d21c5c48b3c">max_files</a> = max_files</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5b01fe29ece489185b3cca557f3de325">  144</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5b01fe29ece489185b3cca557f3de325">max_fields</a> = max_fields</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a4bd54e413d4d8d523fffd320cd4c96c1">  145</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a4bd54e413d4d8d523fffd320cd4c96c1">items</a>: list[tuple[str, str | UploadFile]] = []</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a044f84c19b3a0c04c232fd4920ca7ccf">  146</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a044f84c19b3a0c04c232fd4920ca7ccf">_current_files</a> = 0</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#acda406f8571efe455a1b96de1369af42">  147</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#acda406f8571efe455a1b96de1369af42">_current_fields</a> = 0</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5599524cf456a10e0a8812fad4073b99">  148</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5599524cf456a10e0a8812fad4073b99">_current_partial_header_name</a>: bytes = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af86d6bc8d2938c8648c35fde5f69642b">  149</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af86d6bc8d2938c8648c35fde5f69642b">_current_partial_header_value</a>: bytes = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">  150</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a> = <a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multipart_part.html">MultipartPart</a>()</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a444d65772ccdba9d41f63eac975aa810">  151</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a444d65772ccdba9d41f63eac975aa810">_charset</a> = <span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a6e724b5ad48a4b1f4e3a45293d179995">  152</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a6e724b5ad48a4b1f4e3a45293d179995">_file_parts_to_write</a>: list[tuple[MultipartPart, bytes]] = []</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#aed1b7be9dce2018ad500287e87e02266">  153</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#aed1b7be9dce2018ad500287e87e02266">_file_parts_to_finish</a>: list[MultipartPart] = []</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5473ab3551e22896a929e2b284d31e61">  154</a></span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5473ab3551e22896a929e2b284d31e61">_files_to_close_on_error</a>: list[SpooledTemporaryFile[bytes]] = []</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a975ea9bde813614aa37d6ee80ea19c6e">max_part_size</a> = max_part_size</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="foldopen" id="foldopen00157" data-start="" data-end="">
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a8d4cbf4f1884c1d7e1c46c5777c6b2fe">  157</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a8d4cbf4f1884c1d7e1c46c5777c6b2fe">on_part_begin</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a> = <a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multipart_part.html">MultipartPart</a>()</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
+</div>
+<div class="foldopen" id="foldopen00160" data-start="" data-end="">
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a68b3a4ac1bc2ee12c62cfcc3abe2c23b">  160</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a68b3a4ac1bc2ee12c62cfcc3abe2c23b">on_part_data</a>(self, data: bytes, start: int, end: int) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        message_bytes = data[start:end]</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.file <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>            <span class="keywordflow">if</span> len(self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.data) + len(message_bytes) &gt; self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a975ea9bde813614aa37d6ee80ea19c6e">max_part_size</a>:</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>                <span class="keywordflow">raise</span> <a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html">MultiPartException</a>(f<span class="stringliteral">&quot;Part exceeded maximum size of {int(self.max_part_size / 1024)}KB.&quot;</span>)</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.data.extend(message_bytes)</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a6e724b5ad48a4b1f4e3a45293d179995">_file_parts_to_write</a>.append((self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>, message_bytes))</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+</div>
+<div class="foldopen" id="foldopen00169" data-start="" data-end="">
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a3d6738a31f304ddbc897c8cba8afff33">  169</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a3d6738a31f304ddbc897c8cba8afff33">on_part_end</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.file <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a4bd54e413d4d8d523fffd320cd4c96c1">items</a>.append(</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>                (</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>                    self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.field_name,</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>                    <a class="code hl_function" href="namespacestarlette_1_1formparsers.html#a79e3531a9b54216d510fb0a13b714dd2">_user_safe_decode</a>(self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.data, self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a444d65772ccdba9d41f63eac975aa810">_charset</a>),</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>                )</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>            )</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#aed1b7be9dce2018ad500287e87e02266">_file_parts_to_finish</a>.append(self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>)</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>            <span class="comment"># The file can be added to the items right now even though it&#39;s not</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>            <span class="comment"># finished yet, because it will be finished in the `parse()` method, before</span></div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>            <span class="comment"># self.items is used in the return value.</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a4bd54e413d4d8d523fffd320cd4c96c1">items</a>.append((self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.field_name, self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.file))</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
+</div>
+<div class="foldopen" id="foldopen00184" data-start="" data-end="">
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af9c57c67957df4fd0739dc0d84b6d113">  184</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af9c57c67957df4fd0739dc0d84b6d113">on_header_field</a>(self, data: bytes, start: int, end: int) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5599524cf456a10e0a8812fad4073b99">_current_partial_header_name</a> += data[start:end]</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+</div>
+<div class="foldopen" id="foldopen00187" data-start="" data-end="">
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a47a91b804a3a2be9d825707c3b724a3e">  187</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a47a91b804a3a2be9d825707c3b724a3e">on_header_value</a>(self, data: bytes, start: int, end: int) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af86d6bc8d2938c8648c35fde5f69642b">_current_partial_header_value</a> += data[start:end]</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
+</div>
+<div class="foldopen" id="foldopen00190" data-start="" data-end="">
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#aa8c00ab463e1f21a21f9636ec608aa33">  190</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#aa8c00ab463e1f21a21f9636ec608aa33">on_header_end</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        field = self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5599524cf456a10e0a8812fad4073b99">_current_partial_header_name</a>.lower()</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keywordflow">if</span> field == b<span class="stringliteral">&quot;content-disposition&quot;</span>:</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.content_disposition = self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af86d6bc8d2938c8648c35fde5f69642b">_current_partial_header_value</a></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.item_headers.append((field, self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af86d6bc8d2938c8648c35fde5f69642b">_current_partial_header_value</a>))</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5599524cf456a10e0a8812fad4073b99">_current_partial_header_name</a> = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af86d6bc8d2938c8648c35fde5f69642b">_current_partial_header_value</a> = b<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
+</div>
+<div class="foldopen" id="foldopen00198" data-start="" data-end="">
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a7c7e48da7ac9c4660f6e28e4bceae1fc">  198</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a7c7e48da7ac9c4660f6e28e4bceae1fc">on_headers_finished</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        disposition, options = <a class="code hl_variable" href="namespacestarlette_1_1formparsers.html#a296e841db42ef195e7603652ae6ffe2e">parse_options_header</a>(self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.content_disposition)</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.field_name = <a class="code hl_function" href="namespacestarlette_1_1formparsers.html#a79e3531a9b54216d510fb0a13b714dd2">_user_safe_decode</a>(options[b<span class="stringliteral">&quot;name&quot;</span>], self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a444d65772ccdba9d41f63eac975aa810">_charset</a>)</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordflow">except</span> KeyError:</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            <span class="keywordflow">raise</span> <a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html">MultiPartException</a>(<span class="stringliteral">&#39;The Content-Disposition header field &quot;name&quot; must be provided.&#39;</span>)</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="keywordflow">if</span> b<span class="stringliteral">&quot;filename&quot;</span> <span class="keywordflow">in</span> options:</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a044f84c19b3a0c04c232fd4920ca7ccf">_current_files</a> += 1</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>            <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a044f84c19b3a0c04c232fd4920ca7ccf">_current_files</a> &gt; self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#abe6f4d43b4767d79d2733d21c5c48b3c">max_files</a>:</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>                <span class="keywordflow">raise</span> <a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html">MultiPartException</a>(f<span class="stringliteral">&quot;Too many files. Maximum number of files is {self.max_files}.&quot;</span>)</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            filename = <a class="code hl_function" href="namespacestarlette_1_1formparsers.html#a79e3531a9b54216d510fb0a13b714dd2">_user_safe_decode</a>(options[b<span class="stringliteral">&quot;filename&quot;</span>], self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a444d65772ccdba9d41f63eac975aa810">_charset</a>)</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>            tempfile = SpooledTemporaryFile(max_size=self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adb9c8d6417ecf9030f0b30954fe23d15">spool_max_size</a>)</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5473ab3551e22896a929e2b284d31e61">_files_to_close_on_error</a>.append(tempfile)</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.file = <a class="code hl_class" href="classstarlette_1_1datastructures_1_1_upload_file.html">UploadFile</a>(</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>                file=tempfile,  <span class="comment"># type: ignore[arg-type]</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>                size=0,</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>                filename=filename,</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>                headers=<a class="code hl_class" href="classstarlette_1_1datastructures_1_1_headers.html">Headers</a>(raw=self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.item_headers),</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>            )</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#acda406f8571efe455a1b96de1369af42">_current_fields</a> += 1</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>            <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#acda406f8571efe455a1b96de1369af42">_current_fields</a> &gt; self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5b01fe29ece489185b3cca557f3de325">max_fields</a>:</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>                <span class="keywordflow">raise</span> <a class="code hl_class" href="classstarlette_1_1formparsers_1_1_multi_part_exception.html">MultiPartException</a>(f<span class="stringliteral">&quot;Too many fields. Maximum number of fields is {self.max_fields}.&quot;</span>)</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>            self.<a class="code hl_variable" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">_current_part</a>.file = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+</div>
+<div class="foldopen" id="foldopen00223" data-start="" data-end="">
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a953884be09acc7f68b3e7920bebe2353">  223</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a953884be09acc7f68b3e7920bebe2353">on_end</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        <span class="keywordflow">pass</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+</div>
+<div class="foldopen" id="foldopen00226" data-start="" data-end="">
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno"><a class="line" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a38503bca2b673e4addf117e7188adc9d">  226</a></span>    <span class="keyword">async def </span><a class="code hl_function" href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a38503bca2b673e4addf117e7188adc9d">parse</a>(self) -&gt; FormData:</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="comment"># Parse the Content-Type header to get the multipart boundary.</span></div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        _, params = <a class="code hl_variable" href="namespacestarlette_1_1formparsers.html#a296e841db42ef195e7603652ae6ffe2e">parse_options_header</a>(self.headers[<span class="stringliteral">&quot;Content-Type&quot;</span>])</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        charset = params.get(b<span class="stringliteral">&quot;charset&quot;</span>, <span class="stringliteral">&quot;utf-8&quot;</span>)</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="keywordflow">if</span> isinstance(charset, bytes):</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>            charset = charset.decode(<span class="stringliteral">&quot;latin-1&quot;</span>)</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        self._charset = charset</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>            boundary = params[b<span class="stringliteral">&quot;boundary&quot;</span>]</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordflow">except</span> KeyError:</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>            <span class="keywordflow">raise</span> MultiPartException(<span class="stringliteral">&quot;Missing boundary in multipart.&quot;</span>)</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="comment"># Callbacks dictionary.</span></div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        callbacks: MultipartCallbacks = {</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            <span class="stringliteral">&quot;on_part_begin&quot;</span>: self.on_part_begin,</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>            <span class="stringliteral">&quot;on_part_data&quot;</span>: self.on_part_data,</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>            <span class="stringliteral">&quot;on_part_end&quot;</span>: self.on_part_end,</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            <span class="stringliteral">&quot;on_header_field&quot;</span>: self.on_header_field,</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            <span class="stringliteral">&quot;on_header_value&quot;</span>: self.on_header_value,</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            <span class="stringliteral">&quot;on_header_end&quot;</span>: self.on_header_end,</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            <span class="stringliteral">&quot;on_headers_finished&quot;</span>: self.on_headers_finished,</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            <span class="stringliteral">&quot;on_end&quot;</span>: self.on_end,</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        }</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="comment"># Create the parser.</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        parser = multipart.MultipartParser(boundary, callbacks)</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>            <span class="comment"># Feed the parser with data from the request.</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>            <span class="keyword">async</span> <span class="keywordflow">for</span> chunk <span class="keywordflow">in</span> self.stream:</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>                parser.write(chunk)</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>                <span class="comment"># Write file data, it needs to use await with the UploadFile methods</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>                <span class="comment"># that call the corresponding file methods *in a threadpool*,</span></div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>                <span class="comment"># otherwise, if they were called directly in the callback methods above</span></div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>                <span class="comment"># (regular, non-async functions), that would block the event loop in</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                <span class="comment"># the main thread.</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>                <span class="keywordflow">for</span> part, data <span class="keywordflow">in</span> self._file_parts_to_write:</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>                    <span class="keyword">assert</span> part.file  <span class="comment"># for type checkers</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>                    await part.file.write(data)</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>                <span class="keywordflow">for</span> part <span class="keywordflow">in</span> self._file_parts_to_finish:</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>                    <span class="keyword">assert</span> part.file  <span class="comment"># for type checkers</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>                    await part.file.seek(0)</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>                self._file_parts_to_write.clear()</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>                self._file_parts_to_finish.clear()</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        <span class="keywordflow">except</span> MultiPartException <span class="keyword">as</span> exc:</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>            <span class="comment"># Close all the files if there was an error.</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>            <span class="keywordflow">for</span> file <span class="keywordflow">in</span> self._files_to_close_on_error:</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>                file.close()</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>            <span class="keywordflow">raise</span> exc</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        parser.finalize()</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        <span class="keywordflow">return</span> FormData(self.items)</div>
+</div>
+</div>
+<div class="ttc" id="aclassstarlette_1_1datastructures_1_1_form_data_html"><div class="ttname"><a href="classstarlette_1_1datastructures_1_1_form_data.html">starlette.datastructures.FormData</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2datastructures_8py_source.html#l00485">datastructures.py:485</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1datastructures_1_1_headers_html"><div class="ttname"><a href="classstarlette_1_1datastructures_1_1_headers.html">starlette.datastructures.Headers</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2datastructures_8py_source.html#l00503">datastructures.py:503</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1datastructures_1_1_upload_file_html"><div class="ttname"><a href="classstarlette_1_1datastructures_1_1_upload_file.html">starlette.datastructures.UploadFile</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2datastructures_8py_source.html#l00413">datastructures.py:413</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_message_html"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_message.html">starlette.formparsers.FormMessage</a></div><div class="ttdef"><b>Definition</b> <a href="#l00028">formparsers.py:28</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html">starlette.formparsers.FormParser</a></div><div class="ttdef"><b>Definition</b> <a href="#l00057">formparsers.py:57</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_a170112ee9397f49906feecea8d3331fd"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#a170112ee9397f49906feecea8d3331fd">starlette.formparsers.FormParser.on_end</a></div><div class="ttdeci">None on_end(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00080">formparsers.py:80</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_a208511f680f801a5f23344d1e0c38df4"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#a208511f680f801a5f23344d1e0c38df4">starlette.formparsers.FormParser.on_field_end</a></div><div class="ttdeci">None on_field_end(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00076">formparsers.py:76</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_a3c2e0607e5eacf5938ff325eaca36204"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#a3c2e0607e5eacf5938ff325eaca36204">starlette.formparsers.FormParser.on_field_name</a></div><div class="ttdeci">None on_field_name(self, bytes data, int start, int end)</div><div class="ttdef"><b>Definition</b> <a href="#l00068">formparsers.py:68</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_a40618607b45c43c868b16970df91b75b"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#a40618607b45c43c868b16970df91b75b">starlette.formparsers.FormParser.messages</a></div><div class="ttdeci">list messages</div><div class="ttdef"><b>Definition</b> <a href="#l00062">formparsers.py:62</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_a5deaa39fb5c1b39eda077217f0b41e85"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#a5deaa39fb5c1b39eda077217f0b41e85">starlette.formparsers.FormParser.on_field_start</a></div><div class="ttdeci">None on_field_start(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00064">formparsers.py:64</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_a8fa1707a44e7e13e041277619415b250"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#a8fa1707a44e7e13e041277619415b250">starlette.formparsers.FormParser.stream</a></div><div class="ttdeci">stream</div><div class="ttdef"><b>Definition</b> <a href="#l00061">formparsers.py:61</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_adc555df120f6fe7aba6661e9983f6f2d"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#adc555df120f6fe7aba6661e9983f6f2d">starlette.formparsers.FormParser.parse</a></div><div class="ttdeci">FormData parse(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00084">formparsers.py:84</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_adfe8ee9ed56883e98b320dd02d3c064b"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#adfe8ee9ed56883e98b320dd02d3c064b">starlette.formparsers.FormParser.headers</a></div><div class="ttdeci">headers</div><div class="ttdef"><b>Definition</b> <a href="#l00060">formparsers.py:60</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_form_parser_html_ae94f475ae462aa93e9e59795e38e55ae"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_form_parser.html#ae94f475ae462aa93e9e59795e38e55ae">starlette.formparsers.FormParser.on_field_data</a></div><div class="ttdeci">None on_field_data(self, bytes data, int start, int end)</div><div class="ttdef"><b>Definition</b> <a href="#l00072">formparsers.py:72</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_exception_html"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_exception.html">starlette.formparsers.MultiPartException</a></div><div class="ttdef"><b>Definition</b> <a href="#l00052">formparsers.py:52</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_exception_html_a9d443c532fd967b37a0b923fc9ab1d4f"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_exception.html#a9d443c532fd967b37a0b923fc9ab1d4f">starlette.formparsers.MultiPartException.message</a></div><div class="ttdeci">message</div><div class="ttdef"><b>Definition</b> <a href="#l00054">formparsers.py:54</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html">starlette.formparsers.MultiPartParser</a></div><div class="ttdef"><b>Definition</b> <a href="#l00125">formparsers.py:125</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a044f84c19b3a0c04c232fd4920ca7ccf"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a044f84c19b3a0c04c232fd4920ca7ccf">starlette.formparsers.MultiPartParser._current_files</a></div><div class="ttdeci">int _current_files</div><div class="ttdef"><b>Definition</b> <a href="#l00146">formparsers.py:146</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a38503bca2b673e4addf117e7188adc9d"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a38503bca2b673e4addf117e7188adc9d">starlette.formparsers.MultiPartParser.parse</a></div><div class="ttdeci">FormData parse(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00226">formparsers.py:226</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a3d6738a31f304ddbc897c8cba8afff33"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a3d6738a31f304ddbc897c8cba8afff33">starlette.formparsers.MultiPartParser.on_part_end</a></div><div class="ttdeci">None on_part_end(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00169">formparsers.py:169</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a444d65772ccdba9d41f63eac975aa810"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a444d65772ccdba9d41f63eac975aa810">starlette.formparsers.MultiPartParser._charset</a></div><div class="ttdeci">str _charset</div><div class="ttdef"><b>Definition</b> <a href="#l00151">formparsers.py:151</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a47a91b804a3a2be9d825707c3b724a3e"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a47a91b804a3a2be9d825707c3b724a3e">starlette.formparsers.MultiPartParser.on_header_value</a></div><div class="ttdeci">None on_header_value(self, bytes data, int start, int end)</div><div class="ttdef"><b>Definition</b> <a href="#l00187">formparsers.py:187</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a4bd54e413d4d8d523fffd320cd4c96c1"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a4bd54e413d4d8d523fffd320cd4c96c1">starlette.formparsers.MultiPartParser.items</a></div><div class="ttdeci">list items</div><div class="ttdef"><b>Definition</b> <a href="#l00145">formparsers.py:145</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a5473ab3551e22896a929e2b284d31e61"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5473ab3551e22896a929e2b284d31e61">starlette.formparsers.MultiPartParser._files_to_close_on_error</a></div><div class="ttdeci">list _files_to_close_on_error</div><div class="ttdef"><b>Definition</b> <a href="#l00154">formparsers.py:154</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a5599524cf456a10e0a8812fad4073b99"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5599524cf456a10e0a8812fad4073b99">starlette.formparsers.MultiPartParser._current_partial_header_name</a></div><div class="ttdeci">bytes _current_partial_header_name</div><div class="ttdef"><b>Definition</b> <a href="#l00148">formparsers.py:148</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a5b01fe29ece489185b3cca557f3de325"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a5b01fe29ece489185b3cca557f3de325">starlette.formparsers.MultiPartParser.max_fields</a></div><div class="ttdeci">max_fields</div><div class="ttdef"><b>Definition</b> <a href="#l00144">formparsers.py:144</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a68b3a4ac1bc2ee12c62cfcc3abe2c23b"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a68b3a4ac1bc2ee12c62cfcc3abe2c23b">starlette.formparsers.MultiPartParser.on_part_data</a></div><div class="ttdeci">None on_part_data(self, bytes data, int start, int end)</div><div class="ttdef"><b>Definition</b> <a href="#l00160">formparsers.py:160</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a6e724b5ad48a4b1f4e3a45293d179995"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a6e724b5ad48a4b1f4e3a45293d179995">starlette.formparsers.MultiPartParser._file_parts_to_write</a></div><div class="ttdeci">list _file_parts_to_write</div><div class="ttdef"><b>Definition</b> <a href="#l00152">formparsers.py:152</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a7c7e48da7ac9c4660f6e28e4bceae1fc"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a7c7e48da7ac9c4660f6e28e4bceae1fc">starlette.formparsers.MultiPartParser.on_headers_finished</a></div><div class="ttdeci">None on_headers_finished(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00198">formparsers.py:198</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a8d4cbf4f1884c1d7e1c46c5777c6b2fe"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a8d4cbf4f1884c1d7e1c46c5777c6b2fe">starlette.formparsers.MultiPartParser.on_part_begin</a></div><div class="ttdeci">None on_part_begin(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00157">formparsers.py:157</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a953884be09acc7f68b3e7920bebe2353"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a953884be09acc7f68b3e7920bebe2353">starlette.formparsers.MultiPartParser.on_end</a></div><div class="ttdeci">None on_end(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00223">formparsers.py:223</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_a975ea9bde813614aa37d6ee80ea19c6e"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#a975ea9bde813614aa37d6ee80ea19c6e">starlette.formparsers.MultiPartParser.max_part_size</a></div><div class="ttdeci">int max_part_size</div><div class="ttdef"><b>Definition</b> <a href="#l00128">formparsers.py:128</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_aa8c00ab463e1f21a21f9636ec608aa33"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#aa8c00ab463e1f21a21f9636ec608aa33">starlette.formparsers.MultiPartParser.on_header_end</a></div><div class="ttdeci">None on_header_end(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00190">formparsers.py:190</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_abd9b8b22a5f333b813aa3474898f7ded"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#abd9b8b22a5f333b813aa3474898f7ded">starlette.formparsers.MultiPartParser.stream</a></div><div class="ttdeci">stream</div><div class="ttdef"><b>Definition</b> <a href="#l00142">formparsers.py:142</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_abe6f4d43b4767d79d2733d21c5c48b3c"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#abe6f4d43b4767d79d2733d21c5c48b3c">starlette.formparsers.MultiPartParser.max_files</a></div><div class="ttdeci">max_files</div><div class="ttdef"><b>Definition</b> <a href="#l00143">formparsers.py:143</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_acda406f8571efe455a1b96de1369af42"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#acda406f8571efe455a1b96de1369af42">starlette.formparsers.MultiPartParser._current_fields</a></div><div class="ttdeci">int _current_fields</div><div class="ttdef"><b>Definition</b> <a href="#l00147">formparsers.py:147</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_adb9c8d6417ecf9030f0b30954fe23d15"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adb9c8d6417ecf9030f0b30954fe23d15">starlette.formparsers.MultiPartParser.spool_max_size</a></div><div class="ttdeci">int spool_max_size</div><div class="ttdef"><b>Definition</b> <a href="#l00126">formparsers.py:126</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_adbb6ff82841ca69a33a11e1c1f644e3b"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#adbb6ff82841ca69a33a11e1c1f644e3b">starlette.formparsers.MultiPartParser._current_part</a></div><div class="ttdeci">_current_part</div><div class="ttdef"><b>Definition</b> <a href="#l00150">formparsers.py:150</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_ae85654af6b9eaa5d63d6be05c2f9457f"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#ae85654af6b9eaa5d63d6be05c2f9457f">starlette.formparsers.MultiPartParser.headers</a></div><div class="ttdeci">headers</div><div class="ttdef"><b>Definition</b> <a href="#l00141">formparsers.py:141</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_aed1b7be9dce2018ad500287e87e02266"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#aed1b7be9dce2018ad500287e87e02266">starlette.formparsers.MultiPartParser._file_parts_to_finish</a></div><div class="ttdeci">list _file_parts_to_finish</div><div class="ttdef"><b>Definition</b> <a href="#l00153">formparsers.py:153</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_af86d6bc8d2938c8648c35fde5f69642b"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af86d6bc8d2938c8648c35fde5f69642b">starlette.formparsers.MultiPartParser._current_partial_header_value</a></div><div class="ttdeci">bytes _current_partial_header_value</div><div class="ttdef"><b>Definition</b> <a href="#l00149">formparsers.py:149</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multi_part_parser_html_af9c57c67957df4fd0739dc0d84b6d113"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multi_part_parser.html#af9c57c67957df4fd0739dc0d84b6d113">starlette.formparsers.MultiPartParser.on_header_field</a></div><div class="ttdeci">None on_header_field(self, bytes data, int start, int end)</div><div class="ttdef"><b>Definition</b> <a href="#l00184">formparsers.py:184</a></div></div>
+<div class="ttc" id="aclassstarlette_1_1formparsers_1_1_multipart_part_html"><div class="ttname"><a href="classstarlette_1_1formparsers_1_1_multipart_part.html">starlette.formparsers.MultipartPart</a></div><div class="ttdef"><b>Definition</b> <a href="#l00037">formparsers.py:37</a></div></div>
+<div class="ttc" id="anamespacecollections_1_1abc_html"><div class="ttname"><a href="namespacecollections_1_1abc.html">collections.abc</a></div></div>
+<div class="ttc" id="anamespacestarlette_1_1datastructures_html"><div class="ttname"><a href="namespacestarlette_1_1datastructures.html">starlette.datastructures</a></div><div class="ttdef"><b>Definition</b> <a href="starlette_2datastructures_8py_source.html#l00001">datastructures.py:1</a></div></div>
+<div class="ttc" id="anamespacestarlette_1_1formparsers_html_a296e841db42ef195e7603652ae6ffe2e"><div class="ttname"><a href="namespacestarlette_1_1formparsers.html#a296e841db42ef195e7603652ae6ffe2e">starlette.formparsers.parse_options_header</a></div><div class="ttdeci">parse_options_header</div><div class="ttdef"><b>Definition</b> <a href="#l00025">formparsers.py:25</a></div></div>
+<div class="ttc" id="anamespacestarlette_1_1formparsers_html_a79e3531a9b54216d510fb0a13b714dd2"><div class="ttname"><a href="namespacestarlette_1_1formparsers.html#a79e3531a9b54216d510fb0a13b714dd2">starlette.formparsers._user_safe_decode</a></div><div class="ttdeci">str _user_safe_decode(bytes|bytearray src, str codec)</div><div class="ttdef"><b>Definition</b> <a href="#l00045">formparsers.py:45</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_c6002d85afba549a1634e9775b371108.html">starlette</a></li><li class="navelem"><a href="formparsers_8py.html">formparsers.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

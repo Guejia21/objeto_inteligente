@@ -1,0 +1,302 @@
+\doxysection{\+\_\+winconsole.\+py}
+\hypertarget{__winconsole_8py_source}{}\label{__winconsole_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/click/\_winconsole.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/click/\_winconsole.py}}
+\mbox{\hyperlink{__winconsole_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00001}\mbox{\hyperlink{namespaceclick_1_1__winconsole}{00001}}\ \textcolor{comment}{\#\ This\ module\ is\ based\ on\ the\ excellent\ work\ by\ Adam\ Bartoš\ who}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00002}00002\ \textcolor{comment}{\#\ provided\ a\ lot\ of\ what\ went\ into\ the\ implementation\ here\ in}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00003}00003\ \textcolor{comment}{\#\ the\ discussion\ to\ issue1602\ in\ the\ Python\ bug\ tracker.}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00004}00004\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00005}00005\ \textcolor{comment}{\#\ There\ are\ some\ general\ differences\ in\ regards\ to\ how\ this\ works}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00006}00006\ \textcolor{comment}{\#\ compared\ to\ the\ original\ patches\ as\ we\ do\ not\ need\ to\ patch}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00007}00007\ \textcolor{comment}{\#\ the\ entire\ interpreter\ but\ just\ work\ in\ our\ little\ world\ of}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00008}00008\ \textcolor{comment}{\#\ echo\ and\ prompt.}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00011}00011\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{as}\ cabc}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00012}00012\ \textcolor{keyword}{import}\ io}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00013}00013\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00014}00014\ \textcolor{keyword}{import}\ time}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00015}00015\ \textcolor{keyword}{import}\ typing\ \textcolor{keyword}{as}\ t}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00016}00016\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ Array}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00017}00017\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ byref}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00018}00018\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ c\_char}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00019}00019\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ c\_char\_p}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00020}00020\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ c\_int}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00021}00021\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ c\_ssize\_t}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00022}00022\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ c\_ulong}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00023}00023\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ c\_void\_p}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00024}00024\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ POINTER}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00025}00025\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ py\_object}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00026}00026\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ Structure}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00027}00027\ \textcolor{keyword}{from}\ ctypes.wintypes\ \textcolor{keyword}{import}\ DWORD}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00028}00028\ \textcolor{keyword}{from}\ ctypes.wintypes\ \textcolor{keyword}{import}\ HANDLE}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00029}00029\ \textcolor{keyword}{from}\ ctypes.wintypes\ \textcolor{keyword}{import}\ LPCWSTR}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00030}00030\ \textcolor{keyword}{from}\ ctypes.wintypes\ \textcolor{keyword}{import}\ LPWSTR}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00032}00032\ \textcolor{keyword}{from}\ .\_compat\ \textcolor{keyword}{import}\ \_NonClosingTextIOWrapper}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00034}00034\ \textcolor{keyword}{assert}\ sys.platform\ ==\ \textcolor{stringliteral}{"{}win32"{}}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00035}00035\ \textcolor{keyword}{import}\ msvcrt\ \ \textcolor{comment}{\#\ noqa:\ E402}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00036}00036\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ windll\ \ \textcolor{comment}{\#\ noqa:\ E402}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00037}00037\ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ WINFUNCTYPE\ \ \textcolor{comment}{\#\ noqa:\ E402}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00039}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a70b0eecc63b6fd94d525450740b77582}{00039}}\ c\_ssize\_p\ =\ POINTER(c\_ssize\_t)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00041}\mbox{\hyperlink{namespaceclick_1_1__winconsole_af165f3aa5f37ca83a4ba3b5caef8486e}{00041}}\ kernel32\ =\ windll.kernel32}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00042}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a6e215d1203d1a93a25d5d9f88b1f9812}{00042}}\ GetStdHandle\ =\ kernel32.GetStdHandle}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00043}\mbox{\hyperlink{namespaceclick_1_1__winconsole_aaeef18d392c6264aec738a94577b6a7e}{00043}}\ ReadConsoleW\ =\ kernel32.ReadConsoleW}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00044}\mbox{\hyperlink{namespaceclick_1_1__winconsole_ac1a094c2d8a477bdfcb62c0ae08e9211}{00044}}\ WriteConsoleW\ =\ kernel32.WriteConsoleW}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00045}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a3ebdd446b27fb4922df75b8b9474a9fb}{00045}}\ GetConsoleMode\ =\ kernel32.GetConsoleMode}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00046}\mbox{\hyperlink{namespaceclick_1_1__winconsole_ac19c9e2f9077339c9cac2c6951878351}{00046}}\ GetLastError\ =\ kernel32.GetLastError}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00047}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a230e22c7f96649f3846bd494873e3fd1}{00047}}\ GetCommandLineW\ =\ WINFUNCTYPE(LPWSTR)((\textcolor{stringliteral}{"{}GetCommandLineW"{}},\ windll.kernel32))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00048}\mbox{\hyperlink{namespaceclick_1_1__winconsole_aa26247b485f5468b22edabe37ea21b0a}{00048}}\ CommandLineToArgvW\ =\ WINFUNCTYPE(POINTER(LPWSTR),\ LPCWSTR,\ POINTER(c\_int))(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00049}00049\ \ \ \ \ (\textcolor{stringliteral}{"{}CommandLineToArgvW"{}},\ windll.shell32)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00050}00050\ )}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00051}\mbox{\hyperlink{namespaceclick_1_1__winconsole_aa609361eada3539756149a26e2a0b2b1}{00051}}\ LocalFree\ =\ WINFUNCTYPE(c\_void\_p,\ c\_void\_p)((\textcolor{stringliteral}{"{}LocalFree"{}},\ windll.kernel32))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00052}00052\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00053}\mbox{\hyperlink{namespaceclick_1_1__winconsole_acac7c3ad664a6ca4486a24059698a0a6}{00053}}\ STDIN\_HANDLE\ =\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_a6e215d1203d1a93a25d5d9f88b1f9812}{GetStdHandle}}(-\/10)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00054}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a287bdec4be313127853c3981d1f41519}{00054}}\ STDOUT\_HANDLE\ =\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_a6e215d1203d1a93a25d5d9f88b1f9812}{GetStdHandle}}(-\/11)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00055}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a94fd6865603e39a3bb0cb8c92f35698c}{00055}}\ STDERR\_HANDLE\ =\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_a6e215d1203d1a93a25d5d9f88b1f9812}{GetStdHandle}}(-\/12)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00057}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a75406d5ab0a78fd5f0a3dbff747debb6}{00057}}\ PyBUF\_SIMPLE\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00058}\mbox{\hyperlink{namespaceclick_1_1__winconsole_aafe2b1eb1ffaf8158c380f6de9f4d80c}{00058}}\ PyBUF\_WRITABLE\ =\ 1}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00060}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a2c7c3c594d75a9b2cd57f98732936582}{00060}}\ ERROR\_SUCCESS\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00061}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a3a4813ccc1e2dc1753752f4bb60a7a25}{00061}}\ ERROR\_NOT\_ENOUGH\_MEMORY\ =\ 8}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00062}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a2f454b8bdb40ed170fc9e4152ab7248a}{00062}}\ ERROR\_OPERATION\_ABORTED\ =\ 995}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00064}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a741ed0c1bd4f1de164e2ae9c368877e7}{00064}}\ STDIN\_FILENO\ =\ 0}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00065}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a82531cb812b19639dfd8d0131bfc8eaa}{00065}}\ STDOUT\_FILENO\ =\ 1}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00066}\mbox{\hyperlink{namespaceclick_1_1__winconsole_ac7fa8868be851323df18412f02c514fd}{00066}}\ STDERR\_FILENO\ =\ 2}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00068}\mbox{\hyperlink{namespaceclick_1_1__winconsole_acad583b8826d1d297ce7a278d4dd7908}{00068}}\ EOF\ =\ b\textcolor{stringliteral}{"{}\(\backslash\)x1a"{}}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00069}\mbox{\hyperlink{namespaceclick_1_1__winconsole_afb1319d2b2970f001d0ede164fa9d94d}{00069}}\ MAX\_BYTES\_WRITTEN\ =\ 32767}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00071}00071\ \textcolor{keywordflow}{if}\ t.TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00072}00072\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Using\ \`{}typing\_extensions.Buffer`\ instead\ of\ \`{}collections.abc`}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ on\ Windows\ for\ some\ reason\ does\ not\ have\ \`{}Sized`\ implemented.}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Buffer\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00076}00076\ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ Buffer}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00079}00079\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00080}00080\ \ \ \ \ \textcolor{keyword}{from}\ ctypes\ \textcolor{keyword}{import}\ pythonapi}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00081}00081\ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00082}00082\ \ \ \ \ \textcolor{comment}{\#\ On\ PyPy\ we\ cannot\ get\ buffers\ so\ our\ ability\ to\ operate\ here\ is}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00083}00083\ \ \ \ \ \textcolor{comment}{\#\ severely\ limited.}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00084}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a16404a4d00155c771811142851703c7c}{00084}}\ \ \ \ \ get\_buffer\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00085}00085\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00087}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_py__buffer}{00087}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1_py__buffer}{Py\_buffer}}(Structure):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00088}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_py__buffer_a1ce6481bca8a966b21afee250e744f1a}{00088}}\ \ \ \ \ \ \ \ \ \_fields\_\ =\ [\ \ \textcolor{comment}{\#\ noqa:\ RUF012}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}buf"{}},\ c\_void\_p),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}obj"{}},\ py\_object),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}len"{}},\ c\_ssize\_t),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}itemsize"{}},\ c\_ssize\_t),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}readonly"{}},\ c\_int),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}ndim"{}},\ c\_int),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}format"{}},\ c\_char\_p),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}shape"{}},\ c\_ssize\_p),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}strides"{}},\ c\_ssize\_p),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}suboffsets"{}},\ c\_ssize\_p),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}internal"{}},\ c\_void\_p),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00102}\mbox{\hyperlink{namespaceclick_1_1__winconsole_ab21dda40c13d8cc5429f8f9667d3f2a4}{00102}}\ \ \ \ \ PyObject\_GetBuffer\ =\ pythonapi.PyObject\_GetBuffer}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00103}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a6e960250ebda8f3d3ee54af43ee41f5a}{00103}}\ \ \ \ \ PyBuffer\_Release\ =\ pythonapi.PyBuffer\_Release}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00105}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a2a2e41d7ecb2c47668acaf1cf6b514ae}{00105}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1__winconsole_a16404a4d00155c771811142851703c7c}{get\_buffer}}(obj:\ Buffer,\ writable:\ bool\ =\ \textcolor{keyword}{False})\ -\/>\ Array[c\_char]:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ buf\ =\ \mbox{\hyperlink{classclick_1_1__winconsole_1_1_py__buffer}{Py\_buffer}}()}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ flags:\ int\ =\ PyBUF\_WRITABLE\ \textcolor{keywordflow}{if}\ writable\ \textcolor{keywordflow}{else}\ PyBUF\_SIMPLE}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceclick_1_1__winconsole_ab21dda40c13d8cc5429f8f9667d3f2a4}{PyObject\_GetBuffer}}(py\_object(obj),\ byref(buf),\ flags)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ buffer\_type\ =\ c\_char\ *\ buf.len}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ out:\ Array[c\_char]\ =\ buffer\_type.from\_address(buf.buf)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceclick_1_1__winconsole_a6e960250ebda8f3d3ee54af43ee41f5a}{PyBuffer\_Release}}(byref(buf))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00116}00116\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00117}00117\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00118}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base}{00118}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base}{\_WindowsConsoleRawIOBase}}(io.RawIOBase):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00119}00119\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ handle:\ int\ |\ \textcolor{keywordtype}{None})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00120}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base_adabc1bfa1dbccc9aff88002605928d56}{00120}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base_adabc1bfa1dbccc9aff88002605928d56}{handle}}\ =\ handle}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00122}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base_afecf2b5988cfbb0a3d360768c38bd499}{00122}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base_afecf2b5988cfbb0a3d360768c38bd499}{isatty}}(self)\ -\/>\ t.Literal[True]:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ super().\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base_afecf2b5988cfbb0a3d360768c38bd499}{isatty}}()}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00127}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_reader}{00127}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_reader}{\_WindowsConsoleReader}}(\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base}{\_WindowsConsoleRawIOBase}}):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00128}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_reader_a5f8f15e63ed64ccfdd6661304ae6032b}{00128}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_reader_a5f8f15e63ed64ccfdd6661304ae6032b}{readable}}(self)\ -\/>\ t.Literal[True]:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00131}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_reader_a6e668c4898e9552bfb1613a6e7d54f1d}{00131}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_reader_a6e668c4898e9552bfb1613a6e7d54f1d}{readinto}}(self,\ b:\ Buffer)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ bytes\_to\_be\_read\ =\ len(b)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ bytes\_to\_be\_read:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ bytes\_to\_be\_read\ \%\ 2:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}cannot\ read\ odd\ number\ of\ bytes\ from\ UTF-\/16-\/LE\ encoded\ console"{}}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ buffer\ =\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_a16404a4d00155c771811142851703c7c}{get\_buffer}}(b,\ writable=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ code\_units\_to\_be\_read\ =\ bytes\_to\_be\_read\ //\ 2}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ code\_units\_read\ =\ c\_ulong()}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ rv\ =\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_aaeef18d392c6264aec738a94577b6a7e}{ReadConsoleW}}(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ HANDLE(self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base_adabc1bfa1dbccc9aff88002605928d56}{handle}}),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ buffer,}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ code\_units\_to\_be\_read,}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ byref(code\_units\_read),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_ac19c9e2f9077339c9cac2c6951878351}{GetLastError}}()\ ==\ ERROR\_OPERATION\_ABORTED:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ wait\ for\ KeyboardInterrupt}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ time.sleep(0.1)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ rv:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ OSError(f\textcolor{stringliteral}{"{}Windows\ error:\ \{GetLastError()\}"{}})}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00156}00156\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ buffer[0]\ ==\ EOF:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 2\ *\ code\_units\_read.value}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00160}00160\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00161}00161\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00162}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer}{00162}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer}{\_WindowsConsoleWriter}}(\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base}{\_WindowsConsoleRawIOBase}}):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00163}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer_a0ad50e35b857b6b19c551c7a14c2b32f}{00163}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer_a0ad50e35b857b6b19c551c7a14c2b32f}{writable}}(self)\ -\/>\ t.Literal[True]:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00166}00166\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00167}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer_ab9354ea4c887d05cc963a3874e7d9f41}{00167}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer_ab9354ea4c887d05cc963a3874e7d9f41}{\_get\_error\_message}}(errno:\ int)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ errno\ ==\ ERROR\_SUCCESS:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}ERROR\_SUCCESS"{}}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ errno\ ==\ ERROR\_NOT\_ENOUGH\_MEMORY:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{stringliteral}{"{}ERROR\_NOT\_ENOUGH\_MEMORY"{}}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}Windows\ error\ \{errno\}"{}}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00174}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer_a83e9af2d1479dae1fc33e128101805f3}{00174}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer_a83e9af2d1479dae1fc33e128101805f3}{write}}(self,\ b:\ Buffer)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ bytes\_to\_be\_written\ =\ len(b)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ buf\ =\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_a16404a4d00155c771811142851703c7c}{get\_buffer}}(b)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ code\_units\_to\_be\_written\ =\ min(bytes\_to\_be\_written,\ MAX\_BYTES\_WRITTEN)\ //\ 2}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ code\_units\_written\ =\ c\_ulong()}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespaceclick_1_1__winconsole_ac1a094c2d8a477bdfcb62c0ae08e9211}{WriteConsoleW}}(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00181}\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer}{00181}}\ \ \ \ \ \ \ \ \ \ \ \ \ HANDLE(self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_raw_i_o_base_adabc1bfa1dbccc9aff88002605928d56}{handle}}),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ buf,}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ code\_units\_to\_be\_written,}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ byref(code\_units\_written),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ bytes\_written\ =\ 2\ *\ code\_units\_written.value}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ bytes\_written\ ==\ 0\ \textcolor{keywordflow}{and}\ bytes\_to\_be\_written\ >\ 0:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ OSError(self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer_ab9354ea4c887d05cc963a3874e7d9f41}{\_get\_error\_message}}(\mbox{\hyperlink{namespaceclick_1_1__winconsole_ac19c9e2f9077339c9cac2c6951878351}{GetLastError}}()))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ bytes\_written}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00192}00192\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00194}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream}{00194}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream}{ConsoleStream}}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00195}00195\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ text\_stream:\ t.TextIO,\ byte\_stream:\ t.BinaryIO)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00196}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a57afdcdec715c6434f1bd474c7b0b56a}{00196}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a57afdcdec715c6434f1bd474c7b0b56a}{\_text\_stream}}\ =\ text\_stream}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00197}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a7670c5d952d65f16f6f4824276356433}{00197}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a7670c5d952d65f16f6f4824276356433}{buffer}}\ =\ byte\_stream}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00199}00199\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00200}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_ac52446f6bad4b1aff1029201bd62fef0}{00200}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_ac52446f6bad4b1aff1029201bd62fef0}{name}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a7670c5d952d65f16f6f4824276356433}{buffer}}.name}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00203}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a1e33295299f6d530fc9c2d697e9d1981}{00203}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a1e33295299f6d530fc9c2d697e9d1981}{write}}(self,\ x:\ t.AnyStr)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(x,\ str):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a57afdcdec715c6434f1bd474c7b0b56a}{\_text\_stream}}.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a1e33295299f6d530fc9c2d697e9d1981}{write}}(x)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ self.flush()}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a7670c5d952d65f16f6f4824276356433}{buffer}}.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a1e33295299f6d530fc9c2d697e9d1981}{write}}(x)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00211}00211\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00212}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a0d893cf8f255aad30c04c607926b57d6}{00212}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a0d893cf8f255aad30c04c607926b57d6}{writelines}}(self,\ lines:\ cabc.Iterable[t.AnyStr])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ line\ \textcolor{keywordflow}{in}\ lines:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a1e33295299f6d530fc9c2d697e9d1981}{write}}(line)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00215}00215\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00216}00216\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getattr\_\_(self,\ name:\ str)\ -\/>\ t.Any:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a57afdcdec715c6434f1bd474c7b0b56a}{\_text\_stream}},\ name)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00219}\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_ad5b72cf06be46f61077cb0f1e7de5dbf}{00219}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_ad5b72cf06be46f61077cb0f1e7de5dbf}{isatty}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_a7670c5d952d65f16f6f4824276356433}{buffer}}.\mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream_ad5b72cf06be46f61077cb0f1e7de5dbf}{isatty}}()}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00222}00222\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}<ConsoleStream\ name=\{self.name!r\}\ encoding=\{self.encoding!r\}>"{}}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00226}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a66689e2a9558bffe6ec6317af6a370bc}{00226}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1__winconsole_a66689e2a9558bffe6ec6317af6a370bc}{\_get\_text\_stdin}}(buffer\_stream:\ t.BinaryIO)\ -\/>\ t.TextIO:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00227}00227\ \ \ \ \ text\_stream\ =\ \mbox{\hyperlink{classclick_1_1__compat_1_1___non_closing_text_i_o_wrapper}{\_NonClosingTextIOWrapper}}(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ io.BufferedReader(\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_reader}{\_WindowsConsoleReader}}(STDIN\_HANDLE)),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}utf-\/16-\/le"{}},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}strict"{}},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ line\_buffering=\textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00232}00232\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00233}00233\ \ \ \ \ \textcolor{keywordflow}{return}\ t.cast(t.TextIO,\ \mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream}{ConsoleStream}}(text\_stream,\ buffer\_stream))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00235}00235\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00236}\mbox{\hyperlink{namespaceclick_1_1__winconsole_af92589d3d3210e097a0e16efb016cfcd}{00236}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1__winconsole_af92589d3d3210e097a0e16efb016cfcd}{\_get\_text\_stdout}}(buffer\_stream:\ t.BinaryIO)\ -\/>\ t.TextIO:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00237}00237\ \ \ \ \ text\_stream\ =\ \mbox{\hyperlink{classclick_1_1__compat_1_1___non_closing_text_i_o_wrapper}{\_NonClosingTextIOWrapper}}(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ io.BufferedWriter(\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer}{\_WindowsConsoleWriter}}(STDOUT\_HANDLE)),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}utf-\/16-\/le"{}},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}strict"{}},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ line\_buffering=\textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00242}00242\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00243}00243\ \ \ \ \ \textcolor{keywordflow}{return}\ t.cast(t.TextIO,\ \mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream}{ConsoleStream}}(text\_stream,\ buffer\_stream))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00245}00245\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00246}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a25a2e753ad57056e2aca693b90f9887f}{00246}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1__winconsole_a25a2e753ad57056e2aca693b90f9887f}{\_get\_text\_stderr}}(buffer\_stream:\ t.BinaryIO)\ -\/>\ t.TextIO:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00247}00247\ \ \ \ \ text\_stream\ =\ \mbox{\hyperlink{classclick_1_1__compat_1_1___non_closing_text_i_o_wrapper}{\_NonClosingTextIOWrapper}}(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ io.BufferedWriter(\mbox{\hyperlink{classclick_1_1__winconsole_1_1___windows_console_writer}{\_WindowsConsoleWriter}}(STDERR\_HANDLE)),}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}utf-\/16-\/le"{}},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}strict"{}},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ line\_buffering=\textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00252}00252\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00253}00253\ \ \ \ \ \textcolor{keywordflow}{return}\ t.cast(t.TextIO,\ \mbox{\hyperlink{classclick_1_1__winconsole_1_1_console_stream}{ConsoleStream}}(text\_stream,\ buffer\_stream))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00254}00254\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00255}00255\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00256}\mbox{\hyperlink{namespaceclick_1_1__winconsole_ac953917d02385b4544c756008c964dde}{00256}}\ \_stream\_factories:\ cabc.Mapping[int,\ t.Callable[[t.BinaryIO],\ t.TextIO]]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00257}00257\ \ \ \ \ 0:\ \_get\_text\_stdin,}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00258}00258\ \ \ \ \ 1:\ \_get\_text\_stdout,}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00259}00259\ \ \ \ \ 2:\ \_get\_text\_stderr,}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00260}00260\ \}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00262}00262\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00263}\mbox{\hyperlink{namespaceclick_1_1__winconsole_abd51d5c42be6368b0410c12bd6bada09}{00263}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1__winconsole_abd51d5c42be6368b0410c12bd6bada09}{\_is\_console}}(f:\ t.TextIO)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00264}00264\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(f,\ \textcolor{stringliteral}{"{}fileno"{}}):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00267}00267\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ fileno\ =\ f.fileno()}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00269}00269\ \ \ \ \ \textcolor{keywordflow}{except}\ (OSError,\ io.UnsupportedOperation):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00272}00272\ \ \ \ \ handle\ =\ msvcrt.get\_osfhandle(fileno)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00273}00273\ \ \ \ \ \textcolor{keywordflow}{return}\ bool(\mbox{\hyperlink{namespaceclick_1_1__winconsole_a3ebdd446b27fb4922df75b8b9474a9fb}{GetConsoleMode}}(handle,\ byref(DWORD())))}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00274}00274\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00276}\mbox{\hyperlink{namespaceclick_1_1__winconsole_a89a28ca75be40639344d2ea2e4f5a32b}{00276}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceclick_1_1__winconsole_a89a28ca75be40639344d2ea2e4f5a32b}{\_get\_windows\_console\_stream}}(}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00277}00277\ \ \ \ \ f:\ t.TextIO,\ encoding:\ str\ |\ \textcolor{keywordtype}{None},\ errors:\ str\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00278}00278\ )\ -\/>\ t.TextIO\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00279}00279\ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ get\_buffer\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ encoding\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ \{\textcolor{stringliteral}{"{}utf-\/16-\/le"{}},\ \textcolor{keywordtype}{None}\}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ errors\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ \{\textcolor{stringliteral}{"{}strict"{}},\ \textcolor{keywordtype}{None}\}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ \mbox{\hyperlink{namespaceclick_1_1__winconsole_abd51d5c42be6368b0410c12bd6bada09}{\_is\_console}}(f)}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00284}00284\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00286}00286\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00287}00287\ \ \ \ \ func\ =\ \_stream\_factories.get(f.fileno())}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00288}00288\ \ \ \ \ \textcolor{keywordflow}{if}\ func\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00290}00290\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00291}00291\ \ \ \ \ b\ =\ getattr(f,\ \textcolor{stringliteral}{"{}buffer"{}},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00292}00292\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00293}00293\ \ \ \ \ \textcolor{keywordflow}{if}\ b\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00295}00295\ }
+\DoxyCodeLine{\Hypertarget{__winconsole_8py_source_l00296}00296\ \ \ \ \ \textcolor{keywordflow}{return}\ func(b)}
+
+\end{DoxyCode}

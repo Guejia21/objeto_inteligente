@@ -1,0 +1,389 @@
+\doxysection{build\+\_\+ext.\+py}
+\hypertarget{command_2build__ext_8py_source}{}\label{command_2build__ext_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/build\_ext.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/build\_ext.py}}
+\mbox{\hyperlink{command_2build__ext_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext}{00001}}\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00002}00002\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00003}00003\ \textcolor{keyword}{import}\ itertools}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00004}00004\ \textcolor{keyword}{from}\ importlib.machinery\ \textcolor{keyword}{import}\ EXTENSION\_SUFFIXES}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00005}00005\ \textcolor{keyword}{from}\ importlib.util\ \textcolor{keyword}{import}\ cache\_from\_source\ \textcolor{keyword}{as}\ \_compiled\_file\_name}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00006}00006\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Dict,\ Iterator,\ List,\ Tuple}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00008}00008\ \textcolor{keyword}{from}\ distutils.command.build\_ext\ \textcolor{keyword}{import}\ build\_ext\ \textcolor{keyword}{as}\ \_du\_build\_ext}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00009}00009\ \textcolor{keyword}{from}\ distutils.ccompiler\ \textcolor{keyword}{import}\ new\_compiler}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00010}00010\ \textcolor{keyword}{from}\ distutils.sysconfig\ \textcolor{keyword}{import}\ customize\_compiler,\ get\_config\_var}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00011}00011\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00013}00013\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1errors}{setuptools.errors}}\ \textcolor{keyword}{import}\ BaseError}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00014}00014\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1extension}{setuptools.extension}}\ \textcolor{keyword}{import}\ Extension,\ Library}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00016}00016\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00017}00017\ \ \ \ \ \textcolor{comment}{\#\ Attempt\ to\ use\ Cython\ for\ building\ extensions,\ if\ available}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00018}00018\ \ \ \ \ \textcolor{keyword}{from}\ Cython.Distutils.build\_ext\ \textcolor{keyword}{import}\ build\_ext\ \textcolor{keyword}{as}\ \_build\_ext}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00019}00019\ \ \ \ \ \textcolor{comment}{\#\ Additionally,\ assert\ that\ the\ compiler\ module\ will\ load}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00020}00020\ \ \ \ \ \textcolor{comment}{\#\ also.\ Ref\ \#1229.}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00021}00021\ \ \ \ \ \_\_import\_\_(\textcolor{stringliteral}{'Cython.Compiler.Main'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00022}00022\ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00023}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a608cc05f8cd4907b6a14eb5971f7876d}{00023}}\ \ \ \ \ \_build\_ext\ =\ \_du\_build\_ext}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00025}00025\ \textcolor{comment}{\#\ make\ sure\ \_config\_vars\ is\ initialized}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00026}00026\ get\_config\_var(\textcolor{stringliteral}{"{}LDSHARED"{}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00027}00027\ \textcolor{keyword}{from}\ distutils.sysconfig\ \textcolor{keyword}{import}\ \_config\_vars\ \textcolor{keyword}{as}\ \_CONFIG\_VARS\ \ \textcolor{comment}{\#\ noqa}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00030}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aaabc99aae422a39720b2ef02cfa2d855}{00030}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aaabc99aae422a39720b2ef02cfa2d855}{\_customize\_compiler\_for\_shlib}}(compiler):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00031}00031\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.platform\ ==\ \textcolor{stringliteral}{"{}darwin"{}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ building\ .dylib\ requires\ additional\ compiler\ flags\ on\ OSX;\ here\ we}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ temporarily\ substitute\ the\ pyconfig.h\ variables\ so\ that\ distutils'}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ 'customize\_compiler'\ uses\ them\ before\ we\ build\ the\ shared\ libraries.}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ tmp\ =\ \_CONFIG\_VARS.copy()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ Help!\ \ I\ don't\ have\ any\ idea\ whether\ these\ are\ right...}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \_CONFIG\_VARS[\textcolor{stringliteral}{'LDSHARED'}]\ =\ (}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}gcc\ -\/Wl,-\/x\ -\/dynamiclib\ -\/undefined\ dynamic\_lookup"{}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \_CONFIG\_VARS[\textcolor{stringliteral}{'CCSHARED'}]\ =\ \textcolor{stringliteral}{"{}\ -\/dynamiclib"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \_CONFIG\_VARS[\textcolor{stringliteral}{'SO'}]\ =\ \textcolor{stringliteral}{"{}.dylib"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ customize\_compiler(compiler)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \_CONFIG\_VARS.clear()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \_CONFIG\_VARS.update(tmp)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00046}00046\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ customize\_compiler(compiler)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00050}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a72aec6a687c5be3341dc37d8b017c4c9}{00050}}\ have\_rtld\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00051}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a2a27c3423f10a8f057c2f558bb7e7dab}{00051}}\ use\_stubs\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00052}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aa0dcb2a258b943cb1e88fcc25b346013}{00052}}\ libtype\ =\ \textcolor{stringliteral}{'shared'}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00054}00054\ \textcolor{keywordflow}{if}\ sys.platform\ ==\ \textcolor{stringliteral}{"{}darwin"{}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00055}00055\ \ \ \ \ use\_stubs\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00056}00056\ \textcolor{keywordflow}{elif}\ os.name\ !=\ \textcolor{stringliteral}{'nt'}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00057}00057\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ dl}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ use\_stubs\ =\ have\_rtld\ =\ hasattr(dl,\ \textcolor{stringliteral}{'RTLD\_NOW'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00060}00060\ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00064}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a3eec0f07d99bc904c347c09edbf7cc83}{00064}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a3eec0f07d99bc904c347c09edbf7cc83}{if\_dl}}(s):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{return}\ s\ \textcolor{keywordflow}{if}\ have\_rtld\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{''}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00068}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aaa6cbedc57264542b3f76a50485ffc3c}{00068}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aaa6cbedc57264542b3f76a50485ffc3c}{get\_abi3\_suffix}}():}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00069}00069\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ the\ file\ extension\ for\ an\ abi3-\/compliant\ Extension()"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{for}\ suffix\ \textcolor{keywordflow}{in}\ EXTENSION\_SUFFIXES:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'.abi3'}\ \textcolor{keywordflow}{in}\ suffix:\ \ \textcolor{comment}{\#\ Unix}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ suffix}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ suffix\ ==\ \textcolor{stringliteral}{'.pyd'}:\ \ \textcolor{comment}{\#\ Windows}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ suffix}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00077}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext}{00077}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext}{build\_ext}}(\_build\_ext):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00078}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af55e829eff494c4ff687e52b68bd53f6}{00078}}\ \ \ \ \ editable\_mode:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00079}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa24f1e18f75207103426489127bbb9}{00079}}\ \ \ \ \ inplace:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00081}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ac8ae0b43e3218d2ca2264e3e59fadf48}{00081}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ac8ae0b43e3218d2ca2264e3e59fadf48}{run}}(self):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Build\ extensions\ in\ build\ directory,\ then\ copy\ if\ -\/-\/inplace"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ old\_inplace,\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa24f1e18f75207103426489127bbb9}{inplace}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa24f1e18f75207103426489127bbb9}{inplace}},\ 0}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \_build\_ext.run(self)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa24f1e18f75207103426489127bbb9}{inplace}}\ =\ old\_inplace}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ old\_inplace:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30021dcf19f0ff1f9a9370f5b54b4c24}{copy\_extensions\_to\_source}}()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00089}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ad82b76571f000122fe51ca24ad3b58ec}{00089}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ad82b76571f000122fe51ca24ad3b58ec}{\_get\_inplace\_equivalent}}(self,\ build\_py,\ ext:\ Extension)\ -\/>\ Tuple[str,\ str]:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ fullname\ =\ self.get\_ext\_fullname(ext.name)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ filename\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a6bffadac091b985c6a932adce550024a}{get\_ext\_filename}}(fullname)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ modpath\ =\ fullname.split(\textcolor{stringliteral}{'.'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ package\ =\ \textcolor{stringliteral}{'.'}.join(modpath[:-\/1])}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ package\_dir\ =\ build\_py.get\_package\_dir(package)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ inplace\_file\ =\ os.path.join(package\_dir,\ os.path.basename(filename))}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ regular\_file\ =\ os.path.join(self.build\_lib,\ filename)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (inplace\_file,\ regular\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00099}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30021dcf19f0ff1f9a9370f5b54b4c24}{00099}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30021dcf19f0ff1f9a9370f5b54b4c24}{copy\_extensions\_to\_source}}(self):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ build\_py\ =\ self.get\_finalized\_command(\textcolor{stringliteral}{'build\_py'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00101}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{00101}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ inplace\_file,\ regular\_file\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ad82b76571f000122fe51ca24ad3b58ec}{\_get\_inplace\_equivalent}}(build\_py,\ ext)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Always\ copy,\ even\ if\ source\ is\ older\ than\ destination,\ to\ ensure}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ that\ the\ right\ extensions\ for\ the\ current\ Python/platform\ are}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ used.}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(regular\_file)\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ ext.optional:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.copy\_file(regular\_file,\ inplace\_file,\ level=self.verbose)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00109}00109\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ext.\_needs\_stub:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ inplace\_stub\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af1fbcd643fe822aaf6abeccb072b992f}{\_get\_equivalent\_stub}}(ext,\ inplace\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a4db034aa538b257f40578812400f6c05}{\_write\_stub\_file}}(inplace\_stub,\ ext,\ compile=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Always\ compile\ stub\ and\ remove\ the\ original\ (leave\ the\ cache\ behind)}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (this\ behaviour\ was\ observed\ in\ previous\ iterations\ of\ the\ code)}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00116}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af1fbcd643fe822aaf6abeccb072b992f}{00116}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af1fbcd643fe822aaf6abeccb072b992f}{\_get\_equivalent\_stub}}(self,\ ext:\ Extension,\ output\_file:\ str)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ dir\_\ =\ os.path.dirname(output\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \_,\ \_,\ name\ =\ ext.name.rpartition(\textcolor{stringliteral}{"{}."{}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f\textcolor{stringliteral}{"{}\{os.path.join(dir\_,\ name)\}.py"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00121}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a4f0a4a5298f81ab7bf543e086bb6941f}{00121}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a4f0a4a5298f81ab7bf543e086bb6941f}{\_get\_output\_mapping}}(self)\ -\/>\ Iterator[Tuple[str,\ str]]:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa24f1e18f75207103426489127bbb9}{inplace}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ build\_py\ =\ self.get\_finalized\_command(\textcolor{stringliteral}{'build\_py'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ opt\ =\ self.get\_finalized\_command(\textcolor{stringliteral}{'install\_lib'}).optimize\ \textcolor{keywordflow}{or}\ \textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00127}00127\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ inplace\_file,\ regular\_file\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ad82b76571f000122fe51ca24ad3b58ec}{\_get\_inplace\_equivalent}}(build\_py,\ ext)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ (regular\_file,\ inplace\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00131}00131\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ext.\_needs\_stub:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ version\ of\ \`{}build\_ext`\ always\ builds\ artifacts\ in\ another\ dir,}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ when\ "{}inplace=True"{}\ is\ given\ it\ just\ copies\ them\ back.}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ done\ in\ the\ \`{}copy\_extensions\_to\_source`\ function,\ which}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ always\ compile\ stub\ files\ via\ \`{}\_compile\_and\_remove\_stub`.}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ At\ the\ end\ of\ the\ process,\ a\ \`{}.pyc`\ stub\ file\ is\ created\ without\ the}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ corresponding\ \`{}.py`.}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ inplace\_stub\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af1fbcd643fe822aaf6abeccb072b992f}{\_get\_equivalent\_stub}}(ext,\ inplace\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ regular\_stub\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af1fbcd643fe822aaf6abeccb072b992f}{\_get\_equivalent\_stub}}(ext,\ regular\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ inplace\_cache\ =\ \_compiled\_file\_name(inplace\_stub,\ optimization=opt)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\_cache\ =\ \_compiled\_file\_name(regular\_stub,\ optimization=opt)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ (output\_cache,\ inplace\_cache)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00145}00145\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00146}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a6bffadac091b985c6a932adce550024a}{00146}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a6bffadac091b985c6a932adce550024a}{get\_ext\_filename}}(self,\ fullname):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ so\_ext\ =\ os.getenv(\textcolor{stringliteral}{'SETUPTOOLS\_EXT\_SUFFIX'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ so\_ext:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ filename\ =\ os.path.join(*fullname.split(\textcolor{stringliteral}{'.'}))\ +\ so\_ext}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ filename\ =\ \_build\_ext.get\_ext\_filename(self,\ fullname)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ so\_ext\ =\ get\_config\_var(\textcolor{stringliteral}{'EXT\_SUFFIX'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00154}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a18dd1f744b6a1e60569c06db0f3f727e}{00154}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fullname\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a18dd1f744b6a1e60569c06db0f3f727e}{ext\_map}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ ext\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a18dd1f744b6a1e60569c06db0f3f727e}{ext\_map}}[fullname]}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ use\_abi3\ =\ getattr(ext,\ \textcolor{stringliteral}{'py\_limited\_api'})\ \textcolor{keywordflow}{and}\ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aaa6cbedc57264542b3f76a50485ffc3c}{get\_abi3\_suffix}}()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ use\_abi3:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ filename\ =\ filename[:-\/len(so\_ext)]}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ so\_ext\ =\ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aaa6cbedc57264542b3f76a50485ffc3c}{get\_abi3\_suffix}}()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ filename\ =\ filename\ +\ so\_ext}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ext,\ Library):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fn,\ ext\ =\ os.path.splitext(filename)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a1c1a12eddf646ce19ed053e946a20450}{shlib\_compiler}}.library\_filename(fn,\ libtype)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ use\_stubs\ \textcolor{keywordflow}{and}\ ext.\_links\_to\_dynamic:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ d,\ fn\ =\ os.path.split(filename)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ os.path.join(d,\ \textcolor{stringliteral}{'dl-\/'}\ +\ fn)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ filename}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00169}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_afd152f3ca70a4c427e584e52f0cfde47}{00169}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_afd152f3ca70a4c427e584e52f0cfde47}{initialize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \_build\_ext.initialize\_options(self)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00171}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a1c1a12eddf646ce19ed053e946a20450}{00171}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a1c1a12eddf646ce19ed053e946a20450}{shlib\_compiler}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00172}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7257aa92d9e39103503d998b89adfc33}{00172}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7257aa92d9e39103503d998b89adfc33}{shlibs}}\ =\ []}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a18dd1f744b6a1e60569c06db0f3f727e}{ext\_map}}\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af55e829eff494c4ff687e52b68bd53f6}{editable\_mode}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00176}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_aa012ff067120658b1111093b4121ac0c}{00176}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_aa012ff067120658b1111093b4121ac0c}{finalize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \_build\_ext.finalize\_options(self)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}\ \textcolor{keywordflow}{or}\ []}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ self.check\_extensions\_list(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7257aa92d9e39103503d998b89adfc33}{shlibs}}\ =\ [ext\ \textcolor{keywordflow}{for}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ext,\ Library)]}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7257aa92d9e39103503d998b89adfc33}{shlibs}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7fb83b77d035b8a765240bfba1a32a43}{setup\_shlib\_compiler}}()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ ext.\_full\_name\ =\ self.get\_ext\_fullname(ext.name)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ fullname\ =\ ext.\_full\_name}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a18dd1f744b6a1e60569c06db0f3f727e}{ext\_map}}[fullname]\ =\ ext}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ distutils\ 3.1\ will\ also\ ask\ for\ module\ names}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ what\ to\ do\ with\ conflicts?}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a18dd1f744b6a1e60569c06db0f3f727e}{ext\_map}}[fullname.split(\textcolor{stringliteral}{'.'})[-\/1]]\ =\ ext}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ ltd\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7257aa92d9e39103503d998b89adfc33}{shlibs}}\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a9638ea6fa2835b1d9acd0700f2da9bcb}{links\_to\_dynamic}}(ext)\ \textcolor{keywordflow}{or}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ ns\ =\ ltd\ \textcolor{keywordflow}{and}\ use\_stubs\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ isinstance(ext,\ Library)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ ext.\_links\_to\_dynamic\ =\ ltd}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ ext.\_needs\_stub\ =\ ns}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ filename\ =\ ext.\_file\_name\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a6bffadac091b985c6a932adce550024a}{get\_ext\_filename}}(fullname)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ libdir\ =\ os.path.dirname(os.path.join(self.build\_lib,\ filename))}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ltd\ \textcolor{keywordflow}{and}\ libdir\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ ext.library\_dirs:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext.library\_dirs.append(libdir)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ltd\ \textcolor{keywordflow}{and}\ use\_stubs\ \textcolor{keywordflow}{and}\ os.curdir\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ ext.runtime\_library\_dirs:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext.runtime\_library\_dirs.append(os.curdir)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00204}00204\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_af55e829eff494c4ff687e52b68bd53f6}{editable\_mode}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa24f1e18f75207103426489127bbb9}{inplace}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00207}00207\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00208}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7fb83b77d035b8a765240bfba1a32a43}{00208}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7fb83b77d035b8a765240bfba1a32a43}{setup\_shlib\_compiler}}(self):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ compiler\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a1c1a12eddf646ce19ed053e946a20450}{shlib\_compiler}}\ =\ new\_compiler(}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ compiler=self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a05532b93ff94ae0da5908b6973439c2a}{compiler}},\ dry\_run=self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a56475236f5408332bf1aade27a68994a}{dry\_run}},\ force=self.force}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_aaabc99aae422a39720b2ef02cfa2d855}{\_customize\_compiler\_for\_shlib}}(compiler)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00213}00213\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a23052aaa408ebac8f413e670ea329456}{include\_dirs}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00215}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a23052aaa408ebac8f413e670ea329456}{00215}}\ \ \ \ \ \ \ \ \ \ \ \ \ compiler.set\_include\_dirs(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a23052aaa408ebac8f413e670ea329456}{include\_dirs}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ad4c6d842c635a14e462eb42c8c6b9a5e}{define}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ 'define'\ option\ is\ a\ list\ of\ (name,value)\ tuples}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00218}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ad4c6d842c635a14e462eb42c8c6b9a5e}{00218}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (name,\ value)\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_ad4c6d842c635a14e462eb42c8c6b9a5e}{define}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ compiler.define\_macro(name,\ value)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa89eac38e9fb893487c0b65bf846ff}{undef}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00221}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa89eac38e9fb893487c0b65bf846ff}{00221}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ macro\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa89eac38e9fb893487c0b65bf846ff}{undef}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ compiler.undefine\_macro(macro)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_aff79fcb8faa5098d6f964158386a4894}{libraries}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00224}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_aff79fcb8faa5098d6f964158386a4894}{00224}}\ \ \ \ \ \ \ \ \ \ \ \ \ compiler.set\_libraries(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_aff79fcb8faa5098d6f964158386a4894}{libraries}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a2b284562afeec85afa1bb96d4cae37bf}{library\_dirs}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00226}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a2b284562afeec85afa1bb96d4cae37bf}{00226}}\ \ \ \ \ \ \ \ \ \ \ \ \ compiler.set\_library\_dirs(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a2b284562afeec85afa1bb96d4cae37bf}{library\_dirs}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a8d27af7589d8e318dadf5dca05309a53}{rpath}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00228}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a8d27af7589d8e318dadf5dca05309a53}{00228}}\ \ \ \ \ \ \ \ \ \ \ \ \ compiler.set\_runtime\_library\_dirs(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a8d27af7589d8e318dadf5dca05309a53}{rpath}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a8d3e0c069c2f6459d24c1d57edf759bb}{link\_objects}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00230}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a8d3e0c069c2f6459d24c1d57edf759bb}{00230}}\ \ \ \ \ \ \ \ \ \ \ \ \ compiler.set\_link\_objects(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a8d3e0c069c2f6459d24c1d57edf759bb}{link\_objects}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ hack\ so\ distutils'\ build\_extension()\ builds\ a\ library\ instead}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ compiler.link\_shared\_object\ =\ link\_shared\_object.\_\_get\_\_(compiler)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00234}00234\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00235}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a95aaae87f5218ee6b3ac97f925ba16b5}{00235}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a95aaae87f5218ee6b3ac97f925ba16b5}{get\_export\_symbols}}(self,\ ext):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ext,\ Library):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext.export\_symbols}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_build\_ext.get\_export\_symbols(self,\ ext)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00239}00239\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00240}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a2363ae394546e011591b3df12f5039d2}{00240}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a2363ae394546e011591b3df12f5039d2}{build\_extension}}(self,\ ext):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ ext.\_convert\_pyx\_sources\_to\_lang()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \_compiler\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a05532b93ff94ae0da5908b6973439c2a}{compiler}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ext,\ Library):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00245}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a05532b93ff94ae0da5908b6973439c2a}{00245}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a05532b93ff94ae0da5908b6973439c2a}{compiler}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a1c1a12eddf646ce19ed053e946a20450}{shlib\_compiler}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \_build\_ext.build\_extension(self,\ ext)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ext.\_needs\_stub:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ build\_lib\ =\ self.get\_finalized\_command(\textcolor{stringliteral}{'build\_py'}).build\_lib}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a12cee388eb225ffe4dc09e2759be334c}{write\_stub}}(build\_lib,\ ext)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a05532b93ff94ae0da5908b6973439c2a}{compiler}}\ =\ \_compiler}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00252}00252\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00253}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a9638ea6fa2835b1d9acd0700f2da9bcb}{00253}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a9638ea6fa2835b1d9acd0700f2da9bcb}{links\_to\_dynamic}}(self,\ ext):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ true\ if\ 'ext'\ links\ to\ a\ dynamic\ lib\ in\ the\ same\ package"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ this\ should\ check\ to\ ensure\ the\ lib\ is\ actually\ being\ built}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ as\ dynamic,\ and\ not\ just\ using\ a\ locally-\/found\ version\ or\ a}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ static-\/compiled\ version}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ libnames\ =\ dict.fromkeys([lib.\_full\_name\ \textcolor{keywordflow}{for}\ lib\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7257aa92d9e39103503d998b89adfc33}{shlibs}}])}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ pkg\ =\ \textcolor{stringliteral}{'.'}.join(ext.\_full\_name.split(\textcolor{stringliteral}{'.'})[:-\/1]\ +\ [\textcolor{stringliteral}{''}])}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ any(pkg\ +\ libname\ \textcolor{keywordflow}{in}\ libnames\ \textcolor{keywordflow}{for}\ libname\ \textcolor{keywordflow}{in}\ ext.libraries)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00262}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a834f243d89ea3ee2f57ad22a662f4665}{00262}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a834f243d89ea3ee2f57ad22a662f4665}{get\_outputs}}(self)\ -\/>\ List[str]:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a7aa24f1e18f75207103426489127bbb9}{inplace}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ list(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a74a7667ea3d435f4090046b30b29d55d}{get\_output\_mapping}}().keys())}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sorted(\_build\_ext.get\_outputs(self)\ +\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext}{\_\_get\_stubs\_outputs}}())}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00266}00266\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00267}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a74a7667ea3d435f4090046b30b29d55d}{00267}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a74a7667ea3d435f4090046b30b29d55d}{get\_output\_mapping}}(self)\ -\/>\ Dict[str,\ str]:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}See\ :class:\`{}setuptools.commands.build.SubCommand\`{}"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ mapping\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a4f0a4a5298f81ab7bf543e086bb6941f}{\_get\_output\_mapping}}()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dict(sorted(mapping,\ key=\textcolor{keyword}{lambda}\ x:\ x[0]))}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00272}00272\ \ \ \ \ \textcolor{keyword}{def\ }\_\_get\_stubs\_outputs(self):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ assemble\ the\ base\ name\ for\ each\ extension\ that\ needs\ a\ stub}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ ns\_ext\_bases\ =\ (}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ os.path.join(self.build\_lib,\ *ext.\_full\_name.split(\textcolor{stringliteral}{'.'}))}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ext\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a30d4f3d4b6c7e7007e648e76c83b9adf}{extensions}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ext.\_needs\_stub}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ pair\ each\ base\ with\ the\ extension}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ pairs\ =\ itertools.product(ns\_ext\_bases,\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext}{\_\_get\_output\_extensions}}())}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ list(base\ +\ fnext\ \textcolor{keywordflow}{for}\ base,\ fnext\ \textcolor{keywordflow}{in}\ pairs)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00282}00282\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00283}00283\ \ \ \ \ \textcolor{keyword}{def\ }\_\_get\_output\_extensions(self):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{stringliteral}{'.py'}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{stringliteral}{'.pyc'}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.get\_finalized\_command(\textcolor{stringliteral}{'build\_py'}).optimize:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{stringliteral}{'.pyo'}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00289}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a12cee388eb225ffe4dc09e2759be334c}{00289}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a12cee388eb225ffe4dc09e2759be334c}{write\_stub}}(self,\ output\_dir,\ ext,\ compile=False):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ stub\_file\ =\ os.path.join(output\_dir,\ *ext.\_full\_name.split(\textcolor{stringliteral}{'.'}))\ +\ \textcolor{stringliteral}{'.py'}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a4db034aa538b257f40578812400f6c05}{\_write\_stub\_file}}(stub\_file,\ ext,\ compile)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00292}00292\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00293}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a4db034aa538b257f40578812400f6c05}{00293}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a4db034aa538b257f40578812400f6c05}{\_write\_stub\_file}}(self,\ stub\_file:\ str,\ ext:\ Extension,\ compile=\textcolor{keyword}{False}):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{"{}writing\ stub\ loader\ for\ \%s\ to\ \%s"{}},\ ext.\_full\_name,\ stub\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ compile\ \textcolor{keywordflow}{and}\ os.path.exists(stub\_file):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ BaseError(stub\_file\ +\ \textcolor{stringliteral}{"{}\ already\ exists!\ Please\ delete."{}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00297}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a56475236f5408332bf1aade27a68994a}{00297}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a56475236f5408332bf1aade27a68994a}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00298}00298\ \ \ \ \ \ \ \ \ \ \ \ \ f\ =\ open(stub\_file,\ \textcolor{stringliteral}{'w'})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \ \ \ \ f.write(}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'\(\backslash\)n'}.join([}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}def\ \_\_bootstrap\_\_():"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ global\ \_\_bootstrap\_\_,\ \_\_file\_\_,\ \_\_loader\_\_"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ import\ sys,\ os,\ pkg\_resources,\ importlib.util"{}}\ +}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a3eec0f07d99bc904c347c09edbf7cc83}{if\_dl}}(\textcolor{stringliteral}{"{},\ dl"{}}),}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \_\_file\_\_\ =\ pkg\_resources.resource\_filename"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}(\_\_name\_\_,\%r)"{}}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \%\ os.path.basename(ext.\_file\_name),}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ del\ \_\_bootstrap\_\_"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ if\ '\_\_loader\_\_'\ in\ globals():"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \ \ \ \ del\ \_\_loader\_\_"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a3eec0f07d99bc904c347c09edbf7cc83}{if\_dl}}(\textcolor{stringliteral}{"{}\ \ \ old\_flags\ =\ sys.getdlopenflags()"{}}),}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ old\_dir\ =\ os.getcwd()"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ try:"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \ \ os.chdir(os.path.dirname(\_\_file\_\_))"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a3eec0f07d99bc904c347c09edbf7cc83}{if\_dl}}(\textcolor{stringliteral}{"{}\ \ \ \ \ sys.setdlopenflags(dl.RTLD\_NOW)"{}}),}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \ \ spec\ =\ importlib.util.spec\_from\_file\_location("{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \_\_name\_\_,\ \_\_file\_\_)"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \ \ mod\ =\ importlib.util.module\_from\_spec(spec)"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \ \ spec.loader.exec\_module(mod)"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ finally:"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a3eec0f07d99bc904c347c09edbf7cc83}{if\_dl}}(\textcolor{stringliteral}{"{}\ \ \ \ \ sys.setdlopenflags(old\_flags)"{}}),}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ \ \ os.chdir(old\_dir)"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\_\_bootstrap\_\_()"{}},}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}}\ \ \textcolor{comment}{\#\ terminal\ \(\backslash\)n}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ])}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \ \ \ \ f.close()}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00328}00328\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ compile:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a19a6b32295ac5cddee36e3b44f3e437e}{\_compile\_and\_remove\_stub}}(stub\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00330}00330\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00331}\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a19a6b32295ac5cddee36e3b44f3e437e}{00331}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a19a6b32295ac5cddee36e3b44f3e437e}{\_compile\_and\_remove\_stub}}(self,\ stub\_file:\ str):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ byte\_compile}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00333}00333\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ byte\_compile([stub\_file],\ optimize=0,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ force=\textcolor{keyword}{True},\ dry\_run=self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a56475236f5408332bf1aade27a68994a}{dry\_run}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ optimize\ =\ self.get\_finalized\_command(\textcolor{stringliteral}{'install\_lib'}).optimize}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ optimize\ >\ 0:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ byte\_compile([stub\_file],\ optimize=optimize,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ force=\textcolor{keyword}{True},\ dry\_run=self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a56475236f5408332bf1aade27a68994a}{dry\_run}})}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(stub\_file)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1build__ext_1_1build__ext_a56475236f5408332bf1aade27a68994a}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ os.unlink(stub\_file)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00342}00342\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00343}00343\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00344}00344\ \textcolor{keywordflow}{if}\ use\_stubs\ \textcolor{keywordflow}{or}\ os.name\ ==\ \textcolor{stringliteral}{'nt'}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00345}00345\ \ \ \ \ \textcolor{comment}{\#\ Build\ shared\ libraries}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00346}00346\ \ \ \ \ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00347}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a88d95d13fe4ea44521b89126e23f8df8}{00347}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a88d95d13fe4ea44521b89126e23f8df8}{link\_shared\_object}}(}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ \ \ \ \ self,\ objects,\ output\_libname,\ output\_dir=None,\ libraries=None,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ \ \ \ \ library\_dirs=None,\ runtime\_library\_dirs=None,\ export\_symbols=None,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ \ \ \ \ debug=0,\ extra\_preargs=None,\ extra\_postargs=None,\ build\_temp=None,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ \ \ \ \ target\_lang=None):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ self.link(}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00353}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a77bca3582e4195a61fa06f9252134188}{00353}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.SHARED\_LIBRARY,\ objects,\ output\_libname,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ output\_dir,\ libraries,\ library\_dirs,\ runtime\_library\_dirs,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ export\_symbols,\ debug,\ extra\_preargs,\ extra\_postargs,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ build\_temp,\ target\_lang}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00358}00358\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00359}00359\ \ \ \ \ \textcolor{comment}{\#\ Build\ static\ libraries\ everywhere\ else}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00360}00360\ \ \ \ \ libtype\ =\ \textcolor{stringliteral}{'static'}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00361}00361\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00362}00362\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1command_1_1build__ext_a88d95d13fe4ea44521b89126e23f8df8}{link\_shared\_object}}(}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ self,\ objects,\ output\_libname,\ output\_dir=None,\ libraries=None,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ library\_dirs=None,\ runtime\_library\_dirs=None,\ export\_symbols=None,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \ \ \ \ debug=0,\ extra\_preargs=None,\ extra\_postargs=None,\ build\_temp=None,}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ target\_lang=None):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ we\ need\ to\ either\ disallow\ these\ attrs\ on\ Library\ instances,}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00368}00368\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ or\ warn/abort\ here\ if\ set,\ or\ something...}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ libraries=None,\ library\_dirs=None,\ runtime\_library\_dirs=None,}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ export\_symbols=None,\ extra\_preargs=None,\ extra\_postargs=None,}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ build\_temp=None}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00372}00372\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ output\_dir\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \ \textcolor{comment}{\#\ distutils\ build\_ext\ doesn't\ pass\ this}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ output\_dir,\ filename\ =\ os.path.split(output\_libname)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ basename,\ ext\ =\ os.path.splitext(filename)}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.library\_filename(\textcolor{stringliteral}{"{}x"{}}).startswith(\textcolor{stringliteral}{'lib'}):}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ strip\ 'lib'\ prefix;\ this\ is\ kludgy\ if\ some\ platform\ uses}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ a\ different\ prefix}}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ basename\ =\ basename[3:]}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00380}00380\ }
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ self.create\_static\_lib(}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ objects,\ basename,\ output\_dir,\ debug,\ target\_lang}
+\DoxyCodeLine{\Hypertarget{command_2build__ext_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ )}
+
+\end{DoxyCode}

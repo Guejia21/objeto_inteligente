@@ -1,0 +1,33 @@
+\doxysection{datastream\+\_\+service.\+py}
+\hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source}{}\label{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source}\index{micro\_automatizacion\_ecas/app/application/datastream\_service.py@{micro\_automatizacion\_ecas/app/application/datastream\_service.py}}
+\mbox{\hyperlink{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00001}\mbox{\hyperlink{namespacedatastream__service}{00001}}\ \textcolor{keyword}{import}\ requests}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00002}00002\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ settings}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00003}00003\ \textcolor{keyword}{from}\ infra.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00005}\mbox{\hyperlink{namespacedatastream__service_aae6aee143f7a098c02c76692798ce332}{00005}}\ headers\ =\ \{\textcolor{stringliteral}{"{}Content-\/Type"{}}:\ \textcolor{stringliteral}{"{}application/json"{}}\}}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00006}\mbox{\hyperlink{namespacedatastream__service_a329f83f0327545dd8de6e26badd3985a}{00006}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacedatastream__service_a329f83f0327545dd8de6e26badd3985a}{send\_command}}(osid:str,\ id\_datastream:\ str,\ comando:\ str)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00007}00007\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Envía\ un\ comando\ a\ un\ datastream\ actuador."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00008}00008\ \ \ \ \ url\ =\ settings.DATASTREAM\_SERVICE\_URL\ +\ f\textcolor{stringliteral}{"{}/SetDatastream?osid=\{osid\}\&idDataStream=\{id\_datastream\}\&comando=\{comando\}"{}}}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00009}00009\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00010}00010\ \ \ \ \ \ \ \ \ request\ =\ requests.post(url,\ headers=headers)}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00011}00011\ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00012}00012\ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ al\ conectar\ con\ el\ servicio\ de\ datastream:\ \%s"{}},\ e)}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00013}00013\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00014}00014\ \ \ \ \ \textcolor{keywordflow}{if}\ request.status\_code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00016}00016\ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ request.json()}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Respuesta\ no\ es\ JSON:\ \%s"{}},\ request.text)}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ data.get(\textcolor{stringliteral}{"{}status"{}})\ ==\ \textcolor{stringliteral}{"{}success"{}}:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00021}00021\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00022}00022\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ en\ la\ respuesta\ del\ servicio\ de\ datastream:\ \%s"{}},\ data)}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00025}00025\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ logger.error(\textcolor{stringliteral}{"{}Error\ al\ enviar\ comando\ al\ datastream:\ \%s"{}},\ request.text)}
+\DoxyCodeLine{\Hypertarget{micro__automatizacion__ecas_2app_2application_2data_stream__service_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+
+\end{DoxyCode}

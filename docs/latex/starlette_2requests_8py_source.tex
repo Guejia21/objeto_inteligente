@@ -1,0 +1,329 @@
+\doxysection{requests.\+py}
+\hypertarget{starlette_2requests_8py_source}{}\label{starlette_2requests_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/requests.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/requests.py}}
+\mbox{\hyperlink{starlette_2requests_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00001}\mbox{\hyperlink{namespacestarlette_1_1requests}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00003}00003\ \textcolor{keyword}{import}\ json}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00004}00004\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ AsyncGenerator,\ Iterator,\ Mapping}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00005}00005\ \textcolor{keyword}{from}\ http\ \textcolor{keyword}{import}\ cookies\ \textcolor{keyword}{as}\ http\_cookies}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00006}00006\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ NoReturn,\ cast}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00008}00008\ \textcolor{keyword}{import}\ anyio}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00010}00010\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1__utils}{starlette.\_utils}}\ \textcolor{keyword}{import}\ AwaitableOrContextManager,\ AwaitableOrContextManagerWrapper}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00011}00011\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1datastructures}{starlette.datastructures}}\ \textcolor{keyword}{import}\ URL,\ Address,\ FormData,\ Headers,\ QueryParams,\ State}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00012}00012\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1exceptions}{starlette.exceptions}}\ \textcolor{keyword}{import}\ HTTPException}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00013}00013\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1formparsers}{starlette.formparsers}}\ \textcolor{keyword}{import}\ FormParser,\ MultiPartException,\ MultiPartParser}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00014}00014\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1types}{starlette.types}}\ \textcolor{keyword}{import}\ Message,\ Receive,\ Scope,\ Send}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00016}00016\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00017}00017\ \ \ \ \ \textcolor{keyword}{from}\ python\_multipart.multipart\ \textcolor{keyword}{import}\ parse\_options\_header}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00019}00019\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1applications}{starlette.applications}}\ \textcolor{keyword}{import}\ Starlette}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00020}00020\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1routing}{starlette.routing}}\ \textcolor{keyword}{import}\ Router}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00021}00021\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00022}00022\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ python\_multipart.multipart\ \textcolor{keyword}{import}\ parse\_options\_header}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ModuleNotFoundError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{from}\ multipart.multipart\ \textcolor{keyword}{import}\ parse\_options\_header}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00027}00027\ \ \ \ \ \textcolor{keywordflow}{except}\ ModuleNotFoundError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00028}\mbox{\hyperlink{namespacestarlette_1_1requests_ad54823dc9461b569542a2507315d40b5}{00028}}\ \ \ \ \ \ \ \ \ parse\_options\_header\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00031}\mbox{\hyperlink{namespacestarlette_1_1requests_aebfbd6e8a20277bb85ba855896ac0bfa}{00031}}\ SERVER\_PUSH\_HEADERS\_TO\_COPY\ =\ \{}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00032}00032\ \ \ \ \ \textcolor{stringliteral}{"{}accept"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00033}00033\ \ \ \ \ \textcolor{stringliteral}{"{}accept-\/encoding"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00034}00034\ \ \ \ \ \textcolor{stringliteral}{"{}accept-\/language"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00035}00035\ \ \ \ \ \textcolor{stringliteral}{"{}cache-\/control"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00036}00036\ \ \ \ \ \textcolor{stringliteral}{"{}user-\/agent"{}},}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00037}00037\ \}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00040}\mbox{\hyperlink{namespacestarlette_1_1requests_aca1c6f37e6605131cafba37e722a0a7c}{00040}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacestarlette_1_1requests_aca1c6f37e6605131cafba37e722a0a7c}{cookie\_parser}}(cookie\_string:\ str)\ -\/>\ dict[str,\ str]:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00041}00041\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00042}00042\ \textcolor{stringliteral}{\ \ \ \ This\ function\ parses\ a\ \`{}\`{}Cookie\`{}\`{}\ HTTP\ header\ into\ a\ dict\ of\ key/value\ pairs.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00043}00043\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ It\ attempts\ to\ mimic\ browser\ cookie\ parsing\ behavior:\ browsers\ and\ web\ servers}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ frequently\ disregard\ the\ spec\ (RFC\ 6265)\ when\ setting\ and\ reading\ cookies,}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ so\ we\ attempt\ to\ suit\ the\ common\ scenarios\ here.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00047}00047\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ This\ function\ has\ been\ adapted\ from\ Django\ 3.1.0.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ Note:\ we\ are\ explicitly\ \_NOT\_\ using\ \`{}SimpleCookie.load\`{}\ because\ it\ is\ based}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ on\ an\ outdated\ spec\ and\ will\ fail\ on\ lots\ of\ input\ we\ want\ to\ support}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00052}00052\ \ \ \ \ cookie\_dict:\ dict[str,\ str]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00053}00053\ \ \ \ \ \textcolor{keywordflow}{for}\ chunk\ \textcolor{keywordflow}{in}\ cookie\_string.split(\textcolor{stringliteral}{"{};"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}="{}}\ \textcolor{keywordflow}{in}\ chunk:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ key,\ val\ =\ chunk.split(\textcolor{stringliteral}{"{}="{}},\ 1)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Assume\ an\ empty\ name\ per}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ https://bugzilla.mozilla.org/show\_bug.cgi?id=169091}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ key,\ val\ =\ \textcolor{stringliteral}{"{}"{}},\ chunk}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ key,\ val\ =\ key.strip(),\ val.strip()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ key\ \textcolor{keywordflow}{or}\ val:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ unquote\ using\ Python's\ algorithm.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ cookie\_dict[key]\ =\ http\_cookies.\_unquote(val)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00064}00064\ \ \ \ \ \textcolor{keywordflow}{return}\ cookie\_dict}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00067}\mbox{\hyperlink{classstarlette_1_1requests_1_1_client_disconnect}{00067}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_client_disconnect}{ClientDisconnect}}(Exception):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00068}00068\ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00071}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection}{00071}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection}{HTTPConnection}}(Mapping[str,\ Any]):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00072}00072\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ A\ base\ class\ for\ incoming\ HTTP\ connections,\ that\ is\ used\ to\ provide}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00074}00074\ \textcolor{stringliteral}{\ \ \ \ any\ functionality\ that\ is\ common\ to\ both\ \`{}Request\`{}\ and\ \`{}WebSocket\`{}.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00075}00075\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00077}00077\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ scope:\ Scope,\ receive:\ Receive\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None})\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ scope[\textcolor{stringliteral}{"{}type"{}}]\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{"{}http"{}},\ \textcolor{stringliteral}{"{}websocket"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00079}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{00079}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}\ =\ scope}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00081}00081\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getitem\_\_(self,\ key:\ str)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[key]}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00084}00084\ \ \ \ \ \textcolor{keyword}{def\ }\_\_iter\_\_(self)\ -\/>\ Iterator[str]:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ iter(self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00087}00087\ \ \ \ \ \textcolor{keyword}{def\ }\_\_len\_\_(self)\ -\/>\ int:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ len(self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00090}00090\ \ \ \ \ \textcolor{comment}{\#\ Don't\ use\ the\ \`{}abc.Mapping.\_\_eq\_\_`\ implementation.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00091}00091\ \ \ \ \ \textcolor{comment}{\#\ Connection\ instances\ should\ never\ be\ considered\ equal}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00092}00092\ \ \ \ \ \textcolor{comment}{\#\ unless\ \`{}self\ is\ other`.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00093}00093\ \ \ \ \ \_\_eq\_\_\ =\ object.\_\_eq\_\_}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00094}00094\ \ \ \ \ \_\_hash\_\_\ =\ object.\_\_hash\_\_}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00096}00096\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00097}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a6515e82132a498ca8b59613043e48712}{00097}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceapp}{app}}(self)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[\textcolor{stringliteral}{"{}app"{}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00099}00099\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00100}00100\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00101}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af7694eb116c445a985f4899d65d398ab}{00101}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af7694eb116c445a985f4899d65d398ab}{url}}(self)\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_url"{}}):\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00103}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a7810337ba614b2e2f0db774720aa23ad}{00103}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a7810337ba614b2e2f0db774720aa23ad}{\_url}}\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}(scope=self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a7810337ba614b2e2f0db774720aa23ad}{\_url}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00106}00106\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00107}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af7cb6377b94ac25f259cc47652b7f5bf}{00107}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af7cb6377b94ac25f259cc47652b7f5bf}{base\_url}}(self)\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_base\_url"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ base\_url\_scope\ =\ dict(self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ used\ by\ request.url\_for,\ it\ might\ be\ used\ inside\ a\ Mount\ which}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ would\ have\ its\ own\ child\ scope\ with\ its\ own\ root\_path,\ but\ the\ base\ URL}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ for\ url\_for\ should\ still\ be\ the\ top\ level\ app\ root\ path.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ app\_root\_path\ =\ base\_url\_scope.get(\textcolor{stringliteral}{"{}app\_root\_path"{}},\ base\_url\_scope.get(\textcolor{stringliteral}{"{}root\_path"{}},\ \textcolor{stringliteral}{"{}"{}}))}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ path\ =\ app\_root\_path}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ path.endswith(\textcolor{stringliteral}{"{}/"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ path\ +=\ \textcolor{stringliteral}{"{}/"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ base\_url\_scope[\textcolor{stringliteral}{"{}path"{}}]\ =\ path}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ base\_url\_scope[\textcolor{stringliteral}{"{}query\_string"{}}]\ =\ b\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ base\_url\_scope[\textcolor{stringliteral}{"{}root\_path"{}}]\ =\ app\_root\_path}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00120}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a03ecbe75d5887266a125c1239222eb6e}{00120}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a03ecbe75d5887266a125c1239222eb6e}{\_base\_url}}\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_u_r_l}{URL}}(scope=base\_url\_scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a03ecbe75d5887266a125c1239222eb6e}{\_base\_url}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00123}00123\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00124}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aee1fd2c8d35e8156c997f7cb37d5f4e1}{00124}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aee1fd2c8d35e8156c997f7cb37d5f4e1}{headers}}(self)\ -\/>\ Headers:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_headers"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00126}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a8b982f8b4aaf1155b7ae96ffe82b40af}{00126}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a8b982f8b4aaf1155b7ae96ffe82b40af}{\_headers}}\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_headers}{Headers}}(scope=self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a8b982f8b4aaf1155b7ae96ffe82b40af}{\_headers}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00128}00128\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00129}00129\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00130}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af416cf2c4977aa0d7f4a4aa8ee1c2809}{00130}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af416cf2c4977aa0d7f4a4aa8ee1c2809}{query\_params}}(self)\ -\/>\ QueryParams:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_query\_params"{}}):\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00132}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a82a4d96e0dee742660cb006c9e67fefd}{00132}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a82a4d96e0dee742660cb006c9e67fefd}{\_query\_params}}\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_query_params}{QueryParams}}(self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[\textcolor{stringliteral}{"{}query\_string"{}}])}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a82a4d96e0dee742660cb006c9e67fefd}{\_query\_params}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00135}00135\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00136}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af9618e8c7bb92a5a916b59b313d054d9}{00136}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af9618e8c7bb92a5a916b59b313d054d9}{path\_params}}(self)\ -\/>\ dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}.get(\textcolor{stringliteral}{"{}path\_params"{}},\ \{\})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00138}00138\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00139}00139\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00140}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a20cab99fe01455461a30542e2b3485d5}{00140}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a20cab99fe01455461a30542e2b3485d5}{cookies}}(self)\ -\/>\ dict[str,\ str]:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_cookies"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ cookies:\ dict[str,\ str]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ cookie\_header\ =\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aee1fd2c8d35e8156c997f7cb37d5f4e1}{headers}}.get(\textcolor{stringliteral}{"{}cookie"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00144}00144\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ cookie\_header:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cookies\ =\ \mbox{\hyperlink{namespacestarlette_1_1requests_aca1c6f37e6605131cafba37e722a0a7c}{cookie\_parser}}(cookie\_header)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00147}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a24b5204eae7a976206d6dcc0c07a69c6}{00147}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a24b5204eae7a976206d6dcc0c07a69c6}{\_cookies}}\ =\ cookies}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a24b5204eae7a976206d6dcc0c07a69c6}{\_cookies}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00150}00150\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00151}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a87240c7c1f1c70ab9ba80418d71961c5}{00151}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a87240c7c1f1c70ab9ba80418d71961c5}{client}}(self)\ -\/>\ Address\ |\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ client\ is\ a\ 2\ item\ tuple\ of\ (host,\ port),\ None\ if\ missing}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ host\_port\ =\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}.get(\textcolor{stringliteral}{"{}client"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ host\_port\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_address}{Address}}(*host\_port)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00158}00158\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00159}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a1ba0716eb01f800be8bfa7269b71aba5}{00159}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a1ba0716eb01f800be8bfa7269b71aba5}{session}}(self)\ -\/>\ dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{stringliteral}{"{}session"{}}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}},\ \textcolor{stringliteral}{"{}SessionMiddleware\ must\ be\ installed\ to\ access\ request.session"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[\textcolor{stringliteral}{"{}session"{}}]\ \ \textcolor{comment}{\#\ type:\ ignore[no-\/any-\/return]}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00163}00163\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00164}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a4d7526072409424c265d9498721df192}{00164}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a4d7526072409424c265d9498721df192}{auth}}(self)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{stringliteral}{"{}auth"{}}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}},\ \textcolor{stringliteral}{"{}AuthenticationMiddleware\ must\ be\ installed\ to\ access\ request.auth"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[\textcolor{stringliteral}{"{}auth"{}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00168}00168\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00169}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aca73e8a31d7995b31bbe70e5ca2dc657}{00169}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aca73e8a31d7995b31bbe70e5ca2dc657}{user}}(self)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{stringliteral}{"{}user"{}}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}},\ \textcolor{stringliteral}{"{}AuthenticationMiddleware\ must\ be\ installed\ to\ access\ request.user"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[\textcolor{stringliteral}{"{}user"{}}]}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00173}00173\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00174}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a86a94505a6e5b7552342aabd0386789e}{00174}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a86a94505a6e5b7552342aabd0386789e}{state}}(self)\ -\/>\ State:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_state"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Ensure\ 'state'\ has\ an\ empty\ dict\ if\ it's\ not\ already\ populated.}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}.setdefault(\textcolor{stringliteral}{"{}state"{}},\ \{\})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Create\ a\ state\ instance\ with\ a\ reference\ to\ the\ dict\ in\ which\ it\ should}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ store\ info}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00180}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a05aa00d1bde9ab22e306990a9b25496b}{00180}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a05aa00d1bde9ab22e306990a9b25496b}{\_state}}\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_state}{State}}(self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[\textcolor{stringliteral}{"{}state"{}}])}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a05aa00d1bde9ab22e306990a9b25496b}{\_state}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00182}00182\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00183}\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a519b505d41534252a4619367be85acf0}{00183}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a519b505d41534252a4619367be85acf0}{url\_for}}(self,\ name:\ str,\ /,\ **path\_params:\ Any)\ -\/>\ URL:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ url\_path\_provider:\ Router\ |\ Starlette\ |\ \textcolor{keywordtype}{None}\ =\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}.get(\textcolor{stringliteral}{"{}router"{}})\ \textcolor{keywordflow}{or}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}.get(\textcolor{stringliteral}{"{}app"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ url\_path\_provider\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{"{}The\ \`{}url\_for`\ method\ can\ only\ be\ used\ inside\ a\ Starlette\ application\ or\ with\ a\ router."{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ url\_path\ =\ url\_path\_provider.url\_path\_for(name,\ **path\_params)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ url\_path.make\_absolute\_url(base\_url=self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_af7cb6377b94ac25f259cc47652b7f5bf}{base\_url}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00189}00189\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00191}\mbox{\hyperlink{namespacestarlette_1_1requests_a9b48bc4407445db50fddf0c8b0bfceb7}{00191}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespacestarlette_1_1requests_a9b48bc4407445db50fddf0c8b0bfceb7}{empty\_receive}}()\ -\/>\ NoReturn:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00192}00192\ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{"{}Receive\ channel\ has\ not\ been\ made\ available"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00193}00193\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00195}\mbox{\hyperlink{namespacestarlette_1_1requests_aa3e7db3969d18e47fb4453ca84b34327}{00195}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespacestarlette_1_1requests_aa3e7db3969d18e47fb4453ca84b34327}{empty\_send}}(message:\ Message)\ -\/>\ NoReturn:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00196}00196\ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{"{}Send\ channel\ has\ not\ been\ made\ available"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00197}00197\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00199}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request}{00199}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request}{Request}}(\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection}{HTTPConnection}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00200}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{00200}}\ \ \ \ \ \_form:\ FormData\ |\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00202}00202\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ scope:\ Scope,\ receive:\ Receive\ =\ empty\_receive,\ send:\ Send\ =\ empty\_send):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(scope)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ scope[\textcolor{stringliteral}{"{}type"{}}]\ ==\ \textcolor{stringliteral}{"{}http"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00205}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a1337c5c3f26ca7fd9a0be3959bfcff5f}{00205}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a1337c5c3f26ca7fd9a0be3959bfcff5f}{\_receive}}\ =\ receive}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00206}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_aabf02b4cdddf10a08939865a7db6bdac}{00206}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_aabf02b4cdddf10a08939865a7db6bdac}{\_send}}\ =\ send}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00207}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a86c11cc374669a7d5ba1501995531045}{00207}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a86c11cc374669a7d5ba1501995531045}{\_stream\_consumed}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00208}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ae66de77f80e0078b00b5ecae71010666}{00208}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ae66de77f80e0078b00b5ecae71010666}{\_is\_disconnected}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00211}00211\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00212}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_af1d47b193898e91a68b06233ae07563a}{00212}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_af1d47b193898e91a68b06233ae07563a}{method}}(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cast(str,\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}[\textcolor{stringliteral}{"{}method"{}}])}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00214}00214\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00215}00215\ \ \ \ \ \textcolor{preprocessor}{@property}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00216}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ab7c063d6a13668829f00f96314b7ee50}{00216}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ab7c063d6a13668829f00f96314b7ee50}{receive}}(self)\ -\/>\ Receive:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a1337c5c3f26ca7fd9a0be3959bfcff5f}{\_receive}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00218}00218\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00219}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a8485677d3e4ae54b73f72a50c372f4ef}{00219}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a8485677d3e4ae54b73f72a50c372f4ef}{stream}}(self)\ -\/>\ AsyncGenerator[bytes,\ None]:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_body"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a75fff827a8263b8471190cc6dba90156}{\_body}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ b\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a86c11cc374669a7d5ba1501995531045}{\_stream\_consumed}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{"{}Stream\ consumed"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a86c11cc374669a7d5ba1501995531045}{\_stream\_consumed}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ message\ =\ await\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a1337c5c3f26ca7fd9a0be3959bfcff5f}{\_receive}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ message[\textcolor{stringliteral}{"{}type"{}}]\ ==\ \textcolor{stringliteral}{"{}http.request"{}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body\ =\ message.get(\textcolor{stringliteral}{"{}body"{}},\ b\textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ message.get(\textcolor{stringliteral}{"{}more\_body"{}},\ \textcolor{keyword}{False}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a86c11cc374669a7d5ba1501995531045}{\_stream\_consumed}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ body:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ body}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ message[\textcolor{stringliteral}{"{}type"{}}]\ ==\ \textcolor{stringliteral}{"{}http.disconnect"{}}:\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ae66de77f80e0078b00b5ecae71010666}{\_is\_disconnected}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classstarlette_1_1requests_1_1_client_disconnect}{ClientDisconnect}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ b\textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00239}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a0c8423498a41350fe974157b083e8afb}{00239}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a0c8423498a41350fe974157b083e8afb}{body}}(self)\ -\/>\ bytes:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_body"{}}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ chunks:\ list[bytes]\ =\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keywordflow}{for}\ chunk\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a8485677d3e4ae54b73f72a50c372f4ef}{stream}}():}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ chunks.append(chunk)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00244}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a75fff827a8263b8471190cc6dba90156}{00244}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a75fff827a8263b8471190cc6dba90156}{\_body}}\ =\ b\textcolor{stringliteral}{"{}"{}}.join(chunks)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a75fff827a8263b8471190cc6dba90156}{\_body}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00247}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ac66a5966009087572e787493bf73c3b3}{00247}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ac66a5966009087572e787493bf73c3b3}{json}}(self)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(self,\ \textcolor{stringliteral}{"{}\_json"{}}):\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ body\ =\ await\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a0c8423498a41350fe974157b083e8afb}{body}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00250}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a7c745abbc735f58148938c498ff37f61}{00250}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a7c745abbc735f58148938c498ff37f61}{\_json}}\ =\ json.loads(body)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a7c745abbc735f58148938c498ff37f61}{\_json}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00252}00252\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00253}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a36de66a635fe82bd76b965f57579ec94}{00253}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a36de66a635fe82bd76b965f57579ec94}{\_get\_form}}(}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ max\_files:\ int\ |\ float\ =\ 1000,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ max\_fields:\ int\ |\ float\ =\ 1000,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ max\_part\_size:\ int\ =\ 1024\ *\ 1024,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00259}00259\ \ \ \ \ )\ -\/>\ FormData:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ parse\_options\_header\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None},\ (}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}The\ \`{}python-\/multipart`\ library\ must\ be\ installed\ to\ use\ form\ parsing."{}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ content\_type\_header\ =\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aee1fd2c8d35e8156c997f7cb37d5f4e1}{headers}}.get(\textcolor{stringliteral}{"{}Content-\/Type"{}})}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ content\_type:\ bytes}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ content\_type,\ \_\ =\ \mbox{\hyperlink{namespacestarlette_1_1requests_ad54823dc9461b569542a2507315d40b5}{parse\_options\_header}}(content\_type\_header)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ content\_type\ ==\ b\textcolor{stringliteral}{"{}multipart/form-\/data"{}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ multipart\_parser\ =\ \mbox{\hyperlink{classstarlette_1_1formparsers_1_1_multi_part_parser}{MultiPartParser}}(}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aee1fd2c8d35e8156c997f7cb37d5f4e1}{headers}},}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a8485677d3e4ae54b73f72a50c372f4ef}{stream}}(),}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ max\_files=max\_files,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ max\_fields=max\_fields,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ max\_part\_size=max\_part\_size,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}\ =\ await\ multipart\_parser.parse()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ MultiPartException\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00278}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request}{00278}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}app"{}}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classstarlette_1_1exceptions_1_1_h_t_t_p_exception}{HTTPException}}(status\_code=400,\ detail=exc.message)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ exc}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ content\_type\ ==\ b\textcolor{stringliteral}{"{}application/x-\/www-\/form-\/urlencoded"{}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ form\_parser\ =\ \mbox{\hyperlink{classstarlette_1_1formparsers_1_1_form_parser}{FormParser}}(self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aee1fd2c8d35e8156c997f7cb37d5f4e1}{headers}},\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a8485677d3e4ae54b73f72a50c372f4ef}{stream}}())}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}\ =\ await\ form\_parser.parse()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}\ =\ \mbox{\hyperlink{classstarlette_1_1datastructures_1_1_form_data}{FormData}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00287}00287\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00288}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_af4d7d1d5f01a6edafcc6802626683485}{00288}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_af4d7d1d5f01a6edafcc6802626683485}{form}}(}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ max\_files:\ int\ |\ float\ =\ 1000,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ max\_fields:\ int\ |\ float\ =\ 1000,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ max\_part\_size:\ int\ =\ 1024\ *\ 1024,}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00294}00294\ \ \ \ \ )\ -\/>\ AwaitableOrContextManager[FormData]:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classstarlette_1_1__utils_1_1_awaitable_or_context_manager_wrapper}{AwaitableOrContextManagerWrapper}}(}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a36de66a635fe82bd76b965f57579ec94}{\_get\_form}}(max\_files=max\_files,\ max\_fields=max\_fields,\ max\_part\_size=max\_part\_size)}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00299}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_af55744c17aca7a3ff21a92aec5622584}{00299}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_af55744c17aca7a3ff21a92aec5622584}{close}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a853526f690f4aa1b53f82a894e04b62b}{\_form}}.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_af55744c17aca7a3ff21a92aec5622584}{close}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00302}00302\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00303}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a59a42bc2e84d384a54dbc69aa6dea2f4}{00303}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a59a42bc2e84d384a54dbc69aa6dea2f4}{is\_disconnected}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ae66de77f80e0078b00b5ecae71010666}{\_is\_disconnected}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ message:\ Message\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00306}00306\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ message\ isn't\ immediately\ available,\ move\ on}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ \mbox{\hyperlink{classanyio_1_1__core_1_1__tasks_1_1_cancel_scope}{anyio.CancelScope}}()\ \textcolor{keyword}{as}\ cs:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00309}00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cs.cancel()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ message\ =\ await\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_a1337c5c3f26ca7fd9a0be3959bfcff5f}{\_receive}}()}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00311}00311\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ message.get(\textcolor{stringliteral}{"{}type"{}})\ ==\ \textcolor{stringliteral}{"{}http.disconnect"{}}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ae66de77f80e0078b00b5ecae71010666}{\_is\_disconnected}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00314}00314\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_ae66de77f80e0078b00b5ecae71010666}{\_is\_disconnected}}}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00317}\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_aaf7c4a4f613fc4349c91e4f20bd49b43}{00317}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_aaf7c4a4f613fc4349c91e4f20bd49b43}{send\_push\_promise}}(self,\ path:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}http.response.push"{}}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_a416ca956b3f50a2ba3103a435c6ce005}{scope}}.get(\textcolor{stringliteral}{"{}extensions"{}},\ \{\}):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ \ \ \ \ raw\_headers:\ list[tuple[bytes,\ bytes]]\ =\ []}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name\ \textcolor{keywordflow}{in}\ SERVER\_PUSH\_HEADERS\_TO\_COPY:}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ value\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_h_t_t_p_connection_aee1fd2c8d35e8156c997f7cb37d5f4e1}{headers}}.getlist(name):}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ raw\_headers.append((name.encode(\textcolor{stringliteral}{"{}latin-\/1"{}}),\ value.encode(\textcolor{stringliteral}{"{}latin-\/1"{}})))}
+\DoxyCodeLine{\Hypertarget{starlette_2requests_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ await\ self.\mbox{\hyperlink{classstarlette_1_1requests_1_1_request_aabf02b4cdddf10a08939865a7db6bdac}{\_send}}(\{\textcolor{stringliteral}{"{}type"{}}:\ \textcolor{stringliteral}{"{}http.response.push"{}},\ \textcolor{stringliteral}{"{}path"{}}:\ path,\ \textcolor{stringliteral}{"{}headers"{}}:\ raw\_headers\})}
+
+\end{DoxyCode}

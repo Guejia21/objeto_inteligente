@@ -1,0 +1,549 @@
+\doxysection{\+\_\+generics.\+py}
+\hypertarget{__generics_8py_source}{}\label{__generics_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_generics.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_generics.py}}
+\mbox{\hyperlink{__generics_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00003}00003\ \textcolor{keyword}{import}\ operator}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00004}00004\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00005}00005\ \textcolor{keyword}{import}\ types}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00006}00006\ \textcolor{keyword}{import}\ typing}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00007}00007\ \textcolor{keyword}{from}\ collections\ \textcolor{keyword}{import}\ ChainMap}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00008}00008\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Iterator,\ Mapping}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00009}00009\ \textcolor{keyword}{from}\ contextlib\ \textcolor{keyword}{import}\ contextmanager}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00010}00010\ \textcolor{keyword}{from}\ contextvars\ \textcolor{keyword}{import}\ ContextVar}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00011}00011\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ reduce}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00012}00012\ \textcolor{keyword}{from}\ itertools\ \textcolor{keyword}{import}\ zip\_longest}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00013}00013\ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ prepare\_class}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00014}00014\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Annotated,\ Any,\ TypedDict,\ TypeVar,\ cast}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00015}00015\ \textcolor{keyword}{from}\ weakref\ \textcolor{keyword}{import}\ WeakValueDictionary}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00017}00017\ \textcolor{keyword}{import}\ typing\_extensions}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00018}00018\ \textcolor{keyword}{from}\ typing\_inspection\ \textcolor{keyword}{import}\ typing\_objects}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00019}00019\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacetyping__inspection_1_1introspection}{typing\_inspection.introspection}}\ \textcolor{keyword}{import}\ is\_union\_origin}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00021}00021\ \textcolor{keyword}{from}\ .\ \textcolor{keyword}{import}\ \_typing\_extra}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00022}00022\ \textcolor{keyword}{from}\ .\_core\_utils\ \textcolor{keyword}{import}\ get\_type\_ref}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00023}00023\ \textcolor{keyword}{from}\ .\_forward\_ref\ \textcolor{keyword}{import}\ PydanticRecursiveRef}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00024}00024\ \textcolor{keyword}{from}\ .\_utils\ \textcolor{keyword}{import}\ all\_identical,\ is\_model\_class}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00026}00026\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00027}00027\ \ \ \ \ \textcolor{keyword}{from}\ ..main\ \textcolor{keyword}{import}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00029}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_af66dce654d9513143523a13ddec1ff64}{00029}}\ GenericTypesCacheKey\ =\ tuple[Any,\ Any,\ tuple[Any,\ ...]]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00031}00031\ \textcolor{comment}{\#\ Note:\ We\ want\ to\ remove\ LimitedDict,\ but\ to\ do\ this,\ we'd\ need\ to\ improve\ the\ handling\ of\ generics\ caching.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00032}00032\ \textcolor{comment}{\#\ \ \ Right\ now,\ to\ handle\ recursive\ generics,\ we\ some\ types\ must\ remain\ cached\ for\ brief\ periods\ without\ references.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00033}00033\ \textcolor{comment}{\#\ \ \ By\ chaining\ the\ WeakValuesDict\ with\ a\ LimitedDict,\ we\ have\ a\ way\ to\ retain\ caching\ for\ all\ types\ with\ references,}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00034}00034\ \textcolor{comment}{\#\ \ \ while\ also\ retaining\ a\ limited\ number\ of\ types\ even\ without\ references.\ This\ is\ generally\ enough\ to\ build}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00035}00035\ \textcolor{comment}{\#\ \ \ specific\ recursive\ generic\ models\ without\ losing\ required\ items\ out\ of\ the\ cache.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00037}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a9105fc49941fc60b0585824ef933bd48}{00037}}\ KT\ =\ TypeVar(\textcolor{stringliteral}{'KT'})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00038}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a041e256fadbac3133f8d1c4dab1df1f2}{00038}}\ VT\ =\ TypeVar(\textcolor{stringliteral}{'VT'})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00039}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ab0a4726777265f7ae662e5519a732e5b}{00039}}\ \_LIMITED\_DICT\_SIZE\ =\ 100}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00042}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_limited_dict}{00042}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_limited_dict}{LimitedDict}}(dict[KT,\ VT]):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00043}00043\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ size\_limit:\ int\ =\ \_LIMITED\_DICT\_SIZE)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00044}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_limited_dict_ab1d756bd743782c7e8d12467e1c9ca6b}{00044}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_limited_dict_ab1d756bd743782c7e8d12467e1c9ca6b}{size\_limit}}\ =\ size\_limit}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ super().\_\_init\_\_()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00047}00047\ \ \ \ \ \textcolor{keyword}{def\ }\_\_setitem\_\_(self,\ key:\ KT,\ value:\ VT,\ /)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ super().\_\_setitem\_\_(key,\ value)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ len(self)\ >\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_limited_dict_ab1d756bd743782c7e8d12467e1c9ca6b}{size\_limit}}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ excess\ =\ len(self)\ -\/\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_limited_dict_ab1d756bd743782c7e8d12467e1c9ca6b}{size\_limit}}\ +\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_limited_dict_ab1d756bd743782c7e8d12467e1c9ca6b}{size\_limit}}\ //\ 10}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ to\_remove\ =\ list(self.keys())[:excess]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ k\ \textcolor{keywordflow}{in}\ to\_remove:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ del\ self[k]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00055}00055\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00056}00056\ \textcolor{comment}{\#\ weak\ dictionaries\ allow\ the\ dynamically\ created\ parametrized\ versions\ of\ generic\ models\ to\ get\ collected}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00057}00057\ \textcolor{comment}{\#\ once\ they\ are\ no\ longer\ referenced\ by\ the\ caller.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00058}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a39a759bcb29ba97f166450d257693259}{00058}}\ GenericTypesCache\ =\ WeakValueDictionary[GenericTypesCacheKey,\ \textcolor{stringliteral}{'type[BaseModel]'}]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00060}00060\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00062}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map}{00062}}\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map}{DeepChainMap}}(ChainMap[KT,\ VT]):\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ ...}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00065}00065\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00067}00067\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map}{DeepChainMap}}(ChainMap):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Variant\ of\ ChainMap\ that\ allows\ direct\ updates\ to\ inner\ scopes.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00069}00069\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00070}00070\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Taken\ from\ https://docs.python.org/3/library/collections.html\#collections.ChainMap,}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00071}00071\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ with\ some\ light\ modifications\ for\ this\ use\ case.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00074}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map_ad5b12459f2316278253497dddbb38d7f}{00074}}\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map_ad5b12459f2316278253497dddbb38d7f}{clear}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00075}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map_ab79c95284279bcccfee01e4b6a72c825}{00075}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ mapping\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map_ab79c95284279bcccfee01e4b6a72c825}{maps}}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mapping.clear()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_setitem\_\_(self,\ key:\ KT,\ value:\ VT)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ mapping\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map_ab79c95284279bcccfee01e4b6a72c825}{maps}}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mapping[key]\ =\ value}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keyword}{def\ }\_\_delitem\_\_(self,\ key:\ KT)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ hit\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ mapping\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map_ab79c95284279bcccfee01e4b6a72c825}{maps}}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ key\ \textcolor{keywordflow}{in}\ mapping:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ del\ mapping[key]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hit\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hit:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ KeyError(key)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00092}00092\ \textcolor{comment}{\#\ Despite\ the\ fact\ that\ LimitedDict\ \_seems\_\ no\ longer\ necessary,\ I'm\ very\ nervous\ to\ actually\ remove\ it}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00093}00093\ \textcolor{comment}{\#\ and\ discover\ later\ on\ that\ we\ need\ to\ re-\/add\ all\ this\ infrastructure...}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00094}00094\ \textcolor{comment}{\#\ \_GENERIC\_TYPES\_CACHE\ =\ DeepChainMap(GenericTypesCache(),\ LimitedDict())}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00096}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_deep_chain_map_a971c540a0655a0da1e4069d00c353a0f}{00096}}\ \_GENERIC\_TYPES\_CACHE:\ ContextVar[GenericTypesCache\ |\ \textcolor{keywordtype}{None}]\ =\ ContextVar(\textcolor{stringliteral}{'\_GENERIC\_TYPES\_CACHE'},\ default=\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00099}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_pydantic_generic_metadata}{00099}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_pydantic_generic_metadata}{PydanticGenericMetadata}}(TypedDict):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00100}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_pydantic_generic_metadata_a45b8f693e6ef9199c77f468910719606}{00100}}\ \ \ \ \ origin:\ type[BaseModel]\ |\ \textcolor{keywordtype}{None}\ \ \textcolor{comment}{\#\ analogous\ to\ typing.\_GenericAlias.\_\_origin\_\_}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00101}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_pydantic_generic_metadata_a6256f47cfd00b0cf5a422cbe23e612e2}{00101}}\ \ \ \ \ args:\ tuple[Any,\ ...]\ \ \textcolor{comment}{\#\ analogous\ to\ typing.\_GenericAlias.\_\_args\_\_}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00102}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__generics_1_1_pydantic_generic_metadata_a53bd13109fd72d887d4a5b18d64dcc9c}{00102}}\ \ \ \ \ parameters:\ tuple[TypeVar,\ ...]\ \ \textcolor{comment}{\#\ analogous\ to\ typing.Generic.\_\_parameters\_\_}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00105}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_afcded858103d896453101e13b29d2a9b}{00105}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_afcded858103d896453101e13b29d2a9b}{create\_generic\_submodel}}(}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00106}00106\ \ \ \ \ model\_name:\ str,\ origin:\ type[BaseModel],\ args:\ tuple[Any,\ ...],\ params:\ tuple[Any,\ ...]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00107}00107\ )\ -\/>\ type[BaseModel]:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00108}00108\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Dynamically\ create\ a\ submodel\ of\ a\ provided\ (generic)\ BaseModel.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00109}00109\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ This\ is\ used\ when\ producing\ concrete\ parametrizations\ of\ generic\ models.\ This\ function}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ only\ *creates*\ the\ new\ subclass;\ the\ schema/validators/serialization\ must\ be\ updated\ to}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ reflect\ a\ concrete\ parametrization\ elsewhere.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00113}00113\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00114}00114\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00115}00115\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ model\_name:\ The\ name\ of\ the\ newly\ created\ model.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00116}00116\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ origin:\ The\ base\ class\ for\ the\ new\ model\ to\ inherit\ from.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00117}00117\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ args:\ A\ tuple\ of\ generic\ metadata\ arguments.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ params:\ A\ tuple\ of\ generic\ metadata\ parameters.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00119}00119\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00121}00121\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ created\ submodel.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00123}00123\ \ \ \ \ namespace:\ dict[str,\ Any]\ =\ \{\textcolor{stringliteral}{'\_\_module\_\_'}:\ origin.\_\_module\_\_\}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00124}00124\ \ \ \ \ bases\ =\ (origin,)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00125}00125\ \ \ \ \ meta,\ ns,\ kwds\ =\ prepare\_class(model\_name,\ bases)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00126}00126\ \ \ \ \ namespace.update(ns)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00127}00127\ \ \ \ \ created\_model\ =\ meta(}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ model\_name,}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ bases,}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ namespace,}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \_\_pydantic\_generic\_metadata\_\_=\{}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'origin'}:\ origin,}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'args'}:\ args,}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'parameters'}:\ params,}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \_\_pydantic\_reset\_parent\_namespace\_\_=\textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ **kwds,}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00138}00138\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00140}00140\ \ \ \ \ model\_module,\ called\_globally\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a79b21e519e79b1218b1f3d652fa33b1d}{\_get\_caller\_frame\_info}}(depth=3)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00141}00141\ \ \ \ \ \textcolor{keywordflow}{if}\ called\_globally:\ \ \textcolor{comment}{\#\ create\ global\ reference\ and\ therefore\ allow\ pickling}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ object\_by\_reference\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ reference\_name\ =\ model\_name}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ reference\_module\_globals\ =\ sys.modules[created\_model.\_\_module\_\_].\_\_dict\_\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ object\_by\_reference\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ created\_model:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ object\_by\_reference\ =\ reference\_module\_globals.setdefault(reference\_name,\ created\_model)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ reference\_name\ +=\ \textcolor{stringliteral}{'\_'}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00149}00149\ \ \ \ \ \textcolor{keywordflow}{return}\ created\_model}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00152}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a79b21e519e79b1218b1f3d652fa33b1d}{00152}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a79b21e519e79b1218b1f3d652fa33b1d}{\_get\_caller\_frame\_info}}(depth:\ int\ =\ 2)\ -\/>\ tuple[str\ |\ \textcolor{keywordtype}{None},\ bool]:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00153}00153\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Used\ inside\ a\ function\ to\ check\ whether\ it\ was\ called\ globally.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00154}00154\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00156}00156\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ depth:\ The\ depth\ to\ get\ the\ frame.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00157}00157\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ A\ tuple\ contains\ \`{}module\_name\`{}\ and\ \`{}called\_globally\`{}.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00160}00160\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ Raises:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00162}00162\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ RuntimeError:\ If\ the\ function\ is\ not\ called\ inside\ a\ function.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00163}00163\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00164}00164\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ previous\_caller\_frame\ =\ sys.\_getframe(depth)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00166}00166\ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{'This\ function\ must\ be\ used\ inside\ another\ function'})\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00168}00168\ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:\ \ \textcolor{comment}{\#\ sys\ module\ does\ not\ have\ \_getframe\ function,\ so\ there's\ nothing\ we\ can\ do\ about\ it}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None},\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00170}00170\ \ \ \ \ frame\_globals\ =\ previous\_caller\_frame.f\_globals}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00171}00171\ \ \ \ \ \textcolor{keywordflow}{return}\ frame\_globals.get(\textcolor{stringliteral}{'\_\_name\_\_'}),\ previous\_caller\_frame.f\_locals\ \textcolor{keywordflow}{is}\ frame\_globals}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00172}00172\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00174}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ac482f3da5f4edd52b0b458c5a729c253}{00174}}\ DictValues:\ type[Any]\ =\ \{\}.values().\_\_class\_\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00176}00176\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00177}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a91e72b4bc6889cef434bb6ffd83d61bc}{00177}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a91e72b4bc6889cef434bb6ffd83d61bc}{iter\_contained\_typevars}}(v:\ Any)\ -\/>\ Iterator[TypeVar]:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00178}00178\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Recursively\ iterate\ through\ all\ subtypes\ and\ type\ args\ of\ \`{}v\`{}\ and\ yield\ any\ typevars\ that\ are\ found.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00179}00179\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00180}00180\ \textcolor{stringliteral}{\ \ \ \ This\ is\ inspired\ as\ an\ alternative\ to\ directly\ accessing\ the\ \`{}\_\_parameters\_\_\`{}\ attribute\ of\ a\ GenericAlias,}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ since\ \_\_parameters\_\_\ of\ (nested)\ generic\ BaseModel\ subclasses\ won't\ show\ up\ in\ that\ list.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00183}00183\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(v,\ TypeVar):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ v}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00185}00185\ \ \ \ \ \textcolor{keywordflow}{elif}\ is\_model\_class(v):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{keyword}{from}\ v.\_\_pydantic\_generic\_metadata\_\_[\textcolor{stringliteral}{'parameters'}]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00187}00187\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(v,\ (DictValues,\ list)):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ var\ \textcolor{keywordflow}{in}\ v:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a91e72b4bc6889cef434bb6ffd83d61bc}{iter\_contained\_typevars}}(var)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00190}00190\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ args\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a29a07a03dba4ccf370007eb6718cd7b9}{get\_args}}(v)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ args:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a91e72b4bc6889cef434bb6ffd83d61bc}{iter\_contained\_typevars}}(arg)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00195}00195\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00196}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a29a07a03dba4ccf370007eb6718cd7b9}{00196}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a29a07a03dba4ccf370007eb6718cd7b9}{get\_args}}(v:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00197}00197\ \ \ \ \ pydantic\_generic\_metadata:\ PydanticGenericMetadata\ |\ \textcolor{keywordtype}{None}\ =\ getattr(v,\ \textcolor{stringliteral}{'\_\_pydantic\_generic\_metadata\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00198}00198\ \ \ \ \ \textcolor{keywordflow}{if}\ pydantic\_generic\_metadata:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pydantic\_generic\_metadata.get(\textcolor{stringliteral}{'args'})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00200}00200\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacetyping__extensions_abe2888fbec369aced9e2585a905caa7f}{typing\_extensions.get\_args}}(v)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00203}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a71145b763a2bc45e77b2f646d9d365b5}{00203}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a71145b763a2bc45e77b2f646d9d365b5}{get\_origin}}(v:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00204}00204\ \ \ \ \ pydantic\_generic\_metadata:\ PydanticGenericMetadata\ |\ \textcolor{keywordtype}{None}\ =\ getattr(v,\ \textcolor{stringliteral}{'\_\_pydantic\_generic\_metadata\_\_'},\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{if}\ pydantic\_generic\_metadata:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pydantic\_generic\_metadata.get(\textcolor{stringliteral}{'origin'})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00207}00207\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacetyping__extensions_a4bbba25af711824493b09a427463198d}{typing\_extensions.get\_origin}}(v)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00208}00208\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00209}00209\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00210}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ae5f63b9cae8e839cd0f0237583dd02c8}{00210}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ae5f63b9cae8e839cd0f0237583dd02c8}{get\_standard\_typevars\_map}}(cls:\ Any)\ -\/>\ dict[TypeVar,\ Any]\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00211}00211\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Package\ a\ generic\ type's\ typevars\ and\ parametrization\ (if\ present)\ into\ a\ dictionary\ compatible\ with\ the}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00212}00212\ \textcolor{stringliteral}{\ \ \ \ \`{}replace\_types\`{}\ function.\ Specifically,\ this\ works\ with\ standard\ typing\ generics\ and\ typing.\_GenericAlias.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00213}00213\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00214}00214\ \ \ \ \ origin\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a71145b763a2bc45e77b2f646d9d365b5}{get\_origin}}(cls)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00215}00215\ \ \ \ \ \textcolor{keywordflow}{if}\ origin\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00217}00217\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ hasattr(origin,\ \textcolor{stringliteral}{'\_\_parameters\_\_'}):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00219}00219\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00220}00220\ \ \ \ \ \textcolor{comment}{\#\ In\ this\ case,\ we\ know\ that\ cls\ is\ a\ \_GenericAlias,\ and\ origin\ is\ the\ generic\ type}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00221}00221\ \ \ \ \ \textcolor{comment}{\#\ So\ it\ is\ safe\ to\ access\ cls.\_\_args\_\_\ and\ origin.\_\_parameters\_\_}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00222}00222\ \ \ \ \ args:\ tuple[Any,\ ...]\ =\ cls.\_\_args\_\_\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00223}00223\ \ \ \ \ parameters:\ tuple[TypeVar,\ ...]\ =\ origin.\_\_parameters\_\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00224}00224\ \ \ \ \ \textcolor{keywordflow}{return}\ dict(zip(parameters,\ args))}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00226}00226\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00227}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_af8dab9794ade8386bed3975ec7a1c3f8}{00227}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_af8dab9794ade8386bed3975ec7a1c3f8}{get\_model\_typevars\_map}}(cls:\ type[BaseModel])\ -\/>\ dict[TypeVar,\ Any]:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00228}00228\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Package\ a\ generic\ BaseModel's\ typevars\ and\ concrete\ parametrization\ (if\ present)\ into\ a\ dictionary\ compatible}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00229}00229\ \textcolor{stringliteral}{\ \ \ \ with\ the\ \`{}replace\_types\`{}\ function.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00230}00230\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00231}00231\ \textcolor{stringliteral}{\ \ \ \ Since\ BaseModel.\_\_class\_getitem\_\_\ does\ not\ produce\ a\ typing.\_GenericAlias,\ and\ the\ BaseModel\ generic\ info\ is}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00232}00232\ \textcolor{stringliteral}{\ \ \ \ stored\ in\ the\ \_\_pydantic\_generic\_metadata\_\_\ attribute,\ we\ need\ special\ handling\ here.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00233}00233\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00234}00234\ \ \ \ \ \textcolor{comment}{\#\ TODO:\ This\ could\ be\ unified\ with\ \`{}get\_standard\_typevars\_map`\ if\ we\ stored\ the\ generic\ metadata}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00235}00235\ \ \ \ \ \textcolor{comment}{\#\ \ \ in\ the\ \_\_origin\_\_,\ \_\_args\_\_,\ and\ \_\_parameters\_\_\ attributes\ of\ the\ model.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00236}00236\ \ \ \ \ generic\_metadata\ =\ cls.\_\_pydantic\_generic\_metadata\_\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00237}00237\ \ \ \ \ origin\ =\ generic\_metadata[\textcolor{stringliteral}{'origin'}]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00238}00238\ \ \ \ \ args\ =\ generic\_metadata[\textcolor{stringliteral}{'args'}]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00239}00239\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ args:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ No\ need\ to\ go\ into\ \`{}iter\_contained\_typevars`:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00242}00242\ \ \ \ \ \textcolor{keywordflow}{return}\ dict(zip(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a91e72b4bc6889cef434bb6ffd83d61bc}{iter\_contained\_typevars}}(origin),\ args))}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00244}00244\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00245}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_abf393e8a431474b872c9096a8e99fadd}{00245}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_abf393e8a431474b872c9096a8e99fadd}{replace\_types}}(type\_:\ Any,\ type\_map:\ Mapping[TypeVar,\ Any]\ |\ \textcolor{keywordtype}{None})\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00246}00246\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ type\ with\ all\ occurrences\ of\ \`{}type\_map\`{}\ keys\ recursively\ replaced\ with\ their\ values.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00247}00247\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00248}00248\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00249}00249\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ type\_:\ The\ class\ or\ generic\ alias.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00250}00250\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ type\_map:\ Mapping\ from\ \`{}TypeVar\`{}\ instance\ to\ concrete\ types.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00251}00251\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00252}00252\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00253}00253\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ A\ new\ type\ representing\ the\ basic\ structure\ of\ \`{}type\_\`{}\ with\ all}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00254}00254\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}typevar\_map\`{}\ keys\ recursively\ replaced.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00255}00255\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00256}00256\ \textcolor{stringliteral}{\ \ \ \ Example:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00257}00257\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}python}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00258}00258\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ from\ typing\ import\ Union}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00259}00259\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00260}00260\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ from\ pydantic.\_internal.\_generics\ import\ replace\_types}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00261}00261\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00262}00262\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ replace\_types(tuple[str,\ Union[list[str],\ float]],\ \{str:\ int\})}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00263}00263\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#>\ tuple[int,\ Union[list[int],\ float]]}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00264}00264\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00265}00265\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00266}00266\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ type\_map:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00268}00268\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00269}00269\ \ \ \ \ type\_args\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a29a07a03dba4ccf370007eb6718cd7b9}{get\_args}}(type\_)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00270}00270\ \ \ \ \ origin\_type\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a71145b763a2bc45e77b2f646d9d365b5}{get\_origin}}(type\_)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00272}00272\ \ \ \ \ \textcolor{keywordflow}{if}\ typing\_objects.is\_annotated(origin\_type):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ annotated\_type,\ *annotations\ =\ type\_args}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ annotated\_type\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_abf393e8a431474b872c9096a8e99fadd}{replace\_types}}(annotated\_type,\ type\_map)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TODO\ remove\ parentheses\ when\ we\ drop\ support\ for\ Python\ 3.10:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Annotated[(annotated\_type,\ *annotations)]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00277}00277\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00278}00278\ \ \ \ \ \textcolor{comment}{\#\ Having\ type\ args\ is\ a\ good\ indicator\ that\ this\ is\ a\ typing\ special\ form}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00279}00279\ \ \ \ \ \textcolor{comment}{\#\ instance\ or\ a\ generic\ alias\ of\ some\ sort.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00280}00280\ \ \ \ \ \textcolor{keywordflow}{if}\ type\_args:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ resolved\_type\_args\ =\ tuple(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_abf393e8a431474b872c9096a8e99fadd}{replace\_types}}(arg,\ type\_map)\ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ type\_args)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ all\_identical(type\_args,\ resolved\_type\_args):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ all\ arguments\ are\ the\ same,\ there\ is\ no\ need\ to\ modify\ the}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ type\ or\ create\ a\ new\ object\ at\ all}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00285}00285\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00286}00286\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00288}00288\ \ \ \ \ \ \ \ \ \ \ \ \ origin\_type\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ isinstance(type\_,\ \_typing\_extra.typing\_base)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ isinstance(origin\_type,\ \_typing\_extra.typing\_base)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ getattr(type\_,\ \textcolor{stringliteral}{'\_name'},\ \textcolor{keywordtype}{None})\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ In\ python\ <\ 3.9\ generic\ aliases\ don't\ exist\ so\ any\ of\ these\ like\ \`{}list`,}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}type`\ or\ \`{}collections.abc.Callable`\ need\ to\ be\ translated.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00295}00295\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ See:\ https://www.python.org/dev/peps/pep-\/0585}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00296}00296\ \ \ \ \ \ \ \ \ \ \ \ \ origin\_type\ =\ getattr(typing,\ type\_.\_name)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00297}00297\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ origin\_type\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00298}00298\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00299}00299\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_union\_origin(origin\_type):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00300}00300\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ any(typing\_objects.is\_any(arg)\ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ resolved\_type\_args):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00301}00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}Any\ |\ T`\ \string~\ \`{}Any`:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ resolved\_type\_args\ =\ (Any,)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00303}00303\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}Never\ |\ T`\ \string~\ \`{}T`:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00304}00304\ \ \ \ \ \ \ \ \ \ \ \ \ resolved\_type\_args\ =\ tuple(}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00305}00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arg}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00306}00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ resolved\_type\_args}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00307}00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (typing\_objects.is\_noreturn(arg)\ \textcolor{keywordflow}{or}\ typing\_objects.is\_never(arg))}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00308}00308\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00310}00310\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ PEP-\/604\ syntax\ (Ex.:\ list\ |\ str)\ is\ represented\ with\ a\ types.UnionType\ object\ that\ does\ not\ have\ \_\_getitem\_\_.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ We\ also\ cannot\ use\ isinstance()\ since\ we\ have\ to\ compare\ types.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 10)\ \textcolor{keywordflow}{and}\ origin\_type\ \textcolor{keywordflow}{is}\ types.UnionType:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00313}00313\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ reduce(operator.or\_,\ resolved\_type\_args)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ NotRequired[T]\ and\ Required[T]\ don't\ support\ tuple\ type\ resolved\_type\_args,\ hence\ the\ condition\ below}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ origin\_type[resolved\_type\_args[0]\ \textcolor{keywordflow}{if}\ len(resolved\_type\_args)\ ==\ 1\ \textcolor{keywordflow}{else}\ resolved\_type\_args]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00317}00317\ \ \ \ \ \textcolor{comment}{\#\ We\ handle\ pydantic\ generic\ models\ separately\ as\ they\ don't\ have\ the\ same}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00318}00318\ \ \ \ \ \textcolor{comment}{\#\ semantics\ as\ "{}typing"{}\ classes\ or\ generic\ aliases}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00319}00319\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00320}00320\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ origin\_type\ \textcolor{keywordflow}{and}\ is\_model\_class(type\_):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ parameters\ =\ type\_.\_\_pydantic\_generic\_metadata\_\_[\textcolor{stringliteral}{'parameters'}]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ parameters:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ resolved\_type\_args\ =\ tuple(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_abf393e8a431474b872c9096a8e99fadd}{replace\_types}}(t,\ type\_map)\ \textcolor{keywordflow}{for}\ t\ \textcolor{keywordflow}{in}\ parameters)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00325}00325\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ all\_identical(parameters,\ resolved\_type\_args):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00326}00326\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_[resolved\_type\_args]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00328}00328\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00329}00329\ \ \ \ \ \textcolor{comment}{\#\ Handle\ special\ case\ for\ typehints\ that\ can\ have\ lists\ as\ arguments.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00330}00330\ \ \ \ \ \textcolor{comment}{\#\ \`{}typing.Callable[[int,\ str],\ int]`\ is\ an\ example\ for\ this.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00331}00331\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(type\_,\ list):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00332}00332\ \ \ \ \ \ \ \ \ resolved\_list\ =\ [\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_abf393e8a431474b872c9096a8e99fadd}{replace\_types}}(element,\ type\_map)\ \textcolor{keywordflow}{for}\ element\ \textcolor{keywordflow}{in}\ type\_]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00333}00333\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ all\_identical(type\_,\ resolved\_list):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ resolved\_list}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00336}00336\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00337}00337\ \ \ \ \ \textcolor{comment}{\#\ If\ all\ else\ fails,\ we\ try\ to\ resolve\ the\ type\ directly\ and\ otherwise\ just}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00338}00338\ \ \ \ \ \textcolor{comment}{\#\ return\ the\ input\ with\ no\ modifications.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00339}00339\ \ \ \ \ \textcolor{keywordflow}{return}\ type\_map.get(type\_,\ type\_)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00340}00340\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00341}00341\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00342}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a988383c2fcc5e45381e7a3246650d212}{00342}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a988383c2fcc5e45381e7a3246650d212}{map\_generic\_model\_arguments}}(cls:\ type[BaseModel],\ args:\ tuple[Any,\ ...])\ -\/>\ dict[TypeVar,\ Any]:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00343}00343\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ a\ mapping\ between\ the\ parameters\ of\ a\ generic\ model\ and\ the\ provided\ arguments\ during\ parameterization.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00344}00344\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00345}00345\ \textcolor{stringliteral}{\ \ \ \ Raises:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00346}00346\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ TypeError:\ If\ the\ number\ of\ arguments\ does\ not\ match\ the\ parameters\ (i.e.\ if\ providing\ too\ few\ or\ too\ many\ arguments).}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00347}00347\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00348}00348\ \textcolor{stringliteral}{\ \ \ \ Example:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00349}00349\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}python\ \{test="{}skip"{}\ lint="{}skip"{}\}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00350}00350\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ class\ Model[T,\ U,\ V\ =\ int](BaseModel):\ ...}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00351}00351\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00352}00352\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ map\_generic\_model\_arguments(Model,\ (str,\ bytes))}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00353}00353\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#>\ \{T:\ str,\ U:\ bytes,\ V:\ int\}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00354}00354\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00355}00355\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ map\_generic\_model\_arguments(Model,\ (str,))}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00356}00356\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#>\ TypeError:\ Too\ few\ arguments\ for\ <class\ '\_\_main\_\_.Model'>;\ actual\ 1,\ expected\ at\ least\ 2}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00357}00357\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00358}00358\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ map\_generic\_model\_arguments(Model,\ (str,\ bytes,\ int,\ complex))}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00359}00359\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \#>\ TypeError:\ Too\ many\ arguments\ for\ <class\ '\_\_main\_\_.Model'>;\ actual\ 4,\ expected\ 3}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00360}00360\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00361}00361\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00362}00362\ \textcolor{stringliteral}{\ \ \ \ Note:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00363}00363\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ function\ is\ analogous\ to\ the\ private\ \`{}typing.\_check\_generic\_specialization\`{}\ function.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00364}00364\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00365}00365\ \ \ \ \ parameters\ =\ cls.\_\_pydantic\_generic\_metadata\_\_[\textcolor{stringliteral}{'parameters'}]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00366}00366\ \ \ \ \ expected\_len\ =\ len(parameters)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00367}00367\ \ \ \ \ typevars\_map:\ dict[TypeVar,\ Any]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00369}00369\ \ \ \ \ \_missing\ =\ object()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00370}00370\ \ \ \ \ \textcolor{keywordflow}{for}\ parameter,\ argument\ \textcolor{keywordflow}{in}\ zip\_longest(parameters,\ args,\ fillvalue=\_missing):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ parameter\ \textcolor{keywordflow}{is}\ \_missing:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'Too\ many\ arguments\ for\ \{cls\};\ actual\ \{len(args)\},\ expected\ \{expected\_len\}'})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00373}00373\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00374}00374\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ argument\ \textcolor{keywordflow}{is}\ \_missing:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00375}00375\ \ \ \ \ \ \ \ \ \ \ \ \ param\ =\ cast(TypeVar,\ parameter)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00377}00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ has\_default\ =\ param.has\_default()\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00378}00378\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ AttributeError:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Happens\ if\ using\ \`{}typing.TypeVar`\ (and\ not\ \`{}typing\_extensions`)\ on\ Python\ <\ 3.13.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ has\_default\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ has\_default:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ The\ default\ might\ refer\ to\ other\ type\ parameters.\ For\ an\ example,\ see:}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ https://typing.python.org/en/latest/spec/generics.html\#type-\/parameters-\/as-\/parameters-\/to-\/generics}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ typevars\_map[param]\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_abf393e8a431474b872c9096a8e99fadd}{replace\_types}}(param.\_\_default\_\_,\ typevars\_map)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00386}00386\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expected\_len\ -\/=\ sum(hasattr(p,\ \textcolor{stringliteral}{'has\_default'})\ \textcolor{keywordflow}{and}\ p.has\_default()\ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ parameters)\ \ \textcolor{comment}{\#\ pyright:\ ignore[reportAttributeAccessIssue]}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00387}00387\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(f\textcolor{stringliteral}{'Too\ few\ arguments\ for\ \{cls\};\ actual\ \{len(args)\},\ expected\ at\ least\ \{expected\_len\}'})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \ \ \ \ param\ =\ cast(TypeVar,\ parameter)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ typevars\_map[param]\ =\ argument}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00392}00392\ \ \ \ \ \textcolor{keywordflow}{return}\ typevars\_map}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00393}00393\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00394}00394\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00395}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a852f427cbedb8cfd7cf488f2ffef9c18}{00395}}\ \_generic\_recursion\_cache:\ ContextVar[set[str]\ |\ \textcolor{keywordtype}{None}]\ =\ ContextVar(\textcolor{stringliteral}{'\_generic\_recursion\_cache'},\ default=\textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00396}00396\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00398}00398\ \textcolor{preprocessor}{@contextmanager}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00399}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a05b120c91cf4df0a83a1cea779288b53}{00399}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a05b120c91cf4df0a83a1cea779288b53}{generic\_recursion\_self\_type}}(}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00400}00400\ \ \ \ \ origin:\ type[BaseModel],\ args:\ tuple[Any,\ ...]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00401}00401\ )\ -\/>\ Iterator[PydanticRecursiveRef\ |\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00402}00402\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}This\ contextmanager\ should\ be\ placed\ around\ the\ recursive\ calls\ used\ to\ build\ a\ generic\ type,}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00403}00403\ \textcolor{stringliteral}{\ \ \ \ and\ accept\ as\ arguments\ the\ generic\ origin\ type\ and\ the\ type\ arguments\ being\ passed\ to\ it.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00404}00404\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00405}00405\ \textcolor{stringliteral}{\ \ \ \ If\ the\ same\ origin\ and\ arguments\ are\ observed\ twice,\ it\ implies\ that\ a\ self-\/reference\ placeholder}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00406}00406\ \textcolor{stringliteral}{\ \ \ \ can\ be\ used\ while\ building\ the\ core\ schema,\ and\ will\ produce\ a\ schema\_ref\ that\ will\ be\ valid\ in\ the}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00407}00407\ \textcolor{stringliteral}{\ \ \ \ final\ parent\ schema.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00408}00408\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00409}00409\ \ \ \ \ previously\_seen\_type\_refs\ =\ \_generic\_recursion\_cache.get()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00410}00410\ \ \ \ \ \textcolor{keywordflow}{if}\ previously\_seen\_type\_refs\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ previously\_seen\_type\_refs\ =\ set()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00412}00412\ \ \ \ \ \ \ \ \ token\ =\ \_generic\_recursion\_cache.set(previously\_seen\_type\_refs)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00413}00413\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00414}00414\ \ \ \ \ \ \ \ \ token\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00415}00415\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00416}00416\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ type\_ref\ =\ get\_type\_ref(origin,\ args\_override=args)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00418}00418\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type\_ref\ \textcolor{keywordflow}{in}\ previously\_seen\_type\_refs:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ self\_type\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__forward__ref_1_1_pydantic_recursive_ref}{PydanticRecursiveRef}}(type\_ref=type\_ref)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}\ self\_type}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00421}00421\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ previously\_seen\_type\_refs.add(type\_ref)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00423}00423\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ previously\_seen\_type\_refs.remove(type\_ref)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00425}00425\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00426}00426\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ token:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ \_generic\_recursion\_cache.reset(token)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00428}00428\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00429}00429\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00430}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a58e6abceadaad8d39b24555f71afe7d9}{00430}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a58e6abceadaad8d39b24555f71afe7d9}{recursively\_defined\_type\_refs}}()\ -\/>\ set[str]:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00431}00431\ \ \ \ \ visited\ =\ \_generic\_recursion\_cache.get()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00432}00432\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ visited:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00433}00433\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ set()\ \ \textcolor{comment}{\#\ not\ in\ a\ generic\ recursion,\ so\ there\ are\ no\ types}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00434}00434\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00435}00435\ \ \ \ \ \textcolor{keywordflow}{return}\ visited.copy()\ \ \textcolor{comment}{\#\ don't\ allow\ modifications}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00436}00436\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00437}00437\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00438}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a3c9314192feecb986c1a784369b212fa}{00438}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a3c9314192feecb986c1a784369b212fa}{get\_cached\_generic\_type\_early}}(parent:\ type[BaseModel],\ typevar\_values:\ Any)\ -\/>\ type[BaseModel]\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00439}00439\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}The\ use\ of\ a\ two-\/stage\ cache\ lookup\ approach\ was\ necessary\ to\ have\ the\ highest\ performance\ possible\ for}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00440}00440\ \textcolor{stringliteral}{\ \ \ \ repeated\ calls\ to\ \`{}\_\_class\_getitem\_\_\`{}\ on\ generic\ types\ (which\ may\ happen\ in\ tighter\ loops\ during\ runtime),}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00441}00441\ \textcolor{stringliteral}{\ \ \ \ while\ still\ ensuring\ that\ certain\ alternative\ parametrizations\ ultimately\ resolve\ to\ the\ same\ type.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00442}00442\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00443}00443\ \textcolor{stringliteral}{\ \ \ \ As\ a\ concrete\ example,\ this\ approach\ was\ necessary\ to\ make\ Model[List[T]][int]\ equal\ to\ Model[List[int]].}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00444}00444\ \textcolor{stringliteral}{\ \ \ \ The\ approach\ could\ be\ modified\ to\ not\ use\ two\ different\ cache\ keys\ at\ different\ points,\ but\ the}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00445}00445\ \textcolor{stringliteral}{\ \ \ \ \_early\_cache\_key\ is\ optimized\ to\ be\ as\ quick\ to\ compute\ as\ possible\ (for\ repeated-\/access\ speed),\ and\ the}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00446}00446\ \textcolor{stringliteral}{\ \ \ \ \_late\_cache\_key\ is\ optimized\ to\ be\ as\ "{}correct"{}\ as\ possible,\ so\ that\ two\ types\ that\ will\ ultimately\ be\ the}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00447}00447\ \textcolor{stringliteral}{\ \ \ \ same\ after\ resolving\ the\ type\ arguments\ will\ always\ produce\ cache\ hits.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00448}00448\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00449}00449\ \textcolor{stringliteral}{\ \ \ \ If\ we\ wanted\ to\ move\ to\ only\ using\ a\ single\ cache\ key\ per\ type,\ we\ would\ either\ need\ to\ always\ use\ the}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00450}00450\ \textcolor{stringliteral}{\ \ \ \ slower/more\ computationally\ intensive\ logic\ associated\ with\ \_late\_cache\_key,\ or\ would\ need\ to\ accept}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00451}00451\ \textcolor{stringliteral}{\ \ \ \ that\ Model[List[T]][int]\ is\ a\ different\ type\ than\ Model[List[T]][int].\ Because\ we\ rely\ on\ subclass\ relationships}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00452}00452\ \textcolor{stringliteral}{\ \ \ \ during\ validation,\ I\ think\ it\ is\ worthwhile\ to\ ensure\ that\ types\ that\ are\ functionally\ equivalent\ are\ actually}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00453}00453\ \textcolor{stringliteral}{\ \ \ \ equal.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00454}00454\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00455}00455\ \ \ \ \ generic\_types\_cache\ =\ \_GENERIC\_TYPES\_CACHE.get()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00456}00456\ \ \ \ \ \textcolor{keywordflow}{if}\ generic\_types\_cache\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ generic\_types\_cache\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a39a759bcb29ba97f166450d257693259}{GenericTypesCache}}()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00458}00458\ \ \ \ \ \ \ \ \ \_GENERIC\_TYPES\_CACHE.set(generic\_types\_cache)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00459}00459\ \ \ \ \ \textcolor{keywordflow}{return}\ generic\_types\_cache.get(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a0b982a936af6d27a669a64ff44d55fc4}{\_early\_cache\_key}}(parent,\ typevar\_values))}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00460}00460\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00461}00461\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00462}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a1c055e35886a98db1334e04fc60f8be0}{00462}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a1c055e35886a98db1334e04fc60f8be0}{get\_cached\_generic\_type\_late}}(}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00463}00463\ \ \ \ \ parent:\ type[BaseModel],\ typevar\_values:\ Any,\ origin:\ type[BaseModel],\ args:\ tuple[Any,\ ...]}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00464}00464\ )\ -\/>\ type[BaseModel]\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00465}00465\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}See\ the\ docstring\ of\ \`{}get\_cached\_generic\_type\_early\`{}\ for\ more\ information\ about\ the\ two-\/stage\ cache\ lookup."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00466}00466\ \ \ \ \ generic\_types\_cache\ =\ \_GENERIC\_TYPES\_CACHE.get()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00467}00467\ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ generic\_types\_cache\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00469}00469\ \ \ \ \ ):\ \ \textcolor{comment}{\#\ pragma:\ no\ cover\ (early\ cache\ is\ guaranteed\ to\ run\ first\ and\ initialize\ the\ cache)}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ generic\_types\_cache\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a39a759bcb29ba97f166450d257693259}{GenericTypesCache}}()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ \_GENERIC\_TYPES\_CACHE.set(generic\_types\_cache)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00472}00472\ \ \ \ \ cached\ =\ generic\_types\_cache.get(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a58fb0be9dd993d6b0c1659091ca30716}{\_late\_cache\_key}}(origin,\ args,\ typevar\_values))}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00473}00473\ \ \ \ \ \textcolor{keywordflow}{if}\ cached\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ac46c5b5c5c2d0a221f8cda82b25ae9c0}{set\_cached\_generic\_type}}(parent,\ typevar\_values,\ cached,\ origin,\ args)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00475}00475\ \ \ \ \ \textcolor{keywordflow}{return}\ cached}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00476}00476\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00477}00477\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00478}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ac46c5b5c5c2d0a221f8cda82b25ae9c0}{00478}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ac46c5b5c5c2d0a221f8cda82b25ae9c0}{set\_cached\_generic\_type}}(}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00479}00479\ \ \ \ \ parent:\ type[BaseModel],}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00480}00480\ \ \ \ \ typevar\_values:\ tuple[Any,\ ...],}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00481}00481\ \ \ \ \ type\_:\ type[BaseModel],}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00482}00482\ \ \ \ \ origin:\ type[BaseModel]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00483}00483\ \ \ \ \ args:\ tuple[Any,\ ...]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00484}00484\ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00485}00485\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}See\ the\ docstring\ of\ \`{}get\_cached\_generic\_type\_early\`{}\ for\ more\ information\ about\ why\ items\ are\ cached\ with}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00486}00486\ \textcolor{stringliteral}{\ \ \ \ two\ different\ keys.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00487}00487\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00488}00488\ \ \ \ \ generic\_types\_cache\ =\ \_GENERIC\_TYPES\_CACHE.get()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00489}00489\ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ generic\_types\_cache\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00491}00491\ \ \ \ \ ):\ \ \textcolor{comment}{\#\ pragma:\ no\ cover\ (cache\ lookup\ is\ guaranteed\ to\ run\ first\ and\ initialize\ the\ cache)}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ generic\_types\_cache\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a39a759bcb29ba97f166450d257693259}{GenericTypesCache}}()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ \_GENERIC\_TYPES\_CACHE.set(generic\_types\_cache)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00494}00494\ \ \ \ \ generic\_types\_cache[\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a0b982a936af6d27a669a64ff44d55fc4}{\_early\_cache\_key}}(parent,\ typevar\_values)]\ =\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00495}00495\ \ \ \ \ \textcolor{keywordflow}{if}\ len(typevar\_values)\ ==\ 1:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ generic\_types\_cache[\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a0b982a936af6d27a669a64ff44d55fc4}{\_early\_cache\_key}}(parent,\ typevar\_values[0])]\ =\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00497}00497\ \ \ \ \ \textcolor{keywordflow}{if}\ origin\ \textcolor{keywordflow}{and}\ args:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ generic\_types\_cache[\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a58fb0be9dd993d6b0c1659091ca30716}{\_late\_cache\_key}}(origin,\ args,\ typevar\_values)]\ =\ type\_}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00499}00499\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00500}00500\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00501}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ad1b2be56fbba991bdca0c593c464a6c2}{00501}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ad1b2be56fbba991bdca0c593c464a6c2}{\_union\_orderings\_key}}(typevar\_values:\ Any)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00502}00502\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}This\ is\ intended\ to\ help\ differentiate\ between\ Union\ types\ with\ the\ same\ arguments\ in\ different\ order.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00503}00503\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00504}00504\ \textcolor{stringliteral}{\ \ \ \ Thanks\ to\ caching\ internal\ to\ the\ \`{}typing\`{}\ module,\ it\ is\ not\ possible\ to\ distinguish\ between}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00505}00505\ \textcolor{stringliteral}{\ \ \ \ List[Union[int,\ float]]\ and\ List[Union[float,\ int]]\ (and\ similarly\ for\ other\ "{}parent"{}\ origins\ besides\ List)}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00506}00506\ \textcolor{stringliteral}{\ \ \ \ because\ \`{}typing\`{}\ considers\ Union[int,\ float]\ to\ be\ equal\ to\ Union[float,\ int].}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00507}00507\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00508}00508\ \textcolor{stringliteral}{\ \ \ \ However,\ you\ \_can\_\ distinguish\ between\ (top-\/level)\ Union[int,\ float]\ vs.\ Union[float,\ int].}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00509}00509\ \textcolor{stringliteral}{\ \ \ \ Because\ we\ parse\ items\ as\ the\ first\ Union\ type\ that\ is\ successful,\ we\ get\ slightly\ more\ consistent\ behavior}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00510}00510\ \textcolor{stringliteral}{\ \ \ \ if\ we\ make\ an\ effort\ to\ distinguish\ the\ ordering\ of\ items\ in\ a\ union.\ It\ would\ be\ best\ if\ we\ could\ \_always\_}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00511}00511\ \textcolor{stringliteral}{\ \ \ \ get\ the\ exact-\/correct\ order\ of\ items\ in\ the\ union,\ but\ that\ would\ require\ a\ change\ to\ the\ \`{}typing\`{}\ module\ itself.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00512}00512\ \textcolor{stringliteral}{\ \ \ \ (See\ https://github.com/python/cpython/issues/86483\ for\ reference.)}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00513}00513\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00514}00514\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(typevar\_values,\ tuple):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ tuple(\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ad1b2be56fbba991bdca0c593c464a6c2}{\_union\_orderings\_key}}(value)\ \textcolor{keywordflow}{for}\ value\ \textcolor{keywordflow}{in}\ typevar\_values)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00516}00516\ \ \ \ \ \textcolor{keywordflow}{elif}\ typing\_objects.is\_union(\mbox{\hyperlink{namespacetyping__extensions_a4bbba25af711824493b09a427463198d}{typing\_extensions.get\_origin}}(typevar\_values)):}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00517}00517\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a29a07a03dba4ccf370007eb6718cd7b9}{get\_args}}(typevar\_values)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00518}00518\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ()}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00520}00520\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00521}00521\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00522}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a0b982a936af6d27a669a64ff44d55fc4}{00522}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a0b982a936af6d27a669a64ff44d55fc4}{\_early\_cache\_key}}(cls:\ type[BaseModel],\ typevar\_values:\ Any)\ -\/>\ GenericTypesCacheKey:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00523}00523\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}This\ is\ intended\ for\ minimal\ computational\ overhead\ during\ lookups\ of\ cached\ types.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00524}00524\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00525}00525\ \textcolor{stringliteral}{\ \ \ \ Note\ that\ this\ is\ overly\ simplistic,\ and\ it's\ possible\ that\ two\ different\ cls/typevar\_values}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00526}00526\ \textcolor{stringliteral}{\ \ \ \ inputs\ would\ ultimately\ result\ in\ the\ same\ type\ being\ created\ in\ BaseModel.\_\_class\_getitem\_\_.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00527}00527\ \textcolor{stringliteral}{\ \ \ \ To\ handle\ this,\ we\ have\ a\ fallback\ \_late\_cache\_key\ that\ is\ checked\ later\ if\ the\ \_early\_cache\_key}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00528}00528\ \textcolor{stringliteral}{\ \ \ \ lookup\ fails,\ and\ should\ result\ in\ a\ cache\ hit\ \_precisely\_\ when\ the\ inputs\ to\ \_\_class\_getitem\_\_}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00529}00529\ \textcolor{stringliteral}{\ \ \ \ would\ result\ in\ the\ same\ type.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00530}00530\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00531}00531\ \ \ \ \ \textcolor{keywordflow}{return}\ cls,\ typevar\_values,\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ad1b2be56fbba991bdca0c593c464a6c2}{\_union\_orderings\_key}}(typevar\_values)}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00532}00532\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00533}00533\ }
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00534}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a58fb0be9dd993d6b0c1659091ca30716}{00534}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_a58fb0be9dd993d6b0c1659091ca30716}{\_late\_cache\_key}}(origin:\ type[BaseModel],\ args:\ tuple[Any,\ ...],\ typevar\_values:\ Any)\ -\/>\ GenericTypesCacheKey:}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00535}00535\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}This\ is\ intended\ for\ use\ later\ in\ the\ process\ of\ creating\ a\ new\ type,\ when\ we\ have\ more\ information}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00536}00536\ \textcolor{stringliteral}{\ \ \ \ about\ the\ exact\ args\ that\ will\ be\ passed.\ If\ it\ turns\ out\ that\ a\ different\ set\ of\ inputs\ to}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00537}00537\ \textcolor{stringliteral}{\ \ \ \ \_\_class\_getitem\_\_\ resulted\ in\ the\ same\ inputs\ to\ the\ generic\ type\ creation\ process,\ we\ can\ still}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00538}00538\ \textcolor{stringliteral}{\ \ \ \ return\ the\ cached\ type,\ and\ update\ the\ cache\ with\ the\ \_early\_cache\_key\ as\ well.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00539}00539\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00540}00540\ \ \ \ \ \textcolor{comment}{\#\ The\ \_union\_orderings\_key\ is\ placed\ at\ the\ start\ here\ to\ ensure\ there\ cannot\ be\ a\ collision\ with\ an}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00541}00541\ \ \ \ \ \textcolor{comment}{\#\ \_early\_cache\_key,\ as\ that\ function\ will\ always\ produce\ a\ BaseModel\ subclass\ as\ the\ first\ item\ in\ the\ key,}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00542}00542\ \ \ \ \ \textcolor{comment}{\#\ whereas\ this\ function\ will\ always\ produce\ a\ tuple\ as\ the\ first\ item\ in\ the\ key.}}
+\DoxyCodeLine{\Hypertarget{__generics_8py_source_l00543}00543\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__generics_ad1b2be56fbba991bdca0c593c464a6c2}{\_union\_orderings\_key}}(typevar\_values),\ origin,\ args}
+
+\end{DoxyCode}

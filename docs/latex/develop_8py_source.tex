@@ -1,0 +1,199 @@
+\doxysection{develop.\+py}
+\hypertarget{develop_8py_source}{}\label{develop_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/develop.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/command/develop.py}}
+\mbox{\hyperlink{develop_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1command_1_1develop}{00001}}\ \textcolor{keyword}{from}\ distutils.util\ \textcolor{keyword}{import}\ convert\_path}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00002}00002\ \textcolor{keyword}{from}\ distutils\ \textcolor{keyword}{import}\ log}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00003}00003\ \textcolor{keyword}{from}\ distutils.errors\ \textcolor{keyword}{import}\ DistutilsError,\ DistutilsOptionError}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00004}00004\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00005}00005\ \textcolor{keyword}{import}\ glob}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00006}00006\ \textcolor{keyword}{import}\ io}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00008}00008\ \textcolor{keyword}{import}\ pkg\_resources}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacesetuptools_1_1command_1_1easy__install}{setuptools.command.easy\_install}}\ \textcolor{keyword}{import}\ easy\_install}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00010}00010\ \textcolor{keyword}{from}\ setuptools\ \textcolor{keyword}{import}\ namespaces}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00011}00011\ \textcolor{keyword}{import}\ setuptools}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00014}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00014}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{develop}}(\mbox{\hyperlink{classsetuptools_1_1namespaces_1_1_develop_installer}{namespaces.DevelopInstaller}},\ \mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install}{easy\_install}}):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00015}00015\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Set\ up\ package\ for\ development"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00017}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00017}}\ \ \ \ \ description\ =\ \textcolor{stringliteral}{"{}install\ package\ in\ 'development\ mode'"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00019}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00019}}\ \ \ \ \ user\_options\ =\ easy\_install.user\_options\ +\ [}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}uninstall"{}},\ \textcolor{stringliteral}{"{}u"{}},\ \textcolor{stringliteral}{"{}Uninstall\ this\ source\ package"{}}),}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00021}00021\ \ \ \ \ \ \ \ \ (\textcolor{stringliteral}{"{}egg-\/path="{}},\ \textcolor{keywordtype}{None},\ \textcolor{stringliteral}{"{}Set\ the\ path\ to\ be\ used\ in\ the\ .egg-\/link\ file"{}}),}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00022}00022\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00024}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00024}}\ \ \ \ \ boolean\_options\ =\ easy\_install.boolean\_options\ +\ [\textcolor{stringliteral}{'uninstall'}]}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00026}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00026}}\ \ \ \ \ command\_consumes\_arguments\ =\ \textcolor{keyword}{False}\ \ \textcolor{comment}{\#\ override\ base}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00028}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a43f05c435c7958743b49584e0ceb743f}{00028}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a43f05c435c7958743b49584e0ceb743f}{run}}(self):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00029}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a40763517d7b5632fc6b6cec1838789c7}{00029}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a40763517d7b5632fc6b6cec1838789c7}{uninstall}}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00030}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00030}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{multi\_version}}\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a285c5a670231358ba3d42abc08e9ef20}{uninstall\_link}}()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1namespaces_1_1_installer_a4f328200604be756e7258a6324ac9d02}{uninstall\_namespaces}}()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a35de7e3f44f8096f0334bc5bae4f3966}{install\_for\_development}}()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a22c0a068dd3ab6cea8f1ce796e0d222c}{warn\_deprecated\_options}}()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00037}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aaf5ae9820bad9381d94a9f7a9c1c215d}{00037}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aaf5ae9820bad9381d94a9f7a9c1c215d}{initialize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a40763517d7b5632fc6b6cec1838789c7}{uninstall}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00039}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00039}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ easy\_install.initialize\_options(self)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00041}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aebd7d6fb89f85612802017ae8913a34f}{00041}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aebd7d6fb89f85612802017ae8913a34f}{setup\_path}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00042}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00042}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{always\_copy\_from}}\ =\ \textcolor{stringliteral}{'.'}\ \ \textcolor{comment}{\#\ always\ copy\ eggs\ installed\ in\ curdir}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00044}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a04cfe8562edb332a129c2c4f9bfd73ea}{00044}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a04cfe8562edb332a129c2c4f9bfd73ea}{finalize\_options}}(self):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ ei\ =\ self.get\_finalized\_command(\textcolor{stringliteral}{"{}egg\_info"{}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ei.broken\_egg\_info:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ template\ =\ \textcolor{stringliteral}{"{}Please\ rename\ \%r\ to\ \%r\ before\ using\ 'develop'"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ args\ =\ ei.egg\_info,\ ei.broken\_egg\_info}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsError(template\ \%\ args)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00050}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00050}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{args}}\ =\ [ei.egg\_name]}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ easy\_install.finalize\_options(self)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a5ff7b43f6cc8a8b7f5269911805c7c78}{expand\_basedirs}}()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a09975014e6c2d5fcde741cb6c5cc110e}{expand\_dirs}}()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ pick\ up\ setup-\/dir\ .egg\ files\ only:\ no\ .egg-\/info}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a1191f5f45cbbcc0e6bcf87107818eaca}{package\_index}}.scan(glob.glob(\textcolor{stringliteral}{'*.egg'}))}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ egg\_link\_fn\ =\ ei.egg\_name\ +\ \textcolor{stringliteral}{'.egg-\/link'}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00059}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{00059}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{egg\_link}}\ =\ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a1b80f13e00ade511bf1823bddce3341a}{install\_dir}},\ egg\_link\_fn)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00060}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a09767fa04a16fe9a2f8d2dc828391b3f}{00060}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a09767fa04a16fe9a2f8d2dc828391b3f}{egg\_base}}\ =\ ei.egg\_base}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}}\ =\ os.path.abspath(ei.egg\_base)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ target\ =\ \mbox{\hyperlink{namespacepkg__resources_aa4e109ff43e2450977e06b178590190d}{pkg\_resources.normalize\_path}}(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a09767fa04a16fe9a2f8d2dc828391b3f}{egg\_base}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ egg\_path\ =\ \mbox{\hyperlink{namespacepkg__resources_aa4e109ff43e2450977e06b178590190d}{pkg\_resources.normalize\_path}}(}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ os.path.join(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a1b80f13e00ade511bf1823bddce3341a}{install\_dir}},\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ egg\_path\ !=\ target:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}-\/-\/egg-\/path\ must\ be\ a\ relative\ path\ from\ the\ install"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ directory\ to\ "{}}\ +\ target}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Make\ a\ distribution\ for\ the\ package's\ source}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00075}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_afe57f6e30fcbd487d024ab2dfa587630}{00075}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_afe57f6e30fcbd487d024ab2dfa587630}{dist}}\ =\ \mbox{\hyperlink{classpkg__resources_1_1_distribution}{pkg\_resources.Distribution}}(}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ target,}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classpkg__resources_1_1_path_metadata}{pkg\_resources.PathMetadata}}(target,\ os.path.abspath(ei.egg\_info)),}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ project\_name=ei.egg\_name,}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aebd7d6fb89f85612802017ae8913a34f}{setup\_path}}\ =\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aa4d21a3ff29ddb9c3f6d984428f3b1ec}{\_resolve\_setup\_path}}(}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a09767fa04a16fe9a2f8d2dc828391b3f}{egg\_base}},}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a1b80f13e00ade511bf1823bddce3341a}{install\_dir}},}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}},}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00087}00087\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00088}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aa4d21a3ff29ddb9c3f6d984428f3b1ec}{00088}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aa4d21a3ff29ddb9c3f6d984428f3b1ec}{\_resolve\_setup\_path}}(egg\_base,\ install\_dir,\ egg\_path):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Generate\ a\ path\ from\ egg\_base\ back\ to\ '.'\ where\ the}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ setup\ script\ resides\ and\ ensure\ that\ path\ points\ to\ the}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ setup\ path\ from\ \$install\_dir/\$egg\_path.}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ path\_to\_setup\ =\ egg\_base.replace(os.sep,\ \textcolor{stringliteral}{'/'}).rstrip(\textcolor{stringliteral}{'/'})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ path\_to\_setup\ !=\ os.curdir:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ path\_to\_setup\ =\ \textcolor{stringliteral}{'../'}\ *\ (path\_to\_setup.count(\textcolor{stringliteral}{'/'})\ +\ 1)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ resolved\ =\ \mbox{\hyperlink{namespacepkg__resources_aa4e109ff43e2450977e06b178590190d}{pkg\_resources.normalize\_path}}(}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ os.path.join(install\_dir,\ egg\_path,\ path\_to\_setup)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ resolved\ !=\ \mbox{\hyperlink{namespacepkg__resources_aa4e109ff43e2450977e06b178590190d}{pkg\_resources.normalize\_path}}(os.curdir):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ DistutilsOptionError(}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Can't\ get\ a\ consistent\ path\ to\ setup\ script\ from"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ installation\ directory"{}},}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ resolved,}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepkg__resources_aa4e109ff43e2450977e06b178590190d}{pkg\_resources.normalize\_path}}(os.curdir),}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ path\_to\_setup}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00109}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a35de7e3f44f8096f0334bc5bae4f3966}{00109}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a35de7e3f44f8096f0334bc5bae4f3966}{install\_for\_development}}(self):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ self.run\_command(\textcolor{stringliteral}{'egg\_info'})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00111}00111\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Build\ extensions\ in-\/place}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1_command_a9d9c051523abcdd1a31f1b0af60aecbb}{reinitialize\_command}}(\textcolor{stringliteral}{'build\_ext'},\ inplace=1)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ self.run\_command(\textcolor{stringliteral}{'build\_ext'})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ setuptools.bootstrap\_install\_from:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a5d8266dcdcdeec2c80c569de9755bfc5}{easy\_install}}(setuptools.bootstrap\_install\_from)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ setuptools.bootstrap\_install\_from\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1namespaces_1_1_installer_ad5a36deffcdb26581c67c03b5044fd6c}{install\_namespaces}}()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ create\ an\ .egg-\/link\ in\ the\ installation\ dir,\ pointing\ to\ our\ egg}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{"{}Creating\ \%s\ (link\ to\ \%s)"{}},\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{egg\_link}},\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a09767fa04a16fe9a2f8d2dc828391b3f}{egg\_base}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00124}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00124}}\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ open(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{egg\_link}},\ \textcolor{stringliteral}{"{}w"{}})\ \textcolor{keyword}{as}\ f:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f.write(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}}\ +\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}\ +\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aebd7d6fb89f85612802017ae8913a34f}{setup\_path}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ postprocess\ the\ installed\ distro,\ fixing\ up\ .pth,\ installing\ scripts,}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ handling\ requirements}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00129}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{00129}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a7fff0f4051552c83d9ba72ee1b37cb2e}{process\_distribution}}(\textcolor{keywordtype}{None},\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_afe57f6e30fcbd487d024ab2dfa587630}{dist}},\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{no\_deps}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00131}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a285c5a670231358ba3d42abc08e9ef20}{00131}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a285c5a670231358ba3d42abc08e9ef20}{uninstall\_link}}(self):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{egg\_link}}):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ log.info(\textcolor{stringliteral}{"{}Removing\ \%s\ (link\ to\ \%s)"{}},\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{egg\_link}},\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a09767fa04a16fe9a2f8d2dc828391b3f}{egg\_base}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ egg\_link\_file\ =\ open(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{egg\_link}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ contents\ =\ [line.rstrip()\ \textcolor{keywordflow}{for}\ line\ \textcolor{keywordflow}{in}\ egg\_link\_file]}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ egg\_link\_file.close()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ contents\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ ([self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}}],\ [self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{egg\_path}},\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_aebd7d6fb89f85612802017ae8913a34f}{setup\_path}}]):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(\textcolor{stringliteral}{"{}Link\ points\ to\ \%s:\ uninstall\ aborted"{}},\ contents)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.unlink(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a6025e993026dbb3bc7922c1b61459d38}{egg\_link}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop}{dry\_run}}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a94d9e559f3438f4aa8938cbc394d7f47}{update\_pth}}(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_afe57f6e30fcbd487d024ab2dfa587630}{dist}})\ \ \textcolor{comment}{\#\ remove\ any\ .pth\ link\ to\ us}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.distribution.scripts:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ XXX\ should\ also\ check\ for\ entry\ point\ scripts!}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ log.warn(\textcolor{stringliteral}{"{}Note:\ you\ must\ uninstall\ or\ replace\ scripts\ manually!"{}})}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00148}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a2b65b63042631055f7218605bcbe3211}{00148}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a2b65b63042631055f7218605bcbe3211}{install\_egg\_scripts}}(self,\ dist):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ dist\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_afe57f6e30fcbd487d024ab2dfa587630}{dist}}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Installing\ a\ dependency,\ so\ fall\ back\ to\ normal\ behavior}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ easy\_install.install\_egg\_scripts(self,\ dist)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ create\ wrapper\ scripts\ in\ the\ script\ dir,\ pointing\ to\ dist.scripts}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ new-\/style...}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a72c0ff6e76fb5e1c867ae9e5c367a66e}{install\_wrapper\_scripts}}(dist)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ ...and\ old-\/style}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ script\_name\ \textcolor{keywordflow}{in}\ self.distribution.scripts\ \textcolor{keywordflow}{or}\ []:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ script\_path\ =\ os.path.abspath(\mbox{\hyperlink{namespacesetuptools_a88d3013aac4d5258c5379d90a4fac663}{convert\_path}}(script\_name))}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ script\_name\ =\ os.path.basename(script\_path)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ io.open(script\_path)\ \textcolor{keyword}{as}\ strm:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ script\_text\ =\ strm.read()}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1easy__install_1_1easy__install_a7ab5f41f3f1d16762c1690fab8f9a690}{install\_script}}(dist,\ script\_name,\ script\_text,\ script\_path)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00166}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a72c0ff6e76fb5e1c867ae9e5c367a66e}{00166}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1develop_a72c0ff6e76fb5e1c867ae9e5c367a66e}{install\_wrapper\_scripts}}(self,\ dist):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ dist\ =\ \mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1_versionless_requirement}{VersionlessRequirement}}(dist)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ easy\_install.install\_wrapper\_scripts(self,\ dist)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00169}00169\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00171}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1_versionless_requirement}{00171}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1_versionless_requirement}{VersionlessRequirement}}:}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00172}00172\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ Adapt\ a\ pkg\_resources.Distribution\ to\ simply\ return\ the\ project}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00174}00174\ \textcolor{stringliteral}{\ \ \ \ name\ as\ the\ 'requirement'\ so\ that\ scripts\ will\ work\ across}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00175}00175\ \textcolor{stringliteral}{\ \ \ \ multiple\ versions.}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00176}00176\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00177}00177\ \textcolor{stringliteral}{\ \ \ \ >>>\ from\ pkg\_resources\ import\ Distribution}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00178}00178\ \textcolor{stringliteral}{\ \ \ \ >>>\ dist\ =\ Distribution(project\_name='foo',\ version='1.0')}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00179}00179\ \textcolor{stringliteral}{\ \ \ \ >>>\ str(dist.as\_requirement())}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00180}00180\ \textcolor{stringliteral}{\ \ \ \ 'foo==1.0'}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00181}00181\ \textcolor{stringliteral}{\ \ \ \ >>>\ adapted\_dist\ =\ VersionlessRequirement(dist)}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00182}00182\ \textcolor{stringliteral}{\ \ \ \ >>>\ str(adapted\_dist.as\_requirement())}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00183}00183\ \textcolor{stringliteral}{\ \ \ \ 'foo'}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00184}00184\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00186}00186\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ dist):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1_versionless_requirement}{\_\_dist}}\ =\ dist}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00188}00188\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00189}00189\ \ \ \ \ \textcolor{keyword}{def\ }\_\_getattr\_\_(self,\ name):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ getattr(self.\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1_versionless_requirement}{\_\_dist}},\ name)}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00191}00191\ }
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00192}\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1_versionless_requirement_a53b05b6e48d041eac4ec547f5831ceee}{00192}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1command_1_1develop_1_1_versionless_requirement_a53b05b6e48d041eac4ec547f5831ceee}{as\_requirement}}(self):}
+\DoxyCodeLine{\Hypertarget{develop_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.project\_name}
+
+\end{DoxyCode}

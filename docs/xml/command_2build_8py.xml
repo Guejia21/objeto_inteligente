@@ -1,0 +1,164 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="command_2build_8py" kind="file" language="Python">
+    <compoundname>build.py</compoundname>
+    <innerclass refid="classsetuptools_1_1command_1_1build_1_1build" prot="public">setuptools::command::build::build</innerclass>
+    <innerclass refid="classsetuptools_1_1command_1_1build_1_1_sub_command" prot="public">setuptools::command::build::SubCommand</innerclass>
+    <innernamespace refid="namespacesetuptools">setuptools</innernamespace>
+    <innernamespace refid="namespacesetuptools_1_1command">setuptools::command</innernamespace>
+    <innernamespace refid="namespacesetuptools_1_1command_1_1build">setuptools::command::build</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespacesetuptools_1_1command_1_1build" refkind="compound"><highlight class="keyword">import</highlight><highlight class="normal"><sp/>sys</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>warnings</highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TYPE_CHECKING,<sp/>List,<sp/>Dict</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>distutils.command.build<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>build<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>_build</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>setuptools<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>SetuptoolsDeprecationWarning</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>sys.version_info<sp/>&gt;=<sp/>(3,<sp/>8):</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Protocol</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keywordflow">elif</highlight><highlight class="normal"><sp/>TYPE_CHECKING:</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing_extensions<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Protocol</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>abc<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>ABC<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>Protocol</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16" refid="namespacesetuptools_1_1command_1_1build_1ad2e9cc078e7fc35bac00c7865938b2c5" refkind="member"><highlight class="normal">_ORIGINAL_SUBCOMMANDS<sp/>=<sp/>{</highlight><highlight class="stringliteral">&quot;build_py&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;build_clib&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;build_ext&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;build_scripts&quot;</highlight><highlight class="normal">}</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19" refid="classsetuptools_1_1command_1_1build_1_1build" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1build" kindref="compound">build</ref>(_build):</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>copy<sp/>to<sp/>avoid<sp/>sharing<sp/>the<sp/>object<sp/>with<sp/>parent<sp/>class</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21" refid="classsetuptools_1_1command_1_1build_1_1build_1aa163eae9ea7fa0d7b962fe92ab6464c5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>sub_commands<sp/>=<sp/>_build.sub_commands[:]</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23" refid="classsetuptools_1_1command_1_1build_1_1build_1aa39768957ec662cbf9a10861fced1b2f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1build_1aa39768957ec662cbf9a10861fced1b2f" kindref="member">get_sub_commands</ref>(self):</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>subcommands<sp/>=<sp/>{cmd[0]<sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>cmd<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>_build.sub_commands}</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>subcommands<sp/>-<sp/>_ORIGINAL_SUBCOMMANDS:</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>msg<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="27"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>It<sp/>seems<sp/>that<sp/>you<sp/>are<sp/>using<sp/>`distutils.command.build`<sp/>to<sp/>add</highlight></codeline>
+<codeline lineno="28"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>new<sp/>subcommands.<sp/>Using<sp/>`distutils`<sp/>directly<sp/>is<sp/>considered<sp/>deprecated,</highlight></codeline>
+<codeline lineno="29"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>please<sp/>use<sp/>`setuptools.command.build`.</highlight></codeline>
+<codeline lineno="30"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>warnings.warn(msg,<sp/>SetuptoolsDeprecationWarning)</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classsetuptools_1_1command_1_1build_1_1build_1aa163eae9ea7fa0d7b962fe92ab6464c5" kindref="member">sub_commands</ref><sp/>=<sp/>_build.sub_commands</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>super().<ref refid="classsetuptools_1_1command_1_1build_1_1build_1aa39768957ec662cbf9a10861fced1b2f" kindref="member">get_sub_commands</ref>()</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36" refid="classsetuptools_1_1command_1_1build_1_1_sub_command" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1_sub_command" kindref="compound">SubCommand</ref>(<ref refid="classtyping__extensions_1_1_protocol" kindref="compound">Protocol</ref>):</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;In<sp/>order<sp/>to<sp/>support<sp/>editable<sp/>installations<sp/>(see<sp/>:pep:`660`)<sp/>all</highlight></codeline>
+<codeline lineno="38"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>build<sp/>subcommands<sp/>**SHOULD**<sp/>implement<sp/>this<sp/>protocol.<sp/>They<sp/>also<sp/>**MUST**<sp/>inherit</highlight></codeline>
+<codeline lineno="39"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>from<sp/>``setuptools.Command``.</highlight></codeline>
+<codeline lineno="40"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="41"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>When<sp/>creating<sp/>an<sp/>:pep:`editable<sp/>wheel<sp/>&lt;660&gt;`,<sp/>``setuptools``<sp/>will<sp/>try<sp/>to<sp/>evaluate</highlight></codeline>
+<codeline lineno="42"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>custom<sp/>``build``<sp/>subcommands<sp/>using<sp/>the<sp/>following<sp/>procedure:</highlight></codeline>
+<codeline lineno="43"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="44"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>1.<sp/>``setuptools``<sp/>will<sp/>set<sp/>the<sp/>``editable_mode``<sp/>attribute<sp/>to<sp/>``True``</highlight></codeline>
+<codeline lineno="45"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>2.<sp/>``setuptools``<sp/>will<sp/>execute<sp/>the<sp/>``run()``<sp/>command.</highlight></codeline>
+<codeline lineno="46"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="47"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>..<sp/>important::</highlight></codeline>
+<codeline lineno="48"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Subcommands<sp/>**SHOULD**<sp/>take<sp/>advantage<sp/>of<sp/>``editable_mode=True``<sp/>to<sp/>adequate</highlight></codeline>
+<codeline lineno="49"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>its<sp/>behaviour<sp/>or<sp/>perform<sp/>optimisations.</highlight></codeline>
+<codeline lineno="50"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="51"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>For<sp/>example,<sp/>if<sp/>a<sp/>subcommand<sp/>don&apos;t<sp/>need<sp/>to<sp/>generate<sp/>any<sp/>extra<sp/>file<sp/>and</highlight></codeline>
+<codeline lineno="52"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>everything<sp/>it<sp/>does<sp/>is<sp/>to<sp/>copy<sp/>a<sp/>source<sp/>file<sp/>into<sp/>the<sp/>build<sp/>directory,</highlight></codeline>
+<codeline lineno="53"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``run()``<sp/>**SHOULD**<sp/>simply<sp/>&quot;early<sp/>return&quot;.</highlight></codeline>
+<codeline lineno="54"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="55"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Similarly,<sp/>if<sp/>the<sp/>subcommand<sp/>creates<sp/>files<sp/>that<sp/>would<sp/>be<sp/>placed<sp/>alongside</highlight></codeline>
+<codeline lineno="56"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Python<sp/>files<sp/>in<sp/>the<sp/>final<sp/>distribution,<sp/>during<sp/>an<sp/>editable<sp/>install</highlight></codeline>
+<codeline lineno="57"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>the<sp/>command<sp/>**SHOULD**<sp/>generate<sp/>these<sp/>files<sp/>&quot;in<sp/>place&quot;<sp/>(i.e.<sp/>write<sp/>them<sp/>to</highlight></codeline>
+<codeline lineno="58"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>the<sp/>original<sp/>source<sp/>directory,<sp/>instead<sp/>of<sp/>using<sp/>the<sp/>build<sp/>directory).</highlight></codeline>
+<codeline lineno="59"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Note<sp/>that<sp/>``get_output_mapping()``<sp/>should<sp/>reflect<sp/>that<sp/>and<sp/>include<sp/>mappings</highlight></codeline>
+<codeline lineno="60"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>for<sp/>&quot;in<sp/>place&quot;<sp/>builds<sp/>accordingly.</highlight></codeline>
+<codeline lineno="61"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="62"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>3.<sp/>``setuptools``<sp/>use<sp/>any<sp/>knowledge<sp/>it<sp/>can<sp/>derive<sp/>from<sp/>the<sp/>return<sp/>values<sp/>of</highlight></codeline>
+<codeline lineno="63"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``get_outputs()``<sp/>and<sp/>``get_output_mapping()``<sp/>to<sp/>create<sp/>an<sp/>editable<sp/>wheel.</highlight></codeline>
+<codeline lineno="64"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>When<sp/>relevant<sp/>``setuptools``<sp/>**MAY**<sp/>attempt<sp/>to<sp/>use<sp/>file<sp/>links<sp/>based<sp/>on<sp/>the<sp/>value</highlight></codeline>
+<codeline lineno="65"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>of<sp/>``get_output_mapping()``.<sp/>Alternatively,<sp/>``setuptools``<sp/>**MAY**<sp/>attempt<sp/>to<sp/>use</highlight></codeline>
+<codeline lineno="66"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>:doc:`import<sp/>hooks<sp/>&lt;python:reference/import&gt;`<sp/>to<sp/>redirect<sp/>any<sp/>attempt<sp/>to<sp/>import</highlight></codeline>
+<codeline lineno="67"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>to<sp/>the<sp/>directory<sp/>with<sp/>the<sp/>original<sp/>source<sp/>code<sp/>and<sp/>other<sp/>files<sp/>built<sp/>in<sp/>place.</highlight></codeline>
+<codeline lineno="68"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="69"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Please<sp/>note<sp/>that<sp/>custom<sp/>sub-commands<sp/>**SHOULD<sp/>NOT**<sp/>rely<sp/>on<sp/>``run()``<sp/>being</highlight></codeline>
+<codeline lineno="70"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>executed<sp/>(or<sp/>not)<sp/>to<sp/>provide<sp/>correct<sp/>return<sp/>values<sp/>for<sp/>``get_outputs()``,</highlight></codeline>
+<codeline lineno="71"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>``get_output_mapping()``<sp/>or<sp/>``get_source_files()``.<sp/>The<sp/>``get_*``<sp/>methods<sp/>should</highlight></codeline>
+<codeline lineno="72"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>work<sp/>independently<sp/>of<sp/>``run()``.</highlight></codeline>
+<codeline lineno="73"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75" refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a2e825f25a68b98db176786e3ba008b73" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>editable_mode:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Boolean<sp/>flag<sp/>that<sp/>will<sp/>be<sp/>set<sp/>to<sp/>``True``<sp/>when<sp/>setuptools<sp/>is<sp/>used<sp/>for<sp/>an</highlight></codeline>
+<codeline lineno="77"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>editable<sp/>installation<sp/>(see<sp/>:pep:`660`).</highlight></codeline>
+<codeline lineno="78"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Implementations<sp/>**SHOULD**<sp/>explicitly<sp/>set<sp/>the<sp/>default<sp/>value<sp/>of<sp/>this<sp/>attribute<sp/>to</highlight></codeline>
+<codeline lineno="79"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>``False``.</highlight></codeline>
+<codeline lineno="80"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>When<sp/>subcommands<sp/>run,<sp/>they<sp/>can<sp/>use<sp/>this<sp/>flag<sp/>to<sp/>perform<sp/>optimizations<sp/>or<sp/>change</highlight></codeline>
+<codeline lineno="81"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>their<sp/>behaviour<sp/>accordingly.</highlight></codeline>
+<codeline lineno="82"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/>build_lib:<sp/>str</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;String<sp/>representing<sp/>the<sp/>directory<sp/>where<sp/>the<sp/>build<sp/>artifacts<sp/>should<sp/>be<sp/>stored,</highlight></codeline>
+<codeline lineno="86"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>e.g.<sp/>``build/lib``.</highlight></codeline>
+<codeline lineno="87"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>For<sp/>example,<sp/>if<sp/>a<sp/>distribution<sp/>wants<sp/>to<sp/>provide<sp/>a<sp/>Python<sp/>module<sp/>named<sp/>``pkg.mod``,</highlight></codeline>
+<codeline lineno="88"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>then<sp/>a<sp/>corresponding<sp/>file<sp/>should<sp/>be<sp/>written<sp/>to<sp/>``{build_lib}/package/module.py``.</highlight></codeline>
+<codeline lineno="89"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>A<sp/>way<sp/>of<sp/>thinking<sp/>about<sp/>this<sp/>is<sp/>that<sp/>the<sp/>files<sp/>saved<sp/>under<sp/>``build_lib``</highlight></codeline>
+<codeline lineno="90"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>would<sp/>be<sp/>eventually<sp/>copied<sp/>to<sp/>one<sp/>of<sp/>the<sp/>directories<sp/>in<sp/>:obj:`site.PREFIXES`</highlight></codeline>
+<codeline lineno="91"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>upon<sp/>installation.</highlight></codeline>
+<codeline lineno="92"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="93"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>A<sp/>command<sp/>that<sp/>produces<sp/>platform-independent<sp/>files<sp/>(e.g.<sp/>compiling<sp/>text<sp/>templates</highlight></codeline>
+<codeline lineno="94"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>into<sp/>Python<sp/>functions),<sp/>**CAN**<sp/>initialize<sp/>``build_lib``<sp/>by<sp/>copying<sp/>its<sp/>value<sp/>from</highlight></codeline>
+<codeline lineno="95"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>the<sp/>``build_py``<sp/>command.<sp/>On<sp/>the<sp/>other<sp/>hand,<sp/>a<sp/>command<sp/>that<sp/>produces</highlight></codeline>
+<codeline lineno="96"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>platform-specific<sp/>files<sp/>**CAN**<sp/>initialize<sp/>``build_lib``<sp/>by<sp/>copying<sp/>its<sp/>value<sp/>from</highlight></codeline>
+<codeline lineno="97"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>the<sp/>``build_ext``<sp/>command.<sp/>In<sp/>general<sp/>this<sp/>is<sp/>done<sp/>inside<sp/>the<sp/>``finalize_options``</highlight></codeline>
+<codeline lineno="98"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>method<sp/>with<sp/>the<sp/>help<sp/>of<sp/>the<sp/>``set_undefined_options``<sp/>command::</highlight></codeline>
+<codeline lineno="99"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="100"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>def<sp/>finalize_options(self):</highlight></codeline>
+<codeline lineno="101"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.set_undefined_options(&quot;build_py&quot;,<sp/>(&quot;build_lib&quot;,<sp/>&quot;build_lib&quot;))</highlight></codeline>
+<codeline lineno="102"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>...</highlight></codeline>
+<codeline lineno="103"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight></codeline>
+<codeline lineno="105" refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a74c1822e476ca901425895b4c1f82c61" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a74c1822e476ca901425895b4c1f82c61" kindref="member">initialize_options</ref>(self):</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;(Required<sp/>by<sp/>the<sp/>original<sp/>:class:`setuptools.Command`<sp/>interface)&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="107"><highlight class="normal"></highlight></codeline>
+<codeline lineno="108" refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1af10d4809e4c3a3fd4ca0eae4afacb254" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1af10d4809e4c3a3fd4ca0eae4afacb254" kindref="member">finalize_options</ref>(self):</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;(Required<sp/>by<sp/>the<sp/>original<sp/>:class:`setuptools.Command`<sp/>interface)&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="111" refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a67650ce8e711569bebf0dc7ccfd8aa7d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a67650ce8e711569bebf0dc7ccfd8aa7d" kindref="member">run</ref>(self):</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;(Required<sp/>by<sp/>the<sp/>original<sp/>:class:`setuptools.Command`<sp/>interface)&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight></codeline>
+<codeline lineno="114" refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a297161821631877a2827bbdea8ae6a36" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a297161821631877a2827bbdea8ae6a36" kindref="member">get_source_files</ref>(self)<sp/>-&gt;<sp/>List[str]:</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="116"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Return<sp/>a<sp/>list<sp/>of<sp/>all<sp/>files<sp/>that<sp/>are<sp/>used<sp/>by<sp/>the<sp/>command<sp/>to<sp/>create<sp/>the<sp/>expected</highlight></codeline>
+<codeline lineno="117"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>outputs.</highlight></codeline>
+<codeline lineno="118"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>For<sp/>example,<sp/>if<sp/>your<sp/>build<sp/>command<sp/>transpiles<sp/>Java<sp/>files<sp/>into<sp/>Python,<sp/>you<sp/>should</highlight></codeline>
+<codeline lineno="119"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>list<sp/>here<sp/>all<sp/>the<sp/>Java<sp/>files.</highlight></codeline>
+<codeline lineno="120"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>primary<sp/>purpose<sp/>of<sp/>this<sp/>function<sp/>is<sp/>to<sp/>help<sp/>populating<sp/>the<sp/>``sdist``</highlight></codeline>
+<codeline lineno="121"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>with<sp/>all<sp/>the<sp/>files<sp/>necessary<sp/>to<sp/>build<sp/>the<sp/>distribution.</highlight></codeline>
+<codeline lineno="122"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>All<sp/>files<sp/>should<sp/>be<sp/>strings<sp/>relative<sp/>to<sp/>the<sp/>project<sp/>root<sp/>directory.</highlight></codeline>
+<codeline lineno="123"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight></codeline>
+<codeline lineno="125" refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a20a3b52653748229dca6ff305660d16a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1a20a3b52653748229dca6ff305660d16a" kindref="member">get_outputs</ref>(self)<sp/>-&gt;<sp/>List[str]:</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="127"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Return<sp/>a<sp/>list<sp/>of<sp/>files<sp/>intended<sp/>for<sp/>distribution<sp/>as<sp/>they<sp/>would<sp/>have<sp/>been</highlight></codeline>
+<codeline lineno="128"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>produced<sp/>by<sp/>the<sp/>build.</highlight></codeline>
+<codeline lineno="129"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>These<sp/>files<sp/>should<sp/>be<sp/>strings<sp/>in<sp/>the<sp/>form<sp/>of</highlight></codeline>
+<codeline lineno="130"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``&quot;{build_lib}/destination/file/path&quot;``.</highlight></codeline>
+<codeline lineno="131"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="132"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>..<sp/>note::</highlight></codeline>
+<codeline lineno="133"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>return<sp/>value<sp/>of<sp/>``get_output()``<sp/>should<sp/>include<sp/>all<sp/>files<sp/>used<sp/>as<sp/>keys</highlight></codeline>
+<codeline lineno="134"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>in<sp/>``get_output_mapping()``<sp/>plus<sp/>files<sp/>that<sp/>are<sp/>generated<sp/>during<sp/>the<sp/>build</highlight></codeline>
+<codeline lineno="135"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>and<sp/>don&apos;t<sp/>correspond<sp/>to<sp/>any<sp/>source<sp/>file<sp/>already<sp/>present<sp/>in<sp/>the<sp/>project.</highlight></codeline>
+<codeline lineno="136"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"></highlight></codeline>
+<codeline lineno="138" refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1adb27434e58a136ed3e06c1d75c9b78f9" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classsetuptools_1_1command_1_1build_1_1_sub_command_1adb27434e58a136ed3e06c1d75c9b78f9" kindref="member">get_output_mapping</ref>(self)<sp/>-&gt;<sp/>Dict[str,<sp/>str]:</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="140"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Return<sp/>a<sp/>mapping<sp/>between<sp/>destination<sp/>files<sp/>as<sp/>they<sp/>would<sp/>be<sp/>produced<sp/>by<sp/>the</highlight></codeline>
+<codeline lineno="141"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>build<sp/>(dict<sp/>keys)<sp/>into<sp/>the<sp/>respective<sp/>existing<sp/>(source)<sp/>files<sp/>(dict<sp/>values).</highlight></codeline>
+<codeline lineno="142"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Existing<sp/>(source)<sp/>files<sp/>should<sp/>be<sp/>represented<sp/>as<sp/>strings<sp/>relative<sp/>to<sp/>the<sp/>project</highlight></codeline>
+<codeline lineno="143"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>root<sp/>directory.</highlight></codeline>
+<codeline lineno="144"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Destination<sp/>files<sp/>should<sp/>be<sp/>strings<sp/>in<sp/>the<sp/>form<sp/>of</highlight></codeline>
+<codeline lineno="145"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>``&quot;{build_lib}/destination/file/path&quot;``.</highlight></codeline>
+<codeline lineno="146"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="microservicio_data_stream/venv/Lib/site-packages/setuptools/command/build.py"/>
+  </compounddef>
+</doxygen>

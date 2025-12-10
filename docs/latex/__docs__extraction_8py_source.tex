@@ -1,0 +1,119 @@
+\doxysection{\+\_\+docs\+\_\+extraction.\+py}
+\hypertarget{__docs__extraction_8py_source}{}\label{__docs__extraction_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_docs\_extraction.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_docs\_extraction.py}}
+\mbox{\hyperlink{__docs__extraction_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Utilities\ related\ to\ attribute\ docstring\ extraction."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00005}00005\ \textcolor{keyword}{import}\ ast}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00006}00006\ \textcolor{keyword}{import}\ inspect}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00007}00007\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00008}00008\ \textcolor{keyword}{import}\ textwrap}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00009}00009\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00012}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor}{00012}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor}{DocstringVisitor}}(ast.NodeVisitor):}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00013}00013\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00014}00014\ \ \ \ \ \ \ \ \ super().\_\_init\_\_()}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00016}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a938020214522477bb80c13200eef6f6e}{00016}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a938020214522477bb80c13200eef6f6e}{target}}:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00017}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_ad9a1ddd8493685de2d6e29aeb9d8ccc5}{00017}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_ad9a1ddd8493685de2d6e29aeb9d8ccc5}{attrs}}:\ dict[str,\ str]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00018}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_abcfef0e310c5289796fad1c9e69bf616}{00018}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_abcfef0e310c5289796fad1c9e69bf616}{previous\_node\_type}}:\ type[ast.AST]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00020}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a4696598775993492bf19fe7b4abbb224}{00020}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a4696598775993492bf19fe7b4abbb224}{visit}}(self,\ node:\ ast.AST)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00021}00021\ \ \ \ \ \ \ \ \ node\_result\ =\ super().\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a4696598775993492bf19fe7b4abbb224}{visit}}(node)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00022}00022\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_abcfef0e310c5289796fad1c9e69bf616}{previous\_node\_type}}\ =\ type(node)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ node\_result}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00025}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a34f86a16ae2ec6d2f2f45b856b728542}{00025}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a34f86a16ae2ec6d2f2f45b856b728542}{visit\_AnnAssign}}(self,\ node:\ ast.AnnAssign)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(node.target,\ ast.Name):}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a938020214522477bb80c13200eef6f6e}{target}}\ =\ node.target.id}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00029}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_ad198bad6d9431610da809a905020cffe}{00029}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_ad198bad6d9431610da809a905020cffe}{visit\_Expr}}(self,\ node:\ ast.Expr)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(node.value,\ ast.Constant)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ isinstance(node.value.value,\ str)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_abcfef0e310c5289796fad1c9e69bf616}{previous\_node\_type}}\ \textcolor{keywordflow}{is}\ ast.AnnAssign}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ docstring\ =\ inspect.cleandoc(node.value.value)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a938020214522477bb80c13200eef6f6e}{target}}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_ad9a1ddd8493685de2d6e29aeb9d8ccc5}{attrs}}[self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a938020214522477bb80c13200eef6f6e}{target}}]\ =\ docstring}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor_a938020214522477bb80c13200eef6f6e}{target}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00041}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_a29083f006fff1f9deb5b005ece577de4}{00041}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_a29083f006fff1f9deb5b005ece577de4}{\_dedent\_source\_lines}}(source:\ list[str])\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00042}00042\ \ \ \ \ \textcolor{comment}{\#\ Required\ for\ nested\ class\ definitions,\ e.g.\ in\ a\ function\ block}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00043}00043\ \ \ \ \ dedent\_source\ =\ textwrap.dedent(\textcolor{stringliteral}{''}.join(source))}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00044}00044\ \ \ \ \ \textcolor{keywordflow}{if}\ dedent\_source.startswith((\textcolor{stringliteral}{'\ '},\ \textcolor{stringliteral}{'\(\backslash\)t'})):}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ We\ are\ in\ the\ case\ where\ there's\ a\ dedented\ (usually\ multiline)\ string}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ at\ a\ lower\ indentation\ level\ than\ the\ class\ itself.\ We\ wrap\ our\ class}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ in\ a\ function\ as\ a\ workaround.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ dedent\_source\ =\ f\textcolor{stringliteral}{'def\ dedent\_workaround():\(\backslash\)n\{dedent\_source\}'}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00049}00049\ \ \ \ \ \textcolor{keywordflow}{return}\ dedent\_source}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00052}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_a3890e01aa3b58241af56cab310791e29}{00052}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_a3890e01aa3b58241af56cab310791e29}{\_extract\_source\_from\_frame}}(cls:\ type[Any])\ -\/>\ list[str]\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00053}00053\ \ \ \ \ frame\ =\ inspect.currentframe()}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00055}00055\ \ \ \ \ \textcolor{keywordflow}{while}\ frame:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ inspect.getmodule(frame)\ \textcolor{keywordflow}{is}\ inspect.getmodule(cls):}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ lnum\ =\ frame.f\_lineno}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lines,\ \_\ =\ inspect.findsource(frame)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Source\ can't\ be\ retrieved\ (maybe\ because\ running\ in\ an\ interactive\ terminal),}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ don't\ want\ to\ error\ here.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ block\_lines\ =\ inspect.getblock(lines[lnum\ -\/\ 1\ :])}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dedent\_source\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_a29083f006fff1f9deb5b005ece577de4}{\_dedent\_source\_lines}}(block\_lines)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ block\_tree\ =\ ast.parse(dedent\_source)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ SyntaxError:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stmt\ =\ block\_tree.body[0]}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(stmt,\ ast.FunctionDef)\ \textcolor{keywordflow}{and}\ stmt.name\ ==\ \textcolor{stringliteral}{'dedent\_workaround'}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \`{}\_dedent\_source\_lines`\ wrapped\ the\ class\ around\ the\ workaround\ function}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stmt\ =\ stmt.body[0]}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(stmt,\ ast.ClassDef)\ \textcolor{keywordflow}{and}\ stmt.name\ ==\ cls.\_\_name\_\_:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ block\_lines}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ frame\ =\ frame.f\_back}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00082}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_aeda92daf11b7a46194ac09489c1d48fe}{00082}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_aeda92daf11b7a46194ac09489c1d48fe}{extract\_docstrings\_from\_cls}}(cls:\ type[Any],\ use\_inspect:\ bool\ =\ \textcolor{keyword}{False})\ -\/>\ dict[str,\ str]:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00083}00083\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Map\ model\ attributes\ and\ their\ corresponding\ docstring.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00084}00084\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00085}00085\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ cls:\ The\ class\ of\ the\ Pydantic\ model\ to\ inspect.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ use\_inspect:\ Whether\ to\ skip\ usage\ of\ frames\ to\ find\ the\ object\ and\ use}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ the\ \`{}inspect\`{}\ module\ instead.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00089}00089\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ A\ mapping\ containing\ attribute\ names\ and\ their\ corresponding\ docstring.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00093}00093\ \ \ \ \ \textcolor{keywordflow}{if}\ use\_inspect\ \textcolor{keywordflow}{or}\ sys.version\_info\ >=\ (3,\ 13):}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ On\ Python\ <\ 3.13,\ \`{}inspect.getsourcelines()`\ might\ not\ work\ as\ expected}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ if\ two\ classes\ have\ the\ same\ name\ in\ the\ same\ source\ file.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ On\ Python\ 3.13+,\ it\ will\ use\ the\ new\ \`{}\_\_firstlineno\_\_`\ class\ attribute,}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ making\ it\ way\ more\ robust.}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ source,\ \_\ =\ inspect.getsourcelines(cls)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00102}00102\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TODO\ remove\ this\ implementation\ when\ we\ drop\ support\ for\ Python\ 3.12:}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ source\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_a3890e01aa3b58241af56cab310791e29}{\_extract\_source\_from\_frame}}(cls)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00106}00106\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ source:}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00109}00109\ \ \ \ \ dedent\_source\ =\ \mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__docs__extraction_a29083f006fff1f9deb5b005ece577de4}{\_dedent\_source\_lines}}(source)}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00111}00111\ \ \ \ \ visitor\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__docs__extraction_1_1_docstring_visitor}{DocstringVisitor}}()}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00112}00112\ \ \ \ \ visitor.visit(ast.parse(dedent\_source))}
+\DoxyCodeLine{\Hypertarget{__docs__extraction_8py_source_l00113}00113\ \ \ \ \ \textcolor{keywordflow}{return}\ visitor.attrs}
+
+\end{DoxyCode}

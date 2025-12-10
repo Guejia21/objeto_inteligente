@@ -1,0 +1,111 @@
+\doxysection{Referencia de la clase pydantic.\+functional\+\_\+validators.\+Wrap\+Validator}
+\hypertarget{classpydantic_1_1functional__validators_1_1_wrap_validator}{}\label{classpydantic_1_1functional__validators_1_1_wrap_validator}\index{pydantic.functional\_validators.WrapValidator@{pydantic.functional\_validators.WrapValidator}}
+
+
+!  
+
+
+\doxysubsubsection*{Atributos públicos estáticos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacepydantic__core_1_1core__schema}{core\+\_\+schema}} \mbox{\hyperlink{classpydantic_1_1functional__validators_1_1_wrap_validator_af55abe534e57c105bf5151738759e653}{func}} .No\+Info\+Wrap\+Validator\+Function \texorpdfstring{$\vert$}{|} \mbox{\hyperlink{namespacepydantic__core_1_1core__schema_a896d0dc92976c139adba63e86261bc26}{core\+\_\+schema.\+With\+Info\+Wrap\+Validator\+Function}}
+\item 
+Any \mbox{\hyperlink{classpydantic_1_1functional__validators_1_1_wrap_validator_ae1ce5d564766a101a3e6bc8fdaa763c4}{json\+\_\+schema\+\_\+input\+\_\+type}} = Pydantic\+Undefined
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Métodos protegidos}
+\begin{DoxyCompactItemize}
+\item 
+Self \mbox{\hyperlink{classpydantic_1_1functional__validators_1_1_wrap_validator_ad6cdf3669b45036f51fbb288ef6f6171}{\+\_\+from\+\_\+decorator}} (cls, \mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator}{\+\_\+decorators.\+Decorator}}\mbox{[}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_validator_decorator_info}{\+\_\+decorators.\+Field\+Validator\+Decorator\+Info}}\mbox{]} \mbox{\hyperlink{namespacepydantic_1_1decorator}{decorator}})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+! 
+
+! abstract "{}\+Usage Documentation"{} \href{../concepts/validators.md\#field-wrap-validator}{\texttt{field {\itshape wrap} validators}}
+
+A metadata class that indicates that a validation should be applied {\bfseries{around}} the inner validation logic.
+
+Attributes\+: func\+: The validator function. json\+\_\+schema\+\_\+input\+\_\+type\+: The input type used to generate the appropriate JSON Schema (in validation mode). The actual input type is {\ttfamily Any}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{from}\ datetime\ \textcolor{keyword}{import}\ datetime}
+\DoxyCodeLine{\textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Annotated}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ BaseModel,\ ValidationError,\ WrapValidator}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{def\ }validate\_timestamp(v,\ handler):}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ v\ ==\ \textcolor{stringliteral}{'now'}:}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ don't\ want\ to\ bother\ with\ further\ validation,\ just\ return\ the\ new\ value}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ datetime.now()}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ handler(v)}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{except}\ ValidationError:}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{\#\ validation\ failed,\ in\ this\ case\ we\ want\ to\ return\ a\ default\ value}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ datetime(2000,\ 1,\ 1)}
+\DoxyCodeLine{}
+\DoxyCodeLine{MyTimestamp\ =\ Annotated[datetime,\ WrapValidator(validate\_timestamp)]}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{class\ }Model(BaseModel):}
+\DoxyCodeLine{\ \ \ \ a:\ MyTimestamp}
+\DoxyCodeLine{}
+\DoxyCodeLine{print(Model(a=\textcolor{stringliteral}{'now'}).a)}
+\DoxyCodeLine{\textcolor{comment}{\#>\ 2032-\/01-\/02\ 03:04:05.000006}}
+\DoxyCodeLine{print(Model(a=\textcolor{stringliteral}{'invalid'}).a)}
+\DoxyCodeLine{\textcolor{comment}{\#>\ 2000-\/01-\/01\ 00:00:00}}
+
+\end{DoxyCode}
+ 
+
+Definición en la línea \mbox{\hyperlink{functional__validators_8py_source_l00257}{257}} del archivo \mbox{\hyperlink{functional__validators_8py_source}{functional\+\_\+validators.\+py}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{classpydantic_1_1functional__validators_1_1_wrap_validator_doc-func-members}
+\doxysubsection{Documentación de funciones miembro}
+\Hypertarget{classpydantic_1_1functional__validators_1_1_wrap_validator_ad6cdf3669b45036f51fbb288ef6f6171}\index{pydantic.functional\_validators.WrapValidator@{pydantic.functional\_validators.WrapValidator}!\_from\_decorator@{\_from\_decorator}}
+\index{\_from\_decorator@{\_from\_decorator}!pydantic.functional\_validators.WrapValidator@{pydantic.functional\_validators.WrapValidator}}
+\doxysubsubsection{\texorpdfstring{\_from\_decorator()}{\_from\_decorator()}}
+{\footnotesize\ttfamily \label{classpydantic_1_1functional__validators_1_1_wrap_validator_ad6cdf3669b45036f51fbb288ef6f6171} 
+ Self pydantic.\+functional\+\_\+validators.\+Wrap\+Validator.\+\_\+from\+\_\+decorator (\begin{DoxyParamCaption}\item[{}]{cls}{, }\item[{\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_decorator}{\+\_\+decorators.\+Decorator}}\mbox{[}\mbox{\hyperlink{classpydantic_1_1__internal_1_1__decorators_1_1_field_validator_decorator_info}{\+\_\+decorators.\+Field\+Validator\+Decorator\+Info}}\mbox{]}}]{decorator}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{functional__validators_8py_source_l00324}{324}} del archivo \mbox{\hyperlink{functional__validators_8py_source}{functional\+\_\+validators.\+py}}.
+
+
+
+\label{doc-variable-members}
+\Hypertarget{classpydantic_1_1functional__validators_1_1_wrap_validator_doc-variable-members}
+\doxysubsection{Documentación de datos miembro}
+\Hypertarget{classpydantic_1_1functional__validators_1_1_wrap_validator_af55abe534e57c105bf5151738759e653}\index{pydantic.functional\_validators.WrapValidator@{pydantic.functional\_validators.WrapValidator}!func@{func}}
+\index{func@{func}!pydantic.functional\_validators.WrapValidator@{pydantic.functional\_validators.WrapValidator}}
+\doxysubsubsection{\texorpdfstring{func}{func}}
+{\footnotesize\ttfamily \label{classpydantic_1_1functional__validators_1_1_wrap_validator_af55abe534e57c105bf5151738759e653} 
+\mbox{\hyperlink{namespacepydantic__core_1_1core__schema}{core\+\_\+schema}} pydantic.\+functional\+\_\+validators.\+Wrap\+Validator.\+func .No\+Info\+Wrap\+Validator\+Function \texorpdfstring{$\vert$}{|} \mbox{\hyperlink{namespacepydantic__core_1_1core__schema_a896d0dc92976c139adba63e86261bc26}{core\+\_\+schema.\+With\+Info\+Wrap\+Validator\+Function}}\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{functional__validators_8py_source_l00296}{296}} del archivo \mbox{\hyperlink{functional__validators_8py_source}{functional\+\_\+validators.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2pyparsing_2diagram_2____init_____8py_source_l00118}{pip.\+\_\+vendor.\+pyparsing.\+diagram.\+Editable\+Partial.\+name()}}, \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2pkg__resources_2__vendor_2pyparsing_2diagram_2____init_____8py_source_l00111}{pkg\+\_\+resources.\+\_\+vendor.\+pyparsing.\+diagram.\+Editable\+Partial.\+name()}} y \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2setuptools_2__vendor_2pyparsing_2diagram_2____init_____8py_source_l00111}{setuptools.\+\_\+vendor.\+pyparsing.\+diagram.\+Editable\+Partial.\+name()}}.
+
+\Hypertarget{classpydantic_1_1functional__validators_1_1_wrap_validator_ae1ce5d564766a101a3e6bc8fdaa763c4}\index{pydantic.functional\_validators.WrapValidator@{pydantic.functional\_validators.WrapValidator}!json\_schema\_input\_type@{json\_schema\_input\_type}}
+\index{json\_schema\_input\_type@{json\_schema\_input\_type}!pydantic.functional\_validators.WrapValidator@{pydantic.functional\_validators.WrapValidator}}
+\doxysubsubsection{\texorpdfstring{json\_schema\_input\_type}{json\_schema\_input\_type}}
+{\footnotesize\ttfamily \label{classpydantic_1_1functional__validators_1_1_wrap_validator_ae1ce5d564766a101a3e6bc8fdaa763c4} 
+Any pydantic.\+functional\+\_\+validators.\+Wrap\+Validator.\+json\+\_\+schema\+\_\+input\+\_\+type = Pydantic\+Undefined\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{functional__validators_8py_source_l00297}{297}} del archivo \mbox{\hyperlink{functional__validators_8py_source}{functional\+\_\+validators.\+py}}.
+
+
+
+La documentación de esta clase está generada del siguiente archivo\+:\begin{DoxyCompactItemize}
+\item 
+micro\+\_\+gestion\+\_\+objetos/venv/\+Lib/site-\/packages/pydantic/\mbox{\hyperlink{functional__validators_8py}{functional\+\_\+validators.\+py}}\end{DoxyCompactItemize}

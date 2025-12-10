@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/uvicorn/supervisors/basereload.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('basereload_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">basereload.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="basereload_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespaceuvicorn_1_1supervisors_1_1basereload.html">    1</a></span><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> logging</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">import</span> os</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">import</span> signal</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">import</span> sys</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">import</span> threading</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacecollections_1_1abc.html">collections.abc</a> <span class="keyword">import</span> Iterator</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">from</span> socket <span class="keyword">import</span> socket</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keyword">from</span> types <span class="keyword">import</span> FrameType</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">from</span> typing <span class="keyword">import</span> Callable</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">import</span> click</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceuvicorn_1_1__subprocess.html">uvicorn._subprocess</a> <span class="keyword">import</span> get_subprocess</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceuvicorn_1_1config.html">uvicorn.config</a> <span class="keyword">import</span> Config</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="namespaceuvicorn_1_1supervisors_1_1basereload.html#ac19aa5704f4f8dbb9a1c969d6f4a55d8">   19</a></span>HANDLED_SIGNALS = (</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    signal.SIGINT,  <span class="comment"># Unix signal 2. Sent by Ctrl+C.</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    signal.SIGTERM,  <span class="comment"># Unix signal 15. Sent by `kill &lt;pid&gt;`.</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>)</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="namespaceuvicorn_1_1supervisors_1_1basereload.html#a40405c7d6b8fc488e60d1b1e93353094">   24</a></span>logger = logging.getLogger(<span class="stringliteral">&quot;uvicorn.error&quot;</span>)</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00027" data-start="" data-end="">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html">   27</a></span><span class="keyword">class </span><a class="code hl_class" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html">BaseReload</a>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">def </span>__init__(</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        self,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        config: Config,</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        target: Callable[[list[socket] | <span class="keywordtype">None</span>], <span class="keywordtype">None</span>],</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        sockets: list[socket],</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a1855ef9737897ae520864e7abfa53bfb">   34</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a1855ef9737897ae520864e7abfa53bfb">config</a> = config</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a0822760a35bb9804acf7fb70e7a4e3bf">   35</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a0822760a35bb9804acf7fb70e7a4e3bf">target</a> = target</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#aa407c841352253d5d6ae86af0240e0a1">   36</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#aa407c841352253d5d6ae86af0240e0a1">sockets</a> = sockets</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a11f5b0605d6368355f1f4c4ca6a24055">   37</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a11f5b0605d6368355f1f4c4ca6a24055">should_exit</a> = threading.Event()</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ac4048f520121190f5e1cc3a08e83fd6b">   38</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ac4048f520121190f5e1cc3a08e83fd6b">pid</a> = os.getpid()</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#af50aff16537c3d418827517fc82c95e3">   39</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#af50aff16537c3d418827517fc82c95e3">is_restarting</a> = <span class="keyword">False</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ad436f6a1a9e4df02e6b3fb0a6de60331">   40</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ad436f6a1a9e4df02e6b3fb0a6de60331">reloader_name</a>: str | <span class="keywordtype">None</span> = <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="foldopen" id="foldopen00042" data-start="" data-end="">
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a24452d56fd8f357696d56f4a2c1a6561">   42</a></span>    <span class="keyword">def </span><a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a075dac0021a278bf29c47291d4d6482f">signal_handler</a>(self, sig: int, frame: FrameType | <span class="keywordtype">None</span>) -&gt; <span class="keywordtype">None</span>:  <span class="comment"># pragma: full coverage</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="stringliteral">        A signal handler that is registered with the parent process.</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keywordflow">if</span> sys.platform == <span class="stringliteral">&quot;win32&quot;</span> <span class="keywordflow">and</span> self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#af50aff16537c3d418827517fc82c95e3">is_restarting</a>:</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#af50aff16537c3d418827517fc82c95e3">is_restarting</a> = <span class="keyword">False</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>            self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a11f5b0605d6368355f1f4c4ca6a24055">should_exit</a>.set()</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+</div>
+<div class="foldopen" id="foldopen00051" data-start="" data-end="">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a4e12c2b7457b4a2690b7cacb9eb439cc">   51</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a4e12c2b7457b4a2690b7cacb9eb439cc">run</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        self.<a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#abd87b71b8fb3a67321db2354f0378758">startup</a>()</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="keywordflow">for</span> changes <span class="keywordflow">in</span> self:</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            <span class="keywordflow">if</span> changes:</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>                logger.warning(</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>                    <span class="stringliteral">&quot;%s detected changes in %s. Reloading...&quot;</span>,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>                    self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ad436f6a1a9e4df02e6b3fb0a6de60331">reloader_name</a>,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>                    <span class="stringliteral">&quot;, &quot;</span>.join(map(_display_path, changes)),</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                )</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>                self.<a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a7e3a22e3a40e4e03ce570463e2aa61df">restart</a>()</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        self.<a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a63246cca42ab402f340c0215ba2aae65">shutdown</a>()</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+</div>
+<div class="foldopen" id="foldopen00064" data-start="" data-end="">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a97e3481850d5bda8202517105a0eceb9">   64</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a97e3481850d5bda8202517105a0eceb9">pause</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordflow">if</span> self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a11f5b0605d6368355f1f4c4ca6a24055">should_exit</a>.wait(self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a1855ef9737897ae520864e7abfa53bfb">config</a>.reload_delay):</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            <span class="keywordflow">raise</span> StopIteration()</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">def </span>__iter__(self) -&gt; Iterator[list[Path] | None]:</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordflow">return</span> self</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">def </span>__next__(self) -&gt; list[Path] | None:</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordflow">return</span> self.<a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a697467254e3c70f7a00a27eab4b18826">should_restart</a>()</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="foldopen" id="foldopen00074" data-start="" data-end="">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#abd87b71b8fb3a67321db2354f0378758">   74</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#abd87b71b8fb3a67321db2354f0378758">startup</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        message = f<span class="stringliteral">&quot;Started reloader process [{self.pid}] using {self.reloader_name}&quot;</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        color_message = <span class="stringliteral">&quot;Started reloader process [{}] using {}&quot;</span>.format(</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            click.style(str(self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ac4048f520121190f5e1cc3a08e83fd6b">pid</a>), fg=<span class="stringliteral">&quot;cyan&quot;</span>, bold=<span class="keyword">True</span>),</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>            click.style(str(self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ad436f6a1a9e4df02e6b3fb0a6de60331">reloader_name</a>), fg=<span class="stringliteral">&quot;cyan&quot;</span>, bold=<span class="keyword">True</span>),</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        )</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        logger.info(message, extra={<span class="stringliteral">&quot;color_message&quot;</span>: color_message})</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keywordflow">for</span> sig <span class="keywordflow">in</span> HANDLED_SIGNALS:</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a075dac0021a278bf29c47291d4d6482f">   83</a></span>            signal.signal(sig, self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a075dac0021a278bf29c47291d4d6482f">signal_handler</a>)</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">   85</a></span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a> = get_subprocess(config=self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a1855ef9737897ae520864e7abfa53bfb">config</a>, target=self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a0822760a35bb9804acf7fb70e7a4e3bf">target</a>, sockets=self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#aa407c841352253d5d6ae86af0240e0a1">sockets</a>)</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.start()</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+</div>
+<div class="foldopen" id="foldopen00088" data-start="" data-end="">
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a7e3a22e3a40e4e03ce570463e2aa61df">   88</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a7e3a22e3a40e4e03ce570463e2aa61df">restart</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keywordflow">if</span> sys.platform == <span class="stringliteral">&quot;win32&quot;</span>:  <span class="comment"># pragma: py-not-win32</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#af50aff16537c3d418827517fc82c95e3">is_restarting</a> = <span class="keyword">True</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            <span class="keyword">assert</span> self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.pid <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            os.kill(self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.pid, signal.CTRL_C_EVENT)</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            <span class="comment"># This is a workaround to ensure the Ctrl+C event is processed</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            sys.stdout.write(<span class="stringliteral">&quot; &quot;</span>)  <span class="comment"># This has to be a non-empty string</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            sys.stdout.flush()</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        <span class="keywordflow">else</span>:  <span class="comment"># pragma: py-win32</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.terminate()</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.join()</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a> = get_subprocess(config=self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a1855ef9737897ae520864e7abfa53bfb">config</a>, target=self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a0822760a35bb9804acf7fb70e7a4e3bf">target</a>, sockets=self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#aa407c841352253d5d6ae86af0240e0a1">sockets</a>)</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.start()</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+</div>
+<div class="foldopen" id="foldopen00104" data-start="" data-end="">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a63246cca42ab402f340c0215ba2aae65">  104</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a63246cca42ab402f340c0215ba2aae65">shutdown</a>(self) -&gt; None:</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">if</span> sys.platform == <span class="stringliteral">&quot;win32&quot;</span>:</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a11f5b0605d6368355f1f4c4ca6a24055">should_exit</a>.set()  <span class="comment"># pragma: py-not-win32</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.terminate()  <span class="comment"># pragma: py-win32</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">process</a>.join()</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        <span class="keywordflow">for</span> sock <span class="keywordflow">in</span> self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#aa407c841352253d5d6ae86af0240e0a1">sockets</a>:</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>            sock.close()</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        message = f<span class="stringliteral">&quot;Stopping reloader process [{str(self.pid)}]&quot;</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        color_message = <span class="stringliteral">&quot;Stopping reloader process [{}]&quot;</span>.format(click.style(str(self.<a class="code hl_variable" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ac4048f520121190f5e1cc3a08e83fd6b">pid</a>), fg=<span class="stringliteral">&quot;cyan&quot;</span>, bold=<span class="keyword">True</span>))</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        logger.info(message, extra={<span class="stringliteral">&quot;color_message&quot;</span>: color_message})</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+</div>
+<div class="foldopen" id="foldopen00118" data-start="" data-end="">
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a697467254e3c70f7a00a27eab4b18826">  118</a></span>    <span class="keyword">def </span><a class="code hl_function" href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a697467254e3c70f7a00a27eab4b18826">should_restart</a>(self) -&gt; list[Path] | None:</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <span class="keywordflow">raise</span> NotImplementedError(<span class="stringliteral">&quot;Reload strategies should override should_restart()&quot;</span>)</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+</div>
+</div>
+<div class="foldopen" id="foldopen00122" data-start="" data-end="">
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="namespaceuvicorn_1_1supervisors_1_1basereload.html#aafb8c773803a3464a9b0b8993eff1a5c">  122</a></span><span class="keyword">def </span><a class="code hl_function" href="namespaceuvicorn_1_1supervisors_1_1basereload.html#aafb8c773803a3464a9b0b8993eff1a5c">_display_path</a>(path: Path) -&gt; str:</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="keywordflow">return</span> f<span class="stringliteral">&quot;&#39;{path.relative_to(Path.cwd())}&#39;&quot;</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="keywordflow">except</span> ValueError:</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        <span class="keywordflow">return</span> f<span class="stringliteral">&quot;&#39;{path}&#39;&quot;</span></div>
+</div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html">uvicorn.supervisors.basereload.BaseReload</a></div><div class="ttdef"><b>Definition</b> <a href="#l00027">basereload.py:27</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a075dac0021a278bf29c47291d4d6482f"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a075dac0021a278bf29c47291d4d6482f">uvicorn.supervisors.basereload.BaseReload.signal_handler</a></div><div class="ttdeci">signal_handler</div><div class="ttdef"><b>Definition</b> <a href="#l00083">basereload.py:83</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a0822760a35bb9804acf7fb70e7a4e3bf"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a0822760a35bb9804acf7fb70e7a4e3bf">uvicorn.supervisors.basereload.BaseReload.target</a></div><div class="ttdeci">target</div><div class="ttdef"><b>Definition</b> <a href="#l00035">basereload.py:35</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a11f5b0605d6368355f1f4c4ca6a24055"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a11f5b0605d6368355f1f4c4ca6a24055">uvicorn.supervisors.basereload.BaseReload.should_exit</a></div><div class="ttdeci">should_exit</div><div class="ttdef"><b>Definition</b> <a href="#l00037">basereload.py:37</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a1855ef9737897ae520864e7abfa53bfb"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a1855ef9737897ae520864e7abfa53bfb">uvicorn.supervisors.basereload.BaseReload.config</a></div><div class="ttdeci">config</div><div class="ttdef"><b>Definition</b> <a href="#l00034">basereload.py:34</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a4e12c2b7457b4a2690b7cacb9eb439cc"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a4e12c2b7457b4a2690b7cacb9eb439cc">uvicorn.supervisors.basereload.BaseReload.run</a></div><div class="ttdeci">None run(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00051">basereload.py:51</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a63246cca42ab402f340c0215ba2aae65"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a63246cca42ab402f340c0215ba2aae65">uvicorn.supervisors.basereload.BaseReload.shutdown</a></div><div class="ttdeci">None shutdown(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00104">basereload.py:104</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a697467254e3c70f7a00a27eab4b18826"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a697467254e3c70f7a00a27eab4b18826">uvicorn.supervisors.basereload.BaseReload.should_restart</a></div><div class="ttdeci">list[Path]|None should_restart(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00118">basereload.py:118</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a78ccadfa2575f3f7aa21afb32f5f8fde"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a78ccadfa2575f3f7aa21afb32f5f8fde">uvicorn.supervisors.basereload.BaseReload.process</a></div><div class="ttdeci">process</div><div class="ttdef"><b>Definition</b> <a href="#l00085">basereload.py:85</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a7e3a22e3a40e4e03ce570463e2aa61df"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a7e3a22e3a40e4e03ce570463e2aa61df">uvicorn.supervisors.basereload.BaseReload.restart</a></div><div class="ttdeci">None restart(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00088">basereload.py:88</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_a97e3481850d5bda8202517105a0eceb9"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#a97e3481850d5bda8202517105a0eceb9">uvicorn.supervisors.basereload.BaseReload.pause</a></div><div class="ttdeci">None pause(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00064">basereload.py:64</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_aa407c841352253d5d6ae86af0240e0a1"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#aa407c841352253d5d6ae86af0240e0a1">uvicorn.supervisors.basereload.BaseReload.sockets</a></div><div class="ttdeci">sockets</div><div class="ttdef"><b>Definition</b> <a href="#l00036">basereload.py:36</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_abd87b71b8fb3a67321db2354f0378758"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#abd87b71b8fb3a67321db2354f0378758">uvicorn.supervisors.basereload.BaseReload.startup</a></div><div class="ttdeci">None startup(self)</div><div class="ttdef"><b>Definition</b> <a href="#l00074">basereload.py:74</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_ac4048f520121190f5e1cc3a08e83fd6b"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ac4048f520121190f5e1cc3a08e83fd6b">uvicorn.supervisors.basereload.BaseReload.pid</a></div><div class="ttdeci">pid</div><div class="ttdef"><b>Definition</b> <a href="#l00038">basereload.py:38</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_ad436f6a1a9e4df02e6b3fb0a6de60331"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#ad436f6a1a9e4df02e6b3fb0a6de60331">uvicorn.supervisors.basereload.BaseReload.reloader_name</a></div><div class="ttdeci">str|None reloader_name</div><div class="ttdef"><b>Definition</b> <a href="#l00040">basereload.py:40</a></div></div>
+<div class="ttc" id="aclassuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_html_af50aff16537c3d418827517fc82c95e3"><div class="ttname"><a href="classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload.html#af50aff16537c3d418827517fc82c95e3">uvicorn.supervisors.basereload.BaseReload.is_restarting</a></div><div class="ttdeci">bool is_restarting</div><div class="ttdef"><b>Definition</b> <a href="#l00039">basereload.py:39</a></div></div>
+<div class="ttc" id="anamespacecollections_1_1abc_html"><div class="ttname"><a href="namespacecollections_1_1abc.html">collections.abc</a></div></div>
+<div class="ttc" id="anamespaceuvicorn_1_1__subprocess_html"><div class="ttname"><a href="namespaceuvicorn_1_1__subprocess.html">uvicorn._subprocess</a></div><div class="ttdef"><b>Definition</b> <a href="__subprocess_8py_source.html#l00001">_subprocess.py:1</a></div></div>
+<div class="ttc" id="anamespaceuvicorn_1_1config_html"><div class="ttname"><a href="namespaceuvicorn_1_1config.html">uvicorn.config</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2uvicorn_2config_8py_source.html#l00001">config.py:1</a></div></div>
+<div class="ttc" id="anamespaceuvicorn_1_1supervisors_1_1basereload_html_aafb8c773803a3464a9b0b8993eff1a5c"><div class="ttname"><a href="namespaceuvicorn_1_1supervisors_1_1basereload.html#aafb8c773803a3464a9b0b8993eff1a5c">uvicorn.supervisors.basereload._display_path</a></div><div class="ttdeci">str _display_path(Path path)</div><div class="ttdef"><b>Definition</b> <a href="#l00122">basereload.py:122</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_0ea984c17d5b4f57f452e32213efb42b.html">uvicorn</a></li><li class="navelem"><a href="dir_8b104d9ecdbd6efafaa5e8ae863851ca.html">supervisors</a></li><li class="navelem"><a href="basereload_8py.html">basereload.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,3 +1,37 @@
+"""
+    @file objeto_service.py
+    @brief Servicio de lógica de negocio para gestión de objetos inteligentes.
+    @details
+    Implementa la capa de aplicación (Application Service pattern) que orquesta
+    la creación, consulta y actualización de objetos inteligentes.
+    
+    Responsabilidades:
+    - Validación de datos de entrada (DTOs)
+    - Orquestación de múltiples servicios (persistencia, ontología, datastream, IoT)
+    - Gestión de errores y retries
+    - Implementación de patrones saga/compensación para operaciones compuestas
+    - Logging y observabilidad (panel MQTT, correlation ID)
+    
+    Patrones utilizados:
+    - Service Locator / Dependency Injection (FastAPI Depends)
+    - Adapter (normalización de respuestas de servicios externos)
+    - Async/Await (asyncio) para operaciones no bloqueantes
+    - asyncio.to_thread() para operaciones bloqueantes (clientes HTTP síncronos)
+    
+    @note Cada instancia mantiene en memoria la ontología cargada del objeto inteligente activo.
+    @note Las operaciones que llamam a servicios remotos están envueltas en try/except
+          y registran logs detallados para debugging.
+    
+    @author NexTech
+    @version 1.0
+    @date 2025-01-10
+    
+    @see ObjetoInteligente Para el modelo de dominio
+    @see IRepository Para persistencia
+    @see microservicio_data_stream Para gestión de datastreams
+    @see micro_gestion_conocimiento Para operaciones de ontología
+    @see docs/diagrams/flow_diagrams.md Para diagramas de secuencia de procesos
+"""
 
 import json
 
@@ -15,12 +49,68 @@ import asyncio
 
 
 class ObjetoService:
+    """
+        @class ObjetoService
+        @brief Servicio de aplicación para operaciones sobre objetos inteligentes.
+        
+        @details
+        Implementa la lógica de negocio de alto nivel para:
+        - Inicialización de objetos inteligentes con ontología y datastreams
+        - Consultas de metadatos y estado
+        - Envío de datos a datastreams
+        - Monitoreo de disponibilidad de servicios
+        
+        Patrón: Application Service (Clean Architecture) + Dependency Injection
+        
+        Atributos:
+        - log_panel: cliente para publicar logs/eventos MQTT (ILogPanelMQTT)
+        - objetoInteligente: modelo de dominio del objeto activo (ObjetoInteligente)
+        - persistence: repositorio de persistencia (IRepository)
+        
+        @note Mantiene en memoria un único objeto inteligente activo por instancia.
+              Para múltiples objetos, considerar refactorizar con pattern Registry.
+        
+        @see ObjetoInteligente Para dominio
+        @see IRepository Para persistencia (JSON/DB)
+        @see ILogPanelMQTT Para logging distribuido
+        
+        @author Sistema Objeto Inteligente
+        @date 2025-01-10
+    """
     def __init__(self, log_panel: ILogPanelMQTT, persistence: IRepository):
+        """
+            @brief Constructor del servicio de objeto inteligente.
+            
+            @param log_panel Instancia del cliente MQTT para publicar logs y eventos.
+            @param persistence Instancia del repositorio de persistencia (JSON/DB).
+            
+            @details
+            Inicializa el servicio y carga el objeto inteligente desde la ontología
+            si existe una activa; si no, crea una instancia vacía y registra warning.
+            
+            @see __initializeObjetoInteligente()
+        """
         self.log_panel = log_panel
         self.objetoInteligente = self.__initializeObjetoInteligente()
         self.persistence = persistence
     def __initializeObjetoInteligente(self) -> ObjetoInteligente:
-        """Si la ontología existe, se inicializa el objeto inteligente con los datos guardados"""
+        """
+            @brief Inicializa el objeto inteligente desde la ontología activa.
+            
+            @return Instancia de ObjetoInteligente con datos de la ontología, o vacía.
+            
+            @details
+            Si la ontología está activa (cargada en memoria), recupera el OSID
+            y título, crea un modelo de dominio y registra log INFO.
+            Si no está activa, crea una instancia vacía y registra warning.
+            
+            @note Invocado desde __init__. Considerar hacerlo async si la carga
+                  de ontología requiere I/O.
+            
+            @see ontology_service.is_active()
+            @see ontology_service.get_id()
+            @see ontology_service.get_title()
+        """
         if ontology_service.is_active():
             osid = ontology_service.get_id()
             title = ontology_service.get_title()
@@ -30,12 +120,48 @@ class ObjetoService:
         else:
             logger.warning("La ontología no está activa. Objeto inteligente no inicializado.")
             return ObjetoInteligente(None)
+        
 
     async def getIdentificator(self, osid: int)->JSONResponse:
-        await self.log_panel.PubRawLog(self.objetoInteligente.osid, self.objetoInteligente.osid, "Enviando Metadata.json")
-        await self.log_panel.PubLog("metadata_query", self.objetoInteligente.osid, self.objetoInteligente.title, self.objetoInteligente.osid, self.objetoInteligente.title,
-                                     "metadata_query", "Solicitud Recibida")
-        #Si el osid coincide con el del objeto inteligente guardado, se retorna su info
+        """
+            @brief Obtiene los metadatos del objeto inteligente.
+            
+            @param osid Identificador único del objeto inteligente (debe coincidir con el activo).
+            
+            @return JSONResponse con status 200 y metadatos si existe, o error 400/500.
+            
+            @exception ValueError Si osid no coincide.
+            @exception RuntimeError Si falla la lectura de persistencia.
+            
+            @details
+            Flujo:
+            1. Valida que el osid coincida con el objeto activo
+            2. Publica log raw en panel MQTT (inicio solicitud)
+            3. Verifica que los metadatos existan en persistencia
+            4. Retorna los metadatos en formato JSON con status 200
+            5. Publica log de respuesta en panel MQTT
+            
+            Si el osid no coincide, retorna error 400.
+            Si hay error al leer metadatos, retorna error 500.
+            
+            @see persistence.is_object_metadata_exists()
+            @see persistence.get_object_metadata()
+            @see log_panel.PubRawLog()
+            @see log_panel.PubLog()
+            
+            @example
+            200 OK:
+            {
+                "status": "success",
+                "message": "Metadatos del objeto inteligente obtenidos correctamente.",
+                "data": {
+                    "id": "obj_001",
+                    "title": "Sensor Temperatura Sala A",
+                    "datastreams": [...],
+                    ...
+                }
+            }
+        """
         if osid == self.objetoInteligente.osid:
             logger.info("Enviando identificador del objeto con oid %s", osid)
             try:
@@ -79,7 +205,61 @@ class ObjetoService:
 
 
     async def startObject(self, data: ObjectData)->JSONResponse:
-        """Método para iniciar el objeto inteligente con los datos proporcionados"""        
+        """
+            @brief Inicia un nuevo objeto inteligente con datos proporcionados.
+            
+            @param data DTO ObjectData con configuración: feed (id, title, datastreams, etc.)
+            
+            @return JSONResponse con status 200 si exitoso, o error 400/500 si falla.
+            
+            @exception ValueError Si los datos del DTO son inválidos.
+            @exception RuntimeError Si falla la población de ontología o persistencia.
+            
+            @details
+            Operación compuesta y distribuida que:
+            
+            1. Valida que la ontología no esté ya activa (evita reinicios)
+            2. Estructura los datos en formato JSON compatible con el objeto inteligente
+            3. Puebla la ontología en micro_gestion_conocimiento (crea individuos OWL)
+            4. Actualiza los atributos del modelo de dominio en memoria
+            5. Persiste metadatos en JSON/DB mediante repositorio
+            6. Crea dispositivo en ThingsBoard (IoT Platform) y obtiene token
+            7. Publica mensaje en cola MQTT para que microservicio_data_stream
+               registre los datastreams
+            8. Registra eventos en panel MQTT para auditoría
+            
+            @note Esta es una operación **distribuida** que involucra múltiples
+                  microservicios. Si algún paso falla (ej. ThingsBoard no disponible),
+                  la ontología ya fue poblada y los metadatos ya se persistieron.
+                  Considerar implementar saga/compensación o transacciones distribuidas.
+            
+            @warning Si la población de ontología falla, retorna error 500.
+                     Posterior ejecución puede intentar reintentar con idempotencia.
+            
+            @see ontology_service.poblate_ontology()
+            @see persistence.save_object_metadata()
+            @see tb_client.create_device_with_token() Para ThingsBoard
+            @see log_panel.Publicar() Para cola de datastreams
+            @see docs/diagrams/flow_diagrams.md (StartObject sequence diagram)
+            
+            @example
+            POST /objeto/StartObject
+            {
+                "feed": {
+                    "id": "obj_sensor_001",
+                    "title": "Sensor Temperatura Sala",
+                    "description": "Sensor DHT22",
+                    "datastreams": ["temp", "humidity"]
+                }
+            }
+            
+            200 OK:
+            {
+                "status": "success",
+                "message": "Objeto inteligente iniciado con éxito.",
+                "data": {}
+            }
+        """        
         if ontology_service.is_active():
             logger.warning("El objeto inteligente ya está activo.")
             return JSONResponse(

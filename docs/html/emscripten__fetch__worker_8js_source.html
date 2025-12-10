@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/urllib3/contrib/emscripten/emscripten_fetch_worker.js</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('emscripten__fetch__worker_8js_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">emscripten_fetch_worker.js</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="emscripten__fetch__worker_8js.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span>let Status = {</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span>  SUCCESS_HEADER: -1,</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span>  SUCCESS_EOF: -2,</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span>  ERROR_TIMEOUT: -3,</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span>  ERROR_EXCEPTION: -4,</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>};</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>let connections = {};</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>let nextConnectionID = 1;</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>const encoder = new TextEncoder();</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>self.addEventListener(&quot;message&quot;, async function (event) {</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>  if (event.data.close) {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    let connectionID = event.data.close;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    delete connections[connectionID];</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    return;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  } else if (event.data.getMore) {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    let connectionID = event.data.getMore;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    let { curOffset, value, reader, intBuffer, byteBuffer } =</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>      connections[connectionID];</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    // if we still have some in buffer, then just send it back straight away</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    if (!value || curOffset &gt;= value.length) {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>      // read another buffer if required</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>      try {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        let readResponse = await reader.read();</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        if (readResponse.done) {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>          // read everything - clear connection and return</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>          delete connections[connectionID];</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>          Atomics.store(intBuffer, 0, Status.SUCCESS_EOF);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>          Atomics.notify(intBuffer, 0);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>          // finished reading successfully</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>          // return from event handler</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>          return;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        }</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        curOffset = 0;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        connections[connectionID].value = readResponse.value;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        value = readResponse.value;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>      } catch (error) {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        console.log(&quot;Request exception:&quot;, error);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        let errorBytes = encoder.encode(error.message);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        let written = errorBytes.length;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        byteBuffer.set(errorBytes);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        intBuffer[1] = written;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        Atomics.store(intBuffer, 0, Status.ERROR_EXCEPTION);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        Atomics.notify(intBuffer, 0);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>      }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    // send as much buffer as we can</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    let curLen = value.length - curOffset;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    if (curLen &gt; byteBuffer.length) {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>      curLen = byteBuffer.length;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    byteBuffer.set(value.subarray(curOffset, curOffset + curLen), 0);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    Atomics.store(intBuffer, 0, curLen); // store current length in bytes</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    Atomics.notify(intBuffer, 0);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    curOffset += curLen;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    connections[connectionID].curOffset = curOffset;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    return;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  } else {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    // start fetch</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    let connectionID = nextConnectionID;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    nextConnectionID += 1;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    const intBuffer = new Int32Array(event.data.buffer);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    const byteBuffer = new Uint8Array(event.data.buffer, 8);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    try {</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>      const response = await fetch(event.data.url, event.data.fetchParams);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>      // return the headers first via textencoder</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>      var headers = [];</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>      for (const pair of response.headers.entries()) {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        headers.push([pair[0], pair[1]]);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>      }</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>      let headerObj = {</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        headers: headers,</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        status: response.status,</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        connectionID,</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>      };</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>      const headerText = JSON.stringify(headerObj);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>      let headerBytes = encoder.encode(headerText);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>      let written = headerBytes.length;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>      byteBuffer.set(headerBytes);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>      intBuffer[1] = written;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>      // make a connection</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>      connections[connectionID] = {</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        reader: response.body.getReader(),</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        intBuffer: intBuffer,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        byteBuffer: byteBuffer,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        value: undefined,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        curOffset: 0,</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>      };</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>      // set header ready</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>      Atomics.store(intBuffer, 0, Status.SUCCESS_HEADER);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>      Atomics.notify(intBuffer, 0);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>      // all fetching after this goes through a new postmessage call with getMore</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>      // this allows for parallel requests</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    } catch (error) {</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>      console.log(&quot;Request exception:&quot;, error);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>      let errorBytes = encoder.encode(error.message);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>      let written = errorBytes.length;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>      byteBuffer.set(errorBytes);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>      intBuffer[1] = written;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>      Atomics.store(intBuffer, 0, Status.ERROR_EXCEPTION);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>      Atomics.notify(intBuffer, 0);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    }</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  }</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>});</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>self.postMessage({ inited: true });</div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_9726ff7523e0c985e353e4d7780d2d9b.html">urllib3</a></li><li class="navelem"><a href="dir_dfb7b75ecde5a073c01f6bbbaa861c3a.html">contrib</a></li><li class="navelem"><a href="dir_c04db7d7bbb27a612bbc152bbc3536d8.html">emscripten</a></li><li class="navelem"><a href="emscripten__fetch__worker_8js.html">emscripten_fetch_worker.js</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

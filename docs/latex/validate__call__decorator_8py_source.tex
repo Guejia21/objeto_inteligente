@@ -1,0 +1,122 @@
+\doxysection{validate\+\_\+call\+\_\+decorator.\+py}
+\hypertarget{validate__call__decorator_8py_source}{}\label{validate__call__decorator_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/validate\_call\_decorator.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/validate\_call\_decorator.py}}
+\mbox{\hyperlink{validate__call__decorator_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Decorator\ for\ validating\ function\ calls."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00003}00003\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations\ \textcolor{keyword}{as}\ \_annotations}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00005}00005\ \textcolor{keyword}{import}\ inspect}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00006}00006\ \textcolor{keyword}{from}\ functools\ \textcolor{keyword}{import}\ partial}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00007}00007\ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ BuiltinFunctionType}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00008}00008\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ Callable,\ TypeVar,\ cast,\ overload}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00010}00010\ \textcolor{keyword}{from}\ .\_internal\ \textcolor{keyword}{import}\ \_generate\_schema,\ \_typing\_extra,\ \_validate\_call}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00011}00011\ \textcolor{keyword}{from}\ .errors\ \textcolor{keyword}{import}\ PydanticUserError}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00013}00013\ \_\_all\_\_\ =\ (\textcolor{stringliteral}{'validate\_call'},)}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00015}00015\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00016}00016\ \ \ \ \ \textcolor{keyword}{from}\ .config\ \textcolor{keyword}{import}\ ConfigDict}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00018}\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_abdaaeb21c4fa623a63cb9587bfd694ea}{00018}}\ \ \ \ \ AnyCallableT\ =\ TypeVar(\textcolor{stringliteral}{'AnyCallableT'},\ bound=Callable[...,\ Any])}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00021}\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_afbd06bf51a53ce04cc0da43052fef71f}{00021}}\ \_INVALID\_TYPE\_ERROR\_CODE\ =\ \textcolor{stringliteral}{'validate-\/call-\/type'}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00024}\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_a2956c42a07b361f860de023d0a276e8e}{00024}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_a2956c42a07b361f860de023d0a276e8e}{\_check\_function\_type}}(function:\ object)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00025}00025\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Check\ if\ the\ input\ function\ is\ a\ supported\ type\ for\ \`{}validate\_call\`{}."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00026}00026\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(function,\ \_generate\_schema.VALIDATE\_CALL\_SUPPORTED\_TYPES):}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ inspect.signature(cast(\_generate\_schema.ValidateCallSupportedTypes,\ function))}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ValueError:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}Input\ function\ \`{}\{function\}`\ doesn't\ have\ a\ valid\ signature"{}},\ code=\_INVALID\_TYPE\_ERROR\_CODE}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(function,\ partial):}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ \textcolor{keywordflow}{not}\ isinstance(partial.func,\ partial),\ \textcolor{stringliteral}{'Partial\ of\ partial'}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_a2956c42a07b361f860de023d0a276e8e}{\_check\_function\_type}}(function.func)}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ PydanticUserError\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Partial\ of\ \`{}\{function.func\}`\ is\ invalid\ because\ the\ type\ of\ \`{}\{function.func\}`\ is\ not\ supported\ by\ \`{}validate\_call`'},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ code=\_INVALID\_TYPE\_ERROR\_CODE,}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{from}\ e}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00046}00046\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(function,\ BuiltinFunctionType):}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(f\textcolor{stringliteral}{'Input\ built-\/in\ function\ \`{}\{function\}`\ is\ not\ supported'},\ code=\_INVALID\_TYPE\_ERROR\_CODE)}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00048}00048\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(function,\ (classmethod,\ staticmethod,\ property)):}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ name\ =\ type(function).\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'The\ \`{}@\{name\}`\ decorator\ should\ be\ applied\ after\ \`{}@validate\_call`\ (put\ \`{}@\{name\}`\ on\ top)'},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ code=\_INVALID\_TYPE\_ERROR\_CODE,}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00055}00055\ \ \ \ \ \textcolor{keywordflow}{if}\ inspect.isclass(function):}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unable\ to\ validate\ \{function\}:\ \`{}validate\_call`\ should\ be\ applied\ to\ functions,\ not\ classes\ (put\ \`{}@validate\_call`\ on\ top\ of\ \`{}\_\_init\_\_`\ or\ \`{}\_\_new\_\_`\ instead)'},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ code=\_INVALID\_TYPE\_ERROR\_CODE,}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00060}00060\ \ \ \ \ \textcolor{keywordflow}{if}\ callable(function):}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unable\ to\ validate\ \{function\}:\ \`{}validate\_call`\ should\ be\ applied\ to\ functions,\ not\ instances\ or\ other\ callables.\ Use\ \`{}validate\_call`\ explicitly\ on\ \`{}\_\_call\_\_`\ instead.'},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ code=\_INVALID\_TYPE\_ERROR\_CODE,}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00066}00066\ \ \ \ \ \textcolor{keywordflow}{raise}\ \mbox{\hyperlink{classpydantic_1_1errors_1_1_pydantic_user_error}{PydanticUserError}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{'Unable\ to\ validate\ \{function\}:\ \`{}validate\_call`\ should\ be\ applied\ to\ one\ of\ the\ following:\ function,\ method,\ partial,\ or\ lambda'},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ code=\_INVALID\_TYPE\_ERROR\_CODE,}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00069}00069\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00072}00072\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00073}\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_ac1c9aaae79e0edc6c4dd11092d9e2f56}{00073}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_ac1c9aaae79e0edc6c4dd11092d9e2f56}{validate\_call}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00074}00074\ \ \ \ \ *,\ config:\ ConfigDict\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},\ validate\_return:\ bool\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00075}00075\ )\ -\/>\ Callable[[AnyCallableT],\ AnyCallableT]:\ ...}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00078}00078\ \textcolor{preprocessor}{@overload}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00079}\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_ad68649b8b01eda50376125c218d51a41}{00079}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_ac1c9aaae79e0edc6c4dd11092d9e2f56}{validate\_call}}(func:\ AnyCallableT,\ /)\ -\/>\ AnyCallableT:\ ...}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00081}00081\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00082}\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_af41217bcc22da18c76dcedc11489eda3}{00082}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_ac1c9aaae79e0edc6c4dd11092d9e2f56}{validate\_call}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00083}00083\ \ \ \ \ func:\ AnyCallableT\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00084}00084\ \ \ \ \ /,}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00085}00085\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00086}00086\ \ \ \ \ config:\ ConfigDict\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00087}00087\ \ \ \ \ validate\_return:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00088}00088\ )\ -\/>\ AnyCallableT\ |\ Callable[[AnyCallableT],\ AnyCallableT]:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00089}00089\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}!!!\ abstract\ "{}Usage\ Documentation"{}}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ [Validation\ Decorator](../concepts/validation\_decorator.md)}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00091}00091\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ Returns\ a\ decorated\ wrapper\ around\ the\ function\ that\ validates\ the\ arguments\ and,\ optionally,\ the\ return\ value.}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00093}00093\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ Usage\ may\ be\ either\ as\ a\ plain\ decorator\ \`{}@validate\_call\`{}\ or\ with\ arguments\ \`{}@validate\_call(...)\`{}.}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00095}00095\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ func:\ The\ function\ to\ be\ decorated.}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ config:\ The\ configuration\ dictionary.}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ validate\_return:\ Whether\ to\ validate\ the\ return\ value.}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00100}00100\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ decorated\ function.}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00104}00104\ \ \ \ \ parent\_namespace\ =\ \_typing\_extra.parent\_frame\_namespace()}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00106}00106\ \ \ \ \ \textcolor{keyword}{def\ }validate(function:\ AnyCallableT)\ -\/>\ AnyCallableT:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1validate__call__decorator_a2956c42a07b361f860de023d0a276e8e}{\_check\_function\_type}}(function)}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ validate\_call\_wrapper\ =\ \mbox{\hyperlink{classpydantic_1_1__internal_1_1__validate__call_1_1_validate_call_wrapper}{\_validate\_call.ValidateCallWrapper}}(}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ cast(\_generate\_schema.ValidateCallSupportedTypes,\ function),\ config,\ validate\_return,\ parent\_namespace}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \_validate\_call.update\_wrapper\_attributes(function,\ validate\_call\_wrapper.\_\_call\_\_)\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00112}00112\ }
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00113}00113\ \ \ \ \ \textcolor{keywordflow}{if}\ func\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ validate(func)}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{validate__call__decorator_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ validate}
+
+\end{DoxyCode}

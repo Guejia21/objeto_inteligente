@@ -1,0 +1,206 @@
+\doxysection{\+\_\+contextmanagers.\+py}
+\hypertarget{__contextmanagers_8py_source}{}\label{__contextmanagers_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_contextmanagers.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_contextmanagers.py}}
+\mbox{\hyperlink{__contextmanagers_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00001}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__contextmanagers}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00003}00003\ \textcolor{keyword}{from}\ abc\ \textcolor{keyword}{import}\ abstractmethod}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00004}00004\ \textcolor{keyword}{from}\ contextlib\ \textcolor{keyword}{import}\ AbstractAsyncContextManager,\ AbstractContextManager}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00005}00005\ \textcolor{keyword}{from}\ inspect\ \textcolor{keyword}{import}\ isasyncgen,\ iscoroutine,\ isgenerator}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00006}00006\ \textcolor{keyword}{from}\ types\ \textcolor{keyword}{import}\ TracebackType}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00007}00007\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Protocol,\ TypeVar,\ cast,\ final}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00009}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__contextmanagers_a2cdd4fc8db6813ab1b1fd949b5a0e8b4}{00009}}\ \_T\_co\ =\ TypeVar(\textcolor{stringliteral}{"{}\_T\_co"{}},\ covariant=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00010}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__contextmanagers_ad13309d5f4a3a202eb36882738c9203a}{00010}}\ \_ExitT\_co\ =\ TypeVar(\textcolor{stringliteral}{"{}\_ExitT\_co"{}},\ covariant=\textcolor{keyword}{True},\ bound=\textcolor{stringliteral}{"{}bool\ |\ None"{}})}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00013}\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1___supports_ctx_mgr}{00013}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1___supports_ctx_mgr}{\_SupportsCtxMgr}}(Protocol[\_T\_co,\ \_ExitT\_co]):}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00014}00014\ \ \ \ \ \textcolor{keyword}{def\ }\_\_contextmanager\_\_(self)\ -\/>\ AbstractContextManager[\_T\_co,\ \_ExitT\_co]:\ ...}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00017}\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1___supports_async_ctx_mgr}{00017}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1___supports_async_ctx_mgr}{\_SupportsAsyncCtxMgr}}(Protocol[\_T\_co,\ \_ExitT\_co]):}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00018}00018\ \ \ \ \ \textcolor{keyword}{def\ }\_\_asynccontextmanager\_\_(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00020}00020\ \ \ \ \ )\ -\/>\ AbstractAsyncContextManager[\_T\_co,\ \_ExitT\_co]:\ ...}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00023}\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{00023}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{ContextManagerMixin}}:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00024}00024\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ Mixin\ class\ providing\ context\ manager\ functionality\ via\ a\ generator-\/based}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ implementation.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00027}00027\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ This\ class\ allows\ you\ to\ implement\ a\ context\ manager\ via\ :meth:\`{}\_\_contextmanager\_\_\`{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00029}00029\ \textcolor{stringliteral}{\ \ \ \ which\ should\ return\ a\ generator.\ The\ mechanics\ are\ meant\ to\ mirror\ those\ of}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00030}00030\ \textcolor{stringliteral}{\ \ \ \ :func:\`{}@contextmanager\ <contextlib.contextmanager>\`{}.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00031}00031\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00032}00032\ \textcolor{stringliteral}{\ \ \ \ ..\ note::\ Classes\ using\ this\ mix-\/in\ are\ not\ reentrant\ as\ context\ managers,\ meaning}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00033}00033\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ that\ once\ you\ enter\ it,\ you\ can't\ re-\/enter\ before\ first\ exiting\ it.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00034}00034\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00035}00035\ \textcolor{stringliteral}{\ \ \ \ ..\ seealso::\ :doc:\`{}contextmanagers\`{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00036}00036\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00038}00038\ \ \ \ \ \_\_cm:\ AbstractContextManager[object,\ bool\ |\ \textcolor{keywordtype}{None}]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00040}00040\ \ \ \ \ \textcolor{preprocessor}{@final}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00041}00041\ \ \ \ \ \textcolor{keyword}{def\ }\_\_enter\_\_(self:\ \_SupportsCtxMgr[\_T\_co,\ bool\ |\ \textcolor{keywordtype}{None}])\ -\/>\ \_T\_co:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Needed\ for\ mypy\ to\ assume\ self\ still\ has\ the\ \_\_cm\ member}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(self,\ ContextManagerMixin)}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{\_\_cm}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}this\ \{self.\_\_class\_\_.\_\_qualname\_\_\}\ has\ already\ been\ entered"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ cm\ =\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{\_\_contextmanager\_\_}}()}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(cm,\ AbstractContextManager):}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isgenerator(cm):}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\_\_contextmanager\_\_()\ returned\ a\ generator\ object\ instead\ of\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}a\ context\ manager.\ Did\ you\ forget\ to\ add\ the\ @contextmanager\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}decorator?"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}\_\_contextmanager\_\_()\ did\ not\ return\ a\ context\ manager\ object,\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}but\ \{cm.\_\_class\_\_!r\}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00062}00062\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ cm\ \textcolor{keywordflow}{is}\ self:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}\{self.\_\_class\_\_.\_\_qualname\_\_\}.\_\_contextmanager\_\_()\ returned\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}self.\ Did\ you\ forget\ to\ add\ the\ @contextmanager\ decorator\ and\ a\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}'yield'\ statement?"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ value\ =\ cm.\_\_enter\_\_()}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{\_\_cm}}\ =\ cm}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00074}00074\ \ \ \ \ \textcolor{preprocessor}{@final}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00075}00075\ \ \ \ \ \textcolor{keyword}{def\ }\_\_exit\_\_(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ self:\ \_SupportsCtxMgr[object,\ \_ExitT\_co],}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ exc\_type:\ type[BaseException]\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ exc\_val:\ BaseException\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ exc\_tb:\ TracebackType\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00080}00080\ \ \ \ \ )\ -\/>\ \_ExitT\_co:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Needed\ for\ mypy\ to\ assume\ self\ still\ has\ the\ \_\_cm\ member}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(self,\ ContextManagerMixin)}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{\_\_cm}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}this\ \{self.\_\_class\_\_.\_\_qualname\_\_\}\ has\ not\ been\ entered\ yet"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Prevent\ circular\ references}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ cm\ =\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{\_\_cm}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ del\ self.\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_context_manager_mixin}{\_\_cm}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cast(\_ExitT\_co,\ cm.\_\_exit\_\_(exc\_type,\ exc\_val,\ exc\_tb))}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00094}00094\ \ \ \ \ \textcolor{preprocessor}{@abstractmethod}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00095}00095\ \ \ \ \ \textcolor{keyword}{def\ }\_\_contextmanager\_\_(self)\ -\/>\ AbstractContextManager[object,\ bool\ |\ None]:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Implement\ your\ context\ manager\ logic\ here.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00098}00098\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ method\ **must**\ be\ decorated\ with}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :func:\`{}@contextmanager\ <contextlib.contextmanager>\`{}.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00101}00101\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ note::\ Remember\ that\ the\ \`{}\`{}yield\`{}\`{}\ will\ raise\ any\ exception\ raised\ in\ the}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ enclosed\ context\ block,\ so\ use\ a\ \`{}\`{}finally:\`{}\`{}\ block\ to\ clean\ up\ resources!}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00104}00104\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :return:\ a\ context\ manager\ object}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00108}00108\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00109}\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_async_context_manager_mixin}{00109}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classanyio_1_1__core_1_1__contextmanagers_1_1_async_context_manager_mixin}{AsyncContextManagerMixin}}:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00110}00110\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ Mixin\ class\ providing\ async\ context\ manager\ functionality\ via\ a\ generator-\/based}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ implementation.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00113}00113\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00114}00114\ \textcolor{stringliteral}{\ \ \ \ This\ class\ allows\ you\ to\ implement\ a\ context\ manager\ via}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00115}00115\ \textcolor{stringliteral}{\ \ \ \ :meth:\`{}\_\_asynccontextmanager\_\_\`{}.\ The\ mechanics\ are\ meant\ to\ mirror\ those\ of}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00116}00116\ \textcolor{stringliteral}{\ \ \ \ :func:\`{}@asynccontextmanager\ <contextlib.asynccontextmanager>\`{}.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00117}00117\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ ..\ note::\ Classes\ using\ this\ mix-\/in\ are\ not\ reentrant\ as\ context\ managers,\ meaning}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00119}00119\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ that\ once\ you\ enter\ it,\ you\ can't\ re-\/enter\ before\ first\ exiting\ it.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00120}00120\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00121}00121\ \textcolor{stringliteral}{\ \ \ \ ..\ seealso::\ :doc:\`{}contextmanagers\`{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00124}00124\ \ \ \ \ \_\_cm:\ AbstractAsyncContextManager[object,\ bool\ |\ \textcolor{keywordtype}{None}]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00126}00126\ \ \ \ \ \textcolor{preprocessor}{@final}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00127}00127\ \ \ \ \ \textcolor{keyword}{async\ def\ }\_\_aenter\_\_(self:\ \_SupportsAsyncCtxMgr[\_T\_co,\ bool\ |\ \textcolor{keywordtype}{None}])\ -\/>\ \_T\_co:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Needed\ for\ mypy\ to\ assume\ self\ still\ has\ the\ \_\_cm\ member}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(self,\ AsyncContextManagerMixin)}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\_\_cm\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}this\ \{self.\_\_class\_\_.\_\_qualname\_\_\}\ has\ already\ been\ entered"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ cm\ =\ self.\_\_asynccontextmanager\_\_()}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(cm,\ AbstractAsyncContextManager):}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isasyncgen(cm):}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\_\_asynccontextmanager\_\_()\ returned\ an\ async\ generator\ instead\ of\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}an\ async\ context\ manager.\ Did\ you\ forget\ to\ add\ the\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}@asynccontextmanager\ decorator?"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ iscoroutine(cm):}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cm.close()}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\_\_asynccontextmanager\_\_()\ returned\ a\ coroutine\ object\ instead\ of\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}an\ async\ context\ manager.\ Did\ you\ forget\ to\ add\ the\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}@asynccontextmanager\ decorator\ and\ a\ 'yield'\ statement?"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}\_\_asynccontextmanager\_\_()\ did\ not\ return\ an\ async\ context\ manager,\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}but\ \{cm.\_\_class\_\_!r\}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ cm\ \textcolor{keywordflow}{is}\ self:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}\{self.\_\_class\_\_.\_\_qualname\_\_\}.\_\_asynccontextmanager\_\_()\ returned\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}self.\ Did\ you\ forget\ to\ add\ the\ @asynccontextmanager\ decorator\ and\ a\ "{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}'yield'\ statement?"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ value\ =\ await\ cm.\_\_aenter\_\_()}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ self.\_\_cm\ =\ cm}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00166}00166\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00167}00167\ \ \ \ \ \textcolor{preprocessor}{@final}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00168}00168\ \ \ \ \ \textcolor{keyword}{async\ def\ }\_\_aexit\_\_(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ self:\ \_SupportsAsyncCtxMgr[object,\ \_ExitT\_co],}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ exc\_type:\ type[BaseException]\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ exc\_val:\ BaseException\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ exc\_tb:\ TracebackType\ |\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00173}00173\ \ \ \ \ )\ -\/>\ \_ExitT\_co:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ isinstance(self,\ AsyncContextManagerMixin)}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\_\_cm\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\textcolor{stringliteral}{"{}this\ \{self.\_\_class\_\_.\_\_qualname\_\_\}\ has\ not\ been\ entered\ yet"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00179}00179\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Prevent\ circular\ references}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ cm\ =\ self.\_\_cm}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ del\ self.\_\_cm}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cast(\_ExitT\_co,\ await\ cm.\_\_aexit\_\_(exc\_type,\ exc\_val,\ exc\_tb))}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00185}00185\ }
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00186}00186\ \ \ \ \ \textcolor{preprocessor}{@abstractmethod}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00187}00187\ \ \ \ \ \textcolor{keyword}{def\ }\_\_asynccontextmanager\_\_(}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00189}00189\ \ \ \ \ )\ -\/>\ AbstractAsyncContextManager[object,\ bool\ |\ None]:}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00191}00191\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Implement\ your\ async\ context\ manager\ logic\ here.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00192}00192\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00193}00193\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ method\ **must**\ be\ decorated\ with}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00194}00194\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :func:\`{}@asynccontextmanager\ <contextlib.asynccontextmanager>\`{}.}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00195}00195\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00196}00196\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ ..\ note::\ Remember\ that\ the\ \`{}\`{}yield\`{}\`{}\ will\ raise\ any\ exception\ raised\ in\ the}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00197}00197\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ enclosed\ context\ block,\ so\ use\ a\ \`{}\`{}finally:\`{}\`{}\ block\ to\ clean\ up\ resources!}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00198}00198\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00199}00199\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ :return:\ an\ async\ context\ manager\ object}}
+\DoxyCodeLine{\Hypertarget{__contextmanagers_8py_source_l00200}00200\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+
+\end{DoxyCode}

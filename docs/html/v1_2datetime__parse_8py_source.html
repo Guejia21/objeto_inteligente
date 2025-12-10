@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.15.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Objeto Inteligente - Sistema Completo: Archivo de código fuente micro_gestion_objetos/venv/Lib/site-packages/pydantic/v1/datetime_parse.py</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">Objeto Inteligente - Sistema Completo<span id="projectnumber">&#160;1.0.0</span>
+   </div>
+   <div id="projectbrief">Sistema de gestión de objetos inteligentes con ontologías, microservicios y automatización IoT</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generado por Doxygen 1.15.0 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+$(function() { codefold.init(); });
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+$(function() {
+  initMenu('',true,false,'search.php','Buscar',true);
+  $(function() { init_search(); });
+});
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){initNavTree('v1_2datetime__parse_8py_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Cargando...</div>
+<div class="SRStatus" id="Searching">Buscando...</div>
+<div class="SRStatus" id="NoMatches">Nada coincide</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">datetime_parse.py</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="v1_2datetime__parse_8py.html">Ir a la documentación de este archivo.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html">    1</a></span><span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="stringliteral">Functions to parse datetime objects.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="stringliteral">We&#39;re using regular expressions rather than time.strptime because:</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="stringliteral">- They provide both validation and parsing.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="stringliteral">- They&#39;re more flexible for datetimes.</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="stringliteral">- The date/datetime/time constructors produce friendlier error messages.</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="stringliteral">Stolen from https://raw.githubusercontent.com/django/django/main/django/utils/dateparse.py at</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="stringliteral">9718fa2e8abe430c3526a9278dd976443d4ae3c6</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="stringliteral">Changed to:</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="stringliteral">* use standard python datetime types not django.utils.timezone</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="stringliteral">* raise ValueError when regex doesn&#39;t match rather than returning None</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="stringliteral">* support parsing unix timestamps for dates and datetimes</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">import</span> re</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">from</span> datetime <span class="keyword">import</span> date, datetime, time, timedelta, timezone</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">from</span> typing <span class="keyword">import</span> Dict, Optional, Type, Union</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">from</span> <a class="code hl_namespace" href="namespacepydantic_1_1v1.html">pydantic.v1</a> <span class="keyword">import</span> errors</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a5a6623f7b8d1dd4fd9dfc0dec544f979">   23</a></span>date_expr = <span class="stringliteral">r&#39;(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{1,2})-(?P&lt;day&gt;\d{1,2})&#39;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a8141e5129f07979df68473bcb06b5e54">   24</a></span>time_expr = (</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="stringliteral">r&#39;(?P&lt;hour&gt;\d{1,2}):(?P&lt;minute&gt;\d{1,2})&#39;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="stringliteral">r&#39;(?::(?P&lt;second&gt;\d{1,2})(?:\.(?P&lt;microsecond&gt;\d{1,6})\d{0,6})?)?&#39;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="stringliteral">r&#39;(?P&lt;tzinfo&gt;Z|[+-]\d{2}(?::?\d{2})?)?$&#39;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a4f70663f139c793754d59bbaf35d0cf9">   30</a></span>date_re = re.compile(f<span class="stringliteral">&#39;{date_expr}$&#39;</span>)</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a2d4313dd7b262cc0cda3f909b5aedd87">   31</a></span>time_re = re.compile(time_expr)</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#aa1c5ce4e8d56674af98d82e922b8c1a7">   32</a></span>datetime_re = re.compile(f<span class="stringliteral">&#39;{date_expr}[T ]{time_expr}&#39;</span>)</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a8615782140660e10ef08449b32ba186c">   34</a></span>standard_duration_re = re.compile(</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="stringliteral">r&#39;^&#39;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="stringliteral">r&#39;(?:(?P&lt;days&gt;-?\d+) (days?, )?)?&#39;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="stringliteral">r&#39;((?:(?P&lt;hours&gt;-?\d+):)(?=\d+:\d+))?&#39;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="stringliteral">r&#39;(?:(?P&lt;minutes&gt;-?\d+):)?&#39;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="stringliteral">r&#39;(?P&lt;seconds&gt;-?\d+)&#39;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="stringliteral">r&#39;(?:\.(?P&lt;microseconds&gt;\d{1,6})\d{0,6})?&#39;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="stringliteral">r&#39;$&#39;</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>)</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment"># Support the sections of ISO 8601 date representation that are accepted by timedelta</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a558e442fe736d268b2cc84f31a808684">   45</a></span>iso8601_duration_re = re.compile(</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="stringliteral">r&#39;^(?P&lt;sign&gt;[-+]?)&#39;</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="stringliteral">r&#39;P&#39;</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="stringliteral">r&#39;(?:(?P&lt;days&gt;\d+(.\d+)?)D)?&#39;</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="stringliteral">r&#39;(?:T&#39;</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="stringliteral">r&#39;(?:(?P&lt;hours&gt;\d+(.\d+)?)H)?&#39;</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="stringliteral">r&#39;(?:(?P&lt;minutes&gt;\d+(.\d+)?)M)?&#39;</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="stringliteral">r&#39;(?:(?P&lt;seconds&gt;\d+(.\d+)?)S)?&#39;</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="stringliteral">r&#39;)?&#39;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="stringliteral">r&#39;$&#39;</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>)</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a521358c1dbc8736b448583b20b323f54">   57</a></span>EPOCH = datetime(1970, 1, 1)</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment"># if greater than this, the number is in ms, if less than or equal it&#39;s in seconds</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment"># (in seconds this is 11th October 2603, in ms it&#39;s 20th August 1970)</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a4e81962a97c4a7011c91331d20f82420">   60</a></span>MS_WATERSHED = int(2e10)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment"># slightly more than datetime.max in ns - (datetime.max - EPOCH).total_seconds() * 1e9</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#ab1d9c222d6d63f91b49ad509c4ffab9f">   62</a></span>MAX_NUMBER = int(3e20)</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#aa7c4763f133c0c24d024a4d5eeea70f2">   63</a></span>StrBytesIntFloat = Union[str, bytes, int, float]</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="foldopen" id="foldopen00066" data-start="" data-end="">
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a872cb47762a0dedff55be357ba7179f8">   66</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a872cb47762a0dedff55be357ba7179f8">get_numeric</a>(value: StrBytesIntFloat, native_expected_type: str) -&gt; Union[<span class="keywordtype">None</span>, int, float]:</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keywordflow">if</span> isinstance(value, (int, float)):</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordflow">return</span> value</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordflow">return</span> float(value)</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">except</span> ValueError:</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordflow">return</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordflow">except</span> TypeError:</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">raise</span> TypeError(f<span class="stringliteral">&#39;invalid type; expected {native_expected_type}, string, bytes, int or float&#39;</span>)</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+</div>
+<div class="foldopen" id="foldopen00077" data-start="" data-end="">
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a78b869eb145d1911b57de4cc60e0e339">   77</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a78b869eb145d1911b57de4cc60e0e339">from_unix_seconds</a>(seconds: Union[int, float]) -&gt; datetime:</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">if</span> seconds &gt; MAX_NUMBER:</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="keywordflow">return</span> datetime.max</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordflow">elif</span> seconds &lt; -MAX_NUMBER:</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordflow">return</span> datetime.min</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordflow">while</span> abs(seconds) &gt; MS_WATERSHED:</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        seconds /= 1000</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    dt = EPOCH + timedelta(seconds=seconds)</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">return</span> dt.replace(tzinfo=timezone.utc)</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+</div>
+<div class="foldopen" id="foldopen00089" data-start="" data-end="">
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a6f3b1ab3d2f561f8c78de64b8f18da8e">   89</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a6f3b1ab3d2f561f8c78de64b8f18da8e">_parse_timezone</a>(value: Optional[str], error: Type[Exception]) -&gt; Union[<span class="keywordtype">None</span>, int, timezone]:</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keywordflow">if</span> value == <span class="stringliteral">&#39;Z&#39;</span>:</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="keywordflow">return</span> timezone.utc</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">elif</span> value <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        offset_mins = int(value[-2:]) <span class="keywordflow">if</span> len(value) &gt; 3 <span class="keywordflow">else</span> 0</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        offset = 60 * int(value[1:3]) + offset_mins</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keywordflow">if</span> value[0] == <span class="stringliteral">&#39;-&#39;</span>:</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            offset = -offset</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            <span class="keywordflow">return</span> timezone(timedelta(minutes=offset))</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keywordflow">except</span> ValueError:</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            <span class="keywordflow">raise</span> error()</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keywordflow">return</span> <span class="keywordtype">None</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+</div>
+<div class="foldopen" id="foldopen00105" data-start="" data-end="">
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a9a903e42258a3c16672ecd11c2c3d57f">  105</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a9a903e42258a3c16672ecd11c2c3d57f">parse_date</a>(value: Union[date, StrBytesIntFloat]) -&gt; date:</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="stringliteral">    Parse a date/int/float/string and return a datetime.date.</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="stringliteral">    Raise ValueError if the input is well formatted but not a valid date.</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="stringliteral">    Raise ValueError if the input isn&#39;t well formatted.</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keywordflow">if</span> isinstance(value, date):</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        <span class="keywordflow">if</span> isinstance(value, datetime):</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>            <span class="keywordflow">return</span> value.date()</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keywordflow">else</span>:</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>            <span class="keywordflow">return</span> value</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    number = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a872cb47762a0dedff55be357ba7179f8">get_numeric</a>(value, <span class="stringliteral">&#39;date&#39;</span>)</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keywordflow">if</span> number <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a78b869eb145d1911b57de4cc60e0e339">from_unix_seconds</a>(number).date()</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keywordflow">if</span> isinstance(value, bytes):</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        value = value.decode()</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    match = date_re.match(value)  <span class="comment"># type: ignore</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keywordflow">if</span> match <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_date_error.html">errors.DateError</a>()</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    kw = {k: int(v) <span class="keywordflow">for</span> k, v <span class="keywordflow">in</span> match.groupdict().items()}</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <span class="keywordflow">return</span> date(**kw)</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordflow">except</span> ValueError:</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_date_error.html">errors.DateError</a>()</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+</div>
+<div class="foldopen" id="foldopen00137" data-start="" data-end="">
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a8769829fc434727e7241b70a512be004">  137</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a8769829fc434727e7241b70a512be004">parse_time</a>(value: Union[time, StrBytesIntFloat]) -&gt; time:</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="stringliteral">    Parse a time/string and return a datetime.time.</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="stringliteral">    Raise ValueError if the input is well formatted but not a valid time.</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span><span class="stringliteral">    Raise ValueError if the input isn&#39;t well formatted, in particular if it contains an offset.</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keywordflow">if</span> isinstance(value, time):</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="keywordflow">return</span> value</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    number = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a872cb47762a0dedff55be357ba7179f8">get_numeric</a>(value, <span class="stringliteral">&#39;time&#39;</span>)</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">if</span> number <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keywordflow">if</span> number &gt;= 86400:</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>            <span class="comment"># doesn&#39;t make sense since the time time loop back around to 0</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>            <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_time_error.html">errors.TimeError</a>()</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        <span class="keywordflow">return</span> (datetime.min + timedelta(seconds=number)).time()</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keywordflow">if</span> isinstance(value, bytes):</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        value = value.decode()</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    match = time_re.match(value)  <span class="comment"># type: ignore</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="keywordflow">if</span> match <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_time_error.html">errors.TimeError</a>()</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    kw = match.groupdict()</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="keywordflow">if</span> kw[<span class="stringliteral">&#39;microsecond&#39;</span>]:</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        kw[<span class="stringliteral">&#39;microsecond&#39;</span>] = kw[<span class="stringliteral">&#39;microsecond&#39;</span>].ljust(6, <span class="stringliteral">&#39;0&#39;</span>)</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    tzinfo = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a6f3b1ab3d2f561f8c78de64b8f18da8e">_parse_timezone</a>(kw.pop(<span class="stringliteral">&#39;tzinfo&#39;</span>), <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_time_error.html">errors.TimeError</a>)</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    kw_: Dict[str, Union[<span class="keywordtype">None</span>, int, timezone]] = {k: int(v) <span class="keywordflow">for</span> k, v <span class="keywordflow">in</span> kw.items() <span class="keywordflow">if</span> v <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>}</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    kw_[<span class="stringliteral">&#39;tzinfo&#39;</span>] = tzinfo</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        <span class="keywordflow">return</span> time(**kw_)  <span class="comment"># type: ignore</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="keywordflow">except</span> ValueError:</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_time_error.html">errors.TimeError</a>()</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+</div>
+<div class="foldopen" id="foldopen00175" data-start="" data-end="">
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#acb94d9c78a16fb21828aba1c1ca1ffed">  175</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#acb94d9c78a16fb21828aba1c1ca1ffed">parse_datetime</a>(value: Union[datetime, StrBytesIntFloat]) -&gt; datetime:</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="stringliteral">    Parse a datetime/int/float/string and return a datetime.datetime.</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span><span class="stringliteral">    This function supports time zone offsets. When the input contains one,</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span><span class="stringliteral">    the output uses a timezone with a fixed offset from UTC.</span></div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span><span class="stringliteral">    Raise ValueError if the input is well formatted but not a valid datetime.</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span><span class="stringliteral">    Raise ValueError if the input isn&#39;t well formatted.</span></div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    <span class="keywordflow">if</span> isinstance(value, datetime):</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        <span class="keywordflow">return</span> value</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    number = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a872cb47762a0dedff55be357ba7179f8">get_numeric</a>(value, <span class="stringliteral">&#39;datetime&#39;</span>)</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="keywordflow">if</span> number <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a78b869eb145d1911b57de4cc60e0e339">from_unix_seconds</a>(number)</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="keywordflow">if</span> isinstance(value, bytes):</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        value = value.decode()</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    match = datetime_re.match(value)  <span class="comment"># type: ignore</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <span class="keywordflow">if</span> match <span class="keywordflow">is</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_date_time_error.html">errors.DateTimeError</a>()</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    kw = match.groupdict()</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <span class="keywordflow">if</span> kw[<span class="stringliteral">&#39;microsecond&#39;</span>]:</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        kw[<span class="stringliteral">&#39;microsecond&#39;</span>] = kw[<span class="stringliteral">&#39;microsecond&#39;</span>].ljust(6, <span class="stringliteral">&#39;0&#39;</span>)</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    tzinfo = <a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#a6f3b1ab3d2f561f8c78de64b8f18da8e">_parse_timezone</a>(kw.pop(<span class="stringliteral">&#39;tzinfo&#39;</span>), <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_date_time_error.html">errors.DateTimeError</a>)</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    kw_: Dict[str, Union[<span class="keywordtype">None</span>, int, timezone]] = {k: int(v) <span class="keywordflow">for</span> k, v <span class="keywordflow">in</span> kw.items() <span class="keywordflow">if</span> v <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>}</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    kw_[<span class="stringliteral">&#39;tzinfo&#39;</span>] = tzinfo</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <span class="keywordflow">return</span> datetime(**kw_)  <span class="comment"># type: ignore</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <span class="keywordflow">except</span> ValueError:</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_date_time_error.html">errors.DateTimeError</a>()</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+</div>
+<div class="foldopen" id="foldopen00213" data-start="" data-end="">
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="namespacepydantic_1_1v1_1_1datetime__parse.html#ac2f0d088f884284319f41165126d2d99">  213</a></span><span class="keyword">def </span><a class="code hl_function" href="namespacepydantic_1_1v1_1_1datetime__parse.html#ac2f0d088f884284319f41165126d2d99">parse_duration</a>(value: StrBytesIntFloat) -&gt; timedelta:</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="stringliteral">    Parse a duration int/float/string and return a datetime.timedelta.</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="stringliteral">    The preferred format for durations in Django is &#39;%d %H:%M:%S.%f&#39;.</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><span class="stringliteral"></span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="stringliteral">    Also supports ISO 8601 representation.</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    <span class="keywordflow">if</span> isinstance(value, timedelta):</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <span class="keywordflow">return</span> value</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="keywordflow">if</span> isinstance(value, (int, float)):</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        <span class="comment"># below code requires a string</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        value = f<span class="stringliteral">&#39;{value:f}&#39;</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    <span class="keywordflow">elif</span> isinstance(value, bytes):</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        value = value.decode()</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        match = standard_duration_re.match(value) <span class="keywordflow">or</span> iso8601_duration_re.match(value)</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keywordflow">except</span> TypeError:</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">raise</span> TypeError(<span class="stringliteral">&#39;invalid type; expected timedelta, string, bytes, int or float&#39;</span>)</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <span class="keywordflow">if</span> <span class="keywordflow">not</span> match:</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keywordflow">raise</span> <a class="code hl_class" href="classpydantic_1_1v1_1_1errors_1_1_duration_error.html">errors.DurationError</a>()</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    kw = match.groupdict()</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    sign = -1 <span class="keywordflow">if</span> kw.pop(<span class="stringliteral">&#39;sign&#39;</span>, <span class="stringliteral">&#39;+&#39;</span>) == <span class="stringliteral">&#39;-&#39;</span> <span class="keywordflow">else</span> 1</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="keywordflow">if</span> kw.get(<span class="stringliteral">&#39;microseconds&#39;</span>):</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        kw[<span class="stringliteral">&#39;microseconds&#39;</span>] = kw[<span class="stringliteral">&#39;microseconds&#39;</span>].ljust(6, <span class="stringliteral">&#39;0&#39;</span>)</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <span class="keywordflow">if</span> kw.get(<span class="stringliteral">&#39;seconds&#39;</span>) <span class="keywordflow">and</span> kw.get(<span class="stringliteral">&#39;microseconds&#39;</span>) <span class="keywordflow">and</span> kw[<span class="stringliteral">&#39;seconds&#39;</span>].startswith(<span class="stringliteral">&#39;-&#39;</span>):</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        kw[<span class="stringliteral">&#39;microseconds&#39;</span>] = <span class="stringliteral">&#39;-&#39;</span> + kw[<span class="stringliteral">&#39;microseconds&#39;</span>]</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    kw_ = {k: float(v) <span class="keywordflow">for</span> k, v <span class="keywordflow">in</span> kw.items() <span class="keywordflow">if</span> v <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>}</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="keywordflow">return</span> sign * timedelta(**kw_)</div>
+</div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1errors_1_1_date_error_html"><div class="ttname"><a href="classpydantic_1_1v1_1_1errors_1_1_date_error.html">pydantic.v1.errors.DateError</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2errors_8py_source.html#l00470">errors.py:470</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1errors_1_1_date_time_error_html"><div class="ttname"><a href="classpydantic_1_1v1_1_1errors_1_1_date_time_error.html">pydantic.v1.errors.DateTimeError</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2errors_8py_source.html#l00466">errors.py:466</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1errors_1_1_duration_error_html"><div class="ttname"><a href="classpydantic_1_1v1_1_1errors_1_1_duration_error.html">pydantic.v1.errors.DurationError</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2errors_8py_source.html#l00488">errors.py:488</a></div></div>
+<div class="ttc" id="aclasspydantic_1_1v1_1_1errors_1_1_time_error_html"><div class="ttname"><a href="classpydantic_1_1v1_1_1errors_1_1_time_error.html">pydantic.v1.errors.TimeError</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2errors_8py_source.html#l00484">errors.py:484</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1datetime__parse_html_a6f3b1ab3d2f561f8c78de64b8f18da8e"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1datetime__parse.html#a6f3b1ab3d2f561f8c78de64b8f18da8e">pydantic.v1.datetime_parse._parse_timezone</a></div><div class="ttdeci">Union[None, int, timezone] _parse_timezone(Optional[str] value, Type[Exception] error)</div><div class="ttdef"><b>Definition</b> <a href="#l00089">datetime_parse.py:89</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1datetime__parse_html_a78b869eb145d1911b57de4cc60e0e339"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1datetime__parse.html#a78b869eb145d1911b57de4cc60e0e339">pydantic.v1.datetime_parse.from_unix_seconds</a></div><div class="ttdeci">datetime from_unix_seconds(Union[int, float] seconds)</div><div class="ttdef"><b>Definition</b> <a href="#l00077">datetime_parse.py:77</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1datetime__parse_html_a872cb47762a0dedff55be357ba7179f8"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1datetime__parse.html#a872cb47762a0dedff55be357ba7179f8">pydantic.v1.datetime_parse.get_numeric</a></div><div class="ttdeci">Union[None, int, float] get_numeric(StrBytesIntFloat value, str native_expected_type)</div><div class="ttdef"><b>Definition</b> <a href="#l00066">datetime_parse.py:66</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1datetime__parse_html_a8769829fc434727e7241b70a512be004"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1datetime__parse.html#a8769829fc434727e7241b70a512be004">pydantic.v1.datetime_parse.parse_time</a></div><div class="ttdeci">time parse_time(Union[time, StrBytesIntFloat] value)</div><div class="ttdef"><b>Definition</b> <a href="#l00137">datetime_parse.py:137</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1datetime__parse_html_a9a903e42258a3c16672ecd11c2c3d57f"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1datetime__parse.html#a9a903e42258a3c16672ecd11c2c3d57f">pydantic.v1.datetime_parse.parse_date</a></div><div class="ttdeci">date parse_date(Union[date, StrBytesIntFloat] value)</div><div class="ttdef"><b>Definition</b> <a href="#l00105">datetime_parse.py:105</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1datetime__parse_html_ac2f0d088f884284319f41165126d2d99"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1datetime__parse.html#ac2f0d088f884284319f41165126d2d99">pydantic.v1.datetime_parse.parse_duration</a></div><div class="ttdeci">timedelta parse_duration(StrBytesIntFloat value)</div><div class="ttdef"><b>Definition</b> <a href="#l00213">datetime_parse.py:213</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_1_1datetime__parse_html_acb94d9c78a16fb21828aba1c1ca1ffed"><div class="ttname"><a href="namespacepydantic_1_1v1_1_1datetime__parse.html#acb94d9c78a16fb21828aba1c1ca1ffed">pydantic.v1.datetime_parse.parse_datetime</a></div><div class="ttdeci">datetime parse_datetime(Union[datetime, StrBytesIntFloat] value)</div><div class="ttdef"><b>Definition</b> <a href="#l00175">datetime_parse.py:175</a></div></div>
+<div class="ttc" id="anamespacepydantic_1_1v1_html"><div class="ttname"><a href="namespacepydantic_1_1v1.html">pydantic.v1</a></div><div class="ttdef"><b>Definition</b> <a href="micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2v1_2____init_____8py_source.html#l00001">__init__.py:1</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_15acc5d1b28a48a029037e469feb4950.html">micro_gestion_objetos</a></li><li class="navelem"><a href="dir_50baae965b96496ef3a3ac9750add326.html">venv</a></li><li class="navelem"><a href="dir_351b9a6ed8bb2f5a54cbdd309ef5b86e.html">Lib</a></li><li class="navelem"><a href="dir_952f49c99699fa5150bb18b2f1d6adb9.html">site-packages</a></li><li class="navelem"><a href="dir_cff67c8c4ede01a5ffd78f35945c5bda.html">pydantic</a></li><li class="navelem"><a href="dir_5474fc2212d0f7e6962f0a0020c16fb6.html">v1</a></li><li class="navelem"><a href="v1_2datetime__parse_8py.html">datetime_parse.py</a></li>
+    <li class="footer">Generado el <span class="timestamp"></span> para Objeto Inteligente - Sistema Completo por <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.15.0 </li>
+  </ul>
+</div>
+</body>
+</html>

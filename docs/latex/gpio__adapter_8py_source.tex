@@ -1,0 +1,90 @@
+\doxysection{gpio\+\_\+adapter.\+py}
+\hypertarget{gpio__adapter_8py_source}{}\label{gpio__adapter_8py_source}\index{microservicio\_data\_stream/hardware/gpio\_adapter.py@{microservicio\_data\_stream/hardware/gpio\_adapter.py}}
+\mbox{\hyperlink{gpio__adapter_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00001}\mbox{\hyperlink{namespacehardware_1_1gpio__adapter}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00002}00002\ \textcolor{stringliteral}{Adaptador\ de\ GPIO\ para\ soportar\ Raspberry\ Pi\ (desarrollo)\ y\ ESP32\ (producción)}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00003}00003\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00004}00004\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00006}00006\ \textcolor{comment}{\#\ Detectar\ plataforma}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00007}00007\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00008}00008\ \ \ \ \ \textcolor{keyword}{import}\ machine\ \ \textcolor{comment}{\#\ Disponible\ en\ ESP32\ con\ MicroPython}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00009}\mbox{\hyperlink{namespacehardware_1_1gpio__adapter_aac649b5d4d0f05c2eebf9cd6871dde0e}{00009}}\ \ \ \ \ PLATFORM\ =\ \textcolor{stringliteral}{'ESP32'}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00010}00010\ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00011}00011\ \ \ \ \ PLATFORM\ =\ \textcolor{stringliteral}{'RASPBERRY'}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00013}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter}{00013}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter}{GPIOAdapter}}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00014}00014\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Abstracción\ de\ GPIO\ compatible\ con\ Raspberry\ Pi\ y\ ESP32"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00015}00015\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00016}00016\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self):}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00017}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a2c47ff6c54a5171af6c8ceb885cfd6fc}{00017}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a2c47ff6c54a5171af6c8ceb885cfd6fc}{platform}}\ =\ PLATFORM}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a2c47ff6c54a5171af6c8ceb885cfd6fc}{platform}}\ ==\ \textcolor{stringliteral}{'ESP32'}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ machine}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00021}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ae7976d9f107e2b3b524a30ceb29e846f}{00021}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ae7976d9f107e2b3b524a30ceb29e846f}{Pin}}\ =\ machine.Pin}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00022}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_aee8907948ce61f38552f703e9313d63e}{00022}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_aee8907948ce61f38552f703e9313d63e}{ADC}}\ =\ machine.ADC}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Raspberry\ Pi\ con\ Python\ regular}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ grovepi}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00027}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{00027}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}\ =\ grovepi}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}Warning:\ grovepi\ no\ disponible"{}})}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00031}00031\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00032}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_aae434b36c694233be2d7f2d0de6febb0}{00032}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_aae434b36c694233be2d7f2d0de6febb0}{digital\_write}}(self,\ pin,\ value):}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Escribir\ valor\ digital\ (LED)"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a2c47ff6c54a5171af6c8ceb885cfd6fc}{platform}}\ ==\ \textcolor{stringliteral}{'ESP32'}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ p\ =\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ae7976d9f107e2b3b524a30ceb29e846f}{Pin}}(pin,\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ae7976d9f107e2b3b524a30ceb29e846f}{Pin}}.OUT)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \ \ \ \ p.value(value)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}.pinMode(pin,\ \textcolor{stringliteral}{"{}OUTPUT"{}})}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}.digitalWrite(pin,\ value)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00041}00041\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00042}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_abdc75c6faa76436b9f489561cd04680a}{00042}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_abdc75c6faa76436b9f489561cd04680a}{digital\_read}}(self,\ pin):}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Leer\ valor\ digital"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a2c47ff6c54a5171af6c8ceb885cfd6fc}{platform}}\ ==\ \textcolor{stringliteral}{'ESP32'}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ p\ =\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ae7976d9f107e2b3b524a30ceb29e846f}{Pin}}(pin,\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ae7976d9f107e2b3b524a30ceb29e846f}{Pin}}.IN)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ p.value()}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}.pinMode(pin,\ \textcolor{stringliteral}{"{}INPUT"{}})}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}.digitalRead(pin)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00052}00052\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00053}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ab8be1d49db32e51961679d39a2429170}{00053}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ab8be1d49db32e51961679d39a2429170}{analog\_read}}(self,\ pin):}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Leer\ valor\ analógico\ (0-\/4095\ en\ ESP32,\ 0-\/1023\ en\ Raspberry)"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a2c47ff6c54a5171af6c8ceb885cfd6fc}{platform}}\ ==\ \textcolor{stringliteral}{'ESP32'}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ adc\ =\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_aee8907948ce61f38552f703e9313d63e}{ADC}}(self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ae7976d9f107e2b3b524a30ceb29e846f}{Pin}}(pin))}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ adc.atten(self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_aee8907948ce61f38552f703e9313d63e}{ADC}}.ATTN\_11DB)\ \ \textcolor{comment}{\#\ Rango\ completo\ 0-\/3.3V}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ adc.read()}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}.analogRead(pin)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00063}00063\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00064}\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ac38ff6bb5462699d070b92bfe6e0b4d5}{00064}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ac38ff6bb5462699d070b92bfe6e0b4d5}{read\_temperature}}(self,\ pin,\ sensor\_type='1.2'):}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Leer\ temperatura\ (Grove\ Temperature\ Sensor)"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a2c47ff6c54a5171af6c8ceb885cfd6fc}{platform}}\ ==\ \textcolor{stringliteral}{'ESP32'}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ ESP32:\ calcular\ temperatura\ desde\ ADC}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Fórmula\ para\ Grove\ Temperature\ Sensor\ v1.2}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ adc\_value\ =\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_ab8be1d49db32e51961679d39a2429170}{analog\_read}}(pin)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Convertir\ ADC\ a\ temperatura\ (ajusta\ según\ tu\ sensor)}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ resistance\ =\ (4095.0\ /\ adc\_value)\ -\/\ 1.0}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ resistance\ =\ 100000.0\ *\ resistance}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ temperature\ =\ 1.0\ /\ (0.001129148\ +\ (0.000234125\ *\ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (resistance\ /\ 100000.0))\ +\ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (0.0000000876741\ *\ (resistance\ /\ 100000.0)\ **\ 3))}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ temperature\ =\ temperature\ -\/\ 273.15\ \ \textcolor{comment}{\#\ Kelvin\ a\ Celsius}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ round(temperature,\ 2)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}:}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter_a3df4e0e70c846f451cff6bdefc007051}{grovepi}}.temp(pin,\ sensor\_type)}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0.0}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00083}00083\ \textcolor{comment}{\#\ Instancia\ global}}
+\DoxyCodeLine{\Hypertarget{gpio__adapter_8py_source_l00084}\mbox{\hyperlink{namespacehardware_1_1gpio__adapter_ad2a22d7d7fc9049a6e94828bad4400c0}{00084}}\ gpio\ =\ \mbox{\hyperlink{classhardware_1_1gpio__adapter_1_1_g_p_i_o_adapter}{GPIOAdapter}}()}
+
+\end{DoxyCode}

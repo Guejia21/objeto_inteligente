@@ -1,0 +1,59 @@
+\doxysection{\+\_\+serializers.\+py}
+\hypertarget{__serializers_8py_source}{}\label{__serializers_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_serializers.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/\_internal/\_serializers.py}}
+\mbox{\hyperlink{__serializers_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1__internal_1_1__serializers}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00003}00003\ \textcolor{keyword}{import}\ collections}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00004}00004\ \textcolor{keyword}{import}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00005}00005\ \textcolor{keyword}{import}\ typing}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00006}00006\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00008}00008\ \textcolor{keyword}{from}\ pydantic\_core\ \textcolor{keyword}{import}\ PydanticOmit,\ core\_schema}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00010}00010\ SEQUENCE\_ORIGIN\_MAP:\ dict[Any,\ Any]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00011}00011\ \ \ \ \ typing.Deque:\ collections.deque,\ \ \textcolor{comment}{\#\ noqa:\ UP006}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00012}00012\ \ \ \ \ collections.deque:\ collections.deque,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00013}00013\ \ \ \ \ list:\ list,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00014}00014\ \ \ \ \ typing.List:\ list,\ \ \textcolor{comment}{\#\ noqa:\ UP006}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00015}00015\ \ \ \ \ tuple:\ tuple,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00016}00016\ \ \ \ \ typing.Tuple:\ tuple,\ \ \textcolor{comment}{\#\ noqa:\ UP006}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00017}00017\ \ \ \ \ set:\ set,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00018}00018\ \ \ \ \ typing.AbstractSet:\ set,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00019}00019\ \ \ \ \ typing.Set:\ set,\ \ \textcolor{comment}{\#\ noqa:\ UP006}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00020}00020\ \ \ \ \ frozenset:\ frozenset,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00021}00021\ \ \ \ \ typing.FrozenSet:\ frozenset,\ \ \textcolor{comment}{\#\ noqa:\ UP006}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00022}00022\ \ \ \ \ typing.Sequence:\ list,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00023}00023\ \ \ \ \ typing.MutableSequence:\ list,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00024}00024\ \ \ \ \ typing.MutableSet:\ set,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00025}00025\ \ \ \ \ \textcolor{comment}{\#\ this\ doesn't\ handle\ subclasses\ of\ these}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00026}00026\ \ \ \ \ \textcolor{comment}{\#\ parametrized\ typing.Set\ creates\ one\ of\ these}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00027}00027\ \ \ \ \ collections.abc.MutableSet:\ set,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00028}00028\ \ \ \ \ collections.abc.Set:\ frozenset,}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00029}00029\ \}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00031}00031\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00032}00032\ \textcolor{keyword}{def\ }serialize\_sequence\_via\_list(}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00033}00033\ \ \ \ \ v:\ Any,\ handler:\ \mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_serializer_function_wrap_handler}{core\_schema.SerializerFunctionWrapHandler}},\ info:\ \mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_serialization_info}{core\_schema.SerializationInfo}}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00034}00034\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00035}00035\ \ \ \ \ items:\ list[Any]\ =\ []}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00037}00037\ \ \ \ \ mapped\_origin\ =\ SEQUENCE\_ORIGIN\_MAP.get(type(v),\ \textcolor{keywordtype}{None})}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00038}00038\ \ \ \ \ \textcolor{keywordflow}{if}\ mapped\_origin\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ we\ shouldn't\ hit\ this\ branch,\ should\ probably\ add\ a\ serialization\ error\ or\ something}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00042}00042\ \ \ \ \ \textcolor{keywordflow}{for}\ index,\ item\ \textcolor{keywordflow}{in}\ enumerate(v):}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ v\ =\ handler(item,\ index)}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ PydanticOmit:\ \ \textcolor{comment}{\#\ noqa:\ PERF203}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ items.append(v)}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00049}00049\ }
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00050}00050\ \ \ \ \ \textcolor{keywordflow}{if}\ info.mode\_is\_json():}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ items}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__serializers_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ mapped\_origin(items)}
+
+\end{DoxyCode}

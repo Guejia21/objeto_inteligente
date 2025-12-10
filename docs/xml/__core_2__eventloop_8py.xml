@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="__core_2__eventloop_8py" kind="file" language="Python">
+    <compoundname>_eventloop.py</compoundname>
+    <innernamespace refid="namespaceanyio">anyio</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1__core">anyio::_core</innernamespace>
+    <innernamespace refid="namespaceanyio_1_1__core_1_1__eventloop">anyio::_core::_eventloop</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespaceanyio_1_1__core_1_1__eventloop" refkind="compound"><highlight class="keyword">from</highlight><highlight class="normal"><sp/>__future__<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>annotations</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>math</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>sys</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>threading</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacecollections_1_1abc" kindref="compound">collections.abc</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Awaitable,<sp/>Callable,<sp/>Generator</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>contextlib<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>contextmanager</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>importlib<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>import_module</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TYPE_CHECKING,<sp/>Any,<sp/>TypeVar</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>sniffio</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>sys.version_info<sp/>&gt;=<sp/>(3,<sp/>11):</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TypeVarTuple,<sp/>Unpack</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing_extensions<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TypeVarTuple,<sp/>Unpack</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>TYPE_CHECKING:</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>..abc<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>AsyncBackend</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="comment">#<sp/>This<sp/>must<sp/>be<sp/>updated<sp/>when<sp/>new<sp/>backends<sp/>are<sp/>introduced</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22" refid="namespaceanyio_1_1__core_1_1__eventloop_1a20ea48a316fb91e7397695354c8b2e97" refkind="member"><highlight class="normal">BACKENDS<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;asyncio&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;trio&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24" refid="namespaceanyio_1_1__core_1_1__eventloop_1a99d162a6cc903b3272faf4e21d8cf093" refkind="member"><highlight class="normal">T_Retval<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&quot;T_Retval&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="25" refid="namespaceanyio_1_1__core_1_1__eventloop_1a236f1fe038f4cad08b462853a9d5e8af" refkind="member"><highlight class="normal">PosArgsT<sp/>=<sp/><ref refid="classtyping__extensions_1_1_type_var_tuple" kindref="compound">TypeVarTuple</ref>(</highlight><highlight class="stringliteral">&quot;PosArgsT&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27" refid="namespaceanyio_1_1__core_1_1__eventloop_1aa15e706c87fb0aae6971cd59bfbf848a" refkind="member"><highlight class="normal">threadlocals<sp/>=<sp/>threading.local()</highlight></codeline>
+<codeline lineno="28" refid="namespaceanyio_1_1__core_1_1__eventloop_1ae6d06a3d50a1edc660de1cce0061d1c1" refkind="member"><highlight class="normal">loaded_backends:<sp/>dict[str,<sp/>type[AsyncBackend]]<sp/>=<sp/>{}</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31" refid="namespaceanyio_1_1__core_1_1__eventloop_1af33d203125b5cee86dec46596faceefa" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1af33d203125b5cee86dec46596faceefa" kindref="member">run</ref>(</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/>func:<sp/>Callable[[Unpack[PosArgsT]],<sp/>Awaitable[T_Retval]],</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/>*args:<sp/>Unpack[PosArgsT],</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>backend:<sp/>str<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;asyncio&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>backend_options:<sp/>dict[str,<sp/>Any]<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="36"><highlight class="normal">)<sp/>-&gt;<sp/>T_Retval:</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="38"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Run<sp/>the<sp/>given<sp/>coroutine<sp/>function<sp/>in<sp/>an<sp/>asynchronous<sp/>event<sp/>loop.</highlight></codeline>
+<codeline lineno="39"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="40"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>The<sp/>current<sp/>thread<sp/>must<sp/>not<sp/>be<sp/>already<sp/>running<sp/>an<sp/>event<sp/>loop.</highlight></codeline>
+<codeline lineno="41"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="42"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>func:<sp/>a<sp/>coroutine<sp/>function</highlight></codeline>
+<codeline lineno="43"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>args:<sp/>positional<sp/>arguments<sp/>to<sp/>``func``</highlight></codeline>
+<codeline lineno="44"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>backend:<sp/>name<sp/>of<sp/>the<sp/>asynchronous<sp/>event<sp/>loop<sp/>implementation<sp/>–<sp/>currently</highlight></codeline>
+<codeline lineno="45"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>either<sp/>``asyncio``<sp/>or<sp/>``trio``</highlight></codeline>
+<codeline lineno="46"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>backend_options:<sp/>keyword<sp/>arguments<sp/>to<sp/>call<sp/>the<sp/>backend<sp/>``run()``</highlight></codeline>
+<codeline lineno="47"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>implementation<sp/>with<sp/>(documented<sp/>:ref:`here<sp/>&lt;backend<sp/>options&gt;`)</highlight></codeline>
+<codeline lineno="48"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:return:<sp/>the<sp/>return<sp/>value<sp/>of<sp/>the<sp/>coroutine<sp/>function</highlight></codeline>
+<codeline lineno="49"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:raises<sp/>RuntimeError:<sp/>if<sp/>an<sp/>asynchronous<sp/>event<sp/>loop<sp/>is<sp/>already<sp/>running<sp/>in<sp/>this</highlight></codeline>
+<codeline lineno="50"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>thread</highlight></codeline>
+<codeline lineno="51"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:raises<sp/>LookupError:<sp/>if<sp/>the<sp/>named<sp/>backend<sp/>is<sp/>not<sp/>found</highlight></codeline>
+<codeline lineno="52"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="53"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>asynclib_name<sp/>=<sp/>sniffio.current_async_library()</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/><ref refid="classsniffio_1_1__impl_1_1_async_library_not_found_error" kindref="compound">sniffio.AsyncLibraryNotFoundError</ref>:</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">pass</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>RuntimeError(f</highlight><highlight class="stringliteral">&quot;Already<sp/>running<sp/>{asynclib_name}<sp/>in<sp/>this<sp/>thread&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>async_backend<sp/>=<sp/><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1ad56355e10d7c701f688579cb67d570b1" kindref="member">get_async_backend</ref>(backend)</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>ImportError<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>exc:</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>LookupError(f</highlight><highlight class="stringliteral">&quot;No<sp/>such<sp/>backend:<sp/>{backend}&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>exc</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/>token<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>sniffio.current_async_library_cvar.get(</highlight><highlight class="keywordtype">None</highlight><highlight class="normal">)<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>Since<sp/>we&apos;re<sp/>in<sp/>control<sp/>of<sp/>the<sp/>event<sp/>loop,<sp/>we<sp/>can<sp/>cache<sp/>the<sp/>name<sp/>of<sp/>the<sp/>async</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>library</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>token<sp/>=<sp/>sniffio.current_async_library_cvar.set(backend)</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>backend_options<sp/>=<sp/>backend_options<sp/></highlight><highlight class="keywordflow">or</highlight><highlight class="normal"><sp/>{}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>async_backend.run(func,<sp/>args,<sp/>{},<sp/>backend_options)</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">finally</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>token:</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sniffio.current_async_library_cvar.reset(token)</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80" refid="namespaceanyio_1_1__core_1_1__eventloop_1a8ed29c36d17241df8ae1e237e347753c" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1a8ed29c36d17241df8ae1e237e347753c" kindref="member">sleep</ref>(delay:<sp/>float)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="82"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Pause<sp/>the<sp/>current<sp/>task<sp/>for<sp/>the<sp/>specified<sp/>duration.</highlight></codeline>
+<codeline lineno="83"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="84"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>delay:<sp/>the<sp/>duration,<sp/>in<sp/>seconds</highlight></codeline>
+<codeline lineno="85"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="86"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>await<sp/><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1ad56355e10d7c701f688579cb67d570b1" kindref="member">get_async_backend</ref>().<ref refid="namespaceanyio_1_1__core_1_1__eventloop_1a8ed29c36d17241df8ae1e237e347753c" kindref="member">sleep</ref>(delay)</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90" refid="namespaceanyio_1_1__core_1_1__eventloop_1ac08ca4982191898405dcd79dbafb6eca" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1ac08ca4982191898405dcd79dbafb6eca" kindref="member">sleep_forever</ref>()<sp/>-&gt;<sp/>None:</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="92"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Pause<sp/>the<sp/>current<sp/>task<sp/>until<sp/>it&apos;s<sp/>cancelled.</highlight></codeline>
+<codeline lineno="93"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="94"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>This<sp/>is<sp/>a<sp/>shortcut<sp/>for<sp/>``sleep(math.inf)``.</highlight></codeline>
+<codeline lineno="95"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="96"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>versionadded::<sp/>3.1</highlight></codeline>
+<codeline lineno="97"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="98"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/>await<sp/><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1a8ed29c36d17241df8ae1e237e347753c" kindref="member">sleep</ref>(math.inf)</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight></codeline>
+<codeline lineno="102" refid="namespaceanyio_1_1__core_1_1__eventloop_1aba740ed5c34c3993ddf16f3b31e9fbc1" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1aba740ed5c34c3993ddf16f3b31e9fbc1" kindref="member">sleep_until</ref>(deadline:<sp/>float)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="104"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Pause<sp/>the<sp/>current<sp/>task<sp/>until<sp/>the<sp/>given<sp/>time.</highlight></codeline>
+<codeline lineno="105"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="106"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:param<sp/>deadline:<sp/>the<sp/>absolute<sp/>time<sp/>to<sp/>wake<sp/>up<sp/>at<sp/>(according<sp/>to<sp/>the<sp/>internal</highlight></codeline>
+<codeline lineno="107"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>monotonic<sp/>clock<sp/>of<sp/>the<sp/>event<sp/>loop)</highlight></codeline>
+<codeline lineno="108"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="109"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>versionadded::<sp/>3.1</highlight></codeline>
+<codeline lineno="110"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="111"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/>now<sp/>=<sp/><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1abe0618a701fed77271c5b04f304bb63f" kindref="member">current_time</ref>()</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/>await<sp/><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1a8ed29c36d17241df8ae1e237e347753c" kindref="member">sleep</ref>(max(deadline<sp/>-<sp/>now,<sp/>0))</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"></highlight></codeline>
+<codeline lineno="116" refid="namespaceanyio_1_1__core_1_1__eventloop_1abe0618a701fed77271c5b04f304bb63f" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1abe0618a701fed77271c5b04f304bb63f" kindref="member">current_time</ref>()<sp/>-&gt;<sp/>float:</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="118"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>Return<sp/>the<sp/>current<sp/>value<sp/>of<sp/>the<sp/>event<sp/>loop&apos;s<sp/>internal<sp/>clock.</highlight></codeline>
+<codeline lineno="119"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="120"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:return:<sp/>the<sp/>clock<sp/>value<sp/>(seconds)</highlight></codeline>
+<codeline lineno="121"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="122"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1ad56355e10d7c701f688579cb67d570b1" kindref="member">get_async_backend</ref>().<ref refid="namespaceanyio_1_1__core_1_1__eventloop_1abe0618a701fed77271c5b04f304bb63f" kindref="member">current_time</ref>()</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126" refid="namespaceanyio_1_1__core_1_1__eventloop_1a44cad8aef85374e970304fcbac2e0f67" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1a44cad8aef85374e970304fcbac2e0f67" kindref="member">get_all_backends</ref>()<sp/>-&gt;<sp/>tuple[str,<sp/>...]:</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Return<sp/>a<sp/>tuple<sp/>of<sp/>the<sp/>names<sp/>of<sp/>all<sp/>built-in<sp/>backends.&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>BACKENDS</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"></highlight></codeline>
+<codeline lineno="130"><highlight class="normal"></highlight></codeline>
+<codeline lineno="131" refid="namespaceanyio_1_1__core_1_1__eventloop_1a47e380f55bcaeb9572779b1c28da8a40" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1a47e380f55bcaeb9572779b1c28da8a40" kindref="member">get_cancelled_exc_class</ref>()<sp/>-&gt;<sp/>type[BaseException]:</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Return<sp/>the<sp/>current<sp/>async<sp/>library&apos;s<sp/>cancellation<sp/>exception<sp/>class.&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1ad56355e10d7c701f688579cb67d570b1" kindref="member">get_async_backend</ref>().cancelled_exception_class()</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="normal"></highlight></codeline>
+<codeline lineno="136"><highlight class="normal"></highlight><highlight class="comment">#</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Private<sp/>API</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="138"><highlight class="normal"></highlight><highlight class="comment">#</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="139"><highlight class="normal"></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"></highlight><highlight class="preprocessor">@contextmanager</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="142" refid="namespaceanyio_1_1__core_1_1__eventloop_1a922e1e4bf61257ae443e22f498d1d4fe" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1a922e1e4bf61257ae443e22f498d1d4fe" kindref="member">claim_worker_thread</ref>(</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/>backend_class:<sp/>type[AsyncBackend],<sp/>token:<sp/>object</highlight></codeline>
+<codeline lineno="144"><highlight class="normal">)<sp/>-&gt;<sp/>Generator[Any,<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">]:</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>..lowlevel<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>EventLoopToken</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"></highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/>threadlocals.current_token<sp/>=<sp/>EventLoopToken(backend_class,<sp/>token)</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">yield</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">finally</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>del<sp/>threadlocals.current_token</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"></highlight></codeline>
+<codeline lineno="153"><highlight class="normal"></highlight></codeline>
+<codeline lineno="154" refid="namespaceanyio_1_1__core_1_1__eventloop_1ad56355e10d7c701f688579cb67d570b1" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceanyio_1_1__core_1_1__eventloop_1ad56355e10d7c701f688579cb67d570b1" kindref="member">get_async_backend</ref>(asynclib_name:<sp/>str<sp/>|<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"><sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">)<sp/>-&gt;<sp/>type[AsyncBackend]:</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>asynclib_name<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>asynclib_name<sp/>=<sp/>sniffio.current_async_library()</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"></highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>We<sp/>use<sp/>our<sp/>own<sp/>dict<sp/>instead<sp/>of<sp/>sys.modules<sp/>to<sp/>get<sp/>the<sp/>already<sp/>imported<sp/>back-end</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>class<sp/>because<sp/>the<sp/>appropriate<sp/>modules<sp/>in<sp/>sys.modules<sp/>could<sp/>potentially<sp/>be<sp/>only</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>partially<sp/>initialized</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>loaded_backends[asynclib_name]</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">except</highlight><highlight class="normal"><sp/>KeyError:</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>module<sp/>=<sp/>import_module(f</highlight><highlight class="stringliteral">&quot;anyio._backends._{asynclib_name}&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>loaded_backends[asynclib_name]<sp/>=<sp/>module.backend_class</highlight></codeline>
+<codeline lineno="166"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>module.backend_class</highlight></codeline>
+    </programlisting>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/anyio/_core/_eventloop.py"/>
+  </compounddef>
+</doxygen>

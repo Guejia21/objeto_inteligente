@@ -1,0 +1,141 @@
+\doxysection{api\+\_\+router.\+py}
+\hypertarget{api__router_8py_source}{}\label{api__router_8py_source}\index{gateway/app/api\_router/api\_router.py@{gateway/app/api\_router/api\_router.py}}
+\mbox{\hyperlink{api__router_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00001}\mbox{\hyperlink{namespaceapi__router}{00001}}\ \textcolor{keyword}{from}\ fastapi\ \textcolor{keyword}{import}\ Request,\ Response}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00002}00002\ \textcolor{keyword}{from}\ api\_router.exceptions\ \textcolor{keyword}{import}\ RouteNotFoundException,\ MethodNotAllowedException}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00003}00003\ \textcolor{keyword}{from}\ aiohttp\ \textcolor{keyword}{import}\ ClientSession,\ ClientTimeout}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00004}00004\ \textcolor{keyword}{from}\ config\ \textcolor{keyword}{import}\ config}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00005}00005\ \textcolor{keyword}{from}\ Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00006}00006\ \textcolor{keyword}{import}\ json\ \textcolor{keyword}{as}\ json\_module}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00008}\mbox{\hyperlink{classapi__router_1_1_a_p_i_router}{00008}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classapi__router_1_1_a_p_i_router}{APIRouter}}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00010}00010\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self):}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00011}00011\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00012}\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_ac379160c53444be6626b14105623209a}{00012}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_ac379160c53444be6626b14105623209a}{config}}\ =\ \{}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00013}00013\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}endpoints"{}}:\ \{}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00014}00014\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Microservicio\ de\ Gestión\ de\ Objetos}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}/objeto"{}}:\ \{}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00016}00016\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}methods"{}}:\ [\textcolor{stringliteral}{"{}GET"{}},\ \textcolor{stringliteral}{"{}POST"{}}],}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}backend"{}}:\ config.OBJECT\_SERVICE\_URL}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Microservicio\ de\ Data\ Streams}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}/Datastreams"{}}:\ \{}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00021}00021\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}methods"{}}:\ [\textcolor{stringliteral}{"{}GET"{}},\ \textcolor{stringliteral}{"{}POST"{}}],}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00022}00022\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}backend"{}}:\ config.DATASTREAMS\_SERVICE\_URL}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \},\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Microservicio\ de\ Automatización\ ECAs}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}/eca"{}}:\ \{}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}methods"{}}:\ [\textcolor{stringliteral}{"{}GET"{}},\ \textcolor{stringliteral}{"{}POST"{}},\ \textcolor{stringliteral}{"{}PUT"{}},\ \textcolor{stringliteral}{"{}PATCH"{}},\ \textcolor{stringliteral}{"{}DELETE"{}}],}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}backend"{}}:\ config.ECA\_SERVICE\_URL}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Microservicio\ de\ Personalización}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}/personalizacion"{}}:\ \{}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}methods"{}}:\ [\textcolor{stringliteral}{"{}GET"{}},\ \textcolor{stringliteral}{"{}POST"{}}],}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}backend"{}}:\ config.PERSONALIZACION\_SERVICE\_URL}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ \},}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00037}\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_a36e613a4f041c133eddbcc8b6994a177}{00037}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_a36e613a4f041c133eddbcc8b6994a177}{route}}(self,\ request:\ Request):\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ path\_parts\ =\ request.path\_params[\textcolor{stringliteral}{"{}path\_name"{}}].split(\textcolor{stringliteral}{"{}/"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ service\ =\ \textcolor{stringliteral}{"{}/"{}}\ +\ path\_parts[1]\ \textcolor{keywordflow}{if}\ len(path\_parts)\ >\ 1\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}"{}}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Routing\ request\ for\ service:\ \{service\}\ with\ method:\ \{request.method\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ service\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_ac379160c53444be6626b14105623209a}{config}}[\textcolor{stringliteral}{"{}endpoints"{}}]:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RouteNotFoundException(\textcolor{stringliteral}{"{}Route\ not\ found"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ methods\ =\ self.\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_ac379160c53444be6626b14105623209a}{config}}[\textcolor{stringliteral}{"{}endpoints"{}}][service][\textcolor{stringliteral}{"{}methods"{}}]}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ request.method\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ methods:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ MethodNotAllowedException(f\textcolor{stringliteral}{"{}\{request.method\}\ not\ allowed"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ headers\ =\ request.headers.mutablecopy()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ headers[\textcolor{stringliteral}{"{}gateway-\/jwt-\/token"{}}]\ =\ \textcolor{stringliteral}{"{}Some\ Security\ Header"{}}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ method\ =\ path\_parts[2:]\ \textcolor{keywordflow}{if}\ len(path\_parts)\ >\ 2\ \textcolor{keywordflow}{else}\ []}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ base\_url\ =\ self.\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_ac379160c53444be6626b14105623209a}{config}}[\textcolor{stringliteral}{"{}endpoints"{}}][service][\textcolor{stringliteral}{"{}backend"{}}]\ +\ service\ +\ \textcolor{stringliteral}{"{}/"{}}\ +\ \textcolor{stringliteral}{"{}/"{}}.join(method)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00054}00054\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Agregar\ query\ parameters\ si\ existen}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ request.query\_params:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \ \ \ \ query\_string\ =\ str(request.query\_params)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ base\_url\ =\ f\textcolor{stringliteral}{"{}\{base\_url\}?\{query\_string\}"{}}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Forwarding\ to:\ \{base\_url\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ timeout\ =\ ClientTimeout(total=30)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00063}00063\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ ClientSession(timeout=timeout)\ \textcolor{keyword}{as}\ session:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ request.method\ ==\ \textcolor{stringliteral}{"{}GET"{}}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Sending\ GET\ request"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ session.get(url=base\_url,\ headers=headers)\ \textcolor{keyword}{as}\ response:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ await\ response.read()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}GET\ response:\ \{response.status\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ modified\_headers\ =\ dict(response.headers)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ request.method\ ==\ \textcolor{stringliteral}{"{}POST"{}}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body\_bytes\ =\ await\ request.body()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Sending\ POST\ with\ \{len(body\_bytes)\}\ bytes"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ session.post(}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url=base\_url,\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data=body\_bytes,}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00080}00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ headers=headers}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{as}\ response:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ await\ response.read()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}POST\ response:\ \{response.status\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ modified\_headers\ =\ dict(response.headers)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ request.method\ ==\ \textcolor{stringliteral}{"{}PUT"{}}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body\_bytes\ =\ await\ request.body()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Sending\ PUT\ with\ \{len(body\_bytes)\}\ bytes"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ session.put(}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url=base\_url,\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data=body\_bytes,}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ headers=headers}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{as}\ response:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ await\ response.read()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}PUT\ response:\ \{response.status\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ modified\_headers\ =\ dict(response.headers)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ request.method\ ==\ \textcolor{stringliteral}{"{}PATCH"{}}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ body\_bytes\ =\ await\ request.body()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Sending\ PATCH\ with\ \{len(body\_bytes)\}\ bytes"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ session.patch(}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ url=base\_url,\ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data=body\_bytes,}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ headers=headers}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{as}\ response:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ await\ response.read()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}PATCH\ response:\ \{response.status\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ modified\_headers\ =\ dict(response.headers)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ request.method\ ==\ \textcolor{stringliteral}{"{}DELETE"{}}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}Sending\ DELETE\ request"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ session.delete(url=base\_url,\ headers=headers)\ \textcolor{keyword}{as}\ response:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\ =\ await\ response.read()}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}DELETE\ response:\ \{response.status\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ modified\_headers\ =\ dict(response.headers)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Response(content=\textcolor{stringliteral}{"{}Method\ not\ supported"{}},\ status\_code=405)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_a0e668998776b5c26c152b5d43ce4281a}{add\_headers}}(modified\_headers)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Response(content=data,\ status\_code=response.status,\ headers=modified\_headers)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ forwarding\ request:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Response(content=f\textcolor{stringliteral}{"{}Error:\ \{str(e)\}"{}},\ status\_code=500)}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00128}\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_a0e668998776b5c26c152b5d43ce4281a}{00128}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classapi__router_1_1_a_p_i_router_a0e668998776b5c26c152b5d43ce4281a}{add\_headers}}(self,\ modified\_headers):}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ modified\_headers[\textcolor{stringliteral}{'X-\/XSS-\/Protection'}]\ =\ \textcolor{stringliteral}{'1;\ mode=block'}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ modified\_headers[\textcolor{stringliteral}{'X-\/Frame-\/Options'}]\ =\ \textcolor{stringliteral}{'DENY'}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ modified\_headers[\textcolor{stringliteral}{'Strict-\/Transport-\/Security'}]\ =\ \textcolor{stringliteral}{'max-\/age=63072000;\ includeSubDomains'}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ modified\_headers[\textcolor{stringliteral}{'X-\/Content-\/Type-\/Options'}]\ =\ \textcolor{stringliteral}{'nosniff'}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ modified\_headers[\textcolor{stringliteral}{'Expires'}]\ =\ \textcolor{stringliteral}{'0'}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ modified\_headers[\textcolor{stringliteral}{'Cache-\/Control'}]\ =\ \textcolor{stringliteral}{'no-\/cache,\ no-\/store,\ must-\/revalidate'}}
+\DoxyCodeLine{\Hypertarget{api__router_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ modified\_headers[\textcolor{stringliteral}{'Pragma'}]\ =\ \textcolor{stringliteral}{'no-\/cache'}}
+
+\end{DoxyCode}

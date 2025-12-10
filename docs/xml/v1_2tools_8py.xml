@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="v1_2tools_8py" kind="file" language="Python">
+    <compoundname>tools.py</compoundname>
+    <innernamespace refid="namespacepydantic">pydantic</innernamespace>
+    <innernamespace refid="namespacepydantic_1_1v1">pydantic::v1</innernamespace>
+    <innernamespace refid="namespacepydantic_1_1v1_1_1tools">pydantic::v1::tools</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespacepydantic_1_1v1_1_1tools" refkind="compound"><highlight class="keyword">import</highlight><highlight class="normal"><sp/>json</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>functools<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>lru_cache</highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>pathlib<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Path</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>TYPE_CHECKING,<sp/>Any,<sp/>Callable,<sp/>Optional,<sp/>Type,<sp/>TypeVar,<sp/>Union</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1parse" kindref="compound">pydantic.v1.parse</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Protocol,<sp/>load_file,<sp/>load_str_bytes</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1types" kindref="compound">pydantic.v1.types</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>StrBytes</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1typing" kindref="compound">pydantic.v1.typing</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>display_as_type</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal">__all__<sp/>=<sp/>(</highlight><highlight class="stringliteral">&apos;parse_file_as&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;parse_obj_as&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;parse_raw_as&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;schema_of&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;schema_json_of&apos;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12" refid="namespacepydantic_1_1v1_1_1tools_1a5981fa08f172afab59a409864e14ae9e" refkind="member"><highlight class="normal">NameFactory<sp/>=<sp/>Union[str,<sp/>Callable[[Type[Any]],<sp/>str]]</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>TYPE_CHECKING:</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1typing" kindref="compound">pydantic.v1.typing</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>DictStrAny</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18" refid="namespacepydantic_1_1v1_1_1tools_1ac1f89700f58dcf43ac3fcbd49d58597e" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacepydantic_1_1v1_1_1tools_1ac1f89700f58dcf43ac3fcbd49d58597e" kindref="member">_generate_parsing_type_name</ref>(type_:<sp/>Any)<sp/>-&gt;<sp/>str:</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>f</highlight><highlight class="stringliteral">&apos;ParsingModel[{display_as_type(type_)}]&apos;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">@lru_cache(maxsize=2048)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23" refid="namespacepydantic_1_1v1_1_1tools_1afd5ec6e3bde0b6fd6eba2dab9dc83c31" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacepydantic_1_1v1_1_1tools_1afd5ec6e3bde0b6fd6eba2dab9dc83c31" kindref="member">_get_parsing_type</ref>(type_:<sp/>Any,<sp/>*,<sp/>type_name:<sp/>Optional[NameFactory]<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">)<sp/>-&gt;<sp/>Any:</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1main" kindref="compound">pydantic.v1.main</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>create_model</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>type_name<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>type_name<sp/>=<sp/>_generate_parsing_type_name</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/>isinstance(type_name,<sp/>str):</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>type_name<sp/>=<sp/>type_name(type_)</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1main_1acfaa028a2cd6e589e43d01ccd92cd04c" kindref="member">create_model</ref>(type_name,<sp/>__root__=(type_,<sp/>...))</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33" refid="namespacepydantic_1_1v1_1_1tools_1a11b02347d63316cb7a6ba88681f86d93" refkind="member"><highlight class="normal">T<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&apos;T&apos;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36" refid="namespacepydantic_1_1v1_1_1tools_1a7f5166763629fe79b615fb99f10ad993" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacepydantic_1_1v1_1_1tools_1a7f5166763629fe79b615fb99f10ad993" kindref="member">parse_obj_as</ref>(type_:<sp/>Type[T],<sp/>obj:<sp/>Any,<sp/>*,<sp/>type_name:<sp/>Optional[NameFactory]<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">)<sp/>-&gt;<sp/>T:</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/>model_type<sp/>=<sp/><ref refid="namespacepydantic_1_1v1_1_1tools_1afd5ec6e3bde0b6fd6eba2dab9dc83c31" kindref="member">_get_parsing_type</ref>(type_,<sp/>type_name=type_name)<sp/><sp/></highlight><highlight class="comment">#<sp/>type:<sp/>ignore[arg-type]</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>model_type(__root__=obj).__root__</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41" refid="namespacepydantic_1_1v1_1_1tools_1ade57160ba91639514835c7abe9922cb9" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacepydantic_1_1v1_1_1tools_1ade57160ba91639514835c7abe9922cb9" kindref="member">parse_file_as</ref>(</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>type_:<sp/>Type[T],</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/>path:<sp/>Union[str,<sp/>Path],</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/>*,</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/>content_type:<sp/>str<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/>encoding:<sp/>str<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;utf8&apos;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/>proto:<sp/>Protocol<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/>allow_pickle:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/>json_loads:<sp/>Callable[[str],<sp/>Any]<sp/>=<sp/>json.loads,</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/>type_name:<sp/>Optional[NameFactory]<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="51"><highlight class="normal">)<sp/>-&gt;<sp/>T:</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/>obj<sp/>=<sp/>load_file(</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>path,</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>proto=proto,</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>content_type=content_type,</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>encoding=encoding,</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>allow_pickle=allow_pickle,</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>json_loads=json_loads,</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1tools_1a7f5166763629fe79b615fb99f10ad993" kindref="member">parse_obj_as</ref>(type_,<sp/>obj,<sp/>type_name=type_name)</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63" refid="namespacepydantic_1_1v1_1_1tools_1a7571cdb6302af0c436c667b6bc89b9b3" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacepydantic_1_1v1_1_1tools_1a7571cdb6302af0c436c667b6bc89b9b3" kindref="member">parse_raw_as</ref>(</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/>type_:<sp/>Type[T],</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/>b:<sp/>StrBytes,</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/>*,</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/>content_type:<sp/>str<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/>encoding:<sp/>str<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;utf8&apos;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/>proto:<sp/>Protocol<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/>allow_pickle:<sp/>bool<sp/>=<sp/></highlight><highlight class="keyword">False</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/>json_loads:<sp/>Callable[[str],<sp/>Any]<sp/>=<sp/>json.loads,</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/>type_name:<sp/>Optional[NameFactory]<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="73"><highlight class="normal">)<sp/>-&gt;<sp/>T:</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/>obj<sp/>=<sp/>load_str_bytes(</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>b,</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>proto=proto,</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>content_type=content_type,</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>encoding=encoding,</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>allow_pickle=allow_pickle,</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>json_loads=json_loads,</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1tools_1a7f5166763629fe79b615fb99f10ad993" kindref="member">parse_obj_as</ref>(type_,<sp/>obj,<sp/>type_name=type_name)</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"></highlight></codeline>
+<codeline lineno="85" refid="namespacepydantic_1_1v1_1_1tools_1a9b1d82cbdab213e4369adb7281d1dc3e" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacepydantic_1_1v1_1_1tools_1a9b1d82cbdab213e4369adb7281d1dc3e" kindref="member">schema_of</ref>(type_:<sp/>Any,<sp/>*,<sp/>title:<sp/>Optional[NameFactory]<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,<sp/>**schema_kwargs:<sp/>Any)<sp/>-&gt;<sp/></highlight><highlight class="stringliteral">&apos;DictStrAny&apos;</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Generate<sp/>a<sp/>JSON<sp/>schema<sp/>(as<sp/>dict)<sp/>for<sp/>the<sp/>passed<sp/>model<sp/>or<sp/>dynamically<sp/>generated<sp/>one&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1tools_1afd5ec6e3bde0b6fd6eba2dab9dc83c31" kindref="member">_get_parsing_type</ref>(type_,<sp/>type_name=title).schema(**schema_kwargs)</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90" refid="namespacepydantic_1_1v1_1_1tools_1a664cbd1a1cce123f74c565b9c6360413" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacepydantic_1_1v1_1_1tools_1a664cbd1a1cce123f74c565b9c6360413" kindref="member">schema_json_of</ref>(type_:<sp/>Any,<sp/>*,<sp/>title:<sp/>Optional[NameFactory]<sp/>=<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,<sp/>**schema_json_kwargs:<sp/>Any)<sp/>-&gt;<sp/>str:</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Generate<sp/>a<sp/>JSON<sp/>schema<sp/>(as<sp/>JSON)<sp/>for<sp/>the<sp/>passed<sp/>model<sp/>or<sp/>dynamically<sp/>generated<sp/>one&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="namespacepydantic_1_1v1_1_1tools_1afd5ec6e3bde0b6fd6eba2dab9dc83c31" kindref="member">_get_parsing_type</ref>(type_,<sp/>type_name=title).schema_json(**schema_json_kwargs)</highlight></codeline>
+    </programlisting>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/pydantic/v1/tools.py"/>
+  </compounddef>
+</doxygen>

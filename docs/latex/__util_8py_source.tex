@@ -1,0 +1,141 @@
+\doxysection{\+\_\+util.\+py}
+\hypertarget{__util_8py_source}{}\label{__util_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_util.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/h11/\_util.py}}
+\mbox{\hyperlink{__util_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00001}\mbox{\hyperlink{namespaceh11_1_1__util}{00001}}\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any,\ Dict,\ NoReturn,\ Pattern,\ Tuple,\ Type,\ TypeVar,\ Union}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00003}00003\ \_\_all\_\_\ =\ [}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00004}00004\ \ \ \ \ \textcolor{stringliteral}{"{}ProtocolError"{}},}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00005}00005\ \ \ \ \ \textcolor{stringliteral}{"{}LocalProtocolError"{}},}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00006}00006\ \ \ \ \ \textcolor{stringliteral}{"{}RemoteProtocolError"{}},}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00007}00007\ \ \ \ \ \textcolor{stringliteral}{"{}validate"{}},}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00008}00008\ \ \ \ \ \textcolor{stringliteral}{"{}bytesify"{}},}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00009}00009\ ]}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00012}\mbox{\hyperlink{classh11_1_1__util_1_1_protocol_error}{00012}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__util_1_1_protocol_error}{ProtocolError}}(Exception):}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00013}00013\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Exception\ indicating\ a\ violation\ of\ the\ HTTP/1.1\ protocol.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00014}00014\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00015}00015\ \textcolor{stringliteral}{\ \ \ \ This\ as\ an\ abstract\ base\ class,\ with\ two\ concrete\ base\ classes:}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00016}00016\ \textcolor{stringliteral}{\ \ \ \ :exc:\`{}LocalProtocolError\`{},\ which\ indicates\ that\ you\ tried\ to\ do\ something}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00017}00017\ \textcolor{stringliteral}{\ \ \ \ that\ HTTP/1.1\ says\ is\ illegal,\ and\ :exc:\`{}RemoteProtocolError\`{},\ which}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00018}00018\ \textcolor{stringliteral}{\ \ \ \ indicates\ that\ the\ remote\ peer\ tried\ to\ do\ something\ that\ HTTP/1.1\ says\ is}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00019}00019\ \textcolor{stringliteral}{\ \ \ \ illegal.\ See\ :ref:\`{}error-\/handling\`{}\ for\ details.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00020}00020\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00021}00021\ \textcolor{stringliteral}{\ \ \ \ In\ addition\ to\ the\ normal\ :exc:\`{}Exception\`{}\ features,\ it\ has\ one\ attribute:}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00022}00022\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ ..\ attribute::\ error\_status\_hint}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00024}00024\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ \ \ \ This\ gives\ a\ suggestion\ as\ to\ what\ status\ code\ a\ server\ might\ use\ if}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00026}00026\ \textcolor{stringliteral}{\ \ \ \ \ \ \ this\ error\ occurred\ as\ part\ of\ a\ request.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00027}00027\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ \ \ \ For\ a\ :exc:\`{}RemoteProtocolError\`{},\ this\ is\ useful\ as\ a\ suggestion\ for}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00029}00029\ \textcolor{stringliteral}{\ \ \ \ \ \ \ how\ you\ might\ want\ to\ respond\ to\ a\ misbehaving\ peer,\ if\ you're}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00030}00030\ \textcolor{stringliteral}{\ \ \ \ \ \ \ implementing\ a\ server.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00031}00031\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00032}00032\ \textcolor{stringliteral}{\ \ \ \ \ \ \ For\ a\ :exc:\`{}LocalProtocolError\`{},\ this\ can\ be\ taken\ as\ a\ suggestion\ for}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00033}00033\ \textcolor{stringliteral}{\ \ \ \ \ \ \ how\ your\ peer\ might\ have\ responded\ to\ *you*\ if\ h11\ had\ allowed\ you\ to}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00034}00034\ \textcolor{stringliteral}{\ \ \ \ \ \ \ continue.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00035}00035\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00036}00036\ \textcolor{stringliteral}{\ \ \ \ \ \ \ The\ default\ is\ 400\ Bad\ Request,\ a\ generic\ catch-\/all\ for\ protocol}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00037}00037\ \textcolor{stringliteral}{\ \ \ \ \ \ \ violations.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00038}00038\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00039}00039\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00041}00041\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ msg:\ str,\ error\_status\_hint:\ int\ =\ 400)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ type(self)\ \textcolor{keywordflow}{is}\ ProtocolError:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(\textcolor{stringliteral}{"{}tried\ to\ directly\ instantiate\ ProtocolError"{}})}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ Exception.\_\_init\_\_(self,\ msg)}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00045}\mbox{\hyperlink{classh11_1_1__util_1_1_protocol_error_a53bf1886c5d923e4db5686640471f965}{00045}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__util_1_1_protocol_error_a53bf1886c5d923e4db5686640471f965}{error\_status\_hint}}\ =\ error\_status\_hint}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00048}00048\ \textcolor{comment}{\#\ Strategy:\ there\ are\ a\ number\ of\ public\ APIs\ where\ a\ LocalProtocolError\ can}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00049}00049\ \textcolor{comment}{\#\ be\ raised\ (send(),\ all\ the\ different\ event\ constructors,\ ...),\ and\ only\ one}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00050}00050\ \textcolor{comment}{\#\ public\ API\ where\ RemoteProtocolError\ can\ be\ raised}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00051}00051\ \textcolor{comment}{\#\ (receive\_data()).\ Therefore\ we\ always\ raise\ LocalProtocolError\ internally,}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00052}00052\ \textcolor{comment}{\#\ and\ then\ receive\_data\ will\ translate\ this\ into\ a\ RemoteProtocolError.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00053}00053\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00054}00054\ \textcolor{comment}{\#\ Internally:}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00055}00055\ \textcolor{comment}{\#\ \ \ LocalProtocolError\ is\ the\ generic\ "{}ProtocolError"{}.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00056}00056\ \textcolor{comment}{\#\ Externally:}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00057}00057\ \textcolor{comment}{\#\ \ \ LocalProtocolError\ is\ for\ local\ errors\ and\ RemoteProtocolError\ is\ for}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00058}00058\ \textcolor{comment}{\#\ \ \ remote\ errors.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00059}\mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{00059}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{LocalProtocolError}}(\mbox{\hyperlink{classh11_1_1__util_1_1_protocol_error}{ProtocolError}}):}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00060}\mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error_a68abedb2034da2cee1098b969cb03691}{00060}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error_a68abedb2034da2cee1098b969cb03691}{\_reraise\_as\_remote\_protocol\_error}}(self)\ -\/>\ NoReturn:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ After\ catching\ a\ LocalProtocolError,\ use\ this\ method\ to\ re-\/raise\ it}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ as\ a\ RemoteProtocolError.\ This\ method\ must\ be\ called\ from\ inside\ an}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ except:\ block.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ An\ easy\ way\ to\ get\ an\ equivalent\ RemoteProtocolError\ is\ just\ to}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ modify\ 'self'\ in\ place.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classh11_1_1__util_1_1_local_protocol_error}{\_\_class\_\_}}\ =\ RemoteProtocolError\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ But\ the\ re-\/raising\ is\ somewhat\ non-\/trivial\ -\/-\/\ you\ might\ think\ that}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ now\ that\ we've\ modified\ the\ in-\/flight\ exception\ object,\ that\ just}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ doing\ 'raise'\ to\ re-\/raise\ it\ would\ be\ enough.\ But\ it\ turns\ out\ that}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ this\ doesn't\ work,\ because\ Python\ tracks\ the\ exception\ type}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ (exc\_info[0])\ separately\ from\ the\ exception\ object\ (exc\_info[1]),}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ and\ we\ only\ modified\ the\ latter.\ So\ we\ really\ do\ need\ to\ re-\/raise}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ the\ new\ type\ explicitly.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ On\ py3,\ the\ traceback\ is\ part\ of\ the\ exception\ object,\ so\ our}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ in-\/place\ modification\ preserved\ it\ and\ we\ can\ just\ re-\/raise:}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ self}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00080}\mbox{\hyperlink{classh11_1_1__util_1_1_remote_protocol_error}{00080}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__util_1_1_remote_protocol_error}{RemoteProtocolError}}(\mbox{\hyperlink{classh11_1_1__util_1_1_protocol_error}{ProtocolError}}):}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00081}00081\ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00084}\mbox{\hyperlink{namespaceh11_1_1__util_a477edc9f1c9a8c56aa0d3426fba0bf39}{00084}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceh11_1_1__util_a477edc9f1c9a8c56aa0d3426fba0bf39}{validate}}(}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00085}00085\ \ \ \ \ regex:\ Pattern[bytes],\ data:\ bytes,\ msg:\ str\ =\ \textcolor{stringliteral}{"{}malformed\ data"{}},\ *format\_args:\ Any}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00086}00086\ )\ -\/>\ Dict[str,\ bytes]:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00087}00087\ \ \ \ \ match\ =\ regex.fullmatch(data)}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00088}00088\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ match:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ format\_args:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ msg\ =\ msg.format(*format\_args)}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ LocalProtocolError(msg)}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{return}\ match.groupdict()}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00094}00094\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00095}00095\ \textcolor{comment}{\#\ Sentinel\ values}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00096}00096\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00097}00097\ \textcolor{comment}{\#\ -\/\ Inherit\ identity-\/based\ comparison\ and\ hashing\ from\ object}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00098}00098\ \textcolor{comment}{\#\ -\/\ Have\ a\ nice\ repr}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00099}00099\ \textcolor{comment}{\#\ -\/\ Have\ a\ *bonus\ property*:\ type(sentinel)\ is\ sentinel}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00100}00100\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00101}00101\ \textcolor{comment}{\#\ The\ bonus\ property\ is\ useful\ if\ you\ want\ to\ take\ the\ return\ value\ from}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00102}00102\ \textcolor{comment}{\#\ next\_event()\ and\ do\ some\ sort\ of\ dispatch\ based\ on\ type(event).}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00104}\mbox{\hyperlink{namespaceh11_1_1__util_a92d69981c033465bb97830e3b49eb4f1}{00104}}\ \_T\_Sentinel\ =\ TypeVar(\textcolor{stringliteral}{"{}\_T\_Sentinel"{}},\ bound=\textcolor{stringliteral}{"{}Sentinel"{}})}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00105}00105\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00107}\mbox{\hyperlink{classh11_1_1__util_1_1_sentinel}{00107}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classh11_1_1__util_1_1_sentinel}{Sentinel}}(type):}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00108}00108\ \ \ \ \ \textcolor{keyword}{def\ }\_\_new\_\_(}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ cls:\ Type[\_T\_Sentinel],}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ name:\ str,}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ bases:\ Tuple[type,\ ...],}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ namespace:\ Dict[str,\ Any],}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ **kwds:\ Any}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00114}00114\ \ \ \ \ )\ -\/>\ \_T\_Sentinel:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ bases\ ==\ (Sentinel,)}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ v\ =\ super().\_\_new\_\_(cls,\ name,\ bases,\ namespace,\ **kwds)}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ v.\_\_class\_\_\ =\ v\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00120}00120\ \ \ \ \ \textcolor{keyword}{def\ }\_\_repr\_\_(self)\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\_\_name\_\_}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00124}00124\ \textcolor{comment}{\#\ Used\ for\ methods,\ request\ targets,\ HTTP\ versions,\ header\ names,\ and\ header}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00125}00125\ \textcolor{comment}{\#\ values.\ Accepts\ ascii-\/strings,\ or\ bytes/bytearray/memoryview/...,\ and\ always}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00126}00126\ \textcolor{comment}{\#\ returns\ bytes.}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00127}\mbox{\hyperlink{namespaceh11_1_1__util_adc90f3dc147e8482c18d37e44bdbf177}{00127}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceh11_1_1__util_adc90f3dc147e8482c18d37e44bdbf177}{bytesify}}(s:\ Union[bytes,\ bytearray,\ memoryview,\ int,\ str])\ -\/>\ bytes:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00128}00128\ \ \ \ \ \textcolor{comment}{\#\ Fast-\/path:}}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00129}00129\ \ \ \ \ \textcolor{keywordflow}{if}\ type(s)\ \textcolor{keywordflow}{is}\ bytes:}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ s}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00131}00131\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(s,\ str):}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ s\ =\ s.encode(\textcolor{stringliteral}{"{}ascii"{}})}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(s,\ int):}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ TypeError(\textcolor{stringliteral}{"{}expected\ bytes-\/like\ object,\ not\ int"{}})}
+\DoxyCodeLine{\Hypertarget{__util_8py_source_l00135}00135\ \ \ \ \ \textcolor{keywordflow}{return}\ bytes(s)}
+
+\end{DoxyCode}

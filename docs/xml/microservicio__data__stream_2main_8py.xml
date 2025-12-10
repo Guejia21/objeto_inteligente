@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="microservicio__data__stream_2main_8py" kind="file" language="Python">
+    <compoundname>main.py</compoundname>
+    <innernamespace refid="namespacemain">main</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="2"><highlight class="stringliteral"><sp/>*<sp/>@file<sp/>main.py</highlight></codeline>
+<codeline lineno="3"><highlight class="stringliteral"><sp/>*<sp/>@brief<sp/>Punto<sp/>de<sp/>entrada<sp/>principal<sp/>del<sp/>Microservicio<sp/>de<sp/>Datastreams<sp/>(Microdot)</highlight></codeline>
+<codeline lineno="4"><highlight class="stringliteral"><sp/>*<sp/>@details</highlight></codeline>
+<codeline lineno="5"><highlight class="stringliteral"><sp/>*<sp/>Servicio<sp/>responsable<sp/>de<sp/>gestionar<sp/>datastreams<sp/>de<sp/>objetos<sp/>inteligentes<sp/>usando<sp/>Microdot<sp/>framework<sp/>(MicroPython).</highlight></codeline>
+<codeline lineno="6"><highlight class="stringliteral"><sp/>*<sp/></highlight></codeline>
+<codeline lineno="7"><highlight class="stringliteral"><sp/>*<sp/>Funcionalidades<sp/>principales:</highlight></codeline>
+<codeline lineno="8"><highlight class="stringliteral"><sp/>*<sp/>-<sp/>Servidor<sp/>HTTP<sp/>asincrónico<sp/>basado<sp/>en<sp/>Microdot</highlight></codeline>
+<codeline lineno="9"><highlight class="stringliteral"><sp/>*<sp/>-<sp/>Gestión<sp/>de<sp/>datastreams<sp/>(sensores<sp/>y<sp/>actuadores)</highlight></codeline>
+<codeline lineno="10"><highlight class="stringliteral"><sp/>*<sp/>-<sp/>Publicación<sp/>periódica<sp/>de<sp/>telemetría<sp/>a<sp/>ThingBoard<sp/>y<sp/>Mosquitto</highlight></codeline>
+<codeline lineno="11"><highlight class="stringliteral"><sp/>*<sp/>-<sp/>Consumo<sp/>de<sp/>mensajes<sp/>MQTT<sp/>para<sp/>inicialización<sp/>y<sp/>actuaciones</highlight></codeline>
+<codeline lineno="12"><highlight class="stringliteral"><sp/>*<sp/>-<sp/>Cierre<sp/>seguro<sp/>con<sp/>manejo<sp/>de<sp/>señales<sp/>UNIX</highlight></codeline>
+<codeline lineno="13"><highlight class="stringliteral"><sp/>*<sp/>-<sp/>Soporte<sp/>para<sp/>WiFi<sp/>en<sp/>dispositivos<sp/>ESP32</highlight></codeline>
+<codeline lineno="14"><highlight class="stringliteral"><sp/>*<sp/></highlight></codeline>
+<codeline lineno="15"><highlight class="stringliteral"><sp/>*<sp/>@see<sp/>routes/datastreams.py<sp/>para<sp/>definición<sp/>de<sp/>endpoints</highlight></codeline>
+<codeline lineno="16"><highlight class="stringliteral"><sp/>*<sp/>@see<sp/>services/datastream_service.py<sp/>para<sp/>lógica<sp/>de<sp/>negocio</highlight></codeline>
+<codeline lineno="17"><highlight class="stringliteral"><sp/>*<sp/>@see<sp/>config.py<sp/>para<sp/>configuración<sp/>del<sp/>servicio</highlight></codeline>
+<codeline lineno="18"><highlight class="stringliteral"><sp/>*<sp/></highlight></codeline>
+<codeline lineno="19"><highlight class="stringliteral"><sp/>*<sp/>@author<sp/>Sistema<sp/>de<sp/>Objetos<sp/>Inteligentes</highlight></codeline>
+<codeline lineno="20"><highlight class="stringliteral"><sp/>*<sp/>@version<sp/>1.0.0</highlight></codeline>
+<codeline lineno="21"><highlight class="stringliteral"><sp/>*<sp/>@date<sp/>2024</highlight></codeline>
+<codeline lineno="22"><highlight class="stringliteral">&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>json<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>json</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>signal</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespacelib_1_1microdot_1_1microdot" kindref="compound">lib.microdot.microdot</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Microdot</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>broker.broker_interface<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>consumer_mqtt,<sp/>publicar_valores,<sp/>tb_publicacion_task,<sp/>mosq_publicacion_task</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="comment">#from<sp/>broker.mqtt_adapter<sp/>import<sp/>MQTTAdapter</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>broker.mqtt_python_adapter<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>mosquitto_broker,<sp/>tb_broker</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/><ref refid="namespaceroutes_1_1datastreams" kindref="compound">routes.datastreams</ref><sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>register_routes</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>config<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Config</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="comment">#import<sp/>network<sp/>#Activar<sp/>si<sp/>se<sp/>usa<sp/>ESP32<sp/>con<sp/>WiFi</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>asyncio</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Crear<sp/>aplicación</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal">app<sp/>=<sp/>Microdot()</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Configurar<sp/>broker<sp/>MQTT<sp/>cuando<sp/>se<sp/>desea<sp/>usar<sp/>microPython</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="stringliteral">&quot;&quot;&quot;broker<sp/>=<sp/>MQTTAdapter(</highlight></codeline>
+<codeline lineno="40"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>client_id=&quot;datastream_service&quot;,</highlight></codeline>
+<codeline lineno="41"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>#broker=Config.OBJECT_IP,</highlight></codeline>
+<codeline lineno="42"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>broker=Config.BROKER_HOST,<sp/>#Usar<sp/>localhost<sp/>para<sp/>pruebas<sp/>locales</highlight></codeline>
+<codeline lineno="43"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>port=Config.MQTT_PORT</highlight></codeline>
+<codeline lineno="44"><highlight class="stringliteral">)&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Registrar<sp/>rutas</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal">register_routes(app)</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Flag<sp/>para<sp/>controlar<sp/>el<sp/>cierre</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50" refid="namespacemain_1a9d9c0f06ea285d6128fdce786fa66851" refkind="member"><highlight class="normal">shutdown_event<sp/>=<sp/>asyncio.Event()</highlight></codeline>
+<codeline lineno="51" refid="namespacemain_1aa530773ea5df6edbdc7807a0eaa51773" refkind="member"><highlight class="normal">running_tasks<sp/>=<sp/>[]</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight><highlight class="comment">#Configuración<sp/>de<sp/>WiFi<sp/>(si<sp/>aplica)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="54" refid="namespacemain_1a79124365d1c83d2112cc071a29831386" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespacemain_1a79124365d1c83d2112cc071a29831386" kindref="member">conectar_wifi</ref>():</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/>wlan<sp/>=<sp/>network.WLAN(network.STA_IF)</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/>wlan.active(</highlight><highlight class="keyword">True</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/>wlan.connect(Config.WIFI_SSID,<sp/>Config.WIFI_PASS)</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/>wlan.isconnected():</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">pass</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;WiFi<sp/>conectada:&quot;</highlight><highlight class="normal">,<sp/>wlan.ifconfig())</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63" refid="namespacemain_1a799b0d523414a91d4d3924ae19ec6e0f" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">async<sp/>def<sp/></highlight><highlight class="normal"><ref refid="namespacemain_1a799b0d523414a91d4d3924ae19ec6e0f" kindref="member">shutdown</ref>():</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="65"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>@brief<sp/>Maneja<sp/>el<sp/>cierre<sp/>seguro<sp/>del<sp/>servidor<sp/>Microdot</highlight></codeline>
+<codeline lineno="66"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>@details</highlight></codeline>
+<codeline lineno="67"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>Coordina<sp/>la<sp/>detención<sp/>ordenada<sp/>de:</highlight></codeline>
+<codeline lineno="68"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>1.<sp/>Event<sp/>loop<sp/>-<sp/>propaga<sp/>shutdown_event</highlight></codeline>
+<codeline lineno="69"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>2.<sp/>Tareas<sp/>asyncio<sp/>-<sp/>cancela<sp/>todas<sp/>las<sp/>tareas<sp/>en<sp/>running_tasks</highlight></codeline>
+<codeline lineno="70"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>3.<sp/>Conexiones<sp/>MQTT<sp/>-<sp/>cierra<sp/>clientes<sp/>mosquitto<sp/>y<sp/>ThingBoard</highlight></codeline>
+<codeline lineno="71"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>4.<sp/>Servidor<sp/>HTTP<sp/>-<sp/>detiene<sp/>Microdot</highlight></codeline>
+<codeline lineno="72"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/></highlight></codeline>
+<codeline lineno="73"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>@return<sp/>void</highlight></codeline>
+<codeline lineno="74"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>@see<sp/>running_tasks<sp/>lista<sp/>de<sp/>tareas<sp/>en<sp/>ejecución</highlight></codeline>
+<codeline lineno="75"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>@see<sp/>mosquitto_broker<sp/>cliente<sp/>MQTT<sp/>Mosquitto</highlight></codeline>
+<codeline lineno="76"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/>*<sp/>@see<sp/>tb_broker<sp/>cliente<sp/>MQTT<sp/>ThingBoard</highlight></codeline>
+<codeline lineno="77"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Maneja<sp/>el<sp/>cierre<sp/>seguro<sp/>del<sp/>servidor&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="79"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>print(&quot;\nCerrando<sp/>servidor...&quot;)</highlight></codeline>
+<codeline lineno="80"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>shutdown_event.set()</highlight></codeline>
+<codeline lineno="81"><highlight class="stringliteral"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="82"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>#<sp/>Cancelar<sp/>todas<sp/>las<sp/>tareas</highlight></codeline>
+<codeline lineno="83"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>for<sp/>task<sp/>in<sp/>running_tasks:</highlight></codeline>
+<codeline lineno="84"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>task<sp/>and<sp/>not<sp/>task.done():</highlight></codeline>
+<codeline lineno="85"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>task.cancel()</highlight></codeline>
+<codeline lineno="86"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="87"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>task</highlight></codeline>
+<codeline lineno="88"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>except<sp/>asyncio.CancelledError:</highlight></codeline>
+<codeline lineno="89"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>pass</highlight></codeline>
+<codeline lineno="90"><highlight class="stringliteral"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="91"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>#<sp/>Cerrar<sp/>conexiones<sp/>MQTT</highlight></codeline>
+<codeline lineno="92"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="93"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>hasattr(mosquitto_broker,<sp/>&apos;client&apos;)<sp/>and<sp/>mosquitto_broker.client:</highlight></codeline>
+<codeline lineno="94"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mosquitto_broker.client.loop_stop()</highlight></codeline>
+<codeline lineno="95"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mosquitto_broker.client.disconnect()</highlight></codeline>
+<codeline lineno="96"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>except<sp/>Exception:</highlight></codeline>
+<codeline lineno="97"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>pass</highlight></codeline>
+<codeline lineno="98"><highlight class="stringliteral"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="99"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="100"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>hasattr(tb_broker,<sp/>&apos;client&apos;)<sp/>and<sp/>tb_broker.client:</highlight></codeline>
+<codeline lineno="101"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>tb_broker.client.loop_stop()</highlight></codeline>
+<codeline lineno="102"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>tb_broker.client.disconnect()</highlight></codeline>
+<codeline lineno="103"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>except<sp/>Exception:</highlight></codeline>
+<codeline lineno="104"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>pass</highlight></codeline>
+<codeline lineno="105"><highlight class="stringliteral"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="106"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>#<sp/>Detener<sp/>servidor<sp/>Microdot</highlight></codeline>
+<codeline lineno="107"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="108"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>app.shutdown()</highlight></codeline>
+<codeline lineno="109"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>except<sp/>Exception:</highlight></codeline>
+<codeline lineno="110"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>pass</highlight></codeline>
+<codeline lineno="111"><highlight class="stringliteral"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="112"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>print(&quot;Servidor<sp/>cerrado<sp/>correctamente&quot;)</highlight></codeline>
+<codeline lineno="113"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="114"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="115"><highlight class="stringliteral">#<sp/>Ejecutar<sp/>servidor</highlight></codeline>
+<codeline lineno="116" refid="namespacemain_1a3140e9a5b6a71ffbf498198cfc471b88" refkind="member"><highlight class="stringliteral">async<sp/>def<sp/>main():</highlight></codeline>
+<codeline lineno="117"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>@brief<sp/>Función<sp/>principal<sp/>que<sp/>inicializa<sp/>y<sp/>ejecuta<sp/>el<sp/>servidor<sp/>Microdot</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>@details</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>Secuencia<sp/>de<sp/>inicialización:</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>1.<sp/>Imprime<sp/>configuración<sp/>del<sp/>servicio<sp/>(HOST,<sp/>PORT,<sp/>OSID,<sp/>TITLE)</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>2.<sp/>Registra<sp/>manejadores<sp/>de<sp/>señales<sp/>UNIX<sp/>(SIGINT,<sp/>SIGTERM)<sp/>para<sp/>shutdown<sp/>seguro</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>3.<sp/>Inicia<sp/>servidor<sp/>Microdot<sp/>asincrónico</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>4.<sp/>Si<sp/>OSID<sp/>está<sp/>configurado:</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/><sp/><sp/><sp/>-<sp/>Publica<sp/>telemetría<sp/>periódicamente<sp/>a<sp/>ThingBoard<sp/>(si<sp/>token<sp/>disponible)</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/><sp/><sp/><sp/>-<sp/>Publica<sp/>telemetría<sp/>periódicamente<sp/>a<sp/>Mosquitto</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>5.<sp/>Si<sp/>OSID<sp/>no<sp/>está<sp/>configurado:<sp/>espera<sp/>mensajes<sp/>MQTT<sp/>de<sp/>inicialización</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>6.<sp/>Aguarda<sp/>evento<sp/>de<sp/>shutdown</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/></highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>@return<sp/>void<sp/>(async)</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>@see<sp/>shutdown()<sp/>función<sp/>invocada<sp/>en<sp/>cierre</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>@see<sp/>Config<sp/>configuración<sp/>centralizada</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>@see<sp/>publicar_valores<sp/>tarea<sp/>de<sp/>publicación<sp/>periódica</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>*<sp/>@see<sp/>consumer_mqtt<sp/>consumidor<sp/>de<sp/>mensajes<sp/>de<sp/>inicialización</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/>print(f&quot;<sp/><sp/><sp/>Datastream<sp/>Service<sp/>iniciando<sp/>en<sp/>{Config.HOST}:{Config.PORT}&quot;)</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/>print(f&quot;<sp/><sp/><sp/>OSID:<sp/>{Config.OSID}&quot;)</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/>print(f&quot;<sp/><sp/><sp/>Title:<sp/>{Config.TITLE}&quot;)</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/>#<sp/>Configurar<sp/>manejadores<sp/>de<sp/>señales<sp/>para<sp/>cierre<sp/>seguro</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/>loop<sp/>=<sp/>asyncio.get_running_loop()</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/>for<sp/>sig<sp/>in<sp/>(signal.SIGINT,<sp/>signal.SIGTERM):</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>loop.add_signal_handler(sig,<sp/>lambda:<sp/>asyncio.create_task(shutdown()))</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/>#conectar_wifi()</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/>#<sp/>Iniciar<sp/>servidor</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/>server_task<sp/>=<sp/>asyncio.create_task(app.start_server(host=Config.HOST,<sp/>port=Config.PORT))</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/>running_tasks.append(server_task)</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/>if<sp/>Config.OSID:</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#<sp/>Iniciar<sp/>publicación<sp/>periódica<sp/>a<sp/>ThingBoard<sp/>si<sp/>ya<sp/>hay<sp/>OSID<sp/>y<sp/>token<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>if<sp/>Config.THINGSBOARD_ACCESS_TOKEN<sp/>!=<sp/>&quot;&quot;:</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>global<sp/>tb_publicacion_task</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(&quot;Iniciando<sp/>publicación<sp/>a<sp/>ThingsBoard...&quot;)</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>tb_publicacion_task<sp/>=<sp/>asyncio.create_task(</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>publicar_valores(tb_broker,<sp/>Config.OSID,<sp/>topic=Config.THINGSBOARD_TELEMETRY_TOPIC,<sp/>interval=Config.TELEMETRY_PUBLISH_INTERVAL)</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>running_tasks.append(tb_publicacion_task)</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#<sp/>Iniciar<sp/>publicación<sp/>periodica<sp/>a<sp/>Mosquitto<sp/>si<sp/>ya<sp/>hay<sp/>OSID</highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>global<sp/>mosq_publicacion_task</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mosq_publicacion_task<sp/>=<sp/>asyncio.create_task(</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>publicar_valores(mosquitto_broker,<sp/>Config.OSID,<sp/>topic=Config.MOSQUITTO_TELEMETRY_TOPIC,<sp/>interval=Config.TELEMETRY_PUBLISH_INTERVAL)</highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="166"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>running_tasks.append(mosq_publicacion_task)</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/>else:</highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>#<sp/>Si<sp/>el<sp/>objeto<sp/>no<sp/>está<sp/>inicializado,<sp/>esperar<sp/>a<sp/>que<sp/>se<sp/>inicialice</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(&quot;Esperando<sp/>inicialización<sp/>del<sp/>objeto...&quot;)</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>consumer_task<sp/>=<sp/>asyncio.create_task(consumer_mqtt(mosquitto_broker))</highlight></codeline>
+<codeline lineno="171"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>running_tasks.append(consumer_task)</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/>#<sp/>Esperar<sp/>hasta<sp/>que<sp/>se<sp/>solicite<sp/>el<sp/>cierre</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="175"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>await<sp/>shutdown_event.wait()</highlight></codeline>
+<codeline lineno="176"><highlight class="normal"><sp/><sp/><sp/><sp/>except<sp/>asyncio.CancelledError:</highlight></codeline>
+<codeline lineno="177"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>pass</highlight></codeline>
+<codeline lineno="178"><highlight class="normal"></highlight></codeline>
+<codeline lineno="179"><highlight class="normal"></highlight></codeline>
+<codeline lineno="180"><highlight class="normal">if<sp/>__name__<sp/>==<sp/>&apos;__main__&apos;:</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"><sp/><sp/><sp/><sp/>try:</highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>asyncio.run(main())</highlight></codeline>
+<codeline lineno="183"><highlight class="normal"><sp/><sp/><sp/><sp/>except<sp/>KeyboardInterrupt:</highlight></codeline>
+<codeline lineno="184"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(&quot;\nServidor<sp/>interrumpido<sp/>por<sp/>el<sp/>usuario&quot;)</highlight></codeline>
+    </programlisting>
+    <location file="microservicio_data_stream/main.py"/>
+  </compounddef>
+</doxygen>

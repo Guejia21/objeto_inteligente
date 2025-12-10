@@ -1,0 +1,265 @@
+\doxysection{Referencia de la clase setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range}
+\hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range}{}\label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+
+
+Diagrama de herencia de setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range
+% FIG 0
+
+
+Diagrama de colaboración de setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range\+:
+% FIG 1
+\doxysubsubsection*{Métodos públicos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a906f0c4877f63fc1f2551daef75ae91f}{count}} (self, value)
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_acf0a51d22a2ee14fcd24e3ffcb02897b}{index}} (self, value)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Métodos protegidos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ac3db7a4554b23c61b16778abe712cd1e}{\+\_\+init\+\_\+len}} (self)
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_afc3e73fad3c81b882891b7834e0323f5}{\+\_\+get\+\_\+by\+\_\+index}} (self, i)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Atributos protegidos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad0bd236b50262cbd43a6d6ee82d80c42}{\+\_\+stop}}
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a01c71e02676ced5b1e27b64a5ca55362}{\+\_\+start}} = type(self.\+\_\+stop)(0)
+\item 
+int \mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a43601c825c333f17a81d2b66c3d6068b}{\+\_\+step}} = type(self.\+\_\+stop -\/ self.\+\_\+start)(1)
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad7cbbb53d4d20fc56d38b325464c7f0b}{\+\_\+zero}} = type(self.\+\_\+step)(0)
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a0911c0f16eade96ccbdbc65f10af6b98}{\+\_\+growing}} = self.\+\_\+step $>$ self.\+\_\+zero
+\item 
+int \mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a4d6ee2e28f3f76d9642eabf282935673}{\+\_\+len}} = 0
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Atributos estáticos protegidos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad70e30c7fc172467444faccdb83469cb}{\+\_\+\+EMPTY\+\_\+\+HASH}} = hash(range(0, 0))
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+\begin{DoxyVerb}An extension of the built-in ``range()`` function whose arguments can
+be any orderable numeric type.
+
+With only *stop* specified, *start* defaults to ``0`` and *step*
+defaults to ``1``. The output items will match the type of *stop*:
+
+    >>> list(numeric_range(3.5))
+    [0.0, 1.0, 2.0, 3.0]
+
+With only *start* and *stop* specified, *step* defaults to ``1``. The
+output items will match the type of *start*:
+
+    >>> from decimal import Decimal
+    >>> start = Decimal('2.1')
+    >>> stop = Decimal('5.1')
+    >>> list(numeric_range(start, stop))
+    [Decimal('2.1'), Decimal('3.1'), Decimal('4.1')]
+
+With *start*, *stop*, and *step*  specified the output items will match
+the type of ``start + step``:
+
+    >>> from fractions import Fraction
+    >>> start = Fraction(1, 2)  # Start at 1/2
+    >>> stop = Fraction(5, 2)  # End at 5/2
+    >>> step = Fraction(1, 2)  # Count by 1/2
+    >>> list(numeric_range(start, stop, step))
+    [Fraction(1, 2), Fraction(1, 1), Fraction(3, 2), Fraction(2, 1)]
+
+If *step* is zero, ``ValueError`` is raised. Negative steps are supported:
+
+    >>> list(numeric_range(3, -1, -1.0))
+    [3.0, 2.0, 1.0, 0.0]
+
+Be aware of the limitations of floating point numbers; the representation
+of the yielded numbers may be surprising.
+
+``datetime.datetime`` objects can be used for *start* and *stop*, if *step*
+is a ``datetime.timedelta`` object:
+
+    >>> import datetime
+    >>> start = datetime.datetime(2019, 1, 1)
+    >>> stop = datetime.datetime(2019, 1, 3)
+    >>> step = datetime.timedelta(days=1)
+    >>> items = iter(numeric_range(start, stop, step))
+    >>> next(items)
+    datetime.datetime(2019, 1, 1, 0, 0)
+    >>> next(items)
+    datetime.datetime(2019, 1, 2, 0, 0)
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01888}{1888}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_doc-func-members}
+\doxysubsection{Documentación de funciones miembro}
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_afc3e73fad3c81b882891b7834e0323f5}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_get\_by\_index@{\_get\_by\_index}}
+\index{\_get\_by\_index@{\_get\_by\_index}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_get\_by\_index()}{\_get\_by\_index()}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_afc3e73fad3c81b882891b7834e0323f5} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+get\+\_\+by\+\_\+index (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{}]{i}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02097}{2097}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02227}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+len}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02055}{\+\_\+len}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2pygments_2lexer_8py_source_l00367}{pip.\+\_\+vendor.\+pygments.\+lexer.\+\_\+\+Pseudo\+Match.\+\_\+start}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02118}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+start}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01946}{\+\_\+start}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02119}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+step}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01947}{\+\_\+step}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ac3db7a4554b23c61b16778abe712cd1e}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_init\_len@{\_init\_len}}
+\index{\_init\_len@{\_init\_len}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_init\_len()}{\_init\_len()}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ac3db7a4554b23c61b16778abe712cd1e} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+init\+\_\+len (\begin{DoxyParamCaption}\item[{}]{self}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02044}{2044}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02139}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+growing}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01967}{\+\_\+growing}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2pygments_2lexer_8py_source_l00367}{pip.\+\_\+vendor.\+pygments.\+lexer.\+\_\+\+Pseudo\+Match.\+\_\+start}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02118}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+start}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01946}{\+\_\+start}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02119}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+step}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01947}{\+\_\+step}}, \mbox{\hyperlink{__asyncio__selector__thread_8py_source_l00046}{anyio.\+\_\+core.\+\_\+asyncio\+\_\+selector\+\_\+thread.\+Selector.\+\_\+stop}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02117}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+stop}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01945}{\+\_\+stop}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02136}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+zero}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01964}{\+\_\+zero}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a906f0c4877f63fc1f2551daef75ae91f}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!count@{count}}
+\index{count@{count}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{count()}{count()}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a906f0c4877f63fc1f2551daef75ae91f} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+count (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{}]{value}{}\end{DoxyParamCaption})}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02080}{2080}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_acf0a51d22a2ee14fcd24e3ffcb02897b}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!index@{index}}
+\index{index@{index}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{index()}{index()}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_acf0a51d22a2ee14fcd24e3ffcb02897b} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+index (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{}]{value}{}\end{DoxyParamCaption})}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02083}{2083}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02139}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+growing}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01967}{\+\_\+growing}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2pygments_2lexer_8py_source_l00367}{pip.\+\_\+vendor.\+pygments.\+lexer.\+\_\+\+Pseudo\+Match.\+\_\+start}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02118}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+start}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01946}{\+\_\+start}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02119}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+step}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01947}{\+\_\+step}}, \mbox{\hyperlink{__asyncio__selector__thread_8py_source_l00046}{anyio.\+\_\+core.\+\_\+asyncio\+\_\+selector\+\_\+thread.\+Selector.\+\_\+stop}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02117}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+stop}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01945}{\+\_\+stop}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02136}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+zero}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01964}{\+\_\+zero}}.
+
+
+
+Referenciado por \mbox{\hyperlink{ordered__set_8py_source_l00188}{setuptools.\+\_\+vendor.\+ordered\+\_\+set.\+Ordered\+Set.\+index()}} y \mbox{\hyperlink{microservicio__data__stream_2venv_2_lib_2site-packages_2pip_2__vendor_2distlib_2resources_8py_source_l00187}{pip.\+\_\+vendor.\+distlib.\+resources.\+Resource\+Finder.\+iterator()}}.
+
+
+
+\label{doc-variable-members}
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_doc-variable-members}
+\doxysubsection{Documentación de datos miembro}
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad70e30c7fc172467444faccdb83469cb}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_EMPTY\_HASH@{\_EMPTY\_HASH}}
+\index{\_EMPTY\_HASH@{\_EMPTY\_HASH}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_EMPTY\_HASH}{\_EMPTY\_HASH}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad70e30c7fc172467444faccdb83469cb} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+\+EMPTY\+\_\+\+HASH = hash(range(0, 0))\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01940}{1940}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a0911c0f16eade96ccbdbc65f10af6b98}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_growing@{\_growing}}
+\index{\_growing@{\_growing}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_growing}{\_growing}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a0911c0f16eade96ccbdbc65f10af6b98} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+growing = self.\+\_\+step $>$ self.\+\_\+zero\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01967}{1967}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02044}{\+\_\+init\+\_\+len()}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02083}{index()}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a4d6ee2e28f3f76d9642eabf282935673}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_len@{\_len}}
+\index{\_len@{\_len}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_len}{\_len}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a4d6ee2e28f3f76d9642eabf282935673} 
+int setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+len = 0\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02055}{2055}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02097}{\+\_\+get\+\_\+by\+\_\+index()}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a01c71e02676ced5b1e27b64a5ca55362}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_start@{\_start}}
+\index{\_start@{\_start}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_start}{\_start}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a01c71e02676ced5b1e27b64a5ca55362} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+start = type(self.\+\_\+stop)(0)\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01946}{1946}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02097}{\+\_\+get\+\_\+by\+\_\+index()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02044}{\+\_\+init\+\_\+len()}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02083}{index()}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a43601c825c333f17a81d2b66c3d6068b}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_step@{\_step}}
+\index{\_step@{\_step}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_step}{\_step}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_a43601c825c333f17a81d2b66c3d6068b} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+step = type(self.\+\_\+stop -\/ self.\+\_\+start)(1)\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01947}{1947}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02097}{\+\_\+get\+\_\+by\+\_\+index()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02044}{\+\_\+init\+\_\+len()}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02083}{index()}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad0bd236b50262cbd43a6d6ee82d80c42}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_stop@{\_stop}}
+\index{\_stop@{\_stop}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_stop}{\_stop}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad0bd236b50262cbd43a6d6ee82d80c42} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+stop\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01945}{1945}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02044}{\+\_\+init\+\_\+len()}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02083}{index()}}.
+
+\Hypertarget{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad7cbbb53d4d20fc56d38b325464c7f0b}\index{setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}!\_zero@{\_zero}}
+\index{\_zero@{\_zero}!setuptools.\_vendor.more\_itertools.more.numeric\_range@{setuptools.\_vendor.more\_itertools.more.numeric\_range}}
+\doxysubsubsection{\texorpdfstring{\_zero}{\_zero}}
+{\footnotesize\ttfamily \label{classsetuptools_1_1__vendor_1_1more__itertools_1_1more_1_1numeric__range_ad7cbbb53d4d20fc56d38b325464c7f0b} 
+setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+numeric\+\_\+range.\+\_\+zero = type(self.\+\_\+step)(0)\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l01964}{1964}} del archivo \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02044}{\+\_\+init\+\_\+len()}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02083}{index()}}.
+
+
+
+La documentación de esta clase está generada del siguiente archivo\+:\begin{DoxyCompactItemize}
+\item 
+microservicio\+\_\+data\+\_\+stream/venv/\+Lib/site-\/packages/setuptools/\+\_\+vendor/more\+\_\+itertools/\mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py}{more.\+py}}\end{DoxyCompactItemize}

@@ -1,0 +1,205 @@
+\doxysection{Referencia de la clase pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable}
+\hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable}{}\label{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable}\index{pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}}
+\doxysubsubsection*{Métodos públicos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ae84942fc0d71d291d2e182b2a22b3ec9}{peek}} (self, default=\mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1more__itertools_1_1more_a8609013f8dc36b11eb0fc1fbd7bacb8b}{\+\_\+marker}})
+\item 
+\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a5258b001e2f95aef72004248e6820c8a}{elements}} (self)
+\item 
+\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a43fb97405b207943d88386dbde476ab8}{seek}} (self, index)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Atributos protegidos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ad086acd19c19286ddccaaf15cb885314}{\+\_\+source}} = iter(iterable)
+\item 
+list \mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ac43efb628f1e135ef43dc325520b1eae}{\+\_\+cache}} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\hyperlink{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a94bc7c2b97f5a16c5a097e4a2f5a7d6f}{\+\_\+index}} = None
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+\begin{DoxyVerb}Wrap an iterator to allow for seeking backward and forward. This
+progressively caches the items in the source iterable so they can be
+re-visited.
+
+Call :meth:`seek` with an index to seek to that position in the source
+iterable.
+
+To "reset" an iterator, seek to ``0``:
+
+    >>> from itertools import count
+    >>> it = seekable((str(n) for n in count()))
+    >>> next(it), next(it), next(it)
+    ('0', '1', '2')
+    >>> it.seek(0)
+    >>> next(it), next(it), next(it)
+    ('0', '1', '2')
+    >>> next(it)
+    '3'
+
+You can also seek forward:
+
+    >>> it = seekable((str(n) for n in range(20)))
+    >>> it.seek(10)
+    >>> next(it)
+    '10'
+    >>> it.seek(20)  # Seeking past the end of the source isn't a problem
+    >>> list(it)
+    []
+    >>> it.seek(0)  # Resetting works even after hitting the end
+    >>> next(it), next(it), next(it)
+    ('0', '1', '2')
+
+Call :meth:`peek` to look ahead one item without advancing the iterator:
+
+    >>> it = seekable('1234')
+    >>> it.peek()
+    '1'
+    >>> list(it)
+    ['1', '2', '3', '4']
+    >>> it.peek(default='empty')
+    'empty'
+
+Before the iterator is at its end, calling :func:`bool` on it will return
+``True``. After it will return ``False``:
+
+    >>> it = seekable('5678')
+    >>> bool(it)
+    True
+    >>> list(it)
+    ['5', '6', '7', '8']
+    >>> bool(it)
+    False
+
+You may view the contents of the cache with the :meth:`elements` method.
+That returns a :class:`SequenceView`, a view that updates automatically:
+
+    >>> it = seekable((str(n) for n in range(10)))
+    >>> next(it), next(it), next(it)
+    ('0', '1', '2')
+    >>> elements = it.elements()
+    >>> elements
+    SequenceView(['0', '1', '2'])
+    >>> next(it)
+    '3'
+    >>> elements
+    SequenceView(['0', '1', '2', '3'])
+
+By default, the cache grows as the source iterable progresses, so beware of
+wrapping very large or infinite iterables. Supply *maxlen* to limit the
+size of the cache (this of course limits how far back you can seek).
+
+    >>> from itertools import count
+    >>> it = seekable((str(n) for n in count()), maxlen=2)
+    >>> next(it), next(it), next(it), next(it)
+    ('0', '1', '2', '3')
+    >>> list(it.elements())
+    ['2', '3']
+    >>> it.seek(0)
+    >>> next(it), next(it), next(it), next(it)
+    ('2', '3', '4', '5')
+    >>> next(it)
+    '6'
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02734}{2734}} del archivo \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_doc-func-members}
+\doxysubsection{Documentación de funciones miembro}
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a5258b001e2f95aef72004248e6820c8a}\index{pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}!elements@{elements}}
+\index{elements@{elements}!pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}}
+\doxysubsubsection{\texorpdfstring{elements()}{elements()}}
+{\footnotesize\ttfamily \label{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a5258b001e2f95aef72004248e6820c8a} 
+pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+elements (\begin{DoxyParamCaption}\item[{}]{self}{}\end{DoxyParamCaption})}
+
+
+
+Definición en la línea \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02864}{2864}} del archivo \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{database_8py_source_l00095}{pip.\+\_\+vendor.\+distlib.\+database.\+Distribution\+Path.\+\_\+cache}}, \mbox{\hyperlink{locators_8py_source_l00113}{pip.\+\_\+vendor.\+distlib.\+locators.\+Locator.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l00981}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+bucket.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l00308}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+peekable.\+\_\+cache}} y \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02823}{\+\_\+cache}}.
+
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ae84942fc0d71d291d2e182b2a22b3ec9}\index{pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}!peek@{peek}}
+\index{peek@{peek}!pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}}
+\doxysubsubsection{\texorpdfstring{peek()}{peek()}}
+{\footnotesize\ttfamily \label{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ae84942fc0d71d291d2e182b2a22b3ec9} 
+pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+peek (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{}]{default}{ = {\ttfamily \mbox{\hyperlink{namespacepkg__resources_1_1__vendor_1_1more__itertools_1_1more_a8609013f8dc36b11eb0fc1fbd7bacb8b}{\+\_\+marker}}}}\end{DoxyParamCaption})}
+
+
+
+Definición en la línea \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02852}{2852}} del archivo \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{database_8py_source_l00095}{pip.\+\_\+vendor.\+distlib.\+database.\+Distribution\+Path.\+\_\+cache}}, \mbox{\hyperlink{locators_8py_source_l00113}{pip.\+\_\+vendor.\+distlib.\+locators.\+Locator.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l00981}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+bucket.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l00308}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+peekable.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02823}{\+\_\+cache}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2rich_2table_8py_source_l00112}{pip.\+\_\+vendor.\+rich.\+table.\+Column.\+\_\+index}} y \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02826}{\+\_\+index}}.
+
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a43fb97405b207943d88386dbde476ab8}\index{pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}!seek@{seek}}
+\index{seek@{seek}!pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}}
+\doxysubsubsection{\texorpdfstring{seek()}{seek()}}
+{\footnotesize\ttfamily \label{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a43fb97405b207943d88386dbde476ab8} 
+pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+seek (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{}]{index}{}\end{DoxyParamCaption})}
+
+
+
+Definición en la línea \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02867}{2867}} del archivo \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{database_8py_source_l00095}{pip.\+\_\+vendor.\+distlib.\+database.\+Distribution\+Path.\+\_\+cache}}, \mbox{\hyperlink{locators_8py_source_l00113}{pip.\+\_\+vendor.\+distlib.\+locators.\+Locator.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l00981}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+bucket.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l00308}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+peekable.\+\_\+cache}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02823}{\+\_\+cache}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pip_2__vendor_2rich_2table_8py_source_l00112}{pip.\+\_\+vendor.\+rich.\+table.\+Column.\+\_\+index}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02826}{\+\_\+index}} y \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2recipes_8py_source_l00108}{pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+recipes.\+consume()}}.
+
+
+
+\label{doc-variable-members}
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_doc-variable-members}
+\doxysubsection{Documentación de datos miembro}
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ac43efb628f1e135ef43dc325520b1eae}\index{pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}!\_cache@{\_cache}}
+\index{\_cache@{\_cache}!pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}}
+\doxysubsubsection{\texorpdfstring{\_cache}{\_cache}}
+{\footnotesize\ttfamily \label{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ac43efb628f1e135ef43dc325520b1eae} 
+pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+\_\+cache = \mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02823}{2823}} del archivo \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l00359}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+peekable.\+\_\+get\+\_\+slice()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l00905}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+bucket.\+\_\+get\+\_\+values()}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02864}{elements()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02692}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+elements()}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02852}{peek()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l00306}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+peekable.\+peek()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02680}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+peek()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l00322}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+peekable.\+prepend()}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02867}{seek()}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02695}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+seek()}}.
+
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a94bc7c2b97f5a16c5a097e4a2f5a7d6f}\index{pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}!\_index@{\_index}}
+\index{\_index@{\_index}!pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}}
+\doxysubsubsection{\texorpdfstring{\_index}{\_index}}
+{\footnotesize\ttfamily \label{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_a94bc7c2b97f5a16c5a097e4a2f5a7d6f} 
+pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+\_\+index = None\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02826}{2826}} del archivo \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02852}{peek()}}, \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02680}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+peek()}}, \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02867}{seek()}} y \mbox{\hyperlink{setuptools_2__vendor_2more__itertools_2more_8py_source_l02695}{setuptools.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+seek()}}.
+
+\Hypertarget{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ad086acd19c19286ddccaaf15cb885314}\index{pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}!\_source@{\_source}}
+\index{\_source@{\_source}!pkg\_resources.\_vendor.more\_itertools.more.seekable@{pkg\_resources.\_vendor.more\_itertools.more.seekable}}
+\doxysubsubsection{\texorpdfstring{\_source}{\_source}}
+{\footnotesize\ttfamily \label{classpkg__resources_1_1__vendor_1_1more__itertools_1_1more_1_1seekable_ad086acd19c19286ddccaaf15cb885314} 
+pkg\+\_\+resources.\+\_\+vendor.\+more\+\_\+itertools.\+more.\+seekable.\+\_\+source = iter(iterable)\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source_l02821}{2821}} del archivo \mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py_source}{more.\+py}}.
+
+
+
+La documentación de esta clase está generada del siguiente archivo\+:\begin{DoxyCompactItemize}
+\item 
+microservicio\+\_\+data\+\_\+stream/venv/\+Lib/site-\/packages/pkg\+\_\+resources/\+\_\+vendor/more\+\_\+itertools/\mbox{\hyperlink{pkg__resources_2__vendor_2more__itertools_2more_8py}{more.\+py}}\end{DoxyCompactItemize}

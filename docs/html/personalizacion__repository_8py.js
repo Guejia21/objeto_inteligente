@@ -1,0 +1,4 @@
+var personalizacion__repository_8py =
+[
+    [ "app.domain.repositories.personalizacion_repository.PersonalizacionRepository", "classapp_1_1domain_1_1repositories_1_1personalizacion__repository_1_1_personalizacion_repository.html", "classapp_1_1domain_1_1repositories_1_1personalizacion__repository_1_1_personalizacion_repository" ]
+];

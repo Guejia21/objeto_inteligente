@@ -1,0 +1,172 @@
+\doxysection{\+\_\+eventloop.\+py}
+\hypertarget{__core_2__eventloop_8py_source}{}\label{__core_2__eventloop_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_eventloop.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/anyio/\_core/\_eventloop.py}}
+\mbox{\hyperlink{__core_2__eventloop_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00001}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00003}00003\ \textcolor{keyword}{import}\ math}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00004}00004\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00005}00005\ \textcolor{keyword}{import}\ threading}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00006}00006\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacecollections_1_1abc}{collections.abc}}\ \textcolor{keyword}{import}\ Awaitable,\ Callable,\ Generator}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00007}00007\ \textcolor{keyword}{from}\ contextlib\ \textcolor{keyword}{import}\ contextmanager}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00008}00008\ \textcolor{keyword}{from}\ importlib\ \textcolor{keyword}{import}\ import\_module}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00009}00009\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TYPE\_CHECKING,\ Any,\ TypeVar}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00011}00011\ \textcolor{keyword}{import}\ sniffio}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00013}00013\ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 11):}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00014}00014\ \ \ \ \ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ TypeVarTuple,\ Unpack}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00015}00015\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00016}00016\ \ \ \ \ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ TypeVarTuple,\ Unpack}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00018}00018\ \textcolor{keywordflow}{if}\ TYPE\_CHECKING:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00019}00019\ \ \ \ \ \textcolor{keyword}{from}\ ..abc\ \textcolor{keyword}{import}\ AsyncBackend}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00021}00021\ \textcolor{comment}{\#\ This\ must\ be\ updated\ when\ new\ backends\ are\ introduced}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00022}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a20ea48a316fb91e7397695354c8b2e97}{00022}}\ BACKENDS\ =\ \textcolor{stringliteral}{"{}asyncio"{}},\ \textcolor{stringliteral}{"{}trio"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00023}00023\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00024}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a99d162a6cc903b3272faf4e21d8cf093}{00024}}\ T\_Retval\ =\ TypeVar(\textcolor{stringliteral}{"{}T\_Retval"{}})}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00025}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a236f1fe038f4cad08b462853a9d5e8af}{00025}}\ PosArgsT\ =\ \mbox{\hyperlink{classtyping__extensions_1_1_type_var_tuple}{TypeVarTuple}}(\textcolor{stringliteral}{"{}PosArgsT"{}})}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00026}00026\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00027}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_aa15e706c87fb0aae6971cd59bfbf848a}{00027}}\ threadlocals\ =\ threading.local()}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00028}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ae6d06a3d50a1edc660de1cce0061d1c1}{00028}}\ loaded\_backends:\ dict[str,\ type[AsyncBackend]]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00031}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_af33d203125b5cee86dec46596faceefa}{00031}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_af33d203125b5cee86dec46596faceefa}{run}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00032}00032\ \ \ \ \ func:\ Callable[[Unpack[PosArgsT]],\ Awaitable[T\_Retval]],}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00033}00033\ \ \ \ \ *args:\ Unpack[PosArgsT],}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00034}00034\ \ \ \ \ backend:\ str\ =\ \textcolor{stringliteral}{"{}asyncio"{}},}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00035}00035\ \ \ \ \ backend\_options:\ dict[str,\ Any]\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00036}00036\ )\ -\/>\ T\_Retval:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00037}00037\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00038}00038\ \textcolor{stringliteral}{\ \ \ \ Run\ the\ given\ coroutine\ function\ in\ an\ asynchronous\ event\ loop.}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00039}00039\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00040}00040\ \textcolor{stringliteral}{\ \ \ \ The\ current\ thread\ must\ not\ be\ already\ running\ an\ event\ loop.}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00041}00041\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00042}00042\ \textcolor{stringliteral}{\ \ \ \ :param\ func:\ a\ coroutine\ function}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ :param\ args:\ positional\ arguments\ to\ \`{}\`{}func\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ :param\ backend:\ name\ of\ the\ asynchronous\ event\ loop\ implementation\ –\ currently}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ either\ \`{}\`{}asyncio\`{}\`{}\ or\ \`{}\`{}trio\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ :param\ backend\_options:\ keyword\ arguments\ to\ call\ the\ backend\ \`{}\`{}run()\`{}\`{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ implementation\ with\ (documented\ :ref:\`{}here\ <backend\ options>\`{})}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ :return:\ the\ return\ value\ of\ the\ coroutine\ function}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ :raises\ RuntimeError:\ if\ an\ asynchronous\ event\ loop\ is\ already\ running\ in\ this}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ thread}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ :raises\ LookupError:\ if\ the\ named\ backend\ is\ not\ found}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00052}00052\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00053}00053\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00054}00054\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ asynclib\_name\ =\ sniffio.current\_async\_library()}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00056}00056\ \ \ \ \ \textcolor{keywordflow}{except}\ \mbox{\hyperlink{classsniffio_1_1__impl_1_1_async_library_not_found_error}{sniffio.AsyncLibraryNotFoundError}}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(f\textcolor{stringliteral}{"{}Already\ running\ \{asynclib\_name\}\ in\ this\ thread"{}})}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00060}00060\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00061}00061\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ async\_backend\ =\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ad56355e10d7c701f688579cb67d570b1}{get\_async\_backend}}(backend)}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00063}00063\ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ LookupError(f\textcolor{stringliteral}{"{}No\ such\ backend:\ \{backend\}"{}})\ \textcolor{keyword}{from}\ exc}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00066}00066\ \ \ \ \ token\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00067}00067\ \ \ \ \ \textcolor{keywordflow}{if}\ sniffio.current\_async\_library\_cvar.get(\textcolor{keywordtype}{None})\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Since\ we're\ in\ control\ of\ the\ event\ loop,\ we\ can\ cache\ the\ name\ of\ the\ async}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ library}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ token\ =\ sniffio.current\_async\_library\_cvar.set(backend)}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00071}00071\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00072}00072\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ backend\_options\ =\ backend\_options\ \textcolor{keywordflow}{or}\ \{\}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ async\_backend.run(func,\ args,\ \{\},\ backend\_options)}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00075}00075\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ token:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00077}00077\ \ \ \ \ \ \ \ \ \ \ \ \ sniffio.current\_async\_library\_cvar.reset(token)}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00079}00079\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00080}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a8ed29c36d17241df8ae1e237e347753c}{00080}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a8ed29c36d17241df8ae1e237e347753c}{sleep}}(delay:\ float)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00081}00081\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ Pause\ the\ current\ task\ for\ the\ specified\ duration.}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00083}00083\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ :param\ delay:\ the\ duration,\ in\ seconds}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00085}00085\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00087}00087\ \ \ \ \ \textcolor{keywordflow}{return}\ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ad56355e10d7c701f688579cb67d570b1}{get\_async\_backend}}().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a8ed29c36d17241df8ae1e237e347753c}{sleep}}(delay)}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00088}00088\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00090}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ac08ca4982191898405dcd79dbafb6eca}{00090}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ac08ca4982191898405dcd79dbafb6eca}{sleep\_forever}}()\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00091}00091\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ Pause\ the\ current\ task\ until\ it's\ cancelled.}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00093}00093\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ This\ is\ a\ shortcut\ for\ \`{}\`{}sleep(math.inf)\`{}\`{}.}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00095}00095\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ ..\ versionadded::\ 3.1}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00097}00097\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00099}00099\ \ \ \ \ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a8ed29c36d17241df8ae1e237e347753c}{sleep}}(math.inf)}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00102}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_aba740ed5c34c3993ddf16f3b31e9fbc1}{00102}}\ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_aba740ed5c34c3993ddf16f3b31e9fbc1}{sleep\_until}}(deadline:\ float)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00103}00103\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ Pause\ the\ current\ task\ until\ the\ given\ time.}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00105}00105\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ :param\ deadline:\ the\ absolute\ time\ to\ wake\ up\ at\ (according\ to\ the\ internal}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ monotonic\ clock\ of\ the\ event\ loop)}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00108}00108\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ ..\ versionadded::\ 3.1}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00110}00110\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00112}00112\ \ \ \ \ now\ =\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_abe0618a701fed77271c5b04f304bb63f}{current\_time}}()}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00113}00113\ \ \ \ \ await\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a8ed29c36d17241df8ae1e237e347753c}{sleep}}(max(deadline\ -\/\ now,\ 0))}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00114}00114\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00115}00115\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00116}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_abe0618a701fed77271c5b04f304bb63f}{00116}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_abe0618a701fed77271c5b04f304bb63f}{current\_time}}()\ -\/>\ float:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00117}00117\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00118}00118\ \textcolor{stringliteral}{\ \ \ \ Return\ the\ current\ value\ of\ the\ event\ loop's\ internal\ clock.}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00119}00119\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00120}00120\ \textcolor{stringliteral}{\ \ \ \ :return:\ the\ clock\ value\ (seconds)}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00121}00121\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00122}00122\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ad56355e10d7c701f688579cb67d570b1}{get\_async\_backend}}().\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_abe0618a701fed77271c5b04f304bb63f}{current\_time}}()}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00125}00125\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00126}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a44cad8aef85374e970304fcbac2e0f67}{00126}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a44cad8aef85374e970304fcbac2e0f67}{get\_all\_backends}}()\ -\/>\ tuple[str,\ ...]:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00127}00127\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ a\ tuple\ of\ the\ names\ of\ all\ built-\/in\ backends."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00128}00128\ \ \ \ \ \textcolor{keywordflow}{return}\ BACKENDS}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00130}00130\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00131}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a47e380f55bcaeb9572779b1c28da8a40}{00131}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a47e380f55bcaeb9572779b1c28da8a40}{get\_cancelled\_exc\_class}}()\ -\/>\ type[BaseException]:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00132}00132\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ the\ current\ async\ library's\ cancellation\ exception\ class."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00133}00133\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ad56355e10d7c701f688579cb67d570b1}{get\_async\_backend}}().cancelled\_exception\_class()}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00134}00134\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00135}00135\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00136}00136\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00137}00137\ \textcolor{comment}{\#\ Private\ API}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00138}00138\ \textcolor{comment}{\#}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00139}00139\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00140}00140\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00141}00141\ \textcolor{preprocessor}{@contextmanager}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00142}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a922e1e4bf61257ae443e22f498d1d4fe}{00142}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_a922e1e4bf61257ae443e22f498d1d4fe}{claim\_worker\_thread}}(}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00143}00143\ \ \ \ \ backend\_class:\ type[AsyncBackend],\ token:\ object}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00144}00144\ )\ -\/>\ Generator[Any,\ \textcolor{keywordtype}{None},\ \textcolor{keywordtype}{None}]:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00145}00145\ \ \ \ \ \textcolor{keyword}{from}\ ..lowlevel\ \textcolor{keyword}{import}\ EventLoopToken}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00147}00147\ \ \ \ \ threadlocals.current\_token\ =\ EventLoopToken(backend\_class,\ token)}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00148}00148\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{yield}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00150}00150\ \ \ \ \ \textcolor{keywordflow}{finally}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ del\ threadlocals.current\_token}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00154}\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ad56355e10d7c701f688579cb67d570b1}{00154}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespaceanyio_1_1__core_1_1__eventloop_ad56355e10d7c701f688579cb67d570b1}{get\_async\_backend}}(asynclib\_name:\ str\ |\ \textcolor{keywordtype}{None}\ =\ \textcolor{keywordtype}{None})\ -\/>\ type[AsyncBackend]:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00155}00155\ \ \ \ \ \textcolor{keywordflow}{if}\ asynclib\_name\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ asynclib\_name\ =\ sniffio.current\_async\_library()}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00158}00158\ \ \ \ \ \textcolor{comment}{\#\ We\ use\ our\ own\ dict\ instead\ of\ sys.modules\ to\ get\ the\ already\ imported\ back-\/end}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00159}00159\ \ \ \ \ \textcolor{comment}{\#\ class\ because\ the\ appropriate\ modules\ in\ sys.modules\ could\ potentially\ be\ only}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00160}00160\ \ \ \ \ \textcolor{comment}{\#\ partially\ initialized}}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00161}00161\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ loaded\_backends[asynclib\_name]}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00163}00163\ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ module\ =\ import\_module(f\textcolor{stringliteral}{"{}anyio.\_backends.\_\{asynclib\_name\}"{}})}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ loaded\_backends[asynclib\_name]\ =\ module.backend\_class}
+\DoxyCodeLine{\Hypertarget{__core_2__eventloop_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ module.backend\_class}
+
+\end{DoxyCode}

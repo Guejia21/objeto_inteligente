@@ -1,0 +1,91 @@
+\doxysection{watchfilesreload.\+py}
+\hypertarget{watchfilesreload_8py_source}{}\label{watchfilesreload_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/uvicorn/supervisors/watchfilesreload.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/uvicorn/supervisors/watchfilesreload.py}}
+\mbox{\hyperlink{watchfilesreload_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00001}\mbox{\hyperlink{namespaceuvicorn_1_1supervisors_1_1watchfilesreload}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00003}00003\ \textcolor{keyword}{from}\ pathlib\ \textcolor{keyword}{import}\ Path}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00004}00004\ \textcolor{keyword}{from}\ socket\ \textcolor{keyword}{import}\ socket}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00005}00005\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Callable}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00007}00007\ \textcolor{keyword}{from}\ watchfiles\ \textcolor{keyword}{import}\ watch}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceuvicorn_1_1config}{uvicorn.config}}\ \textcolor{keyword}{import}\ Config}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00010}00010\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespaceuvicorn_1_1supervisors_1_1basereload}{uvicorn.supervisors.basereload}}\ \textcolor{keyword}{import}\ BaseReload}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00012}00012\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00013}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter}{00013}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter}{FileFilter}}:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00014}00014\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ config:\ Config):}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ default\_includes\ =\ [\textcolor{stringliteral}{"{}*.py"{}}]}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00016}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_a4ef5f51892c59b9bd125e3ffff7d45d1}{00016}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_a4ef5f51892c59b9bd125e3ffff7d45d1}{includes}}\ =\ [default\ \textcolor{keywordflow}{for}\ default\ \textcolor{keywordflow}{in}\ default\_includes\ \textcolor{keywordflow}{if}\ default\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ config.reload\_excludes]}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00017}00017\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_a4ef5f51892c59b9bd125e3ffff7d45d1}{includes}}.extend(config.reload\_includes)}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_a4ef5f51892c59b9bd125e3ffff7d45d1}{includes}}\ =\ list(set(self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_a4ef5f51892c59b9bd125e3ffff7d45d1}{includes}}))}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00019}00019\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ default\_excludes\ =\ [\textcolor{stringliteral}{"{}.*"{}},\ \textcolor{stringliteral}{"{}.py[cod]"{}},\ \textcolor{stringliteral}{"{}.sw.*"{}},\ \textcolor{stringliteral}{"{}\string~*"{}}]}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00021}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_abe6844261dff7814545dba29c85851bc}{00021}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_abe6844261dff7814545dba29c85851bc}{excludes}}\ =\ [default\ \textcolor{keywordflow}{for}\ default\ \textcolor{keywordflow}{in}\ default\_excludes\ \textcolor{keywordflow}{if}\ default\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ config.reload\_includes]}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00022}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_aea9446489889625c056d751b1ba9f586}{00022}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_aea9446489889625c056d751b1ba9f586}{exclude\_dirs}}\ =\ []}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ e\ \textcolor{keywordflow}{in}\ config.reload\_excludes:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ p\ =\ Path(e)}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ is\_dir\ =\ p.is\_dir()}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ OSError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ gets\ raised\ on\ Windows\ for\ values\ like\ "{}*.py"{}}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ is\_dir\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_dir:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_aea9446489889625c056d751b1ba9f586}{exclude\_dirs}}.append(p)}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_abe6844261dff7814545dba29c85851bc}{excludes}}.append(e)\ \ \textcolor{comment}{\#\ pragma:\ full\ coverage}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_abe6844261dff7814545dba29c85851bc}{excludes}}\ =\ list(set(self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_abe6844261dff7814545dba29c85851bc}{excludes}}))}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00037}00037\ \ \ \ \ \textcolor{keyword}{def\ }\_\_call\_\_(self,\ path:\ Path)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ include\_pattern\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_a4ef5f51892c59b9bd125e3ffff7d45d1}{includes}}:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ path.match(include\_pattern):}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ str(path).endswith(include\_pattern):}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}\ \ \textcolor{comment}{\#\ pragma:\ full\ coverage}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ exclude\_dir\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_aea9446489889625c056d751b1ba9f586}{exclude\_dirs}}:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ exclude\_dir\ \textcolor{keywordflow}{in}\ path.parents:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00046}00046\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ exclude\_pattern\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter_abe6844261dff7814545dba29c85851bc}{excludes}}:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ path.match(exclude\_pattern):}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}\ \ \textcolor{comment}{\#\ pragma:\ full\ coverage}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00051}00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00055}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload}{00055}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload}{WatchFilesReload}}(\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload}{BaseReload}}):}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00056}00056\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ config:\ Config,}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ target:\ Callable[[list[socket]\ |\ \textcolor{keywordtype}{None}],\ \textcolor{keywordtype}{None}],}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ sockets:\ list[socket],}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00061}00061\ \ \ \ \ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(config,\ target,\ sockets)}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00063}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload}{00063}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_ad436f6a1a9e4df02e6b3fb0a6de60331}{reloader\_name}}\ =\ \textcolor{stringliteral}{"{}WatchFiles"{}}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00064}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_ab08d797121b484ae7704e94f9d0b2566}{00064}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_ab08d797121b484ae7704e94f9d0b2566}{reload\_dirs}}\ =\ []}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ directory\ \textcolor{keywordflow}{in}\ config.reload\_dirs:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_ab08d797121b484ae7704e94f9d0b2566}{reload\_dirs}}.append(directory)}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00067}00067\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00068}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_a1523c3a4c51f42d46873ad3acac6ee04}{00068}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_a1523c3a4c51f42d46873ad3acac6ee04}{watch\_filter}}\ =\ \mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_file_filter}{FileFilter}}(config)}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ self.watcher\ =\ watch(}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \ \ \ \ *self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_ab08d797121b484ae7704e94f9d0b2566}{reload\_dirs}},}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ watch\_filter=\textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00072}00072\ \ \ \ \ \ \ \ \ \ \ \ \ stop\_event=self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_a11f5b0605d6368355f1f4c4ca6a24055}{should\_exit}},}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00073}00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ using\ yield\_on\_timeout\ here\ mostly\ to\ make\ sure\ tests\ don't}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ hang\ forever,\ won't\ affect\ the\ class's\ behavior}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ \ \ \ \ yield\_on\_timeout=\textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00076}00076\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00077}00077\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00078}\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_a1a4a58c6cb5e40cca0b9e4264aaa27a1}{00078}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_a1a4a58c6cb5e40cca0b9e4264aaa27a1}{should\_restart}}(self)\ -\/>\ list[Path]\ |\ None:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00079}00079\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1basereload_1_1_base_reload_a97e3481850d5bda8202517105a0eceb9}{pause}}()}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00081}00081\ \ \ \ \ \ \ \ \ changes\ =\ next(self.watcher)}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ changes:}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ unique\_paths\ =\ \{Path(c[1])\ \textcolor{keywordflow}{for}\ c\ \textcolor{keywordflow}{in}\ changes\}}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ [p\ \textcolor{keywordflow}{for}\ p\ \textcolor{keywordflow}{in}\ unique\_paths\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classuvicorn_1_1supervisors_1_1watchfilesreload_1_1_watch_files_reload_a1523c3a4c51f42d46873ad3acac6ee04}{watch\_filter}}(p)]}
+\DoxyCodeLine{\Hypertarget{watchfilesreload_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+
+\end{DoxyCode}

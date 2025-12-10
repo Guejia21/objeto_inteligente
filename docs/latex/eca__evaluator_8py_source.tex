@@ -1,0 +1,211 @@
+\doxysection{eca\+\_\+evaluator.\+py}
+\hypertarget{eca__evaluator_8py_source}{}\label{eca__evaluator_8py_source}\index{micro\_automatizacion\_ecas/app/domain/eca\_evaluator.py@{micro\_automatizacion\_ecas/app/domain/eca\_evaluator.py}}
+\mbox{\hyperlink{eca__evaluator_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00001}\mbox{\hyperlink{namespaceeca__evaluator}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Evaluador\ de\ condiciones\ ECA"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00002}00002\ \textcolor{keyword}{import}\ httpx}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00003}00003\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Dict,\ Any,\ Callable}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00004}00004\ \textcolor{keyword}{from}\ infra.logging.Logging\ \textcolor{keyword}{import}\ logger}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00007}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator}{00007}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator}{ECAEvaluator}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00008}00008\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Evalúa\ condiciones\ ECA\ y\ ejecuta\ acciones\ cuando\ se\ cumplen"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00009}00009\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00010}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ac143c76cf763266a8395eceaf0f9005b}{00010}}\ \ \ \ \ COMPARATORS\ =\ \{}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00011}00011\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mayor"{}}:\ \textcolor{keyword}{lambda}\ a,\ b:\ a\ >\ b,}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00012}00012\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}menor"{}}:\ \textcolor{keyword}{lambda}\ a,\ b:\ a\ <\ b,}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00013}00013\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}igual"{}}:\ \textcolor{keyword}{lambda}\ a,\ b:\ a\ ==\ b,}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00014}00014\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}mayor\_igual"{}}:\ \textcolor{keyword}{lambda}\ a,\ b:\ a\ >=\ b,}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}menor\_igual"{}}:\ \textcolor{keyword}{lambda}\ a,\ b:\ a\ <=\ b,}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00016}00016\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}diferente"{}}:\ \textcolor{keyword}{lambda}\ a,\ b:\ a\ !=\ b,}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00017}00017\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00018}00018\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00019}00019\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ eca\_config:\ Dict[str,\ Any]):}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00020}00020\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00021}00021\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Inicializa\ el\ evaluador\ con\ la\ configuración\ del\ ECA}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00022}00022\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00023}00023\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00024}00024\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ eca\_config:\ Diccionario\ del\ eca\ (obtenido\ de\ getDiccionarioECA)}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00025}00025\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00026}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a082a044020a5c6e2ac43724f484f400b}{00026}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a082a044020a5c6e2ac43724f484f400b}{config}}\ =\ eca\_config}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00027}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a724fca4779e04d7553a83811b570f8f1}{00027}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a724fca4779e04d7553a83811b570f8f1}{name}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}name\_eca"{}},\ \textcolor{stringliteral}{"{}ECA\_Sin\_Nombre"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00028}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab0021fb899dafa8522a28de3a995594b}{00028}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab0021fb899dafa8522a28de3a995594b}{state}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}state\_eca"{}},\ \textcolor{stringliteral}{"{}off"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00029}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a754ea8d01524f25350fceeae4454d81e}{00029}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a754ea8d01524f25350fceeae4454d81e}{user\_eca}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}user\_eca"{}},\ \textcolor{stringliteral}{"{}default"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Evento}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00032}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab55e6cc8e705a2d8c3777c30875e3cd7}{00032}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab55e6cc8e705a2d8c3777c30875e3cd7}{event\_object\_id}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}id\_event\_object"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00033}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab60271370a2ead4d1b2d32e6efd46834}{00033}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab60271370a2ead4d1b2d32e6efd46834}{event\_object\_ip}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}ip\_event\_object"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00034}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a357c3f343745dfbbc41125785aaa67b8}{00034}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a357c3f343745dfbbc41125785aaa67b8}{event\_resource\_id}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}id\_event\_resource"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Condición}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00037}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ac55aa39d2525a90104ab1f37ade7bac5}{00037}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ac55aa39d2525a90104ab1f37ade7bac5}{comparator}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}comparator\_condition"{}},\ \textcolor{stringliteral}{"{}igual"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00038}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aeb8f44b3b42732ee7a7da2a64988971c}{00038}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aeb8f44b3b42732ee7a7da2a64988971c}{threshold\_value}}\ =\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a02f5bd40ea71edd2a1020362284f16ce}{\_parse\_value}}(}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ eca\_config.get(\textcolor{stringliteral}{"{}variable\_condition"{}}),}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ eca\_config.get(\textcolor{stringliteral}{"{}type\_variable\_condition"{}},\ \textcolor{stringliteral}{"{}string"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Acción}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00044}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a2f83b664d71db4bbb642e3b5163da4c6}{00044}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a2f83b664d71db4bbb642e3b5163da4c6}{action\_object\_id}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}id\_action\_object"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00045}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a201cd6bb4cc03fc18a23f36059332473}{00045}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a201cd6bb4cc03fc18a23f36059332473}{action\_object\_ip}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}ip\_action\_object"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00046}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aa96b5f161b6e6708ea60cdd04bd43926}{00046}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aa96b5f161b6e6708ea60cdd04bd43926}{action\_resource\_id}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}id\_action\_resource"{}},\ \textcolor{stringliteral}{"{}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00047}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a5e3773a7d39edf23b4f38ac009edc488}{00047}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a5e3773a7d39edf23b4f38ac009edc488}{action\_value}}\ =\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a02f5bd40ea71edd2a1020362284f16ce}{\_parse\_value}}(}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ eca\_config.get(\textcolor{stringliteral}{"{}variable\_action"{}}),}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ eca\_config.get(\textcolor{stringliteral}{"{}type\_variable\_action"{}},\ \textcolor{stringliteral}{"{}string"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00051}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab759bc5975b91d124bd2295148dacb52}{00051}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab759bc5975b91d124bd2295148dacb52}{action\_comparator}}\ =\ eca\_config.get(\textcolor{stringliteral}{"{}comparator\_action"{}},\ \textcolor{stringliteral}{"{}igual"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Estado\ interno}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00054}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a16a1f01eb4a666d11cf418c81881fb29}{00054}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a16a1f01eb4a666d11cf418c81881fb29}{last\_action\_executed}}\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00055}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a98767f92f966247cbf5e08dbcd1ba5f4}{00055}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a98767f92f966247cbf5e08dbcd1ba5f4}{is\_running}}\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00057}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a02f5bd40ea71edd2a1020362284f16ce}{00057}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a02f5bd40ea71edd2a1020362284f16ce}{\_parse\_value}}(self,\ value:\ Any,\ value\_type:\ str)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Convierte\ el\ valor\ al\ tipo\ correcto"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ value\_type\ ==\ \textcolor{stringliteral}{"{}float"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ float(value)}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00064}00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ value\_type\ ==\ \textcolor{stringliteral}{"{}int"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ int(value)}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ value\_type\ ==\ \textcolor{stringliteral}{"{}bool"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value\ \textcolor{keywordflow}{in}\ [\textcolor{keyword}{True},\ \textcolor{stringliteral}{"{}true"{}},\ \textcolor{stringliteral}{"{}True"{}},\ \textcolor{stringliteral}{"{}1"{}},\ 1,\ \textcolor{stringliteral}{"{}on"{}},\ \textcolor{stringliteral}{"{}ON"{}}]}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ str(value)}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00070}00070\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ (ValueError,\ TypeError):}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00071}00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ value}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00072}00072\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00073}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab85fbd2232d81842f22d9eb578286ec7}{00073}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab85fbd2232d81842f22d9eb578286ec7}{evaluate\_condition}}(self,\ sensor\_value:\ Any)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00075}00075\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Evalúa\ si\ la\ condición\ del\ ECA\ se\ cumple}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00076}00076\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00077}00077\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ sensor\_value:\ Valor\ actual\ del\ sensor}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ True\ si\ la\ condición\ se\ cumple,\ False\ en\ caso\ contrario}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab0021fb899dafa8522a28de3a995594b}{state}}\ !=\ \textcolor{stringliteral}{"{}on"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ comparator\_func\ =\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ac143c76cf763266a8395eceaf0f9005b}{COMPARATORS}}.get(self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ac55aa39d2525a90104ab1f37ade7bac5}{comparator}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ comparator\_func:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ \ \ \ \ logger.warning(f\textcolor{stringliteral}{"{}Comparador\ desconocido:\ \{self.comparator\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00091}00091\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00092}00092\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Convertir\ sensor\_value\ al\ mismo\ tipo\ que\ threshold\ para\ que\ la\ comparación\ sea\ válida}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aeb8f44b3b42732ee7a7da2a64988971c}{threshold\_value}},\ float):}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sensor\_value\ =\ float(sensor\_value)}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aeb8f44b3b42732ee7a7da2a64988971c}{threshold\_value}},\ int):}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sensor\_value\ =\ int(sensor\_value)}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aeb8f44b3b42732ee7a7da2a64988971c}{threshold\_value}},\ bool):}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sensor\_value\ =\ sensor\_value\ \textcolor{keywordflow}{in}\ [\textcolor{keyword}{True},\ \textcolor{stringliteral}{"{}true"{}},\ \textcolor{stringliteral}{"{}True"{}},\ \textcolor{stringliteral}{"{}1"{}},\ 1]}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#logger.info(f"{}Evaluando\ condición:\ \{sensor\_value\}\ \{self.comparator\}\ \{self.threshold\_value\}"{})}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ result\ =\ comparator\_func(sensor\_value,\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_aeb8f44b3b42732ee7a7da2a64988971c}{threshold\_value}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ (ValueError,\ TypeError)\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00104}00104\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}Error\ comparando\ valores:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00106}00106\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00107}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab9e473c16a1082da7d6f506d3469909e}{00107}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab9e473c16a1082da7d6f506d3469909e}{execute\_action}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Ejecuta\ la\ acción\ del\ ECA\ via\ HTTP}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ True\ si\ la\ acción\ se\ ejecutó\ correctamente}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Determinar\ el\ comando\ basado\ en\ el\ comparador\ de\ acción}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab759bc5975b91d124bd2295148dacb52}{action\_comparator}}\ ==\ \textcolor{stringliteral}{"{}igual"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a5e3773a7d39edf23b4f38ac009edc488}{action\_value}},\ bool):}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ comando\ =\ \textcolor{stringliteral}{"{}on"{}}\ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a5e3773a7d39edf23b4f38ac009edc488}{action\_value}}\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{"{}off"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ comando\ =\ \textcolor{stringliteral}{"{}set"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ comando\ =\ \textcolor{stringliteral}{"{}set"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Construir\ URL\ del\ objeto\ acción}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}http://\{self.action\_object\_ip\}:8003/Datastreams/SetDatastream?osid=\{self.action\_object\_id\}\&idDataStream=\{self.action\_resource\_id\}\&comando=\{comando\}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ httpx.AsyncClient(timeout=10.0)\ \textcolor{keyword}{as}\ client:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ comando\ ==\ \textcolor{stringliteral}{"{}set"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Para\ set,\ enviar\ el\ valor\ en\ el\ body}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ await\ client.post(url,\ json=\{\textcolor{stringliteral}{"{}value"{}}:\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a5e3773a7d39edf23b4f38ac009edc488}{action\_value}}\})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Para\ on/off,\ solo\ hacer\ POST}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ await\ client.post(url)}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response.status\_code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Acción\ ejecutada\ -\/\ \{comando\}\ en\ \{self.action\_resource\_id\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a16a1f01eb4a666d11cf418c81881fb29}{last\_action\_executed}}\ =\ comando}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Error\ HTTP\ \{response.status\_code\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ httpx.TimeoutException:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Timeout\ conectando\ a\ \{self.action\_object\_ip\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Error\ ejecutando\ acción:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00149}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a9aa8d7fc67ced9dbe7abcf7e2991b8d1}{00149}}\ \ \ \ \ \textcolor{keyword}{async\ def\ }\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a9aa8d7fc67ced9dbe7abcf7e2991b8d1}{execute\_inverse\_action}}(self)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Ejecuta\ la\ acción\ inversa\ del\ ECA\ via\ HTTP}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00152}00152\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00153}00153\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00154}00154\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ True\ si\ la\ acción\ inversa\ se\ ejecutó\ correctamente}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a16a1f01eb4a666d11cf418c81881fb29}{last\_action\_executed}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Determinar\ el\ comando\ inverso}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a16a1f01eb4a666d11cf418c81881fb29}{last\_action\_executed}}\ ==\ \textcolor{stringliteral}{"{}on"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ comando\ =\ \textcolor{stringliteral}{"{}off"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a16a1f01eb4a666d11cf418c81881fb29}{last\_action\_executed}}\ ==\ \textcolor{stringliteral}{"{}off"{}}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ comando\ =\ \textcolor{stringliteral}{"{}on"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Para\ "{}set"{},\ no\ hay\ acción\ inversa\ definida}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Construir\ URL\ del\ objeto\ acción}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ url\ =\ f\textcolor{stringliteral}{"{}http://\{self.action\_object\_ip\}:8003/Datastreams/SetDatastream?osid=\{self.action\_object\_id\}\&idDataStream=\{self.action\_resource\_id\}\&comando=\{comando\}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{async}\ \textcolor{keyword}{with}\ httpx.AsyncClient(timeout=10.0)\ \textcolor{keyword}{as}\ client:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ await\ client.post(url)}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response.status\_code\ ==\ 200:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.info(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Acción\ inversa\ ejecutada\ -\/\ \{comando\}\ en\ \{self.action\_resource\_id\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a16a1f01eb4a666d11cf418c81881fb29}{last\_action\_executed}}\ =\ comando}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Error\ HTTP\ \{response.status\_code\}\ en\ acción\ inversa"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ httpx.TimeoutException:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Timeout\ conectando\ a\ \{self.action\_object\_ip\}\ en\ acción\ inversa"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ e:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ logger.error(f\textcolor{stringliteral}{"{}ECA\ [\{self.name\}]:\ Error\ ejecutando\ acción\ inversa:\ \{e\}"{}})}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00190}\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab3e363f2df026a7a922e1f9b26c5c112}{00190}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab3e363f2df026a7a922e1f9b26c5c112}{process\_telemetry}}(self,\ telemetry:\ Dict[str,\ Any])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00192}00192\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Procesa\ un\ mensaje\ de\ telemetría\ y\ evalúa\ si\ debe\ ejecutar\ la\ acción}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00193}00193\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00194}00194\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Args:}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00195}00195\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ telemetry:\ Diccionario\ con\ los\ valores\ de\ telemetría}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00196}00196\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00197}00197\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns:}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00198}00198\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ True\ si\ se\ debe\ ejecutar\ la\ acción}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00199}00199\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Verificar\ si\ el\ recurso\ del\ evento\ está\ en\ la\ telemetría}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a357c3f343745dfbbc41125785aaa67b8}{event\_resource\_id}}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ telemetry:}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ sensor\_value\ =\ telemetry[self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_a357c3f343745dfbbc41125785aaa67b8}{event\_resource\_id}}]}
+\DoxyCodeLine{\Hypertarget{eca__evaluator_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classeca__evaluator_1_1_e_c_a_evaluator_ab85fbd2232d81842f22d9eb578286ec7}{evaluate\_condition}}(sensor\_value)}
+
+\end{DoxyCode}

@@ -1,0 +1,26 @@
+var classstarlette_1_1testclient_1_1_test_client =
+[
+    [ "_portal_factory", "classstarlette_1_1testclient_1_1_test_client.html#a877dc4a1187f7e9bfc776a871af9e0b6", null ],
+    [ "delete", "classstarlette_1_1testclient_1_1_test_client.html#ad4b61196a5944033dc61cba8379c39c7", null ],
+    [ "get", "classstarlette_1_1testclient_1_1_test_client.html#ab61122c8d6e35e3a9da9451c13d8a544", null ],
+    [ "head", "classstarlette_1_1testclient_1_1_test_client.html#a98d6e57a2b9a3f25457584aa1deaa2d6", null ],
+    [ "lifespan", "classstarlette_1_1testclient_1_1_test_client.html#ae30bf9729e3a1c4bf9c508c0a8a10568", null ],
+    [ "options", "classstarlette_1_1testclient_1_1_test_client.html#a2847fe762069c28a1ca342ce76cb6f90", null ],
+    [ "patch", "classstarlette_1_1testclient_1_1_test_client.html#a86567b0eea6eb616f5a4dfa997746a17", null ],
+    [ "post", "classstarlette_1_1testclient_1_1_test_client.html#a2ab08783f141a9ca8f1e22de2d004d8a", null ],
+    [ "put", "classstarlette_1_1testclient_1_1_test_client.html#a22e11b589322c68da94d1a31ec1e8985", null ],
+    [ "request", "classstarlette_1_1testclient_1_1_test_client.html#aa8149176cf84297758ca72f384619edb", null ],
+    [ "wait_shutdown", "classstarlette_1_1testclient_1_1_test_client.html#a0ad5517c0e5dde39792e42cefa678fc2", null ],
+    [ "wait_startup", "classstarlette_1_1testclient_1_1_test_client.html#ab682b2f78f99e53107f25e7eab840036", null ],
+    [ "websocket_connect", "classstarlette_1_1testclient_1_1_test_client.html#a852c25fa16440051ca423b5fde33f28c", null ],
+    [ "app", "classstarlette_1_1testclient_1_1_test_client.html#a4f5731a7b008461a75390db5f3d09532", null ],
+    [ "app_state", "classstarlette_1_1testclient_1_1_test_client.html#a7e805b09fb3dc9b0ad1a8e3b23ddf604", null ],
+    [ "async_backend", "classstarlette_1_1testclient_1_1_test_client.html#ad3e0bc6f2f982a2c84bcf40eeefe175c", null ],
+    [ "exit_stack", "classstarlette_1_1testclient_1_1_test_client.html#aeadf60ced24dd8428c3ecb16a33a785f", null ],
+    [ "portal", "classstarlette_1_1testclient_1_1_test_client.html#a8e5b7679b90fca677ae9e2770a240335", null ],
+    [ "stream_receive", "classstarlette_1_1testclient_1_1_test_client.html#a9f5dbdfe41221a5f6758e1cab9b6fe3e", null ],
+    [ "stream_send", "classstarlette_1_1testclient_1_1_test_client.html#a8f6ca86858f21ac8bfb41fd99a401677", null ],
+    [ "task", "classstarlette_1_1testclient_1_1_test_client.html#a9f95a7a899416020e0d4b78bcb6cf407", null ],
+    [ "wait_shutdown", "classstarlette_1_1testclient_1_1_test_client.html#a1c3a0564dc6f08bf0baa3e9657991e30", null ],
+    [ "wait_startup", "classstarlette_1_1testclient_1_1_test_client.html#a025741a6a08f394a9bc18808a8184ec2", null ]
+];

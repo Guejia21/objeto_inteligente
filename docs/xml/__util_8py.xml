@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.15.0" xml:lang="es">
+  <compounddef id="__util_8py" kind="file" language="Python">
+    <compoundname>_util.py</compoundname>
+    <innerclass refid="classh11_1_1__util_1_1_protocol_error" prot="public">h11::_util::ProtocolError</innerclass>
+    <innerclass refid="classh11_1_1__util_1_1_local_protocol_error" prot="public">h11::_util::LocalProtocolError</innerclass>
+    <innerclass refid="classh11_1_1__util_1_1_remote_protocol_error" prot="public">h11::_util::RemoteProtocolError</innerclass>
+    <innerclass refid="classh11_1_1__util_1_1_sentinel" prot="public">h11::_util::Sentinel</innerclass>
+    <innernamespace refid="namespaceh11">h11</innernamespace>
+    <innernamespace refid="namespaceh11_1_1__util">h11::_util</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1" refid="namespaceh11_1_1__util" refkind="compound"><highlight class="keyword">from</highlight><highlight class="normal"><sp/>typing<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>Any,<sp/>Dict,<sp/>NoReturn,<sp/>Pattern,<sp/>Tuple,<sp/>Type,<sp/>TypeVar,<sp/>Union</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal">__all__<sp/>=<sp/>[</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;ProtocolError&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;LocalProtocolError&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;RemoteProtocolError&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;validate&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;bytesify&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="9"><highlight class="normal">]</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12" refid="classh11_1_1__util_1_1_protocol_error" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classh11_1_1__util_1_1_protocol_error" kindref="compound">ProtocolError</ref>(Exception):</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;&quot;&quot;Exception<sp/>indicating<sp/>a<sp/>violation<sp/>of<sp/>the<sp/>HTTP/1.1<sp/>protocol.</highlight></codeline>
+<codeline lineno="14"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="15"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>This<sp/>as<sp/>an<sp/>abstract<sp/>base<sp/>class,<sp/>with<sp/>two<sp/>concrete<sp/>base<sp/>classes:</highlight></codeline>
+<codeline lineno="16"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>:exc:`LocalProtocolError`,<sp/>which<sp/>indicates<sp/>that<sp/>you<sp/>tried<sp/>to<sp/>do<sp/>something</highlight></codeline>
+<codeline lineno="17"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>that<sp/>HTTP/1.1<sp/>says<sp/>is<sp/>illegal,<sp/>and<sp/>:exc:`RemoteProtocolError`,<sp/>which</highlight></codeline>
+<codeline lineno="18"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>indicates<sp/>that<sp/>the<sp/>remote<sp/>peer<sp/>tried<sp/>to<sp/>do<sp/>something<sp/>that<sp/>HTTP/1.1<sp/>says<sp/>is</highlight></codeline>
+<codeline lineno="19"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>illegal.<sp/>See<sp/>:ref:`error-handling`<sp/>for<sp/>details.</highlight></codeline>
+<codeline lineno="20"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="21"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>In<sp/>addition<sp/>to<sp/>the<sp/>normal<sp/>:exc:`Exception`<sp/>features,<sp/>it<sp/>has<sp/>one<sp/>attribute:</highlight></codeline>
+<codeline lineno="22"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="23"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>..<sp/>attribute::<sp/>error_status_hint</highlight></codeline>
+<codeline lineno="24"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="25"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>This<sp/>gives<sp/>a<sp/>suggestion<sp/>as<sp/>to<sp/>what<sp/>status<sp/>code<sp/>a<sp/>server<sp/>might<sp/>use<sp/>if</highlight></codeline>
+<codeline lineno="26"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>this<sp/>error<sp/>occurred<sp/>as<sp/>part<sp/>of<sp/>a<sp/>request.</highlight></codeline>
+<codeline lineno="27"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="28"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>For<sp/>a<sp/>:exc:`RemoteProtocolError`,<sp/>this<sp/>is<sp/>useful<sp/>as<sp/>a<sp/>suggestion<sp/>for</highlight></codeline>
+<codeline lineno="29"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>how<sp/>you<sp/>might<sp/>want<sp/>to<sp/>respond<sp/>to<sp/>a<sp/>misbehaving<sp/>peer,<sp/>if<sp/>you&apos;re</highlight></codeline>
+<codeline lineno="30"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>implementing<sp/>a<sp/>server.</highlight></codeline>
+<codeline lineno="31"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="32"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>For<sp/>a<sp/>:exc:`LocalProtocolError`,<sp/>this<sp/>can<sp/>be<sp/>taken<sp/>as<sp/>a<sp/>suggestion<sp/>for</highlight></codeline>
+<codeline lineno="33"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>how<sp/>your<sp/>peer<sp/>might<sp/>have<sp/>responded<sp/>to<sp/>*you*<sp/>if<sp/>h11<sp/>had<sp/>allowed<sp/>you<sp/>to</highlight></codeline>
+<codeline lineno="34"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>continue.</highlight></codeline>
+<codeline lineno="35"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="36"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>The<sp/>default<sp/>is<sp/>400<sp/>Bad<sp/>Request,<sp/>a<sp/>generic<sp/>catch-all<sp/>for<sp/>protocol</highlight></codeline>
+<codeline lineno="37"><highlight class="stringliteral"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>violations.</highlight></codeline>
+<codeline lineno="38"><highlight class="stringliteral"></highlight></codeline>
+<codeline lineno="39"><highlight class="stringliteral"><sp/><sp/><sp/><sp/>&quot;&quot;&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__init__(self,<sp/>msg:<sp/>str,<sp/>error_status_hint:<sp/>int<sp/>=<sp/>400)<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>type(self)<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/>ProtocolError:</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>TypeError(</highlight><highlight class="stringliteral">&quot;tried<sp/>to<sp/>directly<sp/>instantiate<sp/>ProtocolError&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Exception.__init__(self,<sp/>msg)</highlight></codeline>
+<codeline lineno="45" refid="classh11_1_1__util_1_1_protocol_error_1a53bf1886c5d923e4db5686640471f965" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classh11_1_1__util_1_1_protocol_error_1a53bf1886c5d923e4db5686640471f965" kindref="member">error_status_hint</ref><sp/>=<sp/>error_status_hint</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Strategy:<sp/>there<sp/>are<sp/>a<sp/>number<sp/>of<sp/>public<sp/>APIs<sp/>where<sp/>a<sp/>LocalProtocolError<sp/>can</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight><highlight class="comment">#<sp/>be<sp/>raised<sp/>(send(),<sp/>all<sp/>the<sp/>different<sp/>event<sp/>constructors,<sp/>...),<sp/>and<sp/>only<sp/>one</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight><highlight class="comment">#<sp/>public<sp/>API<sp/>where<sp/>RemoteProtocolError<sp/>can<sp/>be<sp/>raised</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight><highlight class="comment">#<sp/>(receive_data()).<sp/>Therefore<sp/>we<sp/>always<sp/>raise<sp/>LocalProtocolError<sp/>internally,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight><highlight class="comment">#<sp/>and<sp/>then<sp/>receive_data<sp/>will<sp/>translate<sp/>this<sp/>into<sp/>a<sp/>RemoteProtocolError.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight><highlight class="comment">#</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Internally:</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight><highlight class="comment">#<sp/><sp/><sp/>LocalProtocolError<sp/>is<sp/>the<sp/>generic<sp/>&quot;ProtocolError&quot;.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Externally:</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight><highlight class="comment">#<sp/><sp/><sp/>LocalProtocolError<sp/>is<sp/>for<sp/>local<sp/>errors<sp/>and<sp/>RemoteProtocolError<sp/>is<sp/>for</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight><highlight class="comment">#<sp/><sp/><sp/>remote<sp/>errors.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59" refid="classh11_1_1__util_1_1_local_protocol_error" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classh11_1_1__util_1_1_local_protocol_error" kindref="compound">LocalProtocolError</ref>(<ref refid="classh11_1_1__util_1_1_protocol_error" kindref="compound">ProtocolError</ref>):</highlight></codeline>
+<codeline lineno="60" refid="classh11_1_1__util_1_1_local_protocol_error_1a68abedb2034da2cee1098b969cb03691" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="classh11_1_1__util_1_1_local_protocol_error_1a68abedb2034da2cee1098b969cb03691" kindref="member">_reraise_as_remote_protocol_error</ref>(self)<sp/>-&gt;<sp/>NoReturn:</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>After<sp/>catching<sp/>a<sp/>LocalProtocolError,<sp/>use<sp/>this<sp/>method<sp/>to<sp/>re-raise<sp/>it</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>as<sp/>a<sp/>RemoteProtocolError.<sp/>This<sp/>method<sp/>must<sp/>be<sp/>called<sp/>from<sp/>inside<sp/>an</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>except:<sp/>block.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>An<sp/>easy<sp/>way<sp/>to<sp/>get<sp/>an<sp/>equivalent<sp/>RemoteProtocolError<sp/>is<sp/>just<sp/>to</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>modify<sp/>&apos;self&apos;<sp/>in<sp/>place.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>self.<ref refid="classh11_1_1__util_1_1_local_protocol_error" kindref="compound">__class__</ref><sp/>=<sp/>RemoteProtocolError<sp/><sp/></highlight><highlight class="comment">#<sp/>type:<sp/>ignore</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>But<sp/>the<sp/>re-raising<sp/>is<sp/>somewhat<sp/>non-trivial<sp/>--<sp/>you<sp/>might<sp/>think<sp/>that</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>now<sp/>that<sp/>we&apos;ve<sp/>modified<sp/>the<sp/>in-flight<sp/>exception<sp/>object,<sp/>that<sp/>just</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>doing<sp/>&apos;raise&apos;<sp/>to<sp/>re-raise<sp/>it<sp/>would<sp/>be<sp/>enough.<sp/>But<sp/>it<sp/>turns<sp/>out<sp/>that</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>this<sp/>doesn&apos;t<sp/>work,<sp/>because<sp/>Python<sp/>tracks<sp/>the<sp/>exception<sp/>type</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>(exc_info[0])<sp/>separately<sp/>from<sp/>the<sp/>exception<sp/>object<sp/>(exc_info[1]),</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>and<sp/>we<sp/>only<sp/>modified<sp/>the<sp/>latter.<sp/>So<sp/>we<sp/>really<sp/>do<sp/>need<sp/>to<sp/>re-raise</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>the<sp/>new<sp/>type<sp/>explicitly.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>On<sp/>py3,<sp/>the<sp/>traceback<sp/>is<sp/>part<sp/>of<sp/>the<sp/>exception<sp/>object,<sp/>so<sp/>our</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>in-place<sp/>modification<sp/>preserved<sp/>it<sp/>and<sp/>we<sp/>can<sp/>just<sp/>re-raise:</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>self</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80" refid="classh11_1_1__util_1_1_remote_protocol_error" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classh11_1_1__util_1_1_remote_protocol_error" kindref="compound">RemoteProtocolError</ref>(<ref refid="classh11_1_1__util_1_1_protocol_error" kindref="compound">ProtocolError</ref>):</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">pass</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight></codeline>
+<codeline lineno="84" refid="namespaceh11_1_1__util_1a477edc9f1c9a8c56aa0d3426fba0bf39" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceh11_1_1__util_1a477edc9f1c9a8c56aa0d3426fba0bf39" kindref="member">validate</ref>(</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/>regex:<sp/>Pattern[bytes],<sp/>data:<sp/>bytes,<sp/>msg:<sp/>str<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;malformed<sp/>data&quot;</highlight><highlight class="normal">,<sp/>*format_args:<sp/>Any</highlight></codeline>
+<codeline lineno="86"><highlight class="normal">)<sp/>-&gt;<sp/>Dict[str,<sp/>bytes]:</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/>match<sp/>=<sp/>regex.fullmatch(data)</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">not</highlight><highlight class="normal"><sp/>match:</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>format_args:</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>msg<sp/>=<sp/>msg.format(*format_args)</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>LocalProtocolError(msg)</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>match.groupdict()</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Sentinel<sp/>values</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"></highlight><highlight class="comment">#</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight><highlight class="comment">#<sp/>-<sp/>Inherit<sp/>identity-based<sp/>comparison<sp/>and<sp/>hashing<sp/>from<sp/>object</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight><highlight class="comment">#<sp/>-<sp/>Have<sp/>a<sp/>nice<sp/>repr</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight><highlight class="comment">#<sp/>-<sp/>Have<sp/>a<sp/>*bonus<sp/>property*:<sp/>type(sentinel)<sp/>is<sp/>sentinel</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight><highlight class="comment">#</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight><highlight class="comment">#<sp/>The<sp/>bonus<sp/>property<sp/>is<sp/>useful<sp/>if<sp/>you<sp/>want<sp/>to<sp/>take<sp/>the<sp/>return<sp/>value<sp/>from</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="102"><highlight class="normal"></highlight><highlight class="comment">#<sp/>next_event()<sp/>and<sp/>do<sp/>some<sp/>sort<sp/>of<sp/>dispatch<sp/>based<sp/>on<sp/>type(event).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104" refid="namespaceh11_1_1__util_1a92d69981c033465bb97830e3b49eb4f1" refkind="member"><highlight class="normal">_T_Sentinel<sp/>=<sp/>TypeVar(</highlight><highlight class="stringliteral">&quot;_T_Sentinel&quot;</highlight><highlight class="normal">,<sp/>bound=</highlight><highlight class="stringliteral">&quot;Sentinel&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"></highlight></codeline>
+<codeline lineno="106"><highlight class="normal"></highlight></codeline>
+<codeline lineno="107" refid="classh11_1_1__util_1_1_sentinel" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classh11_1_1__util_1_1_sentinel" kindref="compound">Sentinel</ref>(type):</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__new__(</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cls:<sp/>Type[_T_Sentinel],</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>name:<sp/>str,</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>bases:<sp/>Tuple[type,<sp/>...],</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>namespace:<sp/>Dict[str,<sp/>Any],</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>**kwds:<sp/>Any</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/>)<sp/>-&gt;<sp/>_T_Sentinel:</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">assert</highlight><highlight class="normal"><sp/>bases<sp/>==<sp/>(Sentinel,)</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>v<sp/>=<sp/>super().__new__(cls,<sp/>name,<sp/>bases,<sp/>namespace,<sp/>**kwds)</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>v.__class__<sp/>=<sp/>v<sp/><sp/></highlight><highlight class="comment">#<sp/>type:<sp/>ignore</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>v</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"></highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal">__repr__(self)<sp/>-&gt;<sp/>str:</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>self.__name__</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"></highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Used<sp/>for<sp/>methods,<sp/>request<sp/>targets,<sp/>HTTP<sp/>versions,<sp/>header<sp/>names,<sp/>and<sp/>header</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight><highlight class="comment">#<sp/>values.<sp/>Accepts<sp/>ascii-strings,<sp/>or<sp/>bytes/bytearray/memoryview/...,<sp/>and<sp/>always</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"></highlight><highlight class="comment">#<sp/>returns<sp/>bytes.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="127" refid="namespaceh11_1_1__util_1adc90f3dc147e8482c18d37e44bdbf177" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">def<sp/></highlight><highlight class="normal"><ref refid="namespaceh11_1_1__util_1adc90f3dc147e8482c18d37e44bdbf177" kindref="member">bytesify</ref>(s:<sp/>Union[bytes,<sp/>bytearray,<sp/>memoryview,<sp/>int,<sp/>str])<sp/>-&gt;<sp/>bytes:</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">#<sp/>Fast-path:</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>type(s)<sp/></highlight><highlight class="keywordflow">is</highlight><highlight class="normal"><sp/>bytes:</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>s</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>isinstance(s,<sp/>str):</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>s<sp/>=<sp/>s.encode(</highlight><highlight class="stringliteral">&quot;ascii&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>isinstance(s,<sp/>int):</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">raise</highlight><highlight class="normal"><sp/>TypeError(</highlight><highlight class="stringliteral">&quot;expected<sp/>bytes-like<sp/>object,<sp/>not<sp/>int&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>bytes(s)</highlight></codeline>
+    </programlisting>
+    <location file="micro_gestion_objetos/venv/Lib/site-packages/h11/_util.py"/>
+  </compounddef>
+</doxygen>

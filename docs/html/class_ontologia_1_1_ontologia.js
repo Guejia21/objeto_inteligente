@@ -1,0 +1,25 @@
+var class_ontologia_1_1_ontologia =
+[
+    [ "actualizarDataProperty", "class_ontologia_1_1_ontologia.html#a05609aa9ab1413946ca2c8374650c7db", null ],
+    [ "actualizarListaDataProperty", "class_ontologia_1_1_ontologia.html#ab8efd0fa9f7a9573bd00d8bcd7c41e13", null ],
+    [ "cargarGrafoNuevo", "class_ontologia_1_1_ontologia.html#a3803536893c24f646f22825a9bf67cbf", null ],
+    [ "cargarGrafoOntologia", "class_ontologia_1_1_ontologia.html#a95e956e070462941d276e19fe3b76f7b", null ],
+    [ "cargarOntologia", "class_ontologia_1_1_ontologia.html#a75be611a0936b93f92820ecebd36e59a", null ],
+    [ "consultaDataProperty", "class_ontologia_1_1_ontologia.html#a47abee22c2f936bf1f358c0e205cade3", null ],
+    [ "consultaInstancias", "class_ontologia_1_1_ontologia.html#ae21e4dd24f95aef89dbf85d3fda72b97", null ],
+    [ "eliminarDataProperty", "class_ontologia_1_1_ontologia.html#a12392b0a4d104ba94aa366c96b084ce5", null ],
+    [ "eliminarListaTodoIndividuo", "class_ontologia_1_1_ontologia.html#a31f00a774cccef5999f9115136e716da", null ],
+    [ "eliminarTodoIndividuo", "class_ontologia_1_1_ontologia.html#a534e9d779069ad8c2157b65917534de4", null ],
+    [ "guardarGrafoOntologia", "class_ontologia_1_1_ontologia.html#ad0cb68a7f6fab6c23d8fef2eb550c5e5", null ],
+    [ "insertarDataProperty", "class_ontologia_1_1_ontologia.html#a93a3b68ff686a3203a943a149f948ede", null ],
+    [ "insertarIndividuo", "class_ontologia_1_1_ontologia.html#a070b1aa05223672681c745e900de84b3", null ],
+    [ "insertarListaDataProperty", "class_ontologia_1_1_ontologia.html#a4e2ddfff9aed80844ca8153e26d17aee", null ],
+    [ "insertarListaIndividuos", "class_ontologia_1_1_ontologia.html#a1cdb8cd22f2235fc0bd1cfc5a6672da7", null ],
+    [ "insertarListaObjectProperty", "class_ontologia_1_1_ontologia.html#a19bcff9e11b3d4a5b170e2be54acd66f", null ],
+    [ "insertarObjectProperty", "class_ontologia_1_1_ontologia.html#a5abef8b6d9900494eab12495f610e12d", null ],
+    [ "restarOntologias", "class_ontologia_1_1_ontologia.html#a67bec9de13ac6c17b34f20fb75238126", null ],
+    [ "g", "class_ontologia_1_1_ontologia.html#a5ed7693850aa82389a9c09f9937aaf1c", null ],
+    [ "lock", "class_ontologia_1_1_ontologia.html#aa1befede11690a4c5a812ceb25228979", null ],
+    [ "ontologia", "class_ontologia_1_1_ontologia.html#a4d4e5c50d7ec427e9efe92faab158548", null ],
+    [ "ontologiaInst", "class_ontologia_1_1_ontologia.html#aafac2dd981e97d23274d5666562eff2b", null ]
+];

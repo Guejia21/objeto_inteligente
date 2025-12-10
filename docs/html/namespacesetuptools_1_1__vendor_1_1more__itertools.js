@@ -1,0 +1,37 @@
+var namespacesetuptools_1_1__vendor_1_1more__itertools =
+[
+    [ "more", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1more.html", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1more" ],
+    [ "recipes", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html", [
+      [ "_pairwise", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a219b001616f97a1ccd088a441320f911", null ],
+      [ "all_equal", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#aab9f1c05db8b931895200c193b2d7df9", null ],
+      [ "consume", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a06f3a800031fcc80c345df0826ec28f6", null ],
+      [ "convolve", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#acac5f7d86adbcd65978e4973c993538b", null ],
+      [ "dotproduct", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a0d5a147a4d4107256cc0bd5b2730f9fd", null ],
+      [ "first_true", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a4b8a18befc24944b9a9cb48dbcd9c3d4", null ],
+      [ "flatten", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#ab6fdfc11635142d0d7cb5de974cc3a39", null ],
+      [ "grouper", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#ac97b2fa88395cb4e70ceca43a855acf9", null ],
+      [ "iter_except", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a147ad807330c4bf4b2ac7bdf87664050", null ],
+      [ "ncycles", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a5235832dcdc29dadf589020ffe008383", null ],
+      [ "nth", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a2b7b735b726bad689a02c24b83421dbc", null ],
+      [ "nth_combination", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a17f4fb3e2e7bb80c3d8f8385e4a5824c", null ],
+      [ "pad_none", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a89fba05204b646e1d513597ad42f0bd2", null ],
+      [ "pairwise", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a090a4db9f16386737474a6d066a2b269", null ],
+      [ "partition", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a906cbf6e90e4d19862e7126771fe5922", null ],
+      [ "powerset", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a78c1352de622cb198c545375117fd40c", null ],
+      [ "prepend", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a77d701a493d311648e223c51f3f62043", null ],
+      [ "quantify", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a2e59f89b2caa12af8c4664bbb5641354", null ],
+      [ "random_combination", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#aaac1538b826daedc7136df493b1f6277", null ],
+      [ "random_combination_with_replacement", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a0d8cfe1a26078411a7d7cf29607370c6", null ],
+      [ "random_permutation", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a532da5fdd385a79ee861333ee6df83ed", null ],
+      [ "random_product", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a3521b9fccf7609d65c6e20fac4a00223", null ],
+      [ "repeatfunc", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#af1bb37e32b92c836c510e48b75831e6f", null ],
+      [ "roundrobin", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a776a5fd211f5eaba9bb88e8ea340e91a", null ],
+      [ "tabulate", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#ab518fc5aa47b4744809789e38e4b1f14", null ],
+      [ "tail", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a9871faf9702abf6963ba1057afebf05b", null ],
+      [ "take", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#ada7fe6e78b23058991218c632fff4cf5", null ],
+      [ "unique_everseen", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a0bcd4db1473f0599b9ff1ba125a4e3c5", null ],
+      [ "unique_justseen", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a8ca0cbcef44b7020ecafbb7ea5ba5bf5", null ],
+      [ "padnone", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a4c05b748d0dba58e28b5819e850ad5b8", null ],
+      [ "pairwise", "namespacesetuptools_1_1__vendor_1_1more__itertools_1_1recipes.html#a9cd7dddf054cda2e2f24203685040f06", null ]
+    ] ]
+];

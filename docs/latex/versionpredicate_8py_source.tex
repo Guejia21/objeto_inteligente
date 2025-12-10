@@ -1,0 +1,181 @@
+\doxysection{versionpredicate.\+py}
+\hypertarget{versionpredicate_8py_source}{}\label{versionpredicate_8py_source}\index{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/versionpredicate.py@{microservicio\_data\_stream/venv/Lib/site-\/packages/setuptools/\_distutils/versionpredicate.py}}
+\mbox{\hyperlink{versionpredicate_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00001}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate}{00001}}\ \textcolor{stringliteral}{"{}"{}"{}Module\ for\ parsing\ and\ testing\ package\ version\ predicate\ strings.}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00002}00002\ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00003}00003\ \textcolor{keyword}{import}\ re}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00004}00004\ \textcolor{keyword}{import}\ distutils.version}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00005}00005\ \textcolor{keyword}{import}\ operator}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00006}00006\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00008}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_a1c1ab5d3991e2da262c199dbcaa5e833}{00008}}\ re\_validPackage\ =\ re.compile(\textcolor{stringliteral}{r"{}(?i)\string^\(\backslash\)s*([a-\/z\_]\(\backslash\)w*(?:\(\backslash\).[a-\/z\_]\(\backslash\)w*)*)(.*)"{}},\ re.ASCII)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00009}00009\ \textcolor{comment}{\#\ (package)\ (rest)}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00010}00010\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00011}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_aa9b63cc0b89ab9b811479748e30242b3}{00011}}\ re\_paren\ =\ re.compile(\textcolor{stringliteral}{r"{}\string^\(\backslash\)s*\(\backslash\)((.*)\(\backslash\))\(\backslash\)s*\$"{}})\ \ \textcolor{comment}{\#\ (list)\ inside\ of\ parentheses}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00012}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_aacaf5c82de4677b1a960449710773798}{00012}}\ re\_splitComparison\ =\ re.compile(\textcolor{stringliteral}{r"{}\string^\(\backslash\)s*(<=|>=|<|>|!=|==)\(\backslash\)s*([\string^\(\backslash\)s,]+)\(\backslash\)s*\$"{}})}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00013}00013\ \textcolor{comment}{\#\ (comp)\ (version)}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00016}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_a4d30ed6f6850be6b4d874c8cf2e236c7}{00016}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_a4d30ed6f6850be6b4d874c8cf2e236c7}{splitUp}}(pred):}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00017}00017\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Parse\ a\ single\ version\ comparison.}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00018}00018\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00019}00019\ \textcolor{stringliteral}{\ \ \ \ Return\ (comparison\ string,\ StrictVersion)}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00020}00020\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00021}00021\ \ \ \ \ res\ =\ re\_splitComparison.match(pred)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00022}00022\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ res:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{"{}bad\ package\ restriction\ syntax:\ \%r"{}}\ \%\ pred)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00024}00024\ \ \ \ \ comp,\ verStr\ =\ res.groups()}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00025}00025\ \ \ \ \ \textcolor{keyword}{with}\ distutils.version.suppress\_known\_deprecation():}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ other\ =\ distutils.version.StrictVersion(verStr)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00027}00027\ \ \ \ \ \textcolor{keywordflow}{return}\ (comp,\ other)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00028}00028\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00029}00029\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00030}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_aaa106cca3d7f93a7f5ed47fd39c46dd2}{00030}}\ compmap\ =\ \{}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00031}00031\ \ \ \ \ \textcolor{stringliteral}{"{}<"{}}:\ operator.lt,}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00032}00032\ \ \ \ \ \textcolor{stringliteral}{"{}<="{}}:\ operator.le,}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00033}00033\ \ \ \ \ \textcolor{stringliteral}{"{}=="{}}:\ operator.eq,}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00034}00034\ \ \ \ \ \textcolor{stringliteral}{"{}>"{}}:\ operator.gt,}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00035}00035\ \ \ \ \ \textcolor{stringliteral}{"{}>="{}}:\ operator.ge,}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00036}00036\ \ \ \ \ \textcolor{stringliteral}{"{}!="{}}:\ operator.ne,}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00037}00037\ \}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00038}00038\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00040}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate}{00040}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate}{VersionPredicate}}:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00041}00041\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Parse\ and\ test\ package\ version\ predicates.}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00042}00042\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00043}00043\ \textcolor{stringliteral}{\ \ \ \ >>>\ v\ =\ VersionPredicate('pyepat.abc\ (>1.0,\ <3333.3a1,\ !=1555.1b3)')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00044}00044\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ The\ \`{}name\`{}\ attribute\ provides\ the\ full\ dotted\ name\ that\ is\ given::}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00046}00046\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.name}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ 'pyepat.abc'}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00049}00049\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ The\ str()\ of\ a\ \`{}VersionPredicate\`{}\ provides\ a\ normalized}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ human-\/readable\ version\ of\ the\ expression::}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00052}00052\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00053}00053\ \textcolor{stringliteral}{\ \ \ \ >>>\ print(v)}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00054}00054\ \textcolor{stringliteral}{\ \ \ \ pyepat.abc\ (>\ 1.0,\ <\ 3333.3a1,\ !=\ 1555.1b3)}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00055}00055\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00056}00056\ \textcolor{stringliteral}{\ \ \ \ The\ \`{}satisfied\_by()\`{}\ method\ can\ be\ used\ to\ determine\ with\ a\ given}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00057}00057\ \textcolor{stringliteral}{\ \ \ \ version\ number\ is\ included\ in\ the\ set\ described\ by\ the\ version}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00058}00058\ \textcolor{stringliteral}{\ \ \ \ restrictions::}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00059}00059\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00060}00060\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.satisfied\_by('1.1')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00061}00061\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00062}00062\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.satisfied\_by('1.4')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00063}00063\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00064}00064\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.satisfied\_by('1.0')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00065}00065\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00066}00066\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.satisfied\_by('4444.4')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00067}00067\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00068}00068\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.satisfied\_by('1555.1b3')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00069}00069\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00070}00070\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00071}00071\ \textcolor{stringliteral}{\ \ \ \ \`{}VersionPredicate\`{}\ is\ flexible\ in\ accepting\ extra\ whitespace::}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00072}00072\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ >>>\ v\ =\ VersionPredicate('\ pat(\ ==\ \ 0.1\ \ )\ \ ')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00074}00074\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.name}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00075}00075\ \textcolor{stringliteral}{\ \ \ \ 'pat'}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00076}00076\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.satisfied\_by('0.1')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00077}00077\ \textcolor{stringliteral}{\ \ \ \ True}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ >>>\ v.satisfied\_by('0.2')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ False}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00080}00080\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ If\ any\ version\ numbers\ passed\ in\ do\ not\ conform\ to\ the}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ restrictions\ of\ \`{}StrictVersion\`{},\ a\ \`{}ValueError\`{}\ is\ raised::}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00083}00083\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ >>>\ v\ =\ VersionPredicate('p1.p2.p3.p4(>=1.0,\ <=1.3a1,\ !=1.2zb3)')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00085}00085\ \textcolor{stringliteral}{\ \ \ \ Traceback\ (most\ recent\ call\ last):}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ \ \ ...}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ ValueError:\ invalid\ version\ number\ '1.2zb3'}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00088}00088\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ It\ the\ module\ or\ package\ name\ given\ does\ not\ conform\ to\ what's}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ allowed\ as\ a\ legal\ module\ or\ package\ name,\ \`{}ValueError\`{}\ is}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ raised::}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00092}00092\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ >>>\ v\ =\ VersionPredicate('foo-\/bar')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ Traceback\ (most\ recent\ call\ last):}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ \ \ ...}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ ValueError:\ expected\ parenthesized\ list:\ '-\/bar'}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00097}00097\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ >>>\ v\ =\ VersionPredicate('foo\ bar\ (12.21)')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ Traceback\ (most\ recent\ call\ last):}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ ...}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ ValueError:\ expected\ parenthesized\ list:\ 'bar\ (12.21)'}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00102}00102\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00105}00105\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ versionPredicateStr):}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Parse\ a\ version\ predicate\ string."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Fields:}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ name:\ \ package\ name}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ pred:\ \ list\ of\ (comparison\ string,\ StrictVersion)}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00110}00110\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ versionPredicateStr\ =\ versionPredicateStr.strip()}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ versionPredicateStr:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{"{}empty\ package\ restriction"{}})}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ match\ =\ re\_validPackage.match(versionPredicateStr)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ match:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{"{}bad\ package\ name\ in\ \%r"{}}\ \%\ versionPredicateStr)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00117}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a53967b88416c6c5d627a11fa41a2dc38}{00117}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a53967b88416c6c5d627a11fa41a2dc38}{name}},\ paren\ =\ match.groups()}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ paren\ =\ paren.strip()}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ paren:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ match\ =\ re\_paren.match(paren)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ match:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00122}00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{"{}expected\ parenthesized\ list:\ \%r"{}}\ \%\ paren)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \ \ \ \ str\ =\ match.groups()[0]}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00124}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a6518d94a0b026d230949ee0e2b8e99a9}{00124}}\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a6518d94a0b026d230949ee0e2b8e99a9}{pred}}\ =\ [\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_a4d30ed6f6850be6b4d874c8cf2e236c7}{splitUp}}(aPred)\ \textcolor{keywordflow}{for}\ aPred\ \textcolor{keywordflow}{in}\ str.split(\textcolor{stringliteral}{"{},"{}})]}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a6518d94a0b026d230949ee0e2b8e99a9}{pred}}:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00126}00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{"{}empty\ parenthesized\ list\ in\ \%r"{}}\ \%\ versionPredicateStr)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a6518d94a0b026d230949ee0e2b8e99a9}{pred}}\ =\ []}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00129}00129\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00130}00130\ \ \ \ \ \textcolor{keyword}{def\ }\_\_str\_\_(self):}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a6518d94a0b026d230949ee0e2b8e99a9}{pred}}:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ \ \ \ \ seq\ =\ [cond\ +\ \textcolor{stringliteral}{"{}\ "{}}\ +\ str(ver)\ \textcolor{keywordflow}{for}\ cond,\ ver\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a6518d94a0b026d230949ee0e2b8e99a9}{pred}}]}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a53967b88416c6c5d627a11fa41a2dc38}{name}}\ +\ \textcolor{stringliteral}{"{}\ ("{}}\ +\ \textcolor{stringliteral}{"{},\ "{}}.join(seq)\ +\ \textcolor{stringliteral}{"{})"{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a53967b88416c6c5d627a11fa41a2dc38}{name}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00136}00136\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00137}\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a782b3502c9f703cbbf4cb92eb4807baa}{00137}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a782b3502c9f703cbbf4cb92eb4807baa}{satisfied\_by}}(self,\ version):}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}True\ if\ version\ is\ compatible\ with\ all\ the\ predicates\ in\ self.}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00139}00139\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ parameter\ version\ must\ be\ acceptable\ to\ the\ StrictVersion}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00140}00140\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ constructor.\ \ It\ may\ be\ either\ a\ string\ or\ StrictVersion.}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ cond,\ ver\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsetuptools_1_1__distutils_1_1versionpredicate_1_1_version_predicate_a6518d94a0b026d230949ee0e2b8e99a9}{pred}}:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ compmap[cond](version,\ ver):}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00148}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_ab6cf366e2099020e251578f3a32d8ea0}{00148}}\ \_provision\_rx\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00150}00150\ }
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00151}\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_a49b3a30cb69b7b19915d5b92d93de1d4}{00151}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesetuptools_1_1__distutils_1_1versionpredicate_a49b3a30cb69b7b19915d5b92d93de1d4}{split\_provision}}(value):}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00152}00152\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ the\ name\ and\ optional\ version\ number\ of\ a\ provision.}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00153}00153\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00154}00154\ \textcolor{stringliteral}{\ \ \ \ The\ version\ number,\ if\ given,\ will\ be\ returned\ as\ a\ \`{}StrictVersion\`{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00155}00155\ \textcolor{stringliteral}{\ \ \ \ instance,\ otherwise\ it\ will\ be\ \`{}None\`{}.}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00156}00156\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00157}00157\ \textcolor{stringliteral}{\ \ \ \ >>>\ split\_provision('mypkg')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00158}00158\ \textcolor{stringliteral}{\ \ \ \ ('mypkg',\ None)}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00159}00159\ \textcolor{stringliteral}{\ \ \ \ >>>\ split\_provision('\ mypkg(\ 1.2\ )\ ')}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00160}00160\ \textcolor{stringliteral}{\ \ \ \ ('mypkg',\ StrictVersion\ ('1.2'))}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00162}00162\ \ \ \ \ \textcolor{keyword}{global}\ \_provision\_rx}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00163}00163\ \ \ \ \ \textcolor{keywordflow}{if}\ \_provision\_rx\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \_provision\_rx\ =\ re.compile(}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{r"{}([a-\/zA-\/Z\_]\(\backslash\)w*(?:\(\backslash\).[a-\/zA-\/Z\_]\(\backslash\)w*)*)(?:\(\backslash\)s*\(\backslash\)(\(\backslash\)s*([\string^)\(\backslash\)s]+)\(\backslash\)s*\(\backslash\)))?\$"{}},\ re.ASCII}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00167}00167\ \ \ \ \ value\ =\ value.strip()}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00168}00168\ \ \ \ \ m\ =\ \_provision\_rx.match(value)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00169}00169\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ m:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(\textcolor{stringliteral}{"{}illegal\ provides\ specification:\ \%r"{}}\ \%\ value)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00171}00171\ \ \ \ \ ver\ =\ m.group(2)\ \textcolor{keywordflow}{or}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{if}\ ver:}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ distutils.version.suppress\_known\_deprecation():}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ ver\ =\ distutils.version.StrictVersion(ver)}
+\DoxyCodeLine{\Hypertarget{versionpredicate_8py_source_l00175}00175\ \ \ \ \ \textcolor{keywordflow}{return}\ m.group(1),\ ver}
+
+\end{DoxyCode}

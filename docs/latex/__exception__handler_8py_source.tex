@@ -1,0 +1,71 @@
+\doxysection{\+\_\+exception\+\_\+handler.\+py}
+\hypertarget{__exception__handler_8py_source}{}\label{__exception__handler_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/\_exception\_handler.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/starlette/\_exception\_handler.py}}
+\mbox{\hyperlink{__exception__handler_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00001}\mbox{\hyperlink{namespacestarlette_1_1__exception__handler}{00001}}\ \textcolor{keyword}{from}\ \_\_future\_\_\ \textcolor{keyword}{import}\ annotations}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00003}00003\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00005}00005\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1__utils}{starlette.\_utils}}\ \textcolor{keyword}{import}\ is\_async\_callable}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00006}00006\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1concurrency}{starlette.concurrency}}\ \textcolor{keyword}{import}\ run\_in\_threadpool}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00007}00007\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1exceptions}{starlette.exceptions}}\ \textcolor{keyword}{import}\ HTTPException}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00008}00008\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1requests}{starlette.requests}}\ \textcolor{keyword}{import}\ Request}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00009}00009\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1types}{starlette.types}}\ \textcolor{keyword}{import}\ ASGIApp,\ ExceptionHandler,\ Message,\ Receive,\ Scope,\ Send}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00010}00010\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacestarlette_1_1websockets}{starlette.websockets}}\ \textcolor{keyword}{import}\ WebSocket}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00012}\mbox{\hyperlink{namespacestarlette_1_1__exception__handler_ae83ca5b3434f87f905fa8945f9f018cf}{00012}}\ ExceptionHandlers\ =\ dict[Any,\ ExceptionHandler]}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00013}\mbox{\hyperlink{namespacestarlette_1_1__exception__handler_a24633d7aec4f02094a6ab71bc6437d34}{00013}}\ StatusHandlers\ =\ dict[int,\ ExceptionHandler]}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00016}\mbox{\hyperlink{namespacestarlette_1_1__exception__handler_ae2ddc0fa81e9442da7898a507e88f2f3}{00016}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacestarlette_1_1__exception__handler_ae2ddc0fa81e9442da7898a507e88f2f3}{\_lookup\_exception\_handler}}(exc\_handlers:\ ExceptionHandlers,\ exc:\ Exception)\ -\/>\ ExceptionHandler\ |\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00017}00017\ \ \ \ \ \textcolor{keywordflow}{for}\ cls\ \textcolor{keywordflow}{in}\ type(exc).\_\_mro\_\_:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00018}00018\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ cls\ \textcolor{keywordflow}{in}\ exc\_handlers:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ exc\_handlers[cls]}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00020}00020\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00023}\mbox{\hyperlink{namespacestarlette_1_1__exception__handler_ad851c83b07c64e11f57e4a250b07da00}{00023}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacestarlette_1_1__exception__handler_ad851c83b07c64e11f57e4a250b07da00}{wrap\_app\_handling\_exceptions}}(app:\ ASGIApp,\ conn:\ Request\ |\ WebSocket)\ -\/>\ ASGIApp:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00024}00024\ \ \ \ \ exception\_handlers:\ ExceptionHandlers}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00025}00025\ \ \ \ \ status\_handlers:\ StatusHandlers}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00026}00026\ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ exception\_handlers,\ status\_handlers\ =\ conn.scope[\textcolor{stringliteral}{"{}starlette.exception\_handlers"{}}]}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00028}00028\ \ \ \ \ \textcolor{keywordflow}{except}\ KeyError:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ exception\_handlers,\ status\_handlers\ =\ \{\},\ \{\}}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00031}00031\ \ \ \ \ \textcolor{keyword}{async\ def\ }wrapped\_app(scope:\ Scope,\ receive:\ Receive,\ send:\ Send)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00032}00032\ \ \ \ \ \ \ \ \ response\_started\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00033}00033\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00034}00034\ \ \ \ \ \ \ \ \ \textcolor{keyword}{async\ def\ }sender(message:\ Message)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ nonlocal\ response\_started}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00037}00037\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ message[\textcolor{stringliteral}{"{}type"{}}]\ ==\ \textcolor{stringliteral}{"{}http.response.start"{}}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ response\_started\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ await\ send(message)}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00040}00040\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ \ \ \ \ await\ \mbox{\hyperlink{namespaceapp}{app}}(scope,\ receive,\ sender)}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ Exception\ \textcolor{keyword}{as}\ exc:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \ \ \ \ handler\ =\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00045}00045\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(exc,\ HTTPException):}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ handler\ =\ status\_handlers.get(exc.status\_code)}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00048}00048\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ handler\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ handler\ =\ \mbox{\hyperlink{namespacestarlette_1_1__exception__handler_ae2ddc0fa81e9442da7898a507e88f2f3}{\_lookup\_exception\_handler}}(exception\_handlers,\ exc)}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00052}00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ handler\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00053}00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ exc}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00054}00054\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00055}00055\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response\_started:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ RuntimeError(\textcolor{stringliteral}{"{}Caught\ handled\ exception,\ but\ response\ already\ started."{}})\ \textcolor{keyword}{from}\ exc}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ is\_async\_callable(handler):}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ await\ handler(conn,\ exc)}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ response\ =\ await\ run\_in\_threadpool(handler,\ conn,\ exc)}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ response\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ await\ response(scope,\ receive,\ sender)}
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{__exception__handler_8py_source_l00065}00065\ \ \ \ \ \textcolor{keywordflow}{return}\ wrapped\_app}
+
+\end{DoxyCode}

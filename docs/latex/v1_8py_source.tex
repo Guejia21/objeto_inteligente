@@ -1,0 +1,340 @@
+\doxysection{v1.\+py}
+\hypertarget{v1_8py_source}{}\label{v1_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/fastapi/\_compat/v1.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/fastapi/\_compat/v1.py}}
+\mbox{\hyperlink{v1_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00001}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1}{00001}}\ \textcolor{keyword}{from}\ copy\ \textcolor{keyword}{import}\ copy}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00002}00002\ \textcolor{keyword}{from}\ dataclasses\ \textcolor{keyword}{import}\ dataclass,\ is\_dataclass}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00003}00003\ \textcolor{keyword}{from}\ enum\ \textcolor{keyword}{import}\ Enum}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00004}00004\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00005}00005\ \ \ \ \ Any,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00006}00006\ \ \ \ \ Callable,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00007}00007\ \ \ \ \ Dict,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00008}00008\ \ \ \ \ List,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00009}00009\ \ \ \ \ Sequence,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00010}00010\ \ \ \ \ Set,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00011}00011\ \ \ \ \ Tuple,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00012}00012\ \ \ \ \ Type,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00013}00013\ \ \ \ \ Union,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00014}00014\ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00016}00016\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacefastapi_1_1__compat}{fastapi.\_compat}}\ \textcolor{keyword}{import}\ shared}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00017}00017\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacefastapi_1_1openapi_1_1constants}{fastapi.openapi.constants}}\ \textcolor{keyword}{import}\ REF\_PREFIX\ \textcolor{keyword}{as}\ REF\_PREFIX}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00018}00018\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacefastapi_1_1types}{fastapi.types}}\ \textcolor{keyword}{import}\ ModelNameMap}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00019}00019\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1version}{pydantic.version}}\ \textcolor{keyword}{import}\ VERSION\ \textcolor{keyword}{as}\ PYDANTIC\_VERSION}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00020}00020\ \textcolor{keyword}{from}\ typing\_extensions\ \textcolor{keyword}{import}\ Literal}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00022}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_aea647fc2b4000c85a417289e079b5ffb}{00022}}\ PYDANTIC\_VERSION\_MINOR\_TUPLE\ =\ tuple(int(x)\ \textcolor{keywordflow}{for}\ x\ \textcolor{keywordflow}{in}\ PYDANTIC\_VERSION.split(\textcolor{stringliteral}{"{}."{}})[:2])}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00023}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_adcd680c70726c2cfad61e5b9043fc5f3}{00023}}\ PYDANTIC\_V2\ =\ PYDANTIC\_VERSION\_MINOR\_TUPLE[0]\ ==\ 2}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00024}00024\ \textcolor{comment}{\#\ Keeping\ old\ "{}Required"{}\ functionality\ from\ Pydantic\ V1,\ without}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00025}00025\ \textcolor{comment}{\#\ shadowing\ typing.Required.}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00026}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a289aa3d06c97ed871fcf0b78e83d0074}{00026}}\ RequiredParam:\ Any\ =\ Ellipsis}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00028}00028\ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ PYDANTIC\_V2:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00029}00029\ \ \ \ \ \textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ BaseConfig\ \textcolor{keyword}{as}\ BaseConfig}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00030}00030\ \ \ \ \ \textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ BaseModel\ \textcolor{keyword}{as}\ BaseModel}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00031}00031\ \ \ \ \ \textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ ValidationError\ \textcolor{keyword}{as}\ ValidationError}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00032}00032\ \ \ \ \ \textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ create\_model\ \textcolor{keyword}{as}\ create\_model}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00033}00033\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1class__validators}{pydantic.class\_validators}}\ \textcolor{keyword}{import}\ Validator\ \textcolor{keyword}{as}\ Validator}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00034}00034\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1color}{pydantic.color}}\ \textcolor{keyword}{import}\ Color\ \textcolor{keyword}{as}\ Color}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00035}00035\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1error__wrappers}{pydantic.error\_wrappers}}\ \textcolor{keyword}{import}\ ErrorWrapper\ \textcolor{keyword}{as}\ ErrorWrapper}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00036}00036\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1errors}{pydantic.errors}}\ \textcolor{keyword}{import}\ MissingError}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00037}00037\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1fields}{pydantic.fields}}\ \textcolor{keyword}{import}\ (\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00038}00038\ \ \ \ \ \ \ \ \ SHAPE\_FROZENSET,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ SHAPE\_LIST,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00040}00040\ \ \ \ \ \ \ \ \ SHAPE\_SEQUENCE,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ SHAPE\_SET,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ SHAPE\_SINGLETON,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ SHAPE\_TUPLE,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ SHAPE\_TUPLE\_ELLIPSIS,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00045}00045\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00046}00046\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1fields}{pydantic.fields}}\ \textcolor{keyword}{import}\ FieldInfo\ \textcolor{keyword}{as}\ FieldInfo}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00047}00047\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1fields}{pydantic.fields}}\ \textcolor{keyword}{import}\ ModelField\ \textcolor{keyword}{as}\ ModelField\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00048}00048\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1fields}{pydantic.fields}}\ \textcolor{keyword}{import}\ Undefined\ \textcolor{keyword}{as}\ Undefined\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00049}00049\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1fields}{pydantic.fields}}\ \textcolor{keyword}{import}\ (\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00050}00050\ \ \ \ \ \ \ \ \ UndefinedType\ \textcolor{keyword}{as}\ UndefinedType,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00051}00051\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00052}00052\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1networks}{pydantic.networks}}\ \textcolor{keyword}{import}\ AnyUrl\ \textcolor{keyword}{as}\ AnyUrl}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00053}00053\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1networks}{pydantic.networks}}\ \textcolor{keyword}{import}\ NameEmail\ \textcolor{keyword}{as}\ NameEmail}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00054}00054\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1schema}{pydantic.schema}}\ \textcolor{keyword}{import}\ TypeModelSet\ \textcolor{keyword}{as}\ TypeModelSet}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00055}00055\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1schema}{pydantic.schema}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ field\_schema,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ get\_flat\_models\_from\_fields,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00058}00058\ \ \ \ \ \ \ \ \ model\_process\_schema,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00059}00059\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00060}00060\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1schema}{pydantic.schema}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ get\_annotation\_from\_field\_info\ \textcolor{keyword}{as}\ get\_annotation\_from\_field\_info,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00062}00062\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00063}00063\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1schema}{pydantic.schema}}\ \textcolor{keyword}{import}\ get\_flat\_models\_from\_field\ \textcolor{keyword}{as}\ get\_flat\_models\_from\_field}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00064}00064\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1schema}{pydantic.schema}}\ \textcolor{keyword}{import}\ get\_model\_name\_map\ \textcolor{keyword}{as}\ get\_model\_name\_map}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00065}00065\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1types}{pydantic.types}}\ \textcolor{keyword}{import}\ SecretBytes\ \textcolor{keyword}{as}\ SecretBytes}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00066}00066\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1types}{pydantic.types}}\ \textcolor{keyword}{import}\ SecretStr\ \textcolor{keyword}{as}\ SecretStr}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00067}00067\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1typing}{pydantic.typing}}\ \textcolor{keyword}{import}\ evaluate\_forwardref\ \textcolor{keyword}{as}\ evaluate\_forwardref}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00068}00068\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1utils}{pydantic.utils}}\ \textcolor{keyword}{import}\ lenient\_issubclass\ \textcolor{keyword}{as}\ lenient\_issubclass}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00069}00069\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00071}00071\ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00072}00072\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1}{pydantic.v1}}\ \textcolor{keyword}{import}\ BaseConfig\ \textcolor{keyword}{as}\ BaseConfig\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00073}00073\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1}{pydantic.v1}}\ \textcolor{keyword}{import}\ BaseModel\ \textcolor{keyword}{as}\ BaseModel\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00074}00074\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1}{pydantic.v1}}\ \textcolor{keyword}{import}\ (\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00075}00075\ \ \ \ \ \ \ \ \ ValidationError\ \textcolor{keyword}{as}\ ValidationError,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00076}00076\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00077}00077\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1}{pydantic.v1}}\ \textcolor{keyword}{import}\ create\_model\ \textcolor{keyword}{as}\ create\_model\ \ \textcolor{comment}{\#\ type:\ ignore[no-\/redef]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00078}00078\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1class__validators}{pydantic.v1.class\_validators}}\ \textcolor{keyword}{import}\ Validator\ \textcolor{keyword}{as}\ Validator}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00079}00079\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1color}{pydantic.v1.color}}\ \textcolor{keyword}{import}\ Color\ \textcolor{keyword}{as}\ Color\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00080}00080\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1error__wrappers}{pydantic.v1.error\_wrappers}}\ \textcolor{keyword}{import}\ ErrorWrapper\ \textcolor{keyword}{as}\ ErrorWrapper}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00081}00081\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1errors}{pydantic.v1.errors}}\ \textcolor{keyword}{import}\ MissingError}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00082}00082\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1fields}{pydantic.v1.fields}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00083}00083\ \ \ \ \ \ \ \ \ SHAPE\_FROZENSET,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00084}00084\ \ \ \ \ \ \ \ \ SHAPE\_LIST,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00085}00085\ \ \ \ \ \ \ \ \ SHAPE\_SEQUENCE,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00086}00086\ \ \ \ \ \ \ \ \ SHAPE\_SET,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00087}00087\ \ \ \ \ \ \ \ \ SHAPE\_SINGLETON,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00088}00088\ \ \ \ \ \ \ \ \ SHAPE\_TUPLE,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00089}00089\ \ \ \ \ \ \ \ \ SHAPE\_TUPLE\_ELLIPSIS,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00090}00090\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00091}00091\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1fields}{pydantic.v1.fields}}\ \textcolor{keyword}{import}\ FieldInfo\ \textcolor{keyword}{as}\ FieldInfo\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00092}00092\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1fields}{pydantic.v1.fields}}\ \textcolor{keyword}{import}\ ModelField\ \textcolor{keyword}{as}\ ModelField}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00093}00093\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1fields}{pydantic.v1.fields}}\ \textcolor{keyword}{import}\ Undefined\ \textcolor{keyword}{as}\ Undefined}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00094}00094\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1fields}{pydantic.v1.fields}}\ \textcolor{keyword}{import}\ UndefinedType\ \textcolor{keyword}{as}\ UndefinedType}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00095}00095\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1networks}{pydantic.v1.networks}}\ \textcolor{keyword}{import}\ AnyUrl\ \textcolor{keyword}{as}\ AnyUrl}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00096}00096\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1networks}{pydantic.v1.networks}}\ \textcolor{keyword}{import}\ (\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ NameEmail\ \textcolor{keyword}{as}\ NameEmail,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00098}00098\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00099}00099\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema}{pydantic.v1.schema}}\ \textcolor{keyword}{import}\ TypeModelSet\ \textcolor{keyword}{as}\ TypeModelSet}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00100}00100\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema}{pydantic.v1.schema}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00101}00101\ \ \ \ \ \ \ \ \ field\_schema,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ get\_flat\_models\_from\_fields,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ model\_process\_schema,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00104}00104\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00105}00105\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema}{pydantic.v1.schema}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ get\_annotation\_from\_field\_info\ \textcolor{keyword}{as}\ get\_annotation\_from\_field\_info,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00107}00107\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00108}00108\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema}{pydantic.v1.schema}}\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ get\_flat\_models\_from\_field\ \textcolor{keyword}{as}\ get\_flat\_models\_from\_field,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00110}00110\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00111}00111\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1schema}{pydantic.v1.schema}}\ \textcolor{keyword}{import}\ get\_model\_name\_map\ \textcolor{keyword}{as}\ get\_model\_name\_map}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00112}00112\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1types}{pydantic.v1.types}}\ \textcolor{keyword}{import}\ (\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ SecretBytes\ \textcolor{keyword}{as}\ SecretBytes,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00114}00114\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00115}00115\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1types}{pydantic.v1.types}}\ \textcolor{keyword}{import}\ (\ \ \textcolor{comment}{\#\ type:\ ignore[assignment]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ SecretStr\ \textcolor{keyword}{as}\ SecretStr,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00117}00117\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00118}00118\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1typing}{pydantic.v1.typing}}\ \textcolor{keyword}{import}\ evaluate\_forwardref\ \textcolor{keyword}{as}\ evaluate\_forwardref}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00119}00119\ \ \ \ \ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1utils}{pydantic.v1.utils}}\ \textcolor{keyword}{import}\ lenient\_issubclass\ \textcolor{keyword}{as}\ lenient\_issubclass}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00120}00120\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00122}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a29a7f50c335db89dc436ec4404eed2cb}{00122}}\ GetJsonSchemaHandler\ =\ Any}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00123}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a25fff64c86929bc974c4e4effa97b88e}{00123}}\ JsonSchemaValue\ =\ Dict[str,\ Any]}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00124}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a46ee03a3ce47438243096b484446cb7d}{00124}}\ CoreSchema\ =\ Any}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00125}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_af14ac3d53c849ac39d4f6bf961099775}{00125}}\ Url\ =\ AnyUrl}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00127}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a75d95297e1ba1a31eb18ae5673aa3520}{00127}}\ sequence\_shapes\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00128}00128\ \ \ \ \ SHAPE\_LIST,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00129}00129\ \ \ \ \ SHAPE\_SET,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00130}00130\ \ \ \ \ SHAPE\_FROZENSET,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00131}00131\ \ \ \ \ SHAPE\_TUPLE,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00132}00132\ \ \ \ \ SHAPE\_SEQUENCE,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00133}00133\ \ \ \ \ SHAPE\_TUPLE\_ELLIPSIS,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00134}00134\ \}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00135}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a1c25a814c355044b2318b949f45cc883}{00135}}\ sequence\_shape\_to\_type\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00136}00136\ \ \ \ \ SHAPE\_LIST:\ list,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00137}00137\ \ \ \ \ SHAPE\_SET:\ set,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00138}00138\ \ \ \ \ SHAPE\_TUPLE:\ tuple,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00139}00139\ \ \ \ \ SHAPE\_SEQUENCE:\ list,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00140}00140\ \ \ \ \ SHAPE\_TUPLE\_ELLIPSIS:\ list,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00141}00141\ \}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00142}00142\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00143}00143\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00144}00144\ \textcolor{preprocessor}{@dataclass}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00145}\mbox{\hyperlink{classfastapi_1_1__compat_1_1v1_1_1_generate_json_schema}{00145}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfastapi_1_1__compat_1_1v1_1_1_generate_json_schema}{GenerateJsonSchema}}:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00146}00146\ \ \ \ \ ref\_template:\ str}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00148}00148\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00149}\mbox{\hyperlink{classfastapi_1_1__compat_1_1v1_1_1_pydantic_schema_generation_error}{00149}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfastapi_1_1__compat_1_1v1_1_1_pydantic_schema_generation_error}{PydanticSchemaGenerationError}}(Exception):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00150}00150\ \ \ \ \ \textcolor{keywordflow}{pass}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00151}00151\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00152}00152\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00153}\mbox{\hyperlink{classfastapi_1_1__compat_1_1v1_1_1_pydantic_schema_generation_error_af39ccb119f0fea413fc4b972dc503d1f}{00153}}\ RequestErrorModel:\ Type[BaseModel]\ =\ create\_model(\textcolor{stringliteral}{"{}Request"{}})}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00154}00154\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00156}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a880cc69a149663f1ea1aee132d74c4fb}{00156}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a880cc69a149663f1ea1aee132d74c4fb}{with\_info\_plain\_validator\_function}}(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00157}00157\ \ \ \ \ function:\ Callable[...,\ Any],}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00158}00158\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00159}00159\ \ \ \ \ ref:\ Union[str,\ \textcolor{keywordtype}{None}]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00160}00160\ \ \ \ \ metadata:\ Any\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00161}00161\ \ \ \ \ serialization:\ Any\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00162}00162\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00163}00163\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00164}00164\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00165}00165\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00166}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a45a826d56a93366624f4c5fee9b8a648}{00166}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a45a826d56a93366624f4c5fee9b8a648}{get\_model\_definitions}}(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00167}00167\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00168}00168\ \ \ \ \ flat\_models:\ Set[Union[Type[BaseModel],\ Type[Enum]]],}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00169}00169\ \ \ \ \ model\_name\_map:\ Dict[Union[Type[BaseModel],\ Type[Enum]],\ str],}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00170}00170\ )\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00171}00171\ \ \ \ \ definitions:\ Dict[str,\ Dict[str,\ Any]]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{for}\ model\ \textcolor{keywordflow}{in}\ flat\_models:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ m\_schema,\ m\_definitions,\ m\_nested\_models\ =\ model\_process\_schema(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ model,\ model\_name\_map=model\_name\_map,\ ref\_prefix=REF\_PREFIX}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ definitions.update(m\_definitions)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ model\_name\ =\ model\_name\_map[model]}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ definitions[model\_name]\ =\ m\_schema}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00179}00179\ \ \ \ \ \textcolor{keywordflow}{for}\ m\_schema\ \textcolor{keywordflow}{in}\ definitions.values():}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{"{}description"{}}\ \textcolor{keywordflow}{in}\ m\_schema:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00181}00181\ \ \ \ \ \ \ \ \ \ \ \ \ m\_schema[\textcolor{stringliteral}{"{}description"{}}]\ =\ m\_schema[\textcolor{stringliteral}{"{}description"{}}].split(\textcolor{stringliteral}{"{}\(\backslash\)f"{}})[0]}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00182}00182\ \ \ \ \ \textcolor{keywordflow}{return}\ definitions}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00185}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ad05efaaa31b454582b96847b70b88b20}{00185}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ad05efaaa31b454582b96847b70b88b20}{is\_pv1\_scalar\_field}}(field:\ ModelField)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00186}00186\ \ \ \ \ \textcolor{keyword}{from}\ fastapi\ \textcolor{keyword}{import}\ params}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00187}00187\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00188}00188\ \ \ \ \ field\_info\ =\ field.field\_info}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00189}00189\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ field.shape\ ==\ SHAPE\_SINGLETON}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ lenient\_issubclass(field.type\_,\ BaseModel)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ lenient\_issubclass(field.type\_,\ dict)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ shared.field\_annotation\_is\_sequence(field.type\_)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ is\_dataclass(field.type\_)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ isinstance(field\_info,\ \mbox{\hyperlink{classfastapi_1_1params_1_1_body}{params.Body}})}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00196}00196\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00198}00198\ \ \ \ \ \textcolor{keywordflow}{if}\ field.sub\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ all(\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ad05efaaa31b454582b96847b70b88b20}{is\_pv1\_scalar\_field}}(f)\ \textcolor{keywordflow}{for}\ f\ \textcolor{keywordflow}{in}\ field.sub\_fields):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00201}00201\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00202}00202\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00204}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a3733b9c184ead87d05d000e6d172a63b}{00204}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a3733b9c184ead87d05d000e6d172a63b}{is\_pv1\_scalar\_sequence\_field}}(field:\ ModelField)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{if}\ (field.shape\ \textcolor{keywordflow}{in}\ sequence\_shapes)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ lenient\_issubclass(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ field.type\_,\ BaseModel}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00207}00207\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field.sub\_fields\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ sub\_field\ \textcolor{keywordflow}{in}\ field.sub\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ \mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ad05efaaa31b454582b96847b70b88b20}{is\_pv1\_scalar\_field}}(sub\_field):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00213}00213\ \ \ \ \ \textcolor{keywordflow}{if}\ shared.\_annotation\_is\_sequence(field.type\_):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00215}00215\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00216}00216\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00217}00217\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00218}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_aa7e7ffac002c537691e9c3e7c9baa8ef}{00218}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_aa7e7ffac002c537691e9c3e7c9baa8ef}{\_normalize\_errors}}(errors:\ Sequence[Any])\ -\/>\ List[Dict[str,\ Any]]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00219}00219\ \ \ \ \ use\_errors:\ List[Any]\ =\ []}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00220}00220\ \ \ \ \ \textcolor{keywordflow}{for}\ error\ \textcolor{keywordflow}{in}\ errors:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(error,\ ErrorWrapper):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ new\_errors\ =\ ValidationError(\ \ \textcolor{comment}{\#\ type:\ ignore[call-\/arg]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errors=[error],\ model=RequestErrorModel}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ ).\mbox{\hyperlink{namespaceerrors}{errors}}()}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ use\_errors.extend(new\_errors)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(error,\ list):}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ use\_errors.extend(\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_aa7e7ffac002c537691e9c3e7c9baa8ef}{\_normalize\_errors}}(error))}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ use\_errors.append(error)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00230}00230\ \ \ \ \ \textcolor{keywordflow}{return}\ use\_errors}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00231}00231\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00232}00232\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00233}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a0c8f57144094a2517da256f30b1fe324}{00233}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a0c8f57144094a2517da256f30b1fe324}{\_regenerate\_error\_with\_loc}}(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00234}00234\ \ \ \ \ *,\ errors:\ Sequence[Any],\ loc\_prefix:\ Tuple[Union[str,\ int],\ ...]}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00235}00235\ )\ -\/>\ List[Dict[str,\ Any]]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00236}00236\ \ \ \ \ updated\_loc\_errors:\ List[Any]\ =\ [}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \{**err,\ \textcolor{stringliteral}{"{}loc"{}}:\ loc\_prefix\ +\ err.get(\textcolor{stringliteral}{"{}loc"{}},\ ())\}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ err\ \textcolor{keywordflow}{in}\ \mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_aa7e7ffac002c537691e9c3e7c9baa8ef}{\_normalize\_errors}}(errors)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00239}00239\ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00240}00240\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00241}00241\ \ \ \ \ \textcolor{keywordflow}{return}\ updated\_loc\_errors}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00243}00243\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00244}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ab32f2e35fc525ce2353c4db15c0c68ce}{00244}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ab32f2e35fc525ce2353c4db15c0c68ce}{\_model\_rebuild}}(model:\ Type[BaseModel])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00245}00245\ \ \ \ \ model.update\_forward\_refs()}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00246}00246\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00247}00247\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00248}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a955f730f8c158a68744e1837b1cc078b}{00248}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a955f730f8c158a68744e1837b1cc078b}{\_model\_dump}}(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00249}00249\ \ \ \ \ model:\ BaseModel,\ mode:\ Literal[\textcolor{stringliteral}{"{}json"{}},\ \textcolor{stringliteral}{"{}python"{}}]\ =\ \textcolor{stringliteral}{"{}json"{}},\ **kwargs:\ Any}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00250}00250\ )\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00251}00251\ \ \ \ \ \textcolor{keywordflow}{return}\ model.dict(**kwargs)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00252}00252\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00253}00253\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00254}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ab0e7502cb49f86aaf2d357d2baa9048d}{00254}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ab0e7502cb49f86aaf2d357d2baa9048d}{\_get\_model\_config}}(model:\ BaseModel)\ -\/>\ Any:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00255}00255\ \ \ \ \ \textcolor{keywordflow}{return}\ model.\_\_config\_\_\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00256}00256\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00258}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a01551aee3e72c9ac3ef52d2bc586a5c2}{00258}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a01551aee3e72c9ac3ef52d2bc586a5c2}{get\_schema\_from\_model\_field}}(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00259}00259\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00260}00260\ \ \ \ \ field:\ ModelField,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00261}00261\ \ \ \ \ model\_name\_map:\ ModelNameMap,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00262}00262\ \ \ \ \ field\_mapping:\ Dict[}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ Tuple[ModelField,\ Literal[\textcolor{stringliteral}{"{}validation"{}},\ \textcolor{stringliteral}{"{}serialization"{}}]],\ JsonSchemaValue}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00264}00264\ \ \ \ \ ],}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00265}00265\ \ \ \ \ separate\_input\_output\_schemas:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00266}00266\ )\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00267}00267\ \ \ \ \ \textcolor{keywordflow}{return}\ field\_schema(\ \ \textcolor{comment}{\#\ type:\ ignore[no-\/any-\/return]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ field,\ model\_name\_map=model\_name\_map,\ ref\_prefix=REF\_PREFIX}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00269}00269\ \ \ \ \ )[0]}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00270}00270\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00271}00271\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00272}00272\ \textcolor{comment}{\#\ def\ get\_compat\_model\_name\_map(fields:\ List[ModelField])\ -\/>\ ModelNameMap:}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00273}00273\ \textcolor{comment}{\#\ \ \ \ \ models\ =\ get\_flat\_models\_from\_fields(fields,\ known\_models=set())}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00274}00274\ \textcolor{comment}{\#\ \ \ \ \ return\ get\_model\_name\_map(models)\ \ \#\ type:\ ignore[no-\/any-\/return]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00276}00276\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00277}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_af496889d51e29e1c694654bc4b5a87b2}{00277}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_af496889d51e29e1c694654bc4b5a87b2}{get\_definitions}}(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00278}00278\ \ \ \ \ *,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00279}00279\ \ \ \ \ fields:\ List[ModelField],}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00280}00280\ \ \ \ \ model\_name\_map:\ ModelNameMap,}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00281}00281\ \ \ \ \ separate\_input\_output\_schemas:\ bool\ =\ \textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00282}00282\ )\ -\/>\ Tuple[}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00283}00283\ \ \ \ \ Dict[Tuple[ModelField,\ Literal[\textcolor{stringliteral}{"{}validation"{}},\ \textcolor{stringliteral}{"{}serialization"{}}]],\ JsonSchemaValue],}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00284}00284\ \ \ \ \ Dict[str,\ Dict[str,\ Any]],}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00285}00285\ ]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00286}00286\ \ \ \ \ models\ =\ get\_flat\_models\_from\_fields(fields,\ known\_models=set())}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00287}00287\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\},\ \mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a45a826d56a93366624f4c5fee9b8a648}{get\_model\_definitions}}(flat\_models=models,\ model\_name\_map=model\_name\_map)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00290}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a8cb06072d42d042a276bf2178e122bb7}{00290}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a8cb06072d42d042a276bf2178e122bb7}{is\_scalar\_field}}(field:\ ModelField)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00291}00291\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ad05efaaa31b454582b96847b70b88b20}{is\_pv1\_scalar\_field}}(field)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00292}00292\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00293}00293\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00294}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a81518d8fec152f3e94e37e52c7b7927a}{00294}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a81518d8fec152f3e94e37e52c7b7927a}{is\_sequence\_field}}(field:\ ModelField)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00295}00295\ \ \ \ \ \textcolor{keywordflow}{return}\ field.shape\ \textcolor{keywordflow}{in}\ sequence\_shapes\ \textcolor{keywordflow}{or}\ shared.\_annotation\_is\_sequence(field.type\_)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00296}00296\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00297}00297\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00298}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ae84f25b1fe4265e4b21f89f61913d26f}{00298}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ae84f25b1fe4265e4b21f89f61913d26f}{is\_scalar\_sequence\_field}}(field:\ ModelField)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00299}00299\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a3733b9c184ead87d05d000e6d172a63b}{is\_pv1\_scalar\_sequence\_field}}(field)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00301}00301\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00302}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_af3baaa5d7285e3e9caec47b9b764357b}{00302}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_af3baaa5d7285e3e9caec47b9b764357b}{is\_bytes\_field}}(field:\ ModelField)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00303}00303\ \ \ \ \ \textcolor{keywordflow}{return}\ lenient\_issubclass(field.type\_,\ bytes)\ \ \textcolor{comment}{\#\ type:\ ignore[no-\/any-\/return]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00304}00304\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00305}00305\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00306}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a1914e713360ee1f28df2ceaa1e7daa3f}{00306}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a1914e713360ee1f28df2ceaa1e7daa3f}{is\_bytes\_sequence\_field}}(field:\ ModelField)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00307}00307\ \ \ \ \ \textcolor{keywordflow}{return}\ field.shape\ \textcolor{keywordflow}{in}\ sequence\_shapes\ \textcolor{keywordflow}{and}\ lenient\_issubclass(field.type\_,\ bytes)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00308}00308\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00309}00309\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00310}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_af2c8314892020f6fabf9d4331b38ee31}{00310}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_af2c8314892020f6fabf9d4331b38ee31}{copy\_field\_info}}(*,\ field\_info:\ FieldInfo,\ annotation:\ Any)\ -\/>\ FieldInfo:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00311}00311\ \ \ \ \ \textcolor{keywordflow}{return}\ copy(field\_info)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00312}00312\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00314}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a6cf4cf7cc642d3b5eea2b3fcd1b89fb6}{00314}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a6cf4cf7cc642d3b5eea2b3fcd1b89fb6}{serialize\_sequence\_value}}(*,\ field:\ ModelField,\ value:\ Any)\ -\/>\ Sequence[Any]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00315}00315\ \ \ \ \ \textcolor{keywordflow}{return}\ sequence\_shape\_to\_type[field.shape](value)\ \ \textcolor{comment}{\#\ type:\ ignore[no-\/any-\/return]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00316}00316\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00317}00317\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00318}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ad4e2f31e6b6c1a9a90a05c08a130cbf8}{00318}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_ad4e2f31e6b6c1a9a90a05c08a130cbf8}{get\_missing\_field\_error}}(loc:\ Tuple[str,\ ...])\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00319}00319\ \ \ \ \ missing\_field\_error\ =\ \mbox{\hyperlink{classpydantic_1_1v1_1_1error__wrappers_1_1_error_wrapper}{ErrorWrapper}}(MissingError(),\ loc=loc)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00320}00320\ \ \ \ \ new\_error\ =\ ValidationError([missing\_field\_error],\ RequestErrorModel)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00321}00321\ \ \ \ \ \textcolor{keywordflow}{return}\ new\_error.errors()[0]\ \ \textcolor{comment}{\#\ type:\ ignore[return-\/value]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00322}00322\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00323}00323\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00324}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a2d37a9e71c3225f91d90f4dac0a6a813}{00324}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_a2d37a9e71c3225f91d90f4dac0a6a813}{create\_body\_model}}(}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00325}00325\ \ \ \ \ *,\ fields:\ Sequence[ModelField],\ model\_name:\ str}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00326}00326\ )\ -\/>\ Type[BaseModel]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00327}00327\ \ \ \ \ BodyModel\ =\ create\_model(model\_name)}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00328}00328\ \ \ \ \ \textcolor{keywordflow}{for}\ f\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00329}00329\ \ \ \ \ \ \ \ \ BodyModel.\_\_fields\_\_[f.name]\ =\ f\ \ \textcolor{comment}{\#\ type:\ ignore[index]}}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00330}00330\ \ \ \ \ \textcolor{keywordflow}{return}\ BodyModel}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00331}00331\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00332}00332\ }
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00333}\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_afddb1c557775387b87196c1735f1f887}{00333}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacefastapi_1_1__compat_1_1v1_afddb1c557775387b87196c1735f1f887}{get\_model\_fields}}(model:\ Type[BaseModel])\ -\/>\ List[ModelField]:}
+\DoxyCodeLine{\Hypertarget{v1_8py_source_l00334}00334\ \ \ \ \ \textcolor{keywordflow}{return}\ list(model.\_\_fields\_\_.values())\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+
+\end{DoxyCode}

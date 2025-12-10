@@ -1,0 +1,955 @@
+\doxysection{mypy.\+py}
+\hypertarget{v1_2mypy_8py_source}{}\label{v1_2mypy_8py_source}\index{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/mypy.py@{micro\_gestion\_objetos/venv/Lib/site-\/packages/pydantic/v1/mypy.py}}
+\mbox{\hyperlink{v1_2mypy_8py}{Ir a la documentación de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00001}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy}{00001}}\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00002}00002\ \textcolor{keyword}{from}\ configparser\ \textcolor{keyword}{import}\ ConfigParser}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00003}00003\ \textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Any,\ Callable,\ Dict,\ List,\ Optional,\ Set,\ Tuple,\ Type\ \textcolor{keyword}{as}\ TypingType,\ Union}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00004}00004\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00005}00005\ \textcolor{keyword}{from}\ mypy.errorcodes\ \textcolor{keyword}{import}\ ErrorCode}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00006}00006\ \textcolor{keyword}{from}\ mypy.nodes\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00007}00007\ \ \ \ \ ARG\_NAMED,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00008}00008\ \ \ \ \ ARG\_NAMED\_OPT,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00009}00009\ \ \ \ \ ARG\_OPT,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00010}00010\ \ \ \ \ ARG\_POS,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00011}00011\ \ \ \ \ ARG\_STAR2,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00012}00012\ \ \ \ \ MDEF,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00013}00013\ \ \ \ \ Argument,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00014}00014\ \ \ \ \ AssignmentStmt,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00015}00015\ \ \ \ \ Block,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00016}00016\ \ \ \ \ CallExpr,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00017}00017\ \ \ \ \ ClassDef,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00018}00018\ \ \ \ \ Context,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00019}00019\ \ \ \ \ Decorator,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00020}00020\ \ \ \ \ EllipsisExpr,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00021}00021\ \ \ \ \ FuncBase,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00022}00022\ \ \ \ \ FuncDef,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00023}00023\ \ \ \ \ JsonDict,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00024}00024\ \ \ \ \ MemberExpr,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00025}00025\ \ \ \ \ NameExpr,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00026}00026\ \ \ \ \ PassStmt,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00027}00027\ \ \ \ \ PlaceholderNode,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00028}00028\ \ \ \ \ RefExpr,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00029}00029\ \ \ \ \ StrExpr,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00030}00030\ \ \ \ \ SymbolNode,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00031}00031\ \ \ \ \ SymbolTableNode,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00032}00032\ \ \ \ \ TempNode,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00033}00033\ \ \ \ \ TypeInfo,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00034}00034\ \ \ \ \ TypeVarExpr,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00035}00035\ \ \ \ \ Var,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00036}00036\ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00037}00037\ \textcolor{keyword}{from}\ mypy.options\ \textcolor{keyword}{import}\ Options}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00038}00038\ \textcolor{keyword}{from}\ mypy.plugin\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00039}00039\ \ \ \ \ CheckerPluginInterface,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00040}00040\ \ \ \ \ ClassDefContext,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00041}00041\ \ \ \ \ FunctionContext,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00042}00042\ \ \ \ \ MethodContext,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00043}00043\ \ \ \ \ Plugin,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00044}00044\ \ \ \ \ ReportConfigContext,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00045}00045\ \ \ \ \ SemanticAnalyzerPluginInterface,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00046}00046\ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00047}00047\ \textcolor{keyword}{from}\ mypy.plugins\ \textcolor{keyword}{import}\ dataclasses}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00048}00048\ \textcolor{keyword}{from}\ mypy.semanal\ \textcolor{keyword}{import}\ set\_callable\_name\ \ \textcolor{comment}{\#\ type:\ ignore}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00049}00049\ \textcolor{keyword}{from}\ mypy.server.trigger\ \textcolor{keyword}{import}\ make\_wildcard\_trigger}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00050}00050\ \textcolor{keyword}{from}\ mypy.types\ \textcolor{keyword}{import}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00051}00051\ \ \ \ \ AnyType,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00052}00052\ \ \ \ \ CallableType,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00053}00053\ \ \ \ \ Instance,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00054}00054\ \ \ \ \ NoneType,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00055}00055\ \ \ \ \ Overloaded,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00056}00056\ \ \ \ \ ProperType,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00057}00057\ \ \ \ \ Type,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00058}00058\ \ \ \ \ TypeOfAny,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00059}00059\ \ \ \ \ TypeType,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00060}00060\ \ \ \ \ TypeVarId,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00061}00061\ \ \ \ \ TypeVarType,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00062}00062\ \ \ \ \ UnionType,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00063}00063\ \ \ \ \ get\_proper\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00064}00064\ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00065}00065\ \textcolor{keyword}{from}\ mypy.typevars\ \textcolor{keyword}{import}\ fill\_typevars}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00066}00066\ \textcolor{keyword}{from}\ mypy.util\ \textcolor{keyword}{import}\ get\_unique\_redefinition\_name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00067}00067\ \textcolor{keyword}{from}\ mypy.version\ \textcolor{keyword}{import}\ \_\_version\_\_\ \textcolor{keyword}{as}\ mypy\_version}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00069}00069\ \textcolor{keyword}{from}\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1utils}{pydantic.v1.utils}}\ \textcolor{keyword}{import}\ is\_valid\_field}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00070}00070\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00071}00071\ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00072}00072\ \ \ \ \ \textcolor{keyword}{from}\ mypy.types\ \textcolor{keyword}{import}\ TypeVarDef\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00073}00073\ \textcolor{keywordflow}{except}\ ImportError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00074}00074\ \ \ \ \ \textcolor{comment}{\#\ Backward-\/compatible\ with\ TypeVarDef\ from\ Mypy\ 0.910.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00075}00075\ \ \ \ \ \textcolor{keyword}{from}\ mypy.types\ \textcolor{keyword}{import}\ TypeVarType\ \textcolor{keyword}{as}\ TypeVarDef}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00076}00076\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00077}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a55f64b8cd6832635e2d83316839c9c08}{00077}}\ CONFIGFILE\_KEY\ =\ \textcolor{stringliteral}{'pydantic-\/mypy'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00078}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_ad3e1cb6494d719f273936377cee6c633}{00078}}\ METADATA\_KEY\ =\ \textcolor{stringliteral}{'pydantic-\/mypy-\/metadata'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00079}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_af38d4a28cf4b42457435da73c9f5df60}{00079}}\ \_NAMESPACE\ =\ \_\_name\_\_[:-\/5]\ \ \textcolor{comment}{\#\ 'pydantic'\ in\ 1.10.X,\ 'pydantic.v1'\ in\ v2.X}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00080}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a3cd76bb4c1eb711c572bf4cd1933a627}{00080}}\ BASEMODEL\_FULLNAME\ =\ f\textcolor{stringliteral}{'\{\_NAMESPACE\}.main.BaseModel'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00081}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a45cd9052f1a7e26b3f880f160631da5e}{00081}}\ BASESETTINGS\_FULLNAME\ =\ f\textcolor{stringliteral}{'\{\_NAMESPACE\}.env\_settings.BaseSettings'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00082}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a908719cfac68f0ded8a9526e94cf8846}{00082}}\ MODEL\_METACLASS\_FULLNAME\ =\ f\textcolor{stringliteral}{'\{\_NAMESPACE\}.main.ModelMetaclass'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00083}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a795305277c747e41b4ce392e4fcd7d9b}{00083}}\ FIELD\_FULLNAME\ =\ f\textcolor{stringliteral}{'\{\_NAMESPACE\}.fields.Field'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00084}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a828bd0209967c275b57936c2c6a13f19}{00084}}\ DATACLASS\_FULLNAME\ =\ f\textcolor{stringliteral}{'\{\_NAMESPACE\}.dataclasses.dataclass'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00086}00086\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00087}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a38c7e063df6cc712381b9287b2cdd76c}{00087}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a38c7e063df6cc712381b9287b2cdd76c}{parse\_mypy\_version}}(version:\ str)\ -\/>\ Tuple[int,\ ...]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00088}00088\ \ \ \ \ \textcolor{keywordflow}{return}\ tuple(map(int,\ version.partition(\textcolor{stringliteral}{'+'})[0].split(\textcolor{stringliteral}{'.'})))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00090}00090\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00091}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a31f602a1c2ba0e91734bbe3ec51ff2bd}{00091}}\ MYPY\_VERSION\_TUPLE\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a38c7e063df6cc712381b9287b2cdd76c}{parse\_mypy\_version}}(mypy\_version)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00092}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a13c5c03969772ee40b26d070d1b857e5}{00092}}\ BUILTINS\_NAME\ =\ \textcolor{stringliteral}{'builtins'}\ \textcolor{keywordflow}{if}\ MYPY\_VERSION\_TUPLE\ >=\ (0,\ 930)\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'\_\_builtins\_\_'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00094}00094\ \textcolor{comment}{\#\ Increment\ version\ if\ plugin\ changes\ and\ mypy\ caches\ should\ be\ invalidated}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00095}00095\ \_\_version\_\_\ =\ 2}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00096}00096\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00097}00097\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00098}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a3ca7c0bbf40b8158580c2ff279ee8a4e}{00098}}\ \textcolor{keyword}{def\ }plugin(version:\ str)\ -\/>\ \textcolor{stringliteral}{'TypingType[Plugin]'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00099}00099\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \`{}version\`{}\ is\ the\ mypy\ version\ string}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00101}00101\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ We\ might\ want\ to\ use\ this\ to\ print\ a\ warning\ if\ the\ mypy\ version\ being\ used\ is}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ newer,\ or\ especially\ older,\ than\ we\ expect\ (or\ need).}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00105}00105\ \ \ \ \ \textcolor{keywordflow}{return}\ PydanticPlugin}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00107}00107\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00108}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin}{00108}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin}{PydanticPlugin}}(Plugin):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00109}00109\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ options:\ Options)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00110}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_af17f055ed2d9336163ed8a1de1556ebd}{00110}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_af17f055ed2d9336163ed8a1de1556ebd}{plugin\_config}}\ =\ \mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config}{PydanticPluginConfig}}(options)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00111}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ac08e2e037b8f7f1c9ca91f395cf3efa5}{00111}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ac08e2e037b8f7f1c9ca91f395cf3efa5}{\_plugin\_data}}\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_af17f055ed2d9336163ed8a1de1556ebd}{plugin\_config}}.to\_data()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ super().\_\_init\_\_(options)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00113}00113\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00114}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a8ae14dffa474828c7321c9de2560be80}{00114}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a8ae14dffa474828c7321c9de2560be80}{get\_base\_class\_hook}}(self,\ fullname:\ str)\ -\/>\ \textcolor{stringliteral}{'Optional[Callable[[ClassDefContext],\ None]]'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ sym\ =\ self.lookup\_fully\_qualified(fullname)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sym\ \textcolor{keywordflow}{and}\ isinstance(sym.node,\ TypeInfo):\ \ \textcolor{comment}{\#\ pragma:\ no\ branch}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ No\ branching\ may\ occur\ if\ the\ mypy\ cache\ has\ not\ been\ cleared}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ any(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{get\_fullname}}(base)\ ==\ BASEMODEL\_FULLNAME\ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ sym.node.mro):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a26d760a73933882ce8835a8fb07546c1}{\_pydantic\_model\_class\_maker\_callback}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00121}00121\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00122}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a790662469aa86bbf49e0ba8afed9649b}{00122}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a790662469aa86bbf49e0ba8afed9649b}{get\_metaclass\_hook}}(self,\ fullname:\ str)\ -\/>\ Optional[Callable[[ClassDefContext],\ \textcolor{keywordtype}{None}]]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00123}00123\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fullname\ ==\ MODEL\_METACLASS\_FULLNAME:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00124}00124\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ad00488f02ad96b82048ec8f29d3fdd95}{\_pydantic\_model\_metaclass\_marker\_callback}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00125}00125\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00126}00126\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00127}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a96d8c3bd542e5811e86f0f458817a49b}{00127}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a96d8c3bd542e5811e86f0f458817a49b}{get\_function\_hook}}(self,\ fullname:\ str)\ -\/>\ \textcolor{stringliteral}{'Optional[Callable[[FunctionContext],\ Type]]'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00128}00128\ \ \ \ \ \ \ \ \ sym\ =\ self.lookup\_fully\_qualified(fullname)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00129}00129\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sym\ \textcolor{keywordflow}{and}\ sym.fullname\ ==\ FIELD\_FULLNAME:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ac5adfdd92df1b0fdb09cd45ff7b1706c}{\_pydantic\_field\_callback}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00132}00132\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00133}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_add92e4b423dad990dc7b15d3015f260c}{00133}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_add92e4b423dad990dc7b15d3015f260c}{get\_method\_hook}}(self,\ fullname:\ str)\ -\/>\ Optional[Callable[[MethodContext],\ Type]]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fullname.endswith(\textcolor{stringliteral}{'.from\_orm'}):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ from\_orm\_callback}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00137}00137\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00138}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_af64301cd5ecb5e3fc4c3927d1c826e78}{00138}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_af64301cd5ecb5e3fc4c3927d1c826e78}{get\_class\_decorator\_hook}}(self,\ fullname:\ str)\ -\/>\ Optional[Callable[[ClassDefContext],\ \textcolor{keywordtype}{None}]]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Mark\ pydantic.dataclasses\ as\ dataclass.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00140}00140\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00141}00141\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Mypy\ version\ 1.1.1\ added\ support\ for\ \`{}@dataclass\_transform\`{}\ decorator.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00142}00142\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ fullname\ ==\ DATACLASS\_FULLNAME\ \textcolor{keywordflow}{and}\ MYPY\_VERSION\_TUPLE\ <\ (1,\ 1):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dataclasses.dataclass\_class\_maker\_callback\ \ \textcolor{comment}{\#\ type:\ ignore[return-\/value]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00147}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a93e26d4bc1c163817409f1f3dc336e9c}{00147}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a93e26d4bc1c163817409f1f3dc336e9c}{report\_config\_data}}(self,\ ctx:\ ReportConfigContext)\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Return\ all\ plugin\ config\ data.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00149}00149\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00150}00150\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Used\ by\ mypy\ to\ determine\ if\ cache\ needs\ to\ be\ discarded.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00151}00151\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ac08e2e037b8f7f1c9ca91f395cf3efa5}{\_plugin\_data}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00153}00153\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00154}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a26d760a73933882ce8835a8fb07546c1}{00154}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_a26d760a73933882ce8835a8fb07546c1}{\_pydantic\_model\_class\_maker\_callback}}(self,\ ctx:\ ClassDefContext)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ transformer\ =\ \mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer}{PydanticModelTransformer}}(ctx,\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_af17f055ed2d9336163ed8a1de1556ebd}{plugin\_config}})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ transformer.transform()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00158}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ad00488f02ad96b82048ec8f29d3fdd95}{00158}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ad00488f02ad96b82048ec8f29d3fdd95}{\_pydantic\_model\_metaclass\_marker\_callback}}(self,\ ctx:\ ClassDefContext)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Reset\ dataclass\_transform\_spec\ attribute\ of\ ModelMetaclass.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00160}00160\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00161}00161\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Let\ the\ plugin\ handle\ it.\ This\ behavior\ can\ be\ disabled}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00162}00162\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ if\ 'debug\_dataclass\_transform'\ is\ set\ to\ True',\ for\ testing\ purposes.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00163}00163\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_af17f055ed2d9336163ed8a1de1556ebd}{plugin\_config}}.debug\_dataclass\_transform:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ info\_metaclass\ =\ ctx.cls.info.declared\_metaclass}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00167}00167\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ info\_metaclass,\ \textcolor{stringliteral}{"{}callback\ not\ passed\ from\ 'get\_metaclass\_hook'"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ getattr(info\_metaclass.type,\ \textcolor{stringliteral}{'dataclass\_transform\_spec'},\ \textcolor{keywordtype}{None}):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ info\_metaclass.type.dataclass\_transform\_spec\ =\ \textcolor{keywordtype}{None}\ \ \textcolor{comment}{\#\ type:\ ignore[attr-\/defined]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00171}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ac5adfdd92df1b0fdb09cd45ff7b1706c}{00171}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_ac5adfdd92df1b0fdb09cd45ff7b1706c}{\_pydantic\_field\_callback}}(self,\ ctx:\ FunctionContext)\ -\/>\ \textcolor{stringliteral}{'Type'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00173}00173\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Extract\ the\ type\ of\ the\ \`{}default\`{}\ argument\ from\ the\ Field\ function,\ and\ use\ it\ as\ the\ return\ type.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00174}00174\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00175}00175\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ In\ particular:}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00176}00176\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ Check\ whether\ the\ default\ and\ default\_factory\ argument\ is\ specified.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00177}00177\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ Output\ an\ error\ if\ both\ are\ specified.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00178}00178\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ Retrieve\ the\ type\ of\ the\ argument\ which\ is\ specified,\ and\ use\ it\ as\ return\ type\ for\ the\ function.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00179}00179\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00180}00180\ \ \ \ \ \ \ \ \ default\_any\_type\ =\ ctx.default\_return\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ ctx.callee\_arg\_names[0]\ ==\ \textcolor{stringliteral}{'default'},\ \textcolor{stringliteral}{'"{}default"{}\ is\ no\ longer\ first\ argument\ in\ Field()'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ ctx.callee\_arg\_names[1]\ ==\ \textcolor{stringliteral}{'default\_factory'},\ \textcolor{stringliteral}{'"{}default\_factory"{}\ is\ no\ longer\ second\ argument\ in\ Field()'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ default\_args\ =\ ctx.args[0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ default\_factory\_args\ =\ ctx.args[1]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00186}00186\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ default\_args\ \textcolor{keywordflow}{and}\ default\_factory\_args:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a6726759fa53c33905ef3bbfa81bb9227}{error\_default\_and\_default\_factory\_specified}}(ctx.api,\ ctx.context)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00189}00189\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ default\_any\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00190}00190\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ default\_args:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ default\_type\ =\ ctx.arg\_types[0][0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ default\_arg\ =\ default\_args[0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Fallback\ to\ default\ Any\ type\ if\ the\ field\ is\ required}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(default\_arg,\ EllipsisExpr):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ default\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00198}00198\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ default\_factory\_args:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ default\_factory\_type\ =\ ctx.arg\_types[1][0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00201}00201\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Functions\ which\ use\ \`{}ParamSpec`\ can\ be\ overloaded,\ exposing\ the\ callable's\ types\ as\ a\ parameter}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Pydantic\ calls\ the\ default\ factory\ without\ any\ argument,\ so\ we\ retrieve\ the\ first\ item}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(default\_factory\_type,\ Overloaded):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ MYPY\_VERSION\_TUPLE\ >\ (0,\ 910):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ default\_factory\_type\ =\ default\_factory\_type.items[0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Mypy0.910\ exposes\ the\ items\ of\ overloaded\ types\ in\ a\ function}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ default\_factory\_type\ =\ default\_factory\_type.items()[0]\ \ \textcolor{comment}{\#\ type:\ ignore[operator]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00210}00210\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(default\_factory\_type,\ CallableType):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\_type\ =\ get\_proper\_type(default\_factory\_type.ret\_type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(ret\_type,\ Instance)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ ret\_type.args}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ all(isinstance(arg,\ TypeVarType)\ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ ret\_type.args)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Looks\ like\ the\ default\ factory\ is\ a\ type\ like\ \`{}list`\ or\ \`{}dict`,\ replace\ all\ args\ with\ \`{}Any`}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ret\_type\ =\ ret\_type.copy\_modified(args=[default\_any\_type]\ *\ len(ret\_type.args))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ret\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00221}00221\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ default\_any\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00223}00223\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00224}00224\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00225}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config}{00225}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config}{PydanticPluginConfig}}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00226}00226\ \ \ \ \ \_\_slots\_\_\ =\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'init\_forbid\_extra'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'init\_typed'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'warn\_required\_dynamic\_aliases'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'warn\_untyped\_fields'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'debug\_dataclass\_transform'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00232}00232\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00233}00233\ \ \ \ \ init\_forbid\_extra:\ bool}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00234}00234\ \ \ \ \ init\_typed:\ bool}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00235}00235\ \ \ \ \ warn\_required\_dynamic\_aliases:\ bool}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00236}00236\ \ \ \ \ warn\_untyped\_fields:\ bool}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00237}00237\ \ \ \ \ debug\_dataclass\_transform:\ bool\ \ \textcolor{comment}{\#\ undocumented}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00239}00239\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ options:\ Options)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ options.config\_file\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00242}00242\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ toml\_config\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_ace5676c557130b6e12671a21aee71689}{parse\_toml}}(options.config\_file)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ toml\_config\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ config\ =\ toml\_config.get(\textcolor{stringliteral}{'tool'},\ \{\}).get(\textcolor{stringliteral}{'pydantic-\/mypy'},\ \{\})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config}{\_\_slots\_\_}}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setting\ =\ config.get(key,\ \textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(setting,\ bool):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ ValueError(f\textcolor{stringliteral}{'Configuration\ value\ must\ be\ a\ boolean\ for\ key:\ \{key\}'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setattr(self,\ key,\ setting)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ plugin\_config\ =\ ConfigParser()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ plugin\_config.read(options.config\_file)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ key\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config}{\_\_slots\_\_}}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setting\ =\ plugin\_config.getboolean(CONFIGFILE\_KEY,\ key,\ fallback=\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ setattr(self,\ key,\ setting)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00257}00257\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00258}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config_a15a33f404ab768269efbc438b0205f2a}{00258}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config_a15a33f404ab768269efbc438b0205f2a}{to\_data}}(self)\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{key:\ getattr(self,\ key)\ \textcolor{keywordflow}{for}\ key\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_plugin_config}{\_\_slots\_\_}}\}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00260}00260\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00261}00261\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00262}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a4181b78449314e0885958772649bda75}{00262}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a4181b78449314e0885958772649bda75}{from\_orm\_callback}}(ctx:\ MethodContext)\ -\/>\ Type:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00263}00263\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00264}00264\ \textcolor{stringliteral}{\ \ \ \ Raise\ an\ error\ if\ orm\_mode\ is\ not\ enabled}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00265}00265\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00266}00266\ \ \ \ \ model\_type:\ Instance}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00267}00267\ \ \ \ \ ctx\_type\ =\ ctx.type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00268}00268\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ctx\_type,\ TypeType):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ ctx\_type\ =\ ctx\_type.item}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00270}00270\ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(ctx\_type,\ CallableType)\ \textcolor{keywordflow}{and}\ isinstance(ctx\_type.ret\_type,\ Instance):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ model\_type\ =\ ctx\_type.ret\_type\ \ \textcolor{comment}{\#\ called\ on\ the\ class}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00272}00272\ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(ctx\_type,\ Instance):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ model\_type\ =\ ctx\_type\ \ \textcolor{comment}{\#\ called\ on\ an\ instance\ (unusual,\ but\ still\ valid)}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00274}00274\ \ \ \ \ \textcolor{keywordflow}{else}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00275}00275\ \ \ \ \ \ \ \ \ detail\ =\ f\textcolor{stringliteral}{'ctx.type:\ \{ctx\_type\}\ (of\ type\ \{ctx\_type.\_\_class\_\_.\_\_name\_\_\})'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a066dd80c8430bdc9cef90a2492a6057b}{error\_unexpected\_behavior}}(detail,\ ctx.api,\ ctx.context)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ctx.default\_return\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00278}00278\ \ \ \ \ pydantic\_metadata\ =\ model\_type.type.metadata.get(METADATA\_KEY)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00279}00279\ \ \ \ \ \textcolor{keywordflow}{if}\ pydantic\_metadata\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ctx.default\_return\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00281}00281\ \ \ \ \ orm\_mode\ =\ pydantic\_metadata.get(\textcolor{stringliteral}{'config'},\ \{\}).get(\textcolor{stringliteral}{'orm\_mode'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00282}00282\ \ \ \ \ \textcolor{keywordflow}{if}\ orm\_mode\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a524a5c3d86d199a04819c83dd4e37390}{error\_from\_orm}}(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a9e58d5c0c21a04de16cdcadaab720fbe}{get\_name}}(model\_type.type),\ ctx.api,\ ctx.context)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00284}00284\ \ \ \ \ \textcolor{keywordflow}{return}\ ctx.default\_return\_type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00286}00286\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00287}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer}{00287}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer}{PydanticModelTransformer}}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00288}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ada3fb06b840830e8d1ed9d2a413f1b2a}{00288}}\ \ \ \ \ tracked\_config\_fields:\ Set[str]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00289}00289\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'extra'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00290}00290\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'allow\_mutation'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00291}00291\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'frozen'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00292}00292\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'orm\_mode'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00293}00293\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'allow\_population\_by\_field\_name'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00294}00294\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'alias\_generator'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00295}00295\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00296}00296\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00297}00297\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(self,\ ctx:\ ClassDefContext,\ plugin\_config:\ PydanticPluginConfig)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00298}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{00298}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}\ =\ ctx}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00299}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a249a07a400ebff83b23c4843fb747894}{00299}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a249a07a400ebff83b23c4843fb747894}{plugin\_config}}\ =\ plugin\_config}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00300}00300\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00301}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ac9fe013bb7f0548492dceaf1504ec2e5}{00301}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ac9fe013bb7f0548492dceaf1504ec2e5}{transform}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00302}00302\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00303}00303\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Configures\ the\ BaseModel\ subclass\ according\ to\ the\ plugin\ settings.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00304}00304\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00305}00305\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ In\ particular:}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00306}00306\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ determines\ the\ model\ config\ and\ fields,}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00307}00307\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ adds\ a\ fields-\/aware\ signature\ for\ the\ initializer\ and\ construct\ methods}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00308}00308\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ freezes\ the\ class\ if\ allow\_mutation\ =\ False\ or\ frozen\ =\ True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00309}00309\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *\ stores\ the\ fields,\ config,\ and\ if\ the\ class\ is\ settings\ in\ the\ mypy\ metadata\ for\ access\ by\ subclasses}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00310}00310\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00311}00311\ \ \ \ \ \ \ \ \ ctx\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00312}00312\ \ \ \ \ \ \ \ \ info\ =\ ctx.cls.info}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00313}00313\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00314}00314\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a92406bc42e135c64c5be9da0fe6f19e3}{adjust\_validator\_signatures}}()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00315}00315\ \ \ \ \ \ \ \ \ config\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a5f5623cbb00ae2f37f86b927f4b42a0a}{collect\_config}}()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00316}00316\ \ \ \ \ \ \ \ \ fields\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ad1015f0cb0cbb825d318e638c521f9ba}{collect\_fields}}(config)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00317}00317\ \ \ \ \ \ \ \ \ is\_settings\ =\ any(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{get\_fullname}}(base)\ ==\ BASESETTINGS\_FULLNAME\ \textcolor{keywordflow}{for}\ base\ \textcolor{keywordflow}{in}\ info.mro[:-\/1])}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00318}00318\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a7a02136ac0ee462300b38a2cb533e5e1}{add\_initializer}}(fields,\ config,\ is\_settings)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00319}00319\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_acb345b340a21ae584336760ba334634b}{add\_construct\_method}}(fields)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00320}00320\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a7733e84a091147094014be97b889768a}{set\_frozen}}(fields,\ frozen=config.allow\_mutation\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{False}\ \textcolor{keywordflow}{or}\ config.frozen\ \textcolor{keywordflow}{is}\ \textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00321}00321\ \ \ \ \ \ \ \ \ info.metadata[METADATA\_KEY]\ =\ \{}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00322}00322\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'fields'}:\ \{field.name:\ field.serialize()\ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ fields\},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00323}00323\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'config'}:\ config.set\_values\_dict(),}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00324}00324\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00325}00325\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00326}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a92406bc42e135c64c5be9da0fe6f19e3}{00326}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a92406bc42e135c64c5be9da0fe6f19e3}{adjust\_validator\_signatures}}(self)\ -\/>\ None:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00327}00327\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}When\ we\ decorate\ a\ function\ \`{}f\`{}\ with\ \`{}pydantic.validator(...),\ mypy\ sees}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00328}00328\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}f\`{}\ as\ a\ regular\ method\ taking\ a\ \`{}self\`{}\ instance,\ even\ though\ pydantic}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00329}00329\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ internally\ wraps\ \`{}f\`{}\ with\ \`{}classmethod\`{}\ if\ necessary.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00330}00330\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00331}00331\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Teach\ mypy\ this\ by\ marking\ any\ function\ whose\ outermost\ decorator\ is\ a}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00332}00332\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}validator()\`{}\ call\ as\ a\ classmethod.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00333}00333\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00334}00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ sym\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}.cls.info.names.items():}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00335}00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(sym.node,\ Decorator):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00336}00336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ first\_dec\ =\ sym.node.original\_decorators[0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00337}00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00338}00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(first\_dec,\ CallExpr)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00339}00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ isinstance(first\_dec.callee,\ NameExpr)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00340}00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ first\_dec.callee.fullname\ ==\ f\textcolor{stringliteral}{'\{\_NAMESPACE\}.class\_validators.validator'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00341}00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00342}00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sym.node.func.is\_class\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00343}00343\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00344}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a5f5623cbb00ae2f37f86b927f4b42a0a}{00344}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a5f5623cbb00ae2f37f86b927f4b42a0a}{collect\_config}}(self)\ -\/>\ 'ModelConfigData':}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00345}00345\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00346}00346\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Collects\ the\ values\ of\ the\ config\ attributes\ that\ are\ used\ by\ the\ plugin,\ accounting\ for\ parent\ classes.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00347}00347\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00348}00348\ \ \ \ \ \ \ \ \ ctx\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00349}00349\ \ \ \ \ \ \ \ \ cls\ =\ ctx.cls}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00350}00350\ \ \ \ \ \ \ \ \ config\ =\ \mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data}{ModelConfigData}}()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00351}00351\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ stmt\ \textcolor{keywordflow}{in}\ cls.defs.body:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00352}00352\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(stmt,\ ClassDef):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00353}00353\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00354}00354\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ stmt.name\ ==\ \textcolor{stringliteral}{'Config'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00355}00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ substmt\ \textcolor{keywordflow}{in}\ stmt.defs.body:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00356}00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(substmt,\ AssignmentStmt):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00357}00357\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00358}00358\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ config.update(self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a9b810b8856bbc38ef018cf7884a3ca8b}{get\_config\_update}}(substmt))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00359}00359\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00360}00360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ config.has\_alias\_generator}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00361}00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ config.allow\_population\_by\_field\_name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00362}00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a249a07a400ebff83b23c4843fb747894}{plugin\_config}}.warn\_required\_dynamic\_aliases}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00363}00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00364}00364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a8ec80db5a36564f5dba10bf6cd78f40d}{error\_required\_dynamic\_aliases}}(ctx.api,\ stmt)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00365}00365\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ info\ \textcolor{keywordflow}{in}\ cls.info.mro[1:]:\ \ \textcolor{comment}{\#\ 0\ is\ the\ current\ class}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00366}00366\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ METADATA\_KEY\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ info.metadata:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00367}00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00368}00368\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00369}00369\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Each\ class\ depends\ on\ the\ set\ of\ fields\ in\ its\ ancestors}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00370}00370\ \ \ \ \ \ \ \ \ \ \ \ \ ctx.api.add\_plugin\_dependency(make\_wildcard\_trigger(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{get\_fullname}}(info)))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00371}00371\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ value\ \textcolor{keywordflow}{in}\ info.metadata[METADATA\_KEY][\textcolor{stringliteral}{'config'}].items():}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00372}00372\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ config.setdefault(name,\ value)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00373}00373\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ config}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00374}00374\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00375}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ad1015f0cb0cbb825d318e638c521f9ba}{00375}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ad1015f0cb0cbb825d318e638c521f9ba}{collect\_fields}}(self,\ model\_config:\ \textcolor{stringliteral}{'ModelConfigData'})\ -\/>\ List[\textcolor{stringliteral}{'PydanticModelField'}]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00376}00376\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00377}00377\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Collects\ the\ fields\ for\ the\ model,\ accounting\ for\ parent\ classes}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00378}00378\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00379}00379\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ First,\ collect\ fields\ belonging\ to\ the\ current\ class.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00380}00380\ \ \ \ \ \ \ \ \ ctx\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00381}00381\ \ \ \ \ \ \ \ \ cls\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}.cls}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00382}00382\ \ \ \ \ \ \ \ \ fields\ =\ []\ \ \textcolor{comment}{\#\ type:\ List[PydanticModelField]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00383}00383\ \ \ \ \ \ \ \ \ known\_fields\ =\ set()\ \ \textcolor{comment}{\#\ type:\ Set[str]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00384}00384\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ stmt\ \textcolor{keywordflow}{in}\ cls.defs.body:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00385}00385\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(stmt,\ AssignmentStmt):\ \ \textcolor{comment}{\#\ \`{}and\ stmt.new\_syntax`\ to\ require\ annotation}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00386}00386\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00387}00387\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00388}00388\ \ \ \ \ \ \ \ \ \ \ \ \ lhs\ =\ stmt.lvalues[0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00389}00389\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(lhs,\ NameExpr)\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ is\_valid\_field(lhs.name):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00390}00390\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00391}00391\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00392}00392\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ stmt.new\_syntax\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a249a07a400ebff83b23c4843fb747894}{plugin\_config}}.warn\_untyped\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00393}00393\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_aa773ec852697de67d39a755b1a536f32}{error\_untyped\_fields}}(ctx.api,\ stmt)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00394}00394\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00395}00395\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ if\ lhs.name\ ==\ '\_\_config\_\_':\ \ \#\ BaseConfig\ not\ well\ handled;\ I'm\ not\ sure\ why\ yet}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00396}00396\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00397}00397\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00398}00398\ \ \ \ \ \ \ \ \ \ \ \ \ sym\ =\ cls.info.names.get(lhs.name)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00399}00399\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sym\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00400}00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ likely\ due\ to\ a\ star\ import\ (see\ the\ dataclasses\ plugin\ for\ a\ more\ detailed\ explanation)}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00401}00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ the\ same\ logic\ used\ in\ the\ dataclasses\ plugin}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00402}00402\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00403}00403\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00404}00404\ \ \ \ \ \ \ \ \ \ \ \ \ node\ =\ sym.node}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00405}00405\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(node,\ PlaceholderNode):\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00406}00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ See\ the\ PlaceholderNode\ docstring\ for\ more\ detail\ about\ how\ this\ can\ occur}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00407}00407\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Basically,\ it\ is\ an\ edge\ case\ when\ dealing\ with\ complex\ import\ logic}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00408}00408\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ is\ the\ same\ logic\ used\ in\ the\ dataclasses\ plugin}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00409}00409\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00410}00410\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(node,\ Var):\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00411}00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Don't\ know\ if\ this\ edge\ case\ still\ happens\ with\ the\ \`{}is\_valid\_field`\ check\ above}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00412}00412\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ but\ better\ safe\ than\ sorry}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00413}00413\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00414}00414\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00415}00415\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ x:\ ClassVar[int]\ is\ ignored\ by\ dataclasses.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00416}00416\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ node.is\_classvar:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00417}00417\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00418}00418\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00419}00419\ \ \ \ \ \ \ \ \ \ \ \ \ is\_required\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a28c96f5352f1ab4eaef9b35ab129980d}{get\_is\_required}}(cls,\ stmt,\ lhs)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00420}00420\ \ \ \ \ \ \ \ \ \ \ \ \ alias,\ has\_dynamic\_alias\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ac4b3f416f74c3a8f6840e2c1e1fe33a9}{get\_alias\_info}}(stmt)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00421}00421\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00422}00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ has\_dynamic\_alias}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00423}00423\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ model\_config.allow\_population\_by\_field\_name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00424}00424\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a249a07a400ebff83b23c4843fb747894}{plugin\_config}}.warn\_required\_dynamic\_aliases}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00425}00425\ \ \ \ \ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00426}00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a8ec80db5a36564f5dba10bf6cd78f40d}{error\_required\_dynamic\_aliases}}(ctx.api,\ stmt)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00427}00427\ \ \ \ \ \ \ \ \ \ \ \ \ fields.append(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00428}00428\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field}{PydanticModelField}}(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00429}00429\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name=lhs.name,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00430}00430\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ is\_required=is\_required,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00431}00431\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ alias=alias,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00432}00432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ has\_dynamic\_alias=has\_dynamic\_alias,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00433}00433\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ line=stmt.line,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00434}00434\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ column=stmt.column,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00435}00435\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00436}00436\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00437}00437\ \ \ \ \ \ \ \ \ \ \ \ \ known\_fields.add(lhs.name)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00438}00438\ \ \ \ \ \ \ \ \ all\_fields\ =\ fields.copy()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00439}00439\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ info\ \textcolor{keywordflow}{in}\ cls.info.mro[1:]:\ \ \textcolor{comment}{\#\ 0\ is\ the\ current\ class,\ -\/2\ is\ BaseModel,\ -\/1\ is\ object}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00440}00440\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ METADATA\_KEY\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ info.metadata:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00441}00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00442}00442\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00443}00443\ \ \ \ \ \ \ \ \ \ \ \ \ superclass\_fields\ =\ []}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00444}00444\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Each\ class\ depends\ on\ the\ set\ of\ fields\ in\ its\ ancestors}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00445}00445\ \ \ \ \ \ \ \ \ \ \ \ \ ctx.api.add\_plugin\_dependency(make\_wildcard\_trigger(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{get\_fullname}}(info)))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00446}00446\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00447}00447\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ name,\ data\ \textcolor{keywordflow}{in}\ info.metadata[METADATA\_KEY][\textcolor{stringliteral}{'fields'}].items():}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00448}00448\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ known\_fields:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00449}00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ field\ =\ PydanticModelField.deserialize(info,\ data)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00450}00450\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ known\_fields.add(name)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00451}00451\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ superclass\_fields.append(field)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00452}00452\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00453}00453\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (field,)\ =\ (a\ \textcolor{keywordflow}{for}\ a\ \textcolor{keywordflow}{in}\ all\_fields\ \textcolor{keywordflow}{if}\ a.name\ ==\ name)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00454}00454\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ all\_fields.remove(field)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00455}00455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ superclass\_fields.append(field)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00456}00456\ \ \ \ \ \ \ \ \ \ \ \ \ all\_fields\ =\ superclass\_fields\ +\ all\_fields}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00457}00457\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ all\_fields}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00458}00458\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00459}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a7a02136ac0ee462300b38a2cb533e5e1}{00459}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a7a02136ac0ee462300b38a2cb533e5e1}{add\_initializer}}(self,\ fields:\ List[\textcolor{stringliteral}{'PydanticModelField'}],\ config:\ \textcolor{stringliteral}{'ModelConfigData'},\ is\_settings:\ bool)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00460}00460\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00461}00461\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Adds\ a\ fields-\/aware\ \`{}\_\_init\_\_\`{}\ method\ to\ the\ class.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00462}00462\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00463}00463\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ The\ added\ \`{}\_\_init\_\_\`{}\ will\ be\ annotated\ with\ types\ vs.\ all\ \`{}Any\`{}\ depending\ on\ the\ plugin\ settings.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00464}00464\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00465}00465\ \ \ \ \ \ \ \ \ ctx\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00466}00466\ \ \ \ \ \ \ \ \ typed\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a249a07a400ebff83b23c4843fb747894}{plugin\_config}}.init\_typed}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00467}00467\ \ \ \ \ \ \ \ \ use\_alias\ =\ config.allow\_population\_by\_field\_name\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00468}00468\ \ \ \ \ \ \ \ \ force\_all\_optional\ =\ is\_settings\ \textcolor{keywordflow}{or}\ bool(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00469}00469\ \ \ \ \ \ \ \ \ \ \ \ \ config.has\_alias\_generator\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ config.allow\_population\_by\_field\_name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00470}00470\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00471}00471\ \ \ \ \ \ \ \ \ init\_arguments\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_abb3c9c91ca9eba4838fecef63aa209c5}{get\_field\_arguments}}(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00472}00472\ \ \ \ \ \ \ \ \ \ \ \ \ fields,\ typed=typed,\ force\_all\_optional=force\_all\_optional,\ use\_alias=use\_alias}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00473}00473\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00474}00474\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a4700d059b60e4d0e5816f3336a1c91cc}{should\_init\_forbid\_extra}}(fields,\ config):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00475}00475\ \ \ \ \ \ \ \ \ \ \ \ \ var\ =\ Var(\textcolor{stringliteral}{'kwargs'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00476}00476\ \ \ \ \ \ \ \ \ \ \ \ \ init\_arguments.append(Argument(var,\ \mbox{\hyperlink{namespacepydantic_1_1types_a2432d5ba57c4d80652f9e83e5db04e1d}{AnyType}}(TypeOfAny.explicit),\ \textcolor{keywordtype}{None},\ ARG\_STAR2))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00477}00477\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00478}00478\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'\_\_init\_\_'}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ ctx.cls.info.names:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00479}00479\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a36a4a2443d3323c8d66be64b96af9257}{add\_method}}(ctx,\ \textcolor{stringliteral}{'\_\_init\_\_'},\ init\_arguments,\ NoneType())}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00480}00480\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00481}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_acb345b340a21ae584336760ba334634b}{00481}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_acb345b340a21ae584336760ba334634b}{add\_construct\_method}}(self,\ fields:\ List[\textcolor{stringliteral}{'PydanticModelField'}])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00482}00482\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00483}00483\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Adds\ a\ fully\ typed\ \`{}construct\`{}\ classmethod\ to\ the\ class.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00484}00484\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00485}00485\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Similar\ to\ the\ fields-\/aware\ \_\_init\_\_\ method,\ but\ always\ uses\ the\ field\ names\ (not\ aliases),}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00486}00486\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ and\ does\ not\ treat\ settings\ fields\ as\ optional.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00487}00487\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00488}00488\ \ \ \ \ \ \ \ \ ctx\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00489}00489\ \ \ \ \ \ \ \ \ set\_str\ =\ ctx.api.named\_type(f\textcolor{stringliteral}{'\{BUILTINS\_NAME\}.set'},\ [ctx.api.named\_type(f\textcolor{stringliteral}{'\{BUILTINS\_NAME\}.str'})])}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00490}00490\ \ \ \ \ \ \ \ \ optional\_set\_str\ =\ UnionType([set\_str,\ NoneType()])}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00491}00491\ \ \ \ \ \ \ \ \ fields\_set\_argument\ =\ Argument(Var(\textcolor{stringliteral}{'\_fields\_set'},\ optional\_set\_str),\ optional\_set\_str,\ \textcolor{keywordtype}{None},\ ARG\_OPT)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00492}00492\ \ \ \ \ \ \ \ \ construct\_arguments\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_abb3c9c91ca9eba4838fecef63aa209c5}{get\_field\_arguments}}(fields,\ typed=\textcolor{keyword}{True},\ force\_all\_optional=\textcolor{keyword}{False},\ use\_alias=\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00493}00493\ \ \ \ \ \ \ \ \ construct\_arguments\ =\ [fields\_set\_argument]\ +\ construct\_arguments}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00494}00494\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00495}00495\ \ \ \ \ \ \ \ \ obj\_type\ =\ ctx.api.named\_type(f\textcolor{stringliteral}{'\{BUILTINS\_NAME\}.object'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00496}00496\ \ \ \ \ \ \ \ \ self\_tvar\_name\ =\ \textcolor{stringliteral}{'\_PydanticBaseModel'}\ \ \textcolor{comment}{\#\ Make\ sure\ it\ does\ not\ conflict\ with\ other\ names\ in\ the\ class}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00497}00497\ \ \ \ \ \ \ \ \ tvar\_fullname\ =\ ctx.cls.fullname\ +\ \textcolor{stringliteral}{'.'}\ +\ self\_tvar\_name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00498}00498\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ MYPY\_VERSION\_TUPLE\ >=\ (1,\ 4):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00499}00499\ \ \ \ \ \ \ \ \ \ \ \ \ tvd\ =\ TypeVarType(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00500}00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self\_tvar\_name,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00501}00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tvar\_fullname,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00502}00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00503}00503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TypeVarId(-\/1,\ namespace=ctx.cls.fullname\ +\ \textcolor{stringliteral}{'.construct'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00504}00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ MYPY\_VERSION\_TUPLE\ >=\ (1,\ 11)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00505}00505\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ TypeVarId(-\/1)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00506}00506\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ),}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00507}00507\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [],}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00508}00508\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00509}00509\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1types_a2432d5ba57c4d80652f9e83e5db04e1d}{AnyType}}(TypeOfAny.from\_omitted\_generics),\ \ \textcolor{comment}{\#\ type:\ ignore[arg-\/type]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00510}00510\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00511}00511\ \ \ \ \ \ \ \ \ \ \ \ \ self\_tvar\_expr\ =\ TypeVarExpr(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00512}00512\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ self\_tvar\_name,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00513}00513\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tvar\_fullname,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00514}00514\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [],}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00515}00515\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obj\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00516}00516\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1types_a2432d5ba57c4d80652f9e83e5db04e1d}{AnyType}}(TypeOfAny.from\_omitted\_generics),\ \ \textcolor{comment}{\#\ type:\ ignore[arg-\/type]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00517}00517\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00518}00518\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00519}00519\ \ \ \ \ \ \ \ \ \ \ \ \ tvd\ =\ TypeVarDef(self\_tvar\_name,\ tvar\_fullname,\ -\/1,\ [],\ obj\_type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00520}00520\ \ \ \ \ \ \ \ \ \ \ \ \ self\_tvar\_expr\ =\ TypeVarExpr(self\_tvar\_name,\ tvar\_fullname,\ [],\ obj\_type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00521}00521\ \ \ \ \ \ \ \ \ ctx.cls.info.names[self\_tvar\_name]\ =\ SymbolTableNode(MDEF,\ self\_tvar\_expr)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00522}00522\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00523}00523\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Backward-\/compatible\ with\ TypeVarDef\ from\ Mypy\ 0.910.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00524}00524\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(tvd,\ TypeVarType):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00525}00525\ \ \ \ \ \ \ \ \ \ \ \ \ self\_type\ =\ tvd}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00526}00526\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00527}00527\ \ \ \ \ \ \ \ \ \ \ \ \ self\_type\ =\ TypeVarType(tvd)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00528}00528\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00529}00529\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a36a4a2443d3323c8d66be64b96af9257}{add\_method}}(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00530}00530\ \ \ \ \ \ \ \ \ \ \ \ \ ctx,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00531}00531\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'construct'},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00532}00532\ \ \ \ \ \ \ \ \ \ \ \ \ construct\_arguments,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00533}00533\ \ \ \ \ \ \ \ \ \ \ \ \ return\_type=self\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00534}00534\ \ \ \ \ \ \ \ \ \ \ \ \ self\_type=self\_type,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00535}00535\ \ \ \ \ \ \ \ \ \ \ \ \ tvar\_def=tvd,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00536}00536\ \ \ \ \ \ \ \ \ \ \ \ \ is\_classmethod=\textcolor{keyword}{True},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00537}00537\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00538}00538\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00539}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a7733e84a091147094014be97b889768a}{00539}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a7733e84a091147094014be97b889768a}{set\_frozen}}(self,\ fields:\ List[\textcolor{stringliteral}{'PydanticModelField'}],\ frozen:\ bool)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00540}00540\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00541}00541\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Marks\ all\ fields\ as\ properties\ so\ that\ attempts\ to\ set\ them\ trigger\ mypy\ errors.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00542}00542\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00543}00543\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ This\ is\ the\ same\ approach\ used\ by\ the\ attrs\ and\ dataclasses\ plugins.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00544}00544\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00545}00545\ \ \ \ \ \ \ \ \ ctx\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00546}00546\ \ \ \ \ \ \ \ \ info\ =\ ctx.cls.info}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00547}00547\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00548}00548\ \ \ \ \ \ \ \ \ \ \ \ \ sym\_node\ =\ info.names.get(field.name)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00549}00549\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sym\_node\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00550}00550\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var\ =\ sym\_node.node}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00551}00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(var,\ Var):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00552}00552\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var.is\_property\ =\ frozen}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00553}00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(var,\ PlaceholderNode)\ \textcolor{keywordflow}{and}\ \textcolor{keywordflow}{not}\ ctx.api.final\_iteration:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00554}00554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ See\ https://github.com/pydantic/pydantic/issues/5191\ to\ hit\ this\ branch\ for\ test\ coverage}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00555}00555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ctx.api.defer()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00556}00556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00557}00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ I\ don't\ know\ whether\ it's\ possible\ to\ hit\ this\ branch,\ but\ I've\ added\ it\ for\ safety}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00558}00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00559}00559\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var\_str\ =\ str(var)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00560}00560\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ TypeError:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00561}00561\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ This\ happens\ for\ PlaceholderNode;\ perhaps\ it\ will\ happen\ for\ other\ types\ in\ the\ future..}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00562}00562\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var\_str\ =\ repr(var)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00563}00563\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detail\ =\ f\textcolor{stringliteral}{'sym\_node.node:\ \{var\_str\}\ (of\ type\ \{var.\_\_class\_\_\})'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00564}00564\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a066dd80c8430bdc9cef90a2492a6057b}{error\_unexpected\_behavior}}(detail,\ ctx.api,\ ctx.cls)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00565}00565\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00566}00566\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var\ =\ field.to\_var(info,\ use\_alias=\textcolor{keyword}{False})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00567}00567\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var.info\ =\ info}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00568}00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var.is\_property\ =\ frozen}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00569}00569\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var.\_fullname\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{get\_fullname}}(info)\ +\ \textcolor{stringliteral}{'.'}\ +\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a9e58d5c0c21a04de16cdcadaab720fbe}{get\_name}}(var)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00570}00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ info.names[\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a9e58d5c0c21a04de16cdcadaab720fbe}{get\_name}}(var)]\ =\ SymbolTableNode(MDEF,\ var)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00571}00571\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00572}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a9b810b8856bbc38ef018cf7884a3ca8b}{00572}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a9b810b8856bbc38ef018cf7884a3ca8b}{get\_config\_update}}(self,\ substmt:\ AssignmentStmt)\ -\/>\ Optional[\textcolor{stringliteral}{'ModelConfigData'}]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00573}00573\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00574}00574\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Determines\ the\ config\ update\ due\ to\ a\ single\ statement\ in\ the\ Config\ class\ definition.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00575}00575\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00576}00576\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Warns\ if\ a\ tracked\ config\ attribute\ is\ set\ to\ a\ value\ the\ plugin\ doesn't\ know\ how\ to\ interpret\ (e.g.,\ an\ int)}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00577}00577\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00578}00578\ \ \ \ \ \ \ \ \ lhs\ =\ substmt.lvalues[0]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00579}00579\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (isinstance(lhs,\ NameExpr)\ \textcolor{keywordflow}{and}\ lhs.name\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ada3fb06b840830e8d1ed9d2a413f1b2a}{tracked\_config\_fields}}):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00580}00580\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00581}00581\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ lhs.name\ ==\ \textcolor{stringliteral}{'extra'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00582}00582\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(substmt.rvalue,\ StrExpr):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00583}00583\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ forbid\_extra\ =\ substmt.rvalue.value\ ==\ \textcolor{stringliteral}{'forbid'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00584}00584\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{elif}\ isinstance(substmt.rvalue,\ MemberExpr):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00585}00585\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ forbid\_extra\ =\ substmt.rvalue.name\ ==\ \textcolor{stringliteral}{'forbid'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00586}00586\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00587}00587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_acb3345b186a48d90a1759b8d039309ce}{error\_invalid\_config\_value}}(lhs.name,\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}.api,\ substmt)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00588}00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00589}00589\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data}{ModelConfigData}}(forbid\_extra=forbid\_extra)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00590}00590\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ lhs.name\ ==\ \textcolor{stringliteral}{'alias\_generator'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00591}00591\ \ \ \ \ \ \ \ \ \ \ \ \ has\_alias\_generator\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00592}00592\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(substmt.rvalue,\ NameExpr)\ \textcolor{keywordflow}{and}\ substmt.rvalue.fullname\ ==\ \textcolor{stringliteral}{'builtins.None'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00593}00593\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ has\_alias\_generator\ =\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00594}00594\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data}{ModelConfigData}}(has\_alias\_generator=has\_alias\_generator)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00595}00595\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(substmt.rvalue,\ NameExpr)\ \textcolor{keywordflow}{and}\ substmt.rvalue.fullname\ \textcolor{keywordflow}{in}\ (\textcolor{stringliteral}{'builtins.True'},\ \textcolor{stringliteral}{'builtins.False'}):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00596}00596\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data}{ModelConfigData}}(**\{lhs.name:\ substmt.rvalue.fullname\ ==\ \textcolor{stringliteral}{'builtins.True'}\})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00597}00597\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_acb3345b186a48d90a1759b8d039309ce}{error\_invalid\_config\_value}}(lhs.name,\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}.api,\ substmt)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00598}00598\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00599}00599\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00600}00600\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00601}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a28c96f5352f1ab4eaef9b35ab129980d}{00601}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a28c96f5352f1ab4eaef9b35ab129980d}{get\_is\_required}}(cls:\ ClassDef,\ stmt:\ AssignmentStmt,\ lhs:\ NameExpr)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00602}00602\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00603}00603\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ a\ boolean\ indicating\ whether\ the\ field\ defined\ in\ \`{}stmt\`{}\ is\ a\ required\ field.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00604}00604\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00605}00605\ \ \ \ \ \ \ \ \ expr\ =\ stmt.rvalue}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00606}00606\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(expr,\ TempNode):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00607}00607\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TempNode\ means\ annotation-\/only,\ so\ only\ non-\/required\ if\ Optional}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00608}00608\ \ \ \ \ \ \ \ \ \ \ \ \ value\_type\ =\ get\_proper\_type(cls.info[lhs.name].type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00609}00609\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordflow}{not}\ PydanticModelTransformer.type\_has\_implicit\_default(value\_type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00610}00610\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(expr,\ CallExpr)\ \textcolor{keywordflow}{and}\ isinstance(expr.callee,\ RefExpr)\ \textcolor{keywordflow}{and}\ expr.callee.fullname\ ==\ FIELD\_FULLNAME:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00611}00611\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ The\ "{}default\ value"{}\ is\ a\ call\ to\ \`{}Field`;\ at\ this\ point,\ the\ field\ is}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00612}00612\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ only\ required\ if\ default\ is\ Ellipsis\ (i.e.,\ \`{}field\_name:\ Annotation\ =\ Field(...)`)\ or\ if\ default\_factory}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00613}00613\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ is\ specified.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00614}00614\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ arg,\ name\ \textcolor{keywordflow}{in}\ zip(expr.args,\ expr.arg\_names):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00615}00615\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ If\ name\ is\ None,\ then\ this\ arg\ is\ the\ default\ because\ it\ is\ the\ only\ positional\ argument.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00616}00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}\ \textcolor{keywordflow}{or}\ name\ ==\ \textcolor{stringliteral}{'default'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00617}00617\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ arg.\_\_class\_\_\ \textcolor{keywordflow}{is}\ EllipsisExpr}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00618}00618\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ name\ ==\ \textcolor{stringliteral}{'default\_factory'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00619}00619\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00620}00620\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ In\ this\ case,\ default\ and\ default\_factory\ are\ not\ specified,\ so\ we\ need\ to\ look\ at\ the\ annotation}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00621}00621\ \ \ \ \ \ \ \ \ \ \ \ \ value\_type\ =\ get\_proper\_type(cls.info[lhs.name].type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00622}00622\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordflow}{not}\ PydanticModelTransformer.type\_has\_implicit\_default(value\_type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00623}00623\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Only\ required\ if\ the\ "{}default\ value"{}\ is\ Ellipsis\ (i.e.,\ \`{}field\_name:\ Annotation\ =\ ...`)}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00624}00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ isinstance(expr,\ EllipsisExpr)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00625}00625\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00626}00626\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00627}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a37c407eafbcb5b34678f13766bae632b}{00627}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a37c407eafbcb5b34678f13766bae632b}{type\_has\_implicit\_default}}(type\_:\ Optional[ProperType])\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00628}00628\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00629}00629\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ True\ if\ the\ passed\ type\ will\ be\ given\ an\ implicit\ default\ value.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00630}00630\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00631}00631\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ In\ pydantic\ v1,\ this\ is\ the\ case\ for\ Optional\ types\ and\ Any\ (with\ default\ value\ None).}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00632}00632\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00633}00633\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(type\_,\ AnyType):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00634}00634\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Annotated\ as\ Any}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00635}00635\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00636}00636\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(type\_,\ UnionType)\ \textcolor{keywordflow}{and}\ any(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00637}00637\ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(item,\ NoneType)\ \textcolor{keywordflow}{or}\ isinstance(item,\ AnyType)\ \textcolor{keywordflow}{for}\ item\ \textcolor{keywordflow}{in}\ type\_.items}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00638}00638\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00639}00639\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Annotated\ as\ Optional,\ or\ otherwise\ having\ NoneType\ or\ AnyType\ in\ the\ union}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00640}00640\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00641}00641\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00642}00642\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00643}00643\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00644}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ac4b3f416f74c3a8f6840e2c1e1fe33a9}{00644}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_ac4b3f416f74c3a8f6840e2c1e1fe33a9}{get\_alias\_info}}(stmt:\ AssignmentStmt)\ -\/>\ Tuple[Optional[str],\ bool]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00645}00645\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00646}00646\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ a\ pair\ (alias,\ has\_dynamic\_alias),\ extracted\ from\ the\ declaration\ of\ the\ field\ defined\ in\ \`{}stmt\`{}.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00647}00647\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00648}00648\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \`{}has\_dynamic\_alias\`{}\ is\ True\ if\ and\ only\ if\ an\ alias\ is\ provided,\ but\ not\ as\ a\ string\ literal.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00649}00649\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ If\ \`{}has\_dynamic\_alias\`{}\ is\ True,\ \`{}alias\`{}\ will\ be\ None.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00650}00650\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00651}00651\ \ \ \ \ \ \ \ \ expr\ =\ stmt.rvalue}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00652}00652\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(expr,\ TempNode):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00653}00653\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ TempNode\ means\ annotation-\/only}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00654}00654\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None},\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00655}00655\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00656}00656\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00657}00657\ \ \ \ \ \ \ \ \ \ \ \ \ isinstance(expr,\ CallExpr)\ \textcolor{keywordflow}{and}\ isinstance(expr.callee,\ RefExpr)\ \textcolor{keywordflow}{and}\ expr.callee.fullname\ ==\ FIELD\_FULLNAME}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00658}00658\ \ \ \ \ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00659}00659\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Assigned\ value\ is\ not\ a\ call\ to\ pydantic.fields.Field}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00660}00660\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None},\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00661}00661\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00662}00662\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i,\ arg\_name\ \textcolor{keywordflow}{in}\ enumerate(expr.arg\_names):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00663}00663\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ arg\_name\ !=\ \textcolor{stringliteral}{'alias'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00664}00664\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00665}00665\ \ \ \ \ \ \ \ \ \ \ \ \ arg\ =\ expr.args[i]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00666}00666\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ isinstance(arg,\ StrExpr):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00667}00667\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ arg.value,\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00668}00668\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00669}00669\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None},\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00670}00670\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None},\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00671}00671\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00672}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_abb3c9c91ca9eba4838fecef63aa209c5}{00672}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_abb3c9c91ca9eba4838fecef63aa209c5}{get\_field\_arguments}}(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00673}00673\ \ \ \ \ \ \ \ \ self,\ fields:\ List[\textcolor{stringliteral}{'PydanticModelField'}],\ typed:\ bool,\ force\_all\_optional:\ bool,\ use\_alias:\ bool}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00674}00674\ \ \ \ \ )\ -\/>\ List[Argument]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00675}00675\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00676}00676\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Helper\ function\ used\ during\ the\ construction\ of\ the\ \`{}\_\_init\_\_\`{}\ and\ \`{}construct\`{}\ method\ signatures.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00677}00677\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00678}00678\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ a\ list\ of\ mypy\ Argument\ instances\ for\ use\ in\ the\ generated\ signatures.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00679}00679\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00680}00680\ \ \ \ \ \ \ \ \ info\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a836417a090557f8e168de20e1bcd6221}{\_ctx}}.cls.info}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00681}00681\ \ \ \ \ \ \ \ \ arguments\ =\ [}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00682}00682\ \ \ \ \ \ \ \ \ \ \ \ \ field.to\_argument(info,\ typed=typed,\ force\_optional=force\_all\_optional,\ use\_alias=use\_alias)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00683}00683\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ fields}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00684}00684\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ (use\_alias\ \textcolor{keywordflow}{and}\ field.has\_dynamic\_alias)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00685}00685\ \ \ \ \ \ \ \ \ ]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00686}00686\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ arguments}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00687}00687\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00688}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a4700d059b60e4d0e5816f3336a1c91cc}{00688}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a4700d059b60e4d0e5816f3336a1c91cc}{should\_init\_forbid\_extra}}(self,\ fields:\ List[\textcolor{stringliteral}{'PydanticModelField'}],\ config:\ \textcolor{stringliteral}{'ModelConfigData'})\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00689}00689\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00690}00690\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Indicates\ whether\ the\ generated\ \`{}\_\_init\_\_\`{}\ should\ get\ a\ \`{}**kwargs\`{}\ at\ the\ end\ of\ its\ signature}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00691}00691\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00692}00692\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ We\ disallow\ arbitrary\ kwargs\ if\ the\ extra\ config\ setting\ is\ "{}forbid"{},\ or\ if\ the\ plugin\ config\ says\ to,}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00693}00693\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ *unless*\ a\ required\ dynamic\ alias\ is\ present\ (since\ then\ we\ can't\ determine\ a\ valid\ signature).}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00694}00694\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00695}00695\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ config.allow\_population\_by\_field\_name:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00696}00696\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a1a88416de8847373194af7c2a3e48e68}{is\_dynamic\_alias\_present}}(fields,\ bool(config.has\_alias\_generator)):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00697}00697\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00698}00698\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ config.forbid\_extra:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00699}00699\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00700}00700\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a249a07a400ebff83b23c4843fb747894}{plugin\_config}}.init\_forbid\_extra}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00701}00701\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00702}00702\ \ \ \ \ \textcolor{preprocessor}{@staticmethod}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00703}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a1a88416de8847373194af7c2a3e48e68}{00703}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_transformer_a1a88416de8847373194af7c2a3e48e68}{is\_dynamic\_alias\_present}}(fields:\ List[\textcolor{stringliteral}{'PydanticModelField'}],\ has\_alias\_generator:\ bool)\ -\/>\ bool:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00704}00704\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00705}00705\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns\ whether\ any\ fields\ on\ the\ model\ have\ a\ "{}dynamic\ alias"{},\ i.e.,\ an\ alias\ that\ cannot\ be}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00706}00706\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ determined\ during\ static\ analysis.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00707}00707\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00708}00708\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00709}00709\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field.has\_dynamic\_alias:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00710}00710\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00711}00711\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ has\_alias\_generator:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00712}00712\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ field\ \textcolor{keywordflow}{in}\ fields:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00713}00713\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ field.alias\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00714}00714\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00715}00715\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{False}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00716}00716\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00717}00717\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00718}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field}{00718}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field}{PydanticModelField}}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00719}00719\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00720}00720\ \ \ \ \ \ \ \ \ self,\ name:\ str,\ is\_required:\ bool,\ alias:\ Optional[str],\ has\_dynamic\_alias:\ bool,\ line:\ int,\ column:\ int}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00721}00721\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00722}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a375d38b3fc9b87bd0865480442a3dab6}{00722}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a375d38b3fc9b87bd0865480442a3dab6}{name}}\ =\ name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00723}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a62e3e88bb3d150d179d8142b8071b533}{00723}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a62e3e88bb3d150d179d8142b8071b533}{is\_required}}\ =\ is\_required}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00724}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a81e150b15ab44022fa297849f18cea70}{00724}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a81e150b15ab44022fa297849f18cea70}{alias}}\ =\ alias}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00725}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_ab82b0ce010d3d19e9f167602c1d17e26}{00725}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_ab82b0ce010d3d19e9f167602c1d17e26}{has\_dynamic\_alias}}\ =\ has\_dynamic\_alias}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00726}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_ab8c8872d591591606c3696ef7abe9b42}{00726}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_ab8c8872d591591606c3696ef7abe9b42}{line}}\ =\ line}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00727}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a5ceecff76f9c02ca78127ce4da7c4a61}{00727}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a5ceecff76f9c02ca78127ce4da7c4a61}{column}}\ =\ column}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00728}00728\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00729}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a21ba6a212f2c3172b6b4feda2642b153}{00729}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a21ba6a212f2c3172b6b4feda2642b153}{to\_var}}(self,\ info:\ TypeInfo,\ use\_alias:\ bool)\ -\/>\ Var:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00730}00730\ \ \ \ \ \ \ \ \ name\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a375d38b3fc9b87bd0865480442a3dab6}{name}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00731}00731\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ use\_alias\ \textcolor{keywordflow}{and}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a81e150b15ab44022fa297849f18cea70}{alias}}\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00732}00732\ \ \ \ \ \ \ \ \ \ \ \ \ name\ =\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a81e150b15ab44022fa297849f18cea70}{alias}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00733}00733\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Var(name,\ info[self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a375d38b3fc9b87bd0865480442a3dab6}{name}}].type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00734}00734\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00735}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_aa1c627956d4408978ae11d9fdf417598}{00735}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_aa1c627956d4408978ae11d9fdf417598}{to\_argument}}(self,\ info:\ TypeInfo,\ typed:\ bool,\ force\_optional:\ bool,\ use\_alias:\ bool)\ -\/>\ Argument:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00736}00736\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ typed\ \textcolor{keywordflow}{and}\ info[self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a375d38b3fc9b87bd0865480442a3dab6}{name}}].type\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00737}00737\ \ \ \ \ \ \ \ \ \ \ \ \ type\_annotation\ =\ info[self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a375d38b3fc9b87bd0865480442a3dab6}{name}}].type}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00738}00738\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00739}00739\ \ \ \ \ \ \ \ \ \ \ \ \ type\_annotation\ =\ \mbox{\hyperlink{namespacepydantic_1_1types_a2432d5ba57c4d80652f9e83e5db04e1d}{AnyType}}(TypeOfAny.explicit)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00740}00740\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ Argument(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00741}00741\ \ \ \ \ \ \ \ \ \ \ \ \ variable=self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a21ba6a212f2c3172b6b4feda2642b153}{to\_var}}(info,\ use\_alias),}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00742}00742\ \ \ \ \ \ \ \ \ \ \ \ \ type\_annotation=type\_annotation,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00743}00743\ \ \ \ \ \ \ \ \ \ \ \ \ initializer=\textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00744}00744\ \ \ \ \ \ \ \ \ \ \ \ \ kind=ARG\_NAMED\_OPT\ \textcolor{keywordflow}{if}\ force\_optional\ \textcolor{keywordflow}{or}\ \textcolor{keywordflow}{not}\ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a62e3e88bb3d150d179d8142b8071b533}{is\_required}}\ \textcolor{keywordflow}{else}\ ARG\_NAMED,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00745}00745\ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00746}00746\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00747}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a1ef1e0bc1a8259ad8aa8f68e1f9b7df3}{00747}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a1ef1e0bc1a8259ad8aa8f68e1f9b7df3}{serialize}}(self)\ -\/>\ JsonDict:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00748}00748\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ self.\_\_dict\_\_}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00749}00749\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00750}00750\ \ \ \ \ \textcolor{preprocessor}{@classmethod}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00751}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a35d82503f7696ccb9b3167ed97c5045d}{00751}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_pydantic_model_field_a35d82503f7696ccb9b3167ed97c5045d}{deserialize}}(cls,\ info:\ TypeInfo,\ data:\ JsonDict)\ -\/>\ \textcolor{stringliteral}{'PydanticModelField'}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00752}00752\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ cls(**data)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00753}00753\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00754}00754\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00755}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data}{00755}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data}{ModelConfigData}}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00756}00756\ \ \ \ \ \textcolor{keyword}{def\ }\_\_init\_\_(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00757}00757\ \ \ \ \ \ \ \ \ self,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00758}00758\ \ \ \ \ \ \ \ \ forbid\_extra:\ Optional[bool]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00759}00759\ \ \ \ \ \ \ \ \ allow\_mutation:\ Optional[bool]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00760}00760\ \ \ \ \ \ \ \ \ frozen:\ Optional[bool]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00761}00761\ \ \ \ \ \ \ \ \ orm\_mode:\ Optional[bool]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00762}00762\ \ \ \ \ \ \ \ \ allow\_population\_by\_field\_name:\ Optional[bool]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00763}00763\ \ \ \ \ \ \ \ \ has\_alias\_generator:\ Optional[bool]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00764}00764\ \ \ \ \ ):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00765}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_aeaf78fcc5d3af078c26f9f311efbd661}{00765}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_aeaf78fcc5d3af078c26f9f311efbd661}{forbid\_extra}}\ =\ forbid\_extra}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00766}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a5f09118b38395f9fe6b1f403f960afb9}{00766}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a5f09118b38395f9fe6b1f403f960afb9}{allow\_mutation}}\ =\ allow\_mutation}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00767}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_ac2ee7985d0b99389639f75bdee98f4d2}{00767}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_ac2ee7985d0b99389639f75bdee98f4d2}{frozen}}\ =\ frozen}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00768}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_ae4f00b659723e383791b3bedf9114ccc}{00768}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_ae4f00b659723e383791b3bedf9114ccc}{orm\_mode}}\ =\ orm\_mode}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00769}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a55cf3d5eda11dbf76e8d3f80d7a7bad0}{00769}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a55cf3d5eda11dbf76e8d3f80d7a7bad0}{allow\_population\_by\_field\_name}}\ =\ allow\_population\_by\_field\_name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00770}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a37e41cda4de425436da5dfa20ee5a808}{00770}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a37e41cda4de425436da5dfa20ee5a808}{has\_alias\_generator}}\ =\ has\_alias\_generator}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00771}00771\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00772}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a7c7f474188b009afec7e0b85f5050f3b}{00772}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a7c7f474188b009afec7e0b85f5050f3b}{set\_values\_dict}}(self)\ -\/>\ Dict[str,\ Any]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00773}00773\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{k:\ v\ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ self.\_\_dict\_\_.items()\ \textcolor{keywordflow}{if}\ v\ \textcolor{keywordflow}{is}\ \textcolor{keywordflow}{not}\ \textcolor{keywordtype}{None}\}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00774}00774\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00775}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_ac0458e46b7797f8a7e65890cac55b178}{00775}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_ac0458e46b7797f8a7e65890cac55b178}{update}}(self,\ config:\ Optional[\textcolor{stringliteral}{'ModelConfigData'}])\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00776}00776\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ config\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00777}00777\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00778}00778\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ k,\ v\ \textcolor{keywordflow}{in}\ config.set\_values\_dict().items():}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00779}00779\ \ \ \ \ \ \ \ \ \ \ \ \ setattr(self,\ k,\ v)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00780}00780\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00781}\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a85c6bbc468dcb47b6954d49d99917b9d}{00781}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classpydantic_1_1v1_1_1mypy_1_1_model_config_data_a85c6bbc468dcb47b6954d49d99917b9d}{setdefault}}(self,\ key:\ str,\ value:\ Any)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00782}00782\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ getattr(self,\ key)\ \textcolor{keywordflow}{is}\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00783}00783\ \ \ \ \ \ \ \ \ \ \ \ \ setattr(self,\ key,\ value)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00784}00784\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00785}00785\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00786}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a3f317b6901338485e6bde6f59adca466}{00786}}\ ERROR\_ORM\ =\ ErrorCode(\textcolor{stringliteral}{'pydantic-\/orm'},\ \textcolor{stringliteral}{'Invalid\ from\_orm\ call'},\ \textcolor{stringliteral}{'Pydantic'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00787}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a1350f1ba848f6534c10aa8963cc3c822}{00787}}\ ERROR\_CONFIG\ =\ ErrorCode(\textcolor{stringliteral}{'pydantic-\/config'},\ \textcolor{stringliteral}{'Invalid\ config\ value'},\ \textcolor{stringliteral}{'Pydantic'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00788}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a67cb4fa7735f449a12bb52d514428430}{00788}}\ ERROR\_ALIAS\ =\ ErrorCode(\textcolor{stringliteral}{'pydantic-\/alias'},\ \textcolor{stringliteral}{'Dynamic\ alias\ disallowed'},\ \textcolor{stringliteral}{'Pydantic'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00789}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_acdceeb784802cecd0a3f25f1d721a929}{00789}}\ ERROR\_UNEXPECTED\ =\ ErrorCode(\textcolor{stringliteral}{'pydantic-\/unexpected'},\ \textcolor{stringliteral}{'Unexpected\ behavior'},\ \textcolor{stringliteral}{'Pydantic'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00790}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a302f67bf3bc68c3261e906ed03e89494}{00790}}\ ERROR\_UNTYPED\ =\ ErrorCode(\textcolor{stringliteral}{'pydantic-\/field'},\ \textcolor{stringliteral}{'Untyped\ field\ disallowed'},\ \textcolor{stringliteral}{'Pydantic'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00791}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a9b76b0b873902c7aba6c9dc9e7d92f3a}{00791}}\ ERROR\_FIELD\_DEFAULTS\ =\ ErrorCode(\textcolor{stringliteral}{'pydantic-\/field'},\ \textcolor{stringliteral}{'Invalid\ Field\ defaults'},\ \textcolor{stringliteral}{'Pydantic'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00792}00792\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00793}00793\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00794}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a524a5c3d86d199a04819c83dd4e37390}{00794}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a524a5c3d86d199a04819c83dd4e37390}{error\_from\_orm}}(model\_name:\ str,\ api:\ CheckerPluginInterface,\ context:\ Context)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00795}00795\ \ \ \ \ api.fail(f\textcolor{stringliteral}{'"{}\{model\_name\}"{}\ does\ not\ have\ orm\_mode=True'},\ context,\ code=ERROR\_ORM)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00796}00796\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00797}00797\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00798}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_acb3345b186a48d90a1759b8d039309ce}{00798}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_acb3345b186a48d90a1759b8d039309ce}{error\_invalid\_config\_value}}(name:\ str,\ api:\ SemanticAnalyzerPluginInterface,\ context:\ Context)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00799}00799\ \ \ \ \ api.fail(f\textcolor{stringliteral}{'Invalid\ value\ for\ "{}Config.\{name\}"{}'},\ context,\ code=ERROR\_CONFIG)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00800}00800\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00801}00801\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00802}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a8ec80db5a36564f5dba10bf6cd78f40d}{00802}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a8ec80db5a36564f5dba10bf6cd78f40d}{error\_required\_dynamic\_aliases}}(api:\ SemanticAnalyzerPluginInterface,\ context:\ Context)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00803}00803\ \ \ \ \ api.fail(\textcolor{stringliteral}{'Required\ dynamic\ aliases\ disallowed'},\ context,\ code=ERROR\_ALIAS)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00804}00804\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00805}00805\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00806}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a066dd80c8430bdc9cef90a2492a6057b}{00806}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a066dd80c8430bdc9cef90a2492a6057b}{error\_unexpected\_behavior}}(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00807}00807\ \ \ \ \ detail:\ str,\ api:\ Union[CheckerPluginInterface,\ SemanticAnalyzerPluginInterface],\ context:\ Context}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00808}00808\ )\ -\/>\ \textcolor{keywordtype}{None}:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00809}00809\ \ \ \ \ \textcolor{comment}{\#\ Can't\ think\ of\ a\ good\ way\ to\ test\ this,\ but\ I\ confirmed\ it\ renders\ as\ desired\ by\ adding\ to\ a\ non-\/error\ path}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00810}00810\ \ \ \ \ link\ =\ \textcolor{stringliteral}{'https://github.com/pydantic/pydantic/issues/new/choose'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00811}00811\ \ \ \ \ full\_message\ =\ f\textcolor{stringliteral}{'The\ pydantic\ mypy\ plugin\ ran\ into\ unexpected\ behavior:\ \{detail\}\(\backslash\)n'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00812}00812\ \ \ \ \ full\_message\ +=\ f\textcolor{stringliteral}{'Please\ consider\ reporting\ this\ bug\ at\ \{link\}\ so\ we\ can\ try\ to\ fix\ it!'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00813}00813\ \ \ \ \ api.fail(full\_message,\ context,\ code=ERROR\_UNEXPECTED)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00814}00814\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00815}00815\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00816}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_aa773ec852697de67d39a755b1a536f32}{00816}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_aa773ec852697de67d39a755b1a536f32}{error\_untyped\_fields}}(api:\ SemanticAnalyzerPluginInterface,\ context:\ Context)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00817}00817\ \ \ \ \ api.fail(\textcolor{stringliteral}{'Untyped\ fields\ disallowed'},\ context,\ code=ERROR\_UNTYPED)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00818}00818\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00819}00819\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00820}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a6726759fa53c33905ef3bbfa81bb9227}{00820}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a6726759fa53c33905ef3bbfa81bb9227}{error\_default\_and\_default\_factory\_specified}}(api:\ CheckerPluginInterface,\ context:\ Context)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00821}00821\ \ \ \ \ api.fail(\textcolor{stringliteral}{'Field\ default\ and\ default\_factory\ cannot\ be\ specified\ together'},\ context,\ code=ERROR\_FIELD\_DEFAULTS)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00822}00822\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00823}00823\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00824}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a36a4a2443d3323c8d66be64b96af9257}{00824}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a36a4a2443d3323c8d66be64b96af9257}{add\_method}}(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00825}00825\ \ \ \ \ ctx:\ ClassDefContext,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00826}00826\ \ \ \ \ name:\ str,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00827}00827\ \ \ \ \ args:\ List[Argument],}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00828}00828\ \ \ \ \ return\_type:\ Type,}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00829}00829\ \ \ \ \ self\_type:\ Optional[Type]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00830}00830\ \ \ \ \ tvar\_def:\ Optional[TypeVarDef]\ =\ \textcolor{keywordtype}{None},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00831}00831\ \ \ \ \ is\_classmethod:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00832}00832\ \ \ \ \ is\_new:\ bool\ =\ \textcolor{keyword}{False},}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00833}00833\ \ \ \ \ \textcolor{comment}{\#\ is\_staticmethod:\ bool\ =\ False,}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00834}00834\ )\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00835}00835\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00836}00836\ \textcolor{stringliteral}{\ \ \ \ Adds\ a\ new\ method\ to\ a\ class.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00837}00837\ \textcolor{stringliteral}{}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00838}00838\ \textcolor{stringliteral}{\ \ \ \ This\ can\ be\ dropped\ if/when\ https://github.com/python/mypy/issues/7301\ is\ merged}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00839}00839\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00840}00840\ \ \ \ \ info\ =\ ctx.cls.info}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00841}00841\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00842}00842\ \ \ \ \ \textcolor{comment}{\#\ First\ remove\ any\ previously\ generated\ methods\ with\ the\ same\ name}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00843}00843\ \ \ \ \ \textcolor{comment}{\#\ to\ avoid\ clashes\ and\ problems\ in\ the\ semantic\ analyzer.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00844}00844\ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{in}\ info.names:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00845}00845\ \ \ \ \ \ \ \ \ sym\ =\ info.names[name]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00846}00846\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ sym.plugin\_generated\ \textcolor{keywordflow}{and}\ isinstance(sym.node,\ FuncDef):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00847}00847\ \ \ \ \ \ \ \ \ \ \ \ \ ctx.cls.defs.body.remove(sym.node)\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00848}00848\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00849}00849\ \ \ \ \ self\_type\ =\ self\_type\ \textcolor{keywordflow}{or}\ fill\_typevars(info)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00850}00850\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_classmethod\ \textcolor{keywordflow}{or}\ is\_new:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00851}00851\ \ \ \ \ \ \ \ \ first\ =\ [Argument(Var(\textcolor{stringliteral}{'\_cls'}),\ TypeType.make\_normalized(self\_type),\ \textcolor{keywordtype}{None},\ ARG\_POS)]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00852}00852\ \ \ \ \ \textcolor{comment}{\#\ elif\ is\_staticmethod:}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00853}00853\ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ first\ =\ []}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00854}00854\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00855}00855\ \ \ \ \ \ \ \ \ self\_type\ =\ self\_type\ \textcolor{keywordflow}{or}\ fill\_typevars(info)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00856}00856\ \ \ \ \ \ \ \ \ first\ =\ [Argument(Var(\textcolor{stringliteral}{'\_\_pydantic\_self\_\_'}),\ self\_type,\ \textcolor{keywordtype}{None},\ ARG\_POS)]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00857}00857\ \ \ \ \ args\ =\ first\ +\ args}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00858}00858\ \ \ \ \ arg\_types,\ arg\_names,\ arg\_kinds\ =\ [],\ [],\ []}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00859}00859\ \ \ \ \ \textcolor{keywordflow}{for}\ arg\ \textcolor{keywordflow}{in}\ args:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00860}00860\ \ \ \ \ \ \ \ \ \textcolor{keyword}{assert}\ arg.type\_annotation,\ \textcolor{stringliteral}{'All\ arguments\ must\ be\ fully\ typed.'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00861}00861\ \ \ \ \ \ \ \ \ arg\_types.append(arg.type\_annotation)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00862}00862\ \ \ \ \ \ \ \ \ arg\_names.append(\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a9e58d5c0c21a04de16cdcadaab720fbe}{get\_name}}(arg.variable))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00863}00863\ \ \ \ \ \ \ \ \ arg\_kinds.append(arg.kind)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00864}00864\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00865}00865\ \ \ \ \ function\_type\ =\ ctx.api.named\_type(f\textcolor{stringliteral}{'\{BUILTINS\_NAME\}.function'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00866}00866\ \ \ \ \ signature\ =\ CallableType(}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00867}00867\ \ \ \ \ \ \ \ \ arg\_types,\ arg\_kinds,\ arg\_names,\ return\_type,\ function\_type,\ variables=[tvar\_def]\ \textcolor{keywordflow}{if}\ tvar\_def\ \textcolor{keywordflow}{else}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00868}00868\ \ \ \ \ )}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00869}00869\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00870}00870\ \ \ \ \ func\ =\ FuncDef(name,\ args,\ Block([PassStmt()]))}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00871}00871\ \ \ \ \ func.info\ =\ info}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00872}00872\ \ \ \ \ func.type\ =\ set\_callable\_name(signature,\ func)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00873}00873\ \ \ \ \ func.is\_class\ =\ is\_classmethod}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00874}00874\ \ \ \ \ \textcolor{comment}{\#\ func.is\_static\ =\ is\_staticmethod}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00875}00875\ \ \ \ \ func.\_fullname\ =\ \mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{get\_fullname}}(info)\ +\ \textcolor{stringliteral}{'.'}\ +\ name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00876}00876\ \ \ \ \ func.line\ =\ info.line}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00877}00877\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00878}00878\ \ \ \ \ \textcolor{comment}{\#\ NOTE:\ we\ would\ like\ the\ plugin\ generated\ node\ to\ dominate,\ but\ we\ still}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00879}00879\ \ \ \ \ \textcolor{comment}{\#\ need\ to\ keep\ any\ existing\ definitions\ so\ they\ get\ semantically\ analyzed.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00880}00880\ \ \ \ \ \textcolor{keywordflow}{if}\ name\ \textcolor{keywordflow}{in}\ info.names:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00881}00881\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Get\ a\ nice\ unique\ name\ instead.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00882}00882\ \ \ \ \ \ \ \ \ r\_name\ =\ get\_unique\_redefinition\_name(name,\ info.names)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00883}00883\ \ \ \ \ \ \ \ \ info.names[r\_name]\ =\ info.names[name]}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00884}00884\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00885}00885\ \ \ \ \ \textcolor{keywordflow}{if}\ is\_classmethod:\ \ \textcolor{comment}{\#\ or\ is\_staticmethod:}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00886}00886\ \ \ \ \ \ \ \ \ func.is\_decorated\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00887}00887\ \ \ \ \ \ \ \ \ v\ =\ Var(name,\ func.type)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00888}00888\ \ \ \ \ \ \ \ \ v.info\ =\ info}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00889}00889\ \ \ \ \ \ \ \ \ v.\_fullname\ =\ func.\_fullname}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00890}00890\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ if\ is\_classmethod:}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00891}00891\ \ \ \ \ \ \ \ \ v.is\_classmethod\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00892}00892\ \ \ \ \ \ \ \ \ dec\ =\ Decorator(func,\ [NameExpr(\textcolor{stringliteral}{'classmethod'})],\ v)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00893}00893\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ else:}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00894}00894\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ v.is\_staticmethod\ =\ True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00895}00895\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ \ \ \ \ dec\ =\ Decorator(func,\ [NameExpr('staticmethod')],\ v)}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00896}00896\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00897}00897\ \ \ \ \ \ \ \ \ dec.line\ =\ info.line}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00898}00898\ \ \ \ \ \ \ \ \ sym\ =\ SymbolTableNode(MDEF,\ dec)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00899}00899\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00900}00900\ \ \ \ \ \ \ \ \ sym\ =\ SymbolTableNode(MDEF,\ func)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00901}00901\ \ \ \ \ sym.plugin\_generated\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00902}00902\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00903}00903\ \ \ \ \ info.names[name]\ =\ sym}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00904}00904\ \ \ \ \ info.defn.defs.body.append(func)}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00905}00905\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00906}00906\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00907}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{00907}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a0f8a90958bc593797f3a9e998046f70a}{get\_fullname}}(x:\ Union[FuncBase,\ SymbolNode])\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00908}00908\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00909}00909\ \textcolor{stringliteral}{\ \ \ \ Used\ for\ compatibility\ with\ mypy\ 0.740;\ can\ be\ dropped\ once\ support\ for\ 0.740\ is\ dropped.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00910}00910\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00911}00911\ \ \ \ \ fn\ =\ x.fullname}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00912}00912\ \ \ \ \ \textcolor{keywordflow}{if}\ callable(fn):\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00913}00913\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ fn()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00914}00914\ \ \ \ \ \textcolor{keywordflow}{return}\ fn}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00915}00915\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00916}00916\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00917}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a9e58d5c0c21a04de16cdcadaab720fbe}{00917}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_a9e58d5c0c21a04de16cdcadaab720fbe}{get\_name}}(x:\ Union[FuncBase,\ SymbolNode])\ -\/>\ str:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00918}00918\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00919}00919\ \textcolor{stringliteral}{\ \ \ \ Used\ for\ compatibility\ with\ mypy\ 0.740;\ can\ be\ dropped\ once\ support\ for\ 0.740\ is\ dropped.}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00920}00920\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00921}00921\ \ \ \ \ fn\ =\ x.name}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00922}00922\ \ \ \ \ \textcolor{keywordflow}{if}\ callable(fn):\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00923}00923\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ fn()}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00924}00924\ \ \ \ \ \textcolor{keywordflow}{return}\ fn}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00925}00925\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00926}00926\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00927}\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_ace5676c557130b6e12671a21aee71689}{00927}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacepydantic_1_1v1_1_1mypy_ace5676c557130b6e12671a21aee71689}{parse\_toml}}(config\_file:\ str)\ -\/>\ Optional[Dict[str,\ Any]]:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00928}00928\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ config\_file.endswith(\textcolor{stringliteral}{'.toml'}):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00929}00929\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00930}00930\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00931}00931\ \ \ \ \ read\_mode\ =\ \textcolor{stringliteral}{'rb'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00932}00932\ \ \ \ \ \textcolor{keywordflow}{if}\ sys.version\_info\ >=\ (3,\ 11):}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00933}00933\ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ tomllib\ \textcolor{keyword}{as}\ toml\_}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00934}00934\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00935}00935\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00936}00936\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ tomli\ \textcolor{keyword}{as}\ toml\_}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00937}00937\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00938}00938\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ older\ versions\ of\ mypy\ have\ toml\ as\ a\ dependency,\ not\ tomli}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00939}00939\ \ \ \ \ \ \ \ \ \ \ \ \ read\_mode\ =\ \textcolor{stringliteral}{'r'}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00940}00940\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00941}00941\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ toml\ \textcolor{keyword}{as}\ toml\_\ \ \textcolor{comment}{\#\ type:\ ignore[no-\/redef]}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00942}00942\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ ImportError:\ \ \textcolor{comment}{\#\ pragma:\ no\ cover}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00943}00943\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00944}00944\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00945}00945\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ warnings.warn(\textcolor{stringliteral}{'No\ TOML\ parser\ installed,\ cannot\ read\ configuration\ from\ \`{}pyproject.toml`.'})}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00946}00946\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keywordtype}{None}}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00947}00947\ }
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00948}00948\ \ \ \ \ \textcolor{keyword}{with}\ open(config\_file,\ read\_mode)\ \textcolor{keyword}{as}\ rf:}
+\DoxyCodeLine{\Hypertarget{v1_2mypy_8py_source_l00949}00949\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ toml\_.load(rf)\ \ \textcolor{comment}{\#\ type:\ ignore[arg-\/type]}}
+
+\end{DoxyCode}

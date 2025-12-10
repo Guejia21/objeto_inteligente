@@ -1,0 +1,280 @@
+\doxysection{Referencia del espacio de nombres objeto\+\_\+controller}
+\hypertarget{namespaceobjeto__controller}{}\label{namespaceobjeto__controller}\index{objeto\_controller@{objeto\_controller}}
+\doxysubsubsection*{Funciones}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceobjeto__controller_af05241f784ab7fa3a30deecc788c1b74}{get\+\_\+identificator}} (str osid=Query(..., description="{}ID del objeto inteligente"{}), Objeto\+Service \mbox{\hyperlink{namespaceobjeto__service}{objeto\+\_\+service}}=Depends(get\+\_\+objeto\+\_\+service))
+\item 
+\mbox{\hyperlink{namespaceobjeto__controller_ae5f1ef3cecaa7f2b0ee40d30bbeed98b}{start\+\_\+object}} (Object\+Data data, Objeto\+Service \mbox{\hyperlink{namespaceobjeto__service}{objeto\+\_\+service}}=Depends(get\+\_\+objeto\+\_\+service))
+\item 
+\mbox{\hyperlink{namespaceobjeto__controller_a29e614f29e33f15dcc3f43278440926a}{get\+\_\+state}} (str osid=Query(..., description="{}ID del objeto inteligente"{}), Objeto\+Service \mbox{\hyperlink{namespaceobjeto__service}{objeto\+\_\+service}}=Depends(get\+\_\+objeto\+\_\+service))
+\item 
+\mbox{\hyperlink{namespaceobjeto__controller_a911533e9228d9e95deaee73a861a62e1}{send\+\_\+data}} (str osid=Query(..., description="{}ID del objeto inteligente"{}), str variable\+Estado=Query(..., description="{}Variable del estado a enviar"{}), str tipove=Query(\textquotesingle{}1\textquotesingle{}, description="{}Tipo de variable (1=actuador, 2=sensor, etc.)"{}), Objeto\+Service \mbox{\hyperlink{namespaceobjeto__service}{objeto\+\_\+service}}=Depends(get\+\_\+objeto\+\_\+service))
+\item 
+\mbox{\hyperlink{namespaceobjeto__controller_acbe0a134fad4fa3bb39b5ff5ef3a01ce}{send\+\_\+service\+\_\+state}} (str osid=Query(..., description="{}ID del objeto inteligente"{}), Objeto\+Service \mbox{\hyperlink{namespaceobjeto__service}{objeto\+\_\+service}}=Depends(get\+\_\+objeto\+\_\+service))
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceobjeto__controller_a032a188678b092efd0b10de226f78836}{router}} = \mbox{\hyperlink{classfastapi_1_1routing_1_1_a_p_i_router}{APIRouter}}(prefix="{}/objeto"{}, tags=\mbox{[}"{}Gestión de objeto inteligente"{}\mbox{]})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+\begin{DoxyVerb}    @file objeto_controller.py
+    @brief Controlador REST para gestión de objetos inteligentes.
+    @details
+    Proporciona endpoints para operaciones CRUD y consultas sobre objetos inteligentes.
+    Los endpoints disponibles son:
+    - GET /objeto/Identificator: obtener metadatos del objeto
+    - POST /objeto/StartObject: iniciar/crear un nuevo objeto inteligente
+    - GET /objeto/SendState: obtener estado actual de datastreams
+    - GET /objeto/SendData: enviar datos al objeto
+    - GET /objeto/SendServiceState: verificar disponibilidad del servicio
+    
+    @note Todos los endpoints requieren validación de osid (ID del objeto inteligente).
+    @note Las operaciones asincrónicas usan asyncio.to_thread() para operaciones bloqueantes.
+    
+    @author  NexTech
+    @version 1.0
+    @date 2025-01-10
+    
+    @see ObjetoService Para lógica de negocio
+    @see docs/diagrams/flow_diagrams.md Para diagramas de secuencia
+\end{DoxyVerb}
+ 
+
+\label{doc-func-members}
+\Hypertarget{namespaceobjeto__controller_doc-func-members}
+\doxysubsection{Documentación de funciones}
+\Hypertarget{namespaceobjeto__controller_af05241f784ab7fa3a30deecc788c1b74}\index{objeto\_controller@{objeto\_controller}!get\_identificator@{get\_identificator}}
+\index{get\_identificator@{get\_identificator}!objeto\_controller@{objeto\_controller}}
+\doxysubsubsection{\texorpdfstring{get\_identificator()}{get\_identificator()}}
+{\footnotesize\ttfamily \label{namespaceobjeto__controller_af05241f784ab7fa3a30deecc788c1b74} 
+objeto\+\_\+controller.\+get\+\_\+identificator (\begin{DoxyParamCaption}\item[{str }]{osid}{ = {\ttfamily Query(...,~description="{}ID~del~objeto~inteligente"{})}, }\item[{Objeto\+Service }]{objeto\+\_\+service}{ = {\ttfamily Depends(get\+\_\+objeto\+\_\+service)}}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}    @brief Obtiene los metadatos del objeto inteligente.
+    
+    @param osid Identificador único del objeto inteligente (OSID).
+    @param objeto_service Instancia del servicio de objetos (inyectada por dependencia).
+    
+    @return JSONResponse con status 200 y metadatos del objeto si es exitoso,
+            o error 400/500 si falla.
+    
+    @exception ValueError Si el osid no es válido.
+    @exception RuntimeError Si hay error en la persistencia.
+    
+    @details
+    Flujo:
+    1. Valida que el osid coincida con el objeto inteligente activo
+    2. Verifica que existan metadatos en persistencia
+    3. Retorna los metadatos en formato JSON
+    4. Registra logs y eventos en el panel MQTT
+    
+    @see ObjetoService.getIdentificator()
+    
+    @example
+    GET /objeto/Identificator?osid=obj_001
+    200 OK
+    {
+        "status": "success",
+        "message": "Metadatos del objeto inteligente obtenidos correctamente.",
+        "data": {"id": "obj_001", "title": "Sensor Temperatura", ...}
+    }
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{objeto__controller_8py_source_l00036}{36}} del archivo \mbox{\hyperlink{objeto__controller_8py_source}{objeto\+\_\+controller.\+py}}.
+
+\Hypertarget{namespaceobjeto__controller_a29e614f29e33f15dcc3f43278440926a}\index{objeto\_controller@{objeto\_controller}!get\_state@{get\_state}}
+\index{get\_state@{get\_state}!objeto\_controller@{objeto\_controller}}
+\doxysubsubsection{\texorpdfstring{get\_state()}{get\_state()}}
+{\footnotesize\ttfamily \label{namespaceobjeto__controller_a29e614f29e33f15dcc3f43278440926a} 
+objeto\+\_\+controller.\+get\+\_\+state (\begin{DoxyParamCaption}\item[{str }]{osid}{ = {\ttfamily Query(...,~description="{}ID~del~objeto~inteligente"{})}, }\item[{Objeto\+Service }]{objeto\+\_\+service}{ = {\ttfamily Depends(get\+\_\+objeto\+\_\+service)}}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}    @brief Obtiene el estado actual de los datastreams del objeto inteligente.
+    
+    @param osid Identificador único del objeto inteligente.
+    @param objeto_service Servicio de objetos.
+    
+    @return JSONResponse con status 200 y estado de datastreams (valores, tipos, timestamps).
+    
+    @exception ValueError Si osid es inválido.
+    @exception RuntimeError Si falla la consulta al microservicio datastream.
+    
+    @details
+    Flujo:
+    1. Valida que osid coincida con el objeto inteligente activo
+    2. Delega consulta a microservicio_data_stream.send_state()
+    3. Normaliza la respuesta (mapea campos a estructura uniforme)
+    4. Opcionalmente enriquece con consultas a ontología
+    5. Retorna estado normalizado
+    
+    @note Usa asyncio.to_thread() para no bloquear event loop si cliente HTTP es síncrono.
+    
+    @see ObjetoService.get_state()
+    @see docs/diagrams/flow_diagrams.md (GetState sequence diagram)
+    
+    @example
+    GET /objeto/SendState?osid=obj_001
+    
+    200 OK
+    {
+        "status": "success",
+        "osid": "obj_001",
+        "datastreams": [
+            {"variableEstado": "temp", "type": "float", "valor": 23.5, "dstype": "sensor"},
+            {"variableEstado": "humidity", "type": "float", "valor": 65.2, "dstype": "sensor"}
+        ],
+        "timestamp": "2025-01-10T15:30:45Z"
+    }
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{objeto__controller_8py_source_l00132}{132}} del archivo \mbox{\hyperlink{objeto__controller_8py_source}{objeto\+\_\+controller.\+py}}.
+
+\Hypertarget{namespaceobjeto__controller_a911533e9228d9e95deaee73a861a62e1}\index{objeto\_controller@{objeto\_controller}!send\_data@{send\_data}}
+\index{send\_data@{send\_data}!objeto\_controller@{objeto\_controller}}
+\doxysubsubsection{\texorpdfstring{send\_data()}{send\_data()}}
+{\footnotesize\ttfamily \label{namespaceobjeto__controller_a911533e9228d9e95deaee73a861a62e1} 
+objeto\+\_\+controller.\+send\+\_\+data (\begin{DoxyParamCaption}\item[{str }]{osid}{ = {\ttfamily Query(...,~description="{}ID~del~objeto~inteligente"{})}, }\item[{str }]{variable\+Estado}{ = {\ttfamily Query(...,~description="{}Variable~del~estado~a~enviar"{})}, }\item[{str }]{tipove}{ = {\ttfamily Query(\textquotesingle{}1\textquotesingle{},~description="{}Tipo~de~variable~(1=actuador,~2=sensor,~etc.)"{})}, }\item[{Objeto\+Service }]{objeto\+\_\+service}{ = {\ttfamily Depends(get\+\_\+objeto\+\_\+service)}}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}    @brief Envía datos a un datastream específico del objeto inteligente.
+    
+    @param osid Identificador único del objeto inteligente.
+    @param variableEstado Nombre/ID del datastream (p. ej. 'temp', 'humidity').
+    @param tipove Tipo de variable: '1' (actuador), '2' (sensor), etc.
+    @param objeto_service Servicio de objetos.
+    
+    @return JSONResponse con status 200 y resultado de envío.
+    
+    @exception ValueError Si osid o variableEstado son inválidos.
+    @exception RuntimeError Si falla la comunicación con microservicio datastream.
+    
+    @details
+    Flujo:
+    1. Valida que osid coincida con el objeto activo
+    2. Verifica que variableEstado no esté vacío
+    3. Delega en dataStream_service.send_data() con asyncio.to_thread()
+    4. Registra log en panel MQTT
+    5. Retorna respuesta normalizada
+    
+    @see ObjetoService.send_data()
+    @see microservicio_data_stream Para documentación de datastreams
+    
+    @example
+    GET /objeto/SendData?osid=obj_001&variableEstado=temp&tipove=1
+    
+    200 OK
+    {"status": "success", "datastream": "temp", "sent": true}
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{objeto__controller_8py_source_l00179}{179}} del archivo \mbox{\hyperlink{objeto__controller_8py_source}{objeto\+\_\+controller.\+py}}.
+
+\Hypertarget{namespaceobjeto__controller_acbe0a134fad4fa3bb39b5ff5ef3a01ce}\index{objeto\_controller@{objeto\_controller}!send\_service\_state@{send\_service\_state}}
+\index{send\_service\_state@{send\_service\_state}!objeto\_controller@{objeto\_controller}}
+\doxysubsubsection{\texorpdfstring{send\_service\_state()}{send\_service\_state()}}
+{\footnotesize\ttfamily \label{namespaceobjeto__controller_acbe0a134fad4fa3bb39b5ff5ef3a01ce} 
+objeto\+\_\+controller.\+send\+\_\+service\+\_\+state (\begin{DoxyParamCaption}\item[{str }]{osid}{ = {\ttfamily Query(...,~description="{}ID~del~objeto~inteligente"{})}, }\item[{Objeto\+Service }]{objeto\+\_\+service}{ = {\ttfamily Depends(get\+\_\+objeto\+\_\+service)}}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}    @brief Verifica la disponibilidad/salud del microservicio de datastreams.
+    
+    @param osid Identificador del objeto inteligente (se incluye en respuesta si se proporciona).
+    @param objeto_service Servicio de objetos.
+    
+    @return JSONResponse con status 200 y disponibilidad del servicio.
+    
+    @exception RuntimeError Si falla la comprobación de salud del servicio.
+    
+    @details
+    Flujo:
+    1. Ejecuta healthcheck contra microservicio_data_stream
+    2. Retorna boolean indicando disponibilidad
+    3. Opcionalmente incluye osid en respuesta
+    
+    @note No requiere validación de osid contra el objeto activo
+          (es un check genérico de disponibilidad de servicio).
+    
+    @see ObjetoService.send_service_state()
+    
+    @example
+    GET /objeto/SendServiceState?osid=obj_001
+    
+    200 OK
+    {"service_available": true, "osid": "obj_001"}
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{objeto__controller_8py_source_l00224}{224}} del archivo \mbox{\hyperlink{objeto__controller_8py_source}{objeto\+\_\+controller.\+py}}.
+
+\Hypertarget{namespaceobjeto__controller_ae5f1ef3cecaa7f2b0ee40d30bbeed98b}\index{objeto\_controller@{objeto\_controller}!start\_object@{start\_object}}
+\index{start\_object@{start\_object}!objeto\_controller@{objeto\_controller}}
+\doxysubsubsection{\texorpdfstring{start\_object()}{start\_object()}}
+{\footnotesize\ttfamily \label{namespaceobjeto__controller_ae5f1ef3cecaa7f2b0ee40d30bbeed98b} 
+objeto\+\_\+controller.\+start\+\_\+object (\begin{DoxyParamCaption}\item[{Object\+Data}]{data}{, }\item[{Objeto\+Service }]{objeto\+\_\+service}{ = {\ttfamily Depends(get\+\_\+objeto\+\_\+service)}}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}    @brief Inicia un nuevo objeto inteligente con datos proporcionados.
+    
+    @param data DTO ObjectData con configuración del objeto (feed, datastreams, etc.)
+    @param objeto_service Servicio de objetos (inyectado).
+    
+    @return JSONResponse con status 200 si es exitoso, o error 400/500.
+    
+    @exception ValueError Si los datos del DTO son inválidos.
+    @exception RuntimeError Si falla poblar ontología o persistencia.
+    
+    @details
+    Operación compuesta que:
+    1. Verifica que la ontología no esté ya activa
+    2. Estructura los datos del objeto inteligente
+    3. Puebla la ontología (crea individuos y relaciones OWL)
+    4. Persiste metadatos en JSON/DB
+    5. Crea dispositivo en ThingsBoard (IoT Platform)
+    6. Registra datastreams en microservicio_data_stream
+    7. Registra evento en panel MQTT
+    
+    @note Esta es una operación distribuida que requiere coordinación entre
+          múltiples microservicios. Considerar implementar saga/compensación.
+    
+    @see ObjetoService.startObject()
+    @see docs/diagrams/flow_diagrams.md (StartObject sequence diagram)
+    
+    @example
+    POST /objeto/StartObject
+    Content-Type: application/json
+    {
+        "feed": {
+            "id": "obj_sensor_001",
+            "title": "Sensor Temperatura Sala",
+            "description": "Sensor DHT22 en sala A",
+            "datastreams": ["temp", "humidity"]
+        }
+    }
+    
+    200 OK
+    {
+        "status": "success",
+        "message": "Objeto inteligente iniciado con éxito.",
+        "data": {}
+    }
+\end{DoxyVerb}
+ 
+
+Definición en la línea \mbox{\hyperlink{objeto__controller_8py_source_l00076}{76}} del archivo \mbox{\hyperlink{objeto__controller_8py_source}{objeto\+\_\+controller.\+py}}.
+
+
+
+\label{doc-var-members}
+\Hypertarget{namespaceobjeto__controller_doc-var-members}
+\doxysubsection{Documentación de variables}
+\Hypertarget{namespaceobjeto__controller_a032a188678b092efd0b10de226f78836}\index{objeto\_controller@{objeto\_controller}!router@{router}}
+\index{router@{router}!objeto\_controller@{objeto\_controller}}
+\doxysubsubsection{\texorpdfstring{router}{router}}
+{\footnotesize\ttfamily \label{namespaceobjeto__controller_a032a188678b092efd0b10de226f78836} 
+objeto\+\_\+controller.\+router = \mbox{\hyperlink{classfastapi_1_1routing_1_1_a_p_i_router}{APIRouter}}(prefix="{}/objeto"{}, tags=\mbox{[}"{}Gestión de objeto inteligente"{}\mbox{]})}
+
+
+
+Definición en la línea \mbox{\hyperlink{objeto__controller_8py_source_l00032}{32}} del archivo \mbox{\hyperlink{objeto__controller_8py_source}{objeto\+\_\+controller.\+py}}.
+

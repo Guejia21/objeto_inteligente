@@ -1,0 +1,180 @@
+\doxysection{Referencia de la clase pydantic.\+types.\+Discriminator}
+\hypertarget{classpydantic_1_1types_1_1_discriminator}{}\label{classpydantic_1_1types_1_1_discriminator}\index{pydantic.types.Discriminator@{pydantic.types.Discriminator}}
+
+
+!  
+
+
+\doxysubsubsection*{Atributos públicos estáticos}
+\begin{DoxyCompactItemize}
+\item 
+str \mbox{\hyperlink{classpydantic_1_1types_1_1_discriminator_a0a17d85717117b02387810a115f3aac7}{discriminator}} \texorpdfstring{$\vert$}{|} Callable\mbox{[}\mbox{[}Any\mbox{]}, Hashable\mbox{]}
+\item 
+str \mbox{\hyperlink{classpydantic_1_1types_1_1_discriminator_ab07b0fc41cbcf3ca6339b9c53a07b662}{custom\+\_\+error\+\_\+type}} = None
+\item 
+str \mbox{\hyperlink{classpydantic_1_1types_1_1_discriminator_aef39b59e00dfb5f329c2b01f909ee671}{custom\+\_\+error\+\_\+message}} = None
+\item 
+dict \mbox{\hyperlink{classpydantic_1_1types_1_1_discriminator_aa06588d045dd5a238acee69c8a57fc00}{custom\+\_\+error\+\_\+context}} = None
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Métodos protegidos}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_tagged_union_schema}{core\+\_\+schema.\+Tagged\+Union\+Schema}} \mbox{\hyperlink{classpydantic_1_1types_1_1_discriminator_a8d2a3464661964ae100d5d81f7afd13c}{\+\_\+convert\+\_\+schema}} (self, \mbox{\hyperlink{namespacepydantic__core_1_1core__schema_a1f02ea1f9bd470bc088f9f8ef1dafa84}{core\+\_\+schema.\+Core\+Schema}} original\+\_\+schema, \mbox{\hyperlink{classpydantic_1_1annotated__handlers_1_1_get_core_schema_handler}{Get\+Core\+Schema\+Handler}}\texorpdfstring{$\vert$}{|}None handler=None)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+! 
+
+! abstract "{}\+Usage Documentation"{} \href{../concepts/unions.md\#discriminated-unions-with-callable-discriminator}{\texttt{Discriminated Unions with {\ttfamily Callable} {\ttfamily Discriminator}}}
+
+Provides a way to use a custom callable as the way to extract the value of a union discriminator.
+
+This allows you to get validation behavior like you\textquotesingle{}d get from {\ttfamily Field(\doxylink{classpydantic_1_1types_1_1_discriminator_a0a17d85717117b02387810a115f3aac7}{discriminator}=\texorpdfstring{$<$}{<}field\+\_\+name\texorpdfstring{$>$}{>})}, but without needing to have a single shared field across all the union choices. This also makes it possible to handle unions of models and primitive types with discriminated-\/union-\/style validation errors. Finally, this allows you to use a custom callable as the way to identify which member of a union a value belongs to, while still seeing all the performance benefits of a discriminated union.
+
+Consider this example, which is much more performant with the use of {\ttfamily \doxylink{classpydantic_1_1types_1_1_discriminator}{Discriminator}} and thus a {\ttfamily Tagged\+Union} than it would be as a normal {\ttfamily Union}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{from}\ typing\ \textcolor{keyword}{import}\ Annotated,\ Any,\ Literal,\ Union}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{from}\ pydantic\ \textcolor{keyword}{import}\ BaseModel,\ Discriminator,\ Tag}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{class\ }Pie(BaseModel):}
+\DoxyCodeLine{\ \ \ \ time\_to\_cook:\ int}
+\DoxyCodeLine{\ \ \ \ num\_ingredients:\ int}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{class\ }ApplePie(Pie):}
+\DoxyCodeLine{\ \ \ \ fruit:\ Literal[\textcolor{stringliteral}{'apple'}]\ =\ \textcolor{stringliteral}{'apple'}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{class\ }PumpkinPie(Pie):}
+\DoxyCodeLine{\ \ \ \ filling:\ Literal[\textcolor{stringliteral}{'pumpkin'}]\ =\ \textcolor{stringliteral}{'pumpkin'}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{def\ }get\_discriminator\_value(v:\ Any)\ -\/>\ str:}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ isinstance(v,\ dict):}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v.get(\textcolor{stringliteral}{'fruit'},\ v.get(\textcolor{stringliteral}{'filling'}))}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{return}\ getattr(v,\ \textcolor{stringliteral}{'fruit'},\ getattr(v,\ \textcolor{stringliteral}{'filling'},\ \textcolor{keywordtype}{None}))}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{class\ }ThanksgivingDinner(BaseModel):}
+\DoxyCodeLine{\ \ \ \ dessert:\ Annotated[}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Union[}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ Annotated[ApplePie,\ Tag(\textcolor{stringliteral}{'apple'})],}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ Annotated[PumpkinPie,\ Tag(\textcolor{stringliteral}{'pumpkin'})],}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ ],}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Discriminator(get\_discriminator\_value),}
+\DoxyCodeLine{\ \ \ \ ]}
+\DoxyCodeLine{}
+\DoxyCodeLine{apple\_variation\ =\ ThanksgivingDinner.model\_validate(}
+\DoxyCodeLine{\ \ \ \ \{\textcolor{stringliteral}{'dessert'}:\ \{\textcolor{stringliteral}{'fruit'}:\ \textcolor{stringliteral}{'apple'},\ \textcolor{stringliteral}{'time\_to\_cook'}:\ 60,\ \textcolor{stringliteral}{'num\_ingredients'}:\ 8\}\}}
+\DoxyCodeLine{)}
+\DoxyCodeLine{print(repr(apple\_variation))}
+\DoxyCodeLine{\textcolor{stringliteral}{'''}}
+\DoxyCodeLine{\textcolor{stringliteral}{ThanksgivingDinner(dessert=ApplePie(time\_to\_cook=60,\ num\_ingredients=8,\ fruit='apple'))}}
+\DoxyCodeLine{\textcolor{stringliteral}{'''}}
+\DoxyCodeLine{}
+\DoxyCodeLine{pumpkin\_variation\ =\ ThanksgivingDinner.model\_validate(}
+\DoxyCodeLine{\ \ \ \ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{stringliteral}{'dessert'}:\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'filling'}:\ \textcolor{stringliteral}{'pumpkin'},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'time\_to\_cook'}:\ 40,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'num\_ingredients'}:\ 6,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{)}
+\DoxyCodeLine{print(repr(pumpkin\_variation))}
+\DoxyCodeLine{\textcolor{stringliteral}{'''}}
+\DoxyCodeLine{\textcolor{stringliteral}{ThanksgivingDinner(dessert=PumpkinPie(time\_to\_cook=40,\ num\_ingredients=6,\ filling='pumpkin'))}}
+\DoxyCodeLine{\textcolor{stringliteral}{'''}}
+
+\end{DoxyCode}
+
+
+See the \href{../concepts/unions.md\#discriminated-unions}{\texttt{Discriminated Unions}} concepts docs for more details on how to use {\ttfamily \doxylink{classpydantic_1_1types_1_1_discriminator}{Discriminator}}s. 
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l02975}{2975}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{classpydantic_1_1types_1_1_discriminator_doc-func-members}
+\doxysubsection{Documentación de funciones miembro}
+\Hypertarget{classpydantic_1_1types_1_1_discriminator_a8d2a3464661964ae100d5d81f7afd13c}\index{pydantic.types.Discriminator@{pydantic.types.Discriminator}!\_convert\_schema@{\_convert\_schema}}
+\index{\_convert\_schema@{\_convert\_schema}!pydantic.types.Discriminator@{pydantic.types.Discriminator}}
+\doxysubsubsection{\texorpdfstring{\_convert\_schema()}{\_convert\_schema()}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_discriminator_a8d2a3464661964ae100d5d81f7afd13c} 
+ \mbox{\hyperlink{classpydantic__core_1_1core__schema_1_1_tagged_union_schema}{core\+\_\+schema.\+Tagged\+Union\+Schema}} pydantic.\+types.\+Discriminator.\+\_\+convert\+\_\+schema (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{\mbox{\hyperlink{namespacepydantic__core_1_1core__schema_a1f02ea1f9bd470bc088f9f8ef1dafa84}{core\+\_\+schema.\+Core\+Schema}}}]{original\+\_\+schema}{, }\item[{\mbox{\hyperlink{classpydantic_1_1annotated__handlers_1_1_get_core_schema_handler}{Get\+Core\+Schema\+Handler}} \texorpdfstring{$\vert$}{|} None }]{handler}{ = {\ttfamily None}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l03074}{3074}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Hace referencia a \mbox{\hyperlink{pydantic_2types_8py_source_l03059}{custom\+\_\+error\+\_\+context}}, \mbox{\hyperlink{pydantic_2types_8py_source_l03057}{custom\+\_\+error\+\_\+message}}, \mbox{\hyperlink{pydantic_2types_8py_source_l03053}{custom\+\_\+error\+\_\+type}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2fastapi_2openapi_2models_8py_source_l00205}{fastapi.\+openapi.\+models.\+Schema.\+discriminator}}, \mbox{\hyperlink{__discriminated__union_8py_source_l00091}{pydantic.\+\_\+internal.\+\_\+discriminated\+\_\+union.\+\_\+\+Apply\+Inferred\+Discriminator.\+discriminator}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2fields_8py_source_l00079}{pydantic.\+fields.\+\_\+\+From\+Field\+Info\+Inputs.\+discriminator}}, \mbox{\hyperlink{micro__gestion__objetos_2venv_2_lib_2site-packages_2pydantic_2fields_8py_source_l00150}{pydantic.\+fields.\+Field\+Info.\+discriminator}} y \mbox{\hyperlink{pydantic_2types_8py_source_l03047}{discriminator}}.
+
+
+
+\label{doc-variable-members}
+\Hypertarget{classpydantic_1_1types_1_1_discriminator_doc-variable-members}
+\doxysubsection{Documentación de datos miembro}
+\Hypertarget{classpydantic_1_1types_1_1_discriminator_aa06588d045dd5a238acee69c8a57fc00}\index{pydantic.types.Discriminator@{pydantic.types.Discriminator}!custom\_error\_context@{custom\_error\_context}}
+\index{custom\_error\_context@{custom\_error\_context}!pydantic.types.Discriminator@{pydantic.types.Discriminator}}
+\doxysubsubsection{\texorpdfstring{custom\_error\_context}{custom\_error\_context}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_discriminator_aa06588d045dd5a238acee69c8a57fc00} 
+dict pydantic.\+types.\+Discriminator.\+custom\+\_\+error\+\_\+context = None\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l03059}{3059}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pydantic_2types_8py_source_l03076}{\+\_\+convert\+\_\+schema()}}.
+
+\Hypertarget{classpydantic_1_1types_1_1_discriminator_aef39b59e00dfb5f329c2b01f909ee671}\index{pydantic.types.Discriminator@{pydantic.types.Discriminator}!custom\_error\_message@{custom\_error\_message}}
+\index{custom\_error\_message@{custom\_error\_message}!pydantic.types.Discriminator@{pydantic.types.Discriminator}}
+\doxysubsubsection{\texorpdfstring{custom\_error\_message}{custom\_error\_message}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_discriminator_aef39b59e00dfb5f329c2b01f909ee671} 
+str pydantic.\+types.\+Discriminator.\+custom\+\_\+error\+\_\+message = None\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l03057}{3057}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pydantic_2types_8py_source_l03076}{\+\_\+convert\+\_\+schema()}}.
+
+\Hypertarget{classpydantic_1_1types_1_1_discriminator_ab07b0fc41cbcf3ca6339b9c53a07b662}\index{pydantic.types.Discriminator@{pydantic.types.Discriminator}!custom\_error\_type@{custom\_error\_type}}
+\index{custom\_error\_type@{custom\_error\_type}!pydantic.types.Discriminator@{pydantic.types.Discriminator}}
+\doxysubsubsection{\texorpdfstring{custom\_error\_type}{custom\_error\_type}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_discriminator_ab07b0fc41cbcf3ca6339b9c53a07b662} 
+str pydantic.\+types.\+Discriminator.\+custom\+\_\+error\+\_\+type = None\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l03053}{3053}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pydantic_2types_8py_source_l03076}{\+\_\+convert\+\_\+schema()}}.
+
+\Hypertarget{classpydantic_1_1types_1_1_discriminator_a0a17d85717117b02387810a115f3aac7}\index{pydantic.types.Discriminator@{pydantic.types.Discriminator}!discriminator@{discriminator}}
+\index{discriminator@{discriminator}!pydantic.types.Discriminator@{pydantic.types.Discriminator}}
+\doxysubsubsection{\texorpdfstring{discriminator}{discriminator}}
+{\footnotesize\ttfamily \label{classpydantic_1_1types_1_1_discriminator_a0a17d85717117b02387810a115f3aac7} 
+pydantic.\+types.\+Discriminator.\+discriminator \texorpdfstring{$\vert$}{|} Callable\mbox{[}\mbox{[}Any\mbox{]}, Hashable\mbox{]}\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Definición en la línea \mbox{\hyperlink{pydantic_2types_8py_source_l03047}{3047}} del archivo \mbox{\hyperlink{pydantic_2types_8py_source}{types.\+py}}.
+
+
+
+Referenciado por \mbox{\hyperlink{pydantic_2types_8py_source_l03076}{\+\_\+convert\+\_\+schema()}}.
+
+
+
+La documentación de esta clase está generada del siguiente archivo\+:\begin{DoxyCompactItemize}
+\item 
+micro\+\_\+gestion\+\_\+objetos/venv/\+Lib/site-\/packages/pydantic/\mbox{\hyperlink{pydantic_2types_8py}{types.\+py}}\end{DoxyCompactItemize}
