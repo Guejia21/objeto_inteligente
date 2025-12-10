@@ -67,6 +67,14 @@ cd microservicio_data_stream/ && source .venv/bin/activate && python3 main.py
 cd microservicio_personalizacion/app && source ../.venv/bin/activate && python3 main.py
 ```
 
+## Documentación
+Para acceder a la documentación de los microservicios, acceda a la pestaña de `docs` por medio de un navegador web.
+### Ejemplo
+Si se está corriendo un micro de manera local, acceda a [Docs Micro Gestión del Conocimiento](https://localhost:8001/docs)
+
+De esa manera podrá acceder al Swagger de cada microservicio cambiando al puerto pertinente.
+
+
 ## Notas adicionales
 Todo este proyecto está pensado para ejecutarse en una raspberry, pero el micro de `microservicio_data_stream_esp` está pensado para ejecutarse en una ESP32, para más información ingrese a su `README.md`
 
