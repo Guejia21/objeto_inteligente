@@ -83,10 +83,8 @@ Para acceder a la documentación interactiva de los microservicios (Swagger/Open
 
 | Microservicio | URL |
 |---------------|-----|
-| Gateway | http://localhost:8000/docs |
 | Ontología | http://localhost:8001/docs |
 | Objetos | http://localhost:8002/docs |
-| Datastreams | http://localhost:8003/docs |
 | ECAs | http://localhost:8004/docs |
 | Personalización | http://localhost:8005/docs |
 
