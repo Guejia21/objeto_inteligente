@@ -76,12 +76,70 @@ Si se desea correr el proyecto con un solo comando (**DEBE INSTALARSE TMUX**) se
 ./run.sh
 ```
 ## Documentación
-Para acceder a la documentación de los microservicios, acceda a la pestaña de `docs` por medio de un navegador web.
-### Ejemplo
-Si se está corriendo un micro de manera local, acceda a [Docs Micro Gestión del Conocimiento](https://localhost:8001/docs)
 
-De esa manera podrá acceder al Swagger de cada microservicio cambiando al puerto pertinente.
+### Acceso a Documentación de APIs
 
+Para acceder a la documentación interactiva de los microservicios (Swagger/OpenAPI):
+
+| Microservicio | URL |
+|---------------|-----|
+| Gateway | http://localhost:8000/docs |
+| Ontología | http://localhost:8001/docs |
+| Objetos | http://localhost:8002/docs |
+| Datastreams | http://localhost:8003/docs |
+| ECAs | http://localhost:8004/docs |
+| Personalización | http://localhost:8005/docs |
+
+### Generar Documentación Completa (Doxygen)
+
+Para generar la documentación técnica completa del código:
+
+#### Requisitos
+
+```bash
+# Ubuntu/Debian/Raspberry Pi
+sudo apt install doxygen graphviz
+
+# macOS
+brew install doxygen graphviz
+
+# Windows (con Chocolatey)
+choco install doxygen.install graphviz
+```
+
+#### Generación
+
+```bash
+# Desde la raíz del proyecto
+cd docs/
+doxygen Doxyfile
+
+# La documentación se generará en:
+# - docs/html/index.html (navegable en web)
+# - docs/latex/ (para compilar a PDF)
+```
+
+#### Ver Documentación
+
+```bash
+# Linux/macOS
+xdg-open docs/html/index.html
+
+# Raspberry Pi
+chromium-browser docs/html/index.html
+
+# Windows
+start docs/html/index.html
+```
+
+#### Generar PDF (Opcional)
+
+```bash
+cd docs/latex/
+make
+# Se generará docs/latex/refman.pdf
+```
+> **Nota:** La documentación HTML/LaTeX **NO** está incluida en el repositorio por su gran tamaño (800MB). Se genera bajo demanda ejecutando `doxygen` como se indica arriba.
 
 ## Notas adicionales
 Todo este proyecto está pensado para ejecutarse en una raspberry, pero el micro de `microservicio_data_stream_esp` está pensado para ejecutarse en una ESP32, para más información ingrese a su `README.md`
