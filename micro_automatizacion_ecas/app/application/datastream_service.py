@@ -7,7 +7,7 @@ def send_command(osid:str, id_datastream: str, comando: str) -> bool:
     """Envía un comando a un datastream actuador."""
     url = settings.DATASTREAM_SERVICE_URL + f"/SetDatastream?osid={osid}&idDataStream={id_datastream}&comando={comando}"
     try:
-        request = requests.post(url, headers=headers)
+        request = requests.post(url, headers=headers,timeout=10)
     except Exception as e:
         logger.error("Error al conectar con el servicio de datastream: %s", e)
         return False

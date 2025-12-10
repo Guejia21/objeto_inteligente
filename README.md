@@ -9,6 +9,7 @@ El rediseño se centrará en separar funcionalidades clave en microservicios, co
 - python3
 - mosquitto
 - Docker Desktop (Opcional)
+- tmux (Opcional)
 
 Para ejecutar este proyecto primero debe clonarse en el dispositivo donde se desea ejecutar, haciendo:
 
@@ -21,6 +22,9 @@ cd objeto_inteligente
 
 #Si se desea instalar mosquitto
 sudo apt install mosquitto
+
+#Si se desea instalar tmux
+sudo apt install tmux
 ```
 
 ### Ejecución manual
@@ -51,7 +55,7 @@ docker compose up
 ```
 **Importante:** Apesar de que el proyecto se conecta a ThingsBoard para exponer telemetría, el hecho de no tenerlo no es un impedimento para que el proyecto funcione
 
-Para iniciar cada micro (estando en la carpeta raiz):
+Para iniciar cada micro de manera manual(estando en la carpeta raiz):
 ```sh
 #Gateway
 cd gateway/app/ && source ../.venv/bin/activate && python3 main.py
@@ -66,7 +70,11 @@ cd microservicio_data_stream/ && source .venv/bin/activate && python3 main.py
 #Personalizacion
 cd microservicio_personalizacion/app && source ../.venv/bin/activate && python3 main.py
 ```
-
+### Ejecución automatizada
+Si se desea correr el proyecto con un solo comando (**DEBE INSTALARSE TMUX**) se hace:
+```sh
+./run.sh
+```
 ## Documentación
 Para acceder a la documentación de los microservicios, acceda a la pestaña de `docs` por medio de un navegador web.
 ### Ejemplo

@@ -8,7 +8,7 @@ headers = {"Content-Type": "application/json"}
 def is_active() -> bool:
     """Verifica si la ontología ha sido creada."""
     url = settings.ONTOLOGY_SERVICE_URL + "/consultas/consultar_active"
-    request = requests.get(url, headers=headers)
+    request = requests.get(url, headers=headers,timeout=10)
     if request.status_code == 200 and request.content == b'true':
         return True
     else:
@@ -43,7 +43,7 @@ def get_title() -> str:
     """Obtiene el título del objeto inteligente desde la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/consultas/consultar_title"
     try:
-        request = requests.get(url, headers=headers)
+        request = requests.get(url, headers=headers,timeout=10)
     except Exception as e:
         logger.error("Error al conectar con el servicio de ontología: %s", e)
         return None
@@ -70,7 +70,7 @@ def get_title() -> str:
 def poblate_eca(data: dict) -> bool:
     """Puebla una nueva regla ECA en la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/poblacion/poblar_eca"    
-    request = requests.post(url, json=data, headers=headers)
+    request = requests.post(url, json=data, headers=headers,timeout=10)
     if request.status_code == 201:
         logger.info("ECA poblada con éxito.")
         return True
@@ -79,7 +79,7 @@ def poblate_eca(data: dict) -> bool:
 def edit_eca(data: dict) -> bool:
     """Edita una regla ECA en la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/poblacion/editar_eca"    
-    request = requests.post(url, json=data, headers=headers)
+    request = requests.post(url, json=data, headers=headers,timeout=10)
     if request.status_code == 200:
         logger.info("ECA editada con éxito.")
         return True
@@ -88,7 +88,7 @@ def edit_eca(data: dict) -> bool:
 def get_ecas()-> list:
     """Obtiene todas las reglas ECA desde la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/consultas/listar_ecas"
-    request = requests.get(url, headers=headers)
+    request = requests.get(url, headers=headers,timeout=10)
     if request.status_code == 200:
         try:
             data = request.json()
@@ -102,7 +102,7 @@ def get_ecas()-> list:
 def listarDinamicEstado(estado: str) -> list:
     """Lista las ECAs por estado (on/off)"""
     url = settings.ONTOLOGY_SERVICE_URL + f"/consultas/listar_dinamic_estado?eca_state={estado}"
-    request = requests.get(url, headers=headers)
+    request = requests.get(url, headers=headers,timeout=10)
     if request.status_code == 200:
         try:
             data = request.json()
@@ -117,7 +117,7 @@ def setEcaListState(lista_ecas: list) -> bool:
     """Actualiza el estado de una lista de ECAs."""
     url = settings.ONTOLOGY_SERVICE_URL + "/consultas/set_eca_list_state"
     payload = {"ecas": lista_ecas}
-    request = requests.patch(url, json=payload, headers=headers)
+    request = requests.patch(url, json=payload, headers=headers,timeout=10)
     if request.status_code == 200:
         logger.info("Estados de ECAs actualizados con éxito.")
         return True
@@ -126,7 +126,7 @@ def setEcaListState(lista_ecas: list) -> bool:
 def delete_eca(eca_name: str) -> bool:
     """Elimina una regla ECA de la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + f"/consultas/eliminar_eca?nombreECA={eca_name}"
-    request = requests.delete(url, headers=headers)
+    request = requests.delete(url, headers=headers,timeout=10)
     if request.status_code == 200:
         logger.info("ECA eliminada con éxito.")
         return True
@@ -135,7 +135,7 @@ def delete_eca(eca_name: str) -> bool:
 def set_eca_state(eca_name: str, new_state: str) -> bool:
     """Actualiza el estado de una regla ECA en la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/consultas/set_eca_state?valorNuevo=" + new_state + "&nombreECA=" + eca_name
-    request = requests.patch(url, headers=headers)
+    request = requests.patch(url, headers=headers,timeout=10)
     if request.status_code == 200:
         logger.info("Estado de ECA actualizado con éxito.")
         return True
@@ -151,7 +151,7 @@ def verificar_contrato(osid:str,osidDestino:str)-> list:
         list: Lista de contratos ECA entre los dos objetos inteligentes.
     """
     url = settings.ONTOLOGY_SERVICE_URL + f"/consultas/verificar_contrato/{osid}/{osidDestino}"
-    request = requests.get(url, headers=headers)
+    request = requests.get(url, headers=headers,timeout=10)
     if request.status_code == 200:
         try:
             data = request.json()

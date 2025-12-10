@@ -8,7 +8,7 @@ headers = {"Content-Type": "application/json"}
 def is_active() -> bool:
     """Verifica si la ontología ha sido creada."""
     url = settings.ONTOLOGY_SERVICE_URL + "/consultas/consultar_active"
-    request = requests.get(url, headers=headers)
+    request = requests.get(url, headers=headers,timeout=10)
     if request.status_code == 200 and request.content == b'true':
         return True
     else:
@@ -38,7 +38,7 @@ def get_id() -> str:
 def get_title() -> str:
     """Obtiene el título del objeto inteligente desde la ontología."""
     url = settings.ONTOLOGY_SERVICE_URL + "/consultas/consultar_title"
-    request = requests.get(url, headers=headers)
+    request = requests.get(url, headers=headers,timeout=10)
     if request.status_code == 200:
         try:
             data = request.json()
@@ -92,7 +92,7 @@ def poblate_ontology(data: dict) -> bool:
         payload = data
 
     logger.debug("Payload enviado a poblar_metadatos_objeto: %s", payload)
-    request = requests.post(url, json=payload, headers=headers)
+    request = requests.post(url, json=payload, headers=headers,timeout=10)
     if request.status_code == 201:
         logger.info("Ontología poblada con éxito.")
         return True
