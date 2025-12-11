@@ -11,7 +11,7 @@ def apagar_ecas(osid:str)->bool:
         bool: Indica si la operación fue exitosa o no
     """
     response = requests.patch(
-        f"{settings.AUTOMATIZACION_MS_URL}eca/",
+        f"{settings.AUTOMATIZACION_MS_URL}",
         params={"osid": osid},
         timeout=30.0
     )
