@@ -284,7 +284,10 @@ class PersonalizacionService:
             else:
                 logger.error("Error apagando las ECAS del usuario "+ self.user_eca)
                 return JSONResponse(content={"error": "Error apagando ECAs del usuario"}, status_code=500)
-        #Elimina la ontologia del usuario en el micro de ontologias
+        # No sabemos como se manejan las ecas cuando se traen del micro de personalizacion, pero suponemos que deben apagarse al notificar la salida del usuario
+        if eca_service.apagar_ecas(self.osid):
+                logger.info("ECAS del usuario "+ self.user_eca +" apagadas correctamente")
+        #Elimina la ontologia del usuario en el micro de ontologias        
         if ontology_service.eliminar_ontologia_usuario():
             logger.info("Ontologia del usuario "+ self.user_eca +" eliminada correctamente")
         else:
