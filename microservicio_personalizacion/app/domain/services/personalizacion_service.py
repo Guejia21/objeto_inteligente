@@ -157,6 +157,19 @@ class PersonalizacionService:
             @see MakeContractRequest DTO
             @see settings.AUTOMATIZACION_MS_URL Para endpoint remoto
         """
+        if ontology_service.consultar_email_usuario() != data.email:
+            logger.error("El email proporcionado no coincide con el usuario activo")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "El email proporcionado no coincide con el usuario activo"}
+            )
+         # Enviar solicitud al microservicio de automatización
+         # Construir la URL del microservicio de automatización
+         # Enviar la solicitud POST al microservicio de automatización
+         # Manejar la respuesta del microservicio de automatización
+         # Registrar la preferencia en la ontología del usuario si la creación fue exitosa
+         # Retornar la respuesta adecuada al cliente
+         # Construir la URL del microservicio de automatización
         try:
             response = requests.post(
                 f"{settings.AUTOMATIZACION_MS_URL}",
