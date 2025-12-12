@@ -157,7 +157,14 @@ class PersonalizacionService:
             @see MakeContractRequest DTO
             @see settings.AUTOMATIZACION_MS_URL Para endpoint remoto
         """
-        if ontology_service.consultar_email_usuario() != data.email:
+        email = ontology_service.consultar_email_usuario()
+        if email == "":
+            logger.error("No hay usuario activo en la ontología")
+            return JSONResponse(
+                status_code=500,
+                content={"error": "No hay usuario activo en la ontología"}
+            )
+        if email != data.email:
             logger.error("El email proporcionado no coincide con el usuario activo")
             return JSONResponse(
                 status_code=400,
